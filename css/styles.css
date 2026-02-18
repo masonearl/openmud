@@ -107,6 +107,22 @@ body {
     text-decoration: underline;
 }
 
+.link-cta {
+    font-weight: 700;
+}
+
+.contech-status {
+    margin-bottom: 8px;
+}
+
+#api-status.status-ok {
+    color: #6ee7b7;
+}
+
+#api-status.status-error {
+    color: #f87171;
+}
+
 /* Footer */
 .footer {
     padding: 32px 0;
