@@ -388,6 +388,10 @@ body {
     padding: 20px;
 }
 
+.modal-overlay[hidden] {
+    display: none !important;
+}
+
 .modal {
     background: var(--bg);
     border: 1px solid var(--border);
