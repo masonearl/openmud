@@ -1,75 +1,54 @@
-# Rockmud.com DNS on Squarespace → point to Vercel
+# Fix “Invalid Configuration” – point rockmud.com to Vercel
 
-You’re on: **Squarespace Domains — rockmud.com — DNS Settings**
+Vercel shows **Invalid Configuration** because DNS still points to **Squarespace**. Fix it in Squarespace (no change needed in Vercel).
 
-Do this so **rockmud.com** and **www.rockmud.com** point to Vercel.
-
----
-
-## Step 1: Fix the root domain (rockmud.com)
-
-Squarespace Defaults currently has several **A** records for `@` pointing to Squarespace. We need Vercel’s A record instead.
-
-**Option A – If you can edit Squarespace Defaults**
-
-- Delete the existing **A** records for host **@** (the four with IPs like 198.49.23.144, 198.185.159.144, etc.).
-- Then add one **A** record:
-  - **Host:** `@`
-  - **Type:** `A`
-  - **Data:** `76.76.21.21`
-  - **TTL:** leave default (e.g. 4 hrs).
-
-**Option B – If Defaults can’t be edited (use Custom records)**
-
-1. Scroll to **Custom records**.
-2. Click **ADD RECORD**.
-3. Set:
-   - **Host:** `@`
-   - **Type:** `A`
-   - **Priority:** `0` (or leave blank)
-   - **Data:** `76.76.21.21`
-4. Save.
-5. If Squarespace still shows “No custom records” or doesn’t list your record, check whether you must remove the default A records for `@` first (some setups only use Custom for extra records).
+**Squarespace DNS:** https://account.squarespace.com/domains/managed/rockmud.com/dns/dns-settings
 
 ---
 
-## Step 2: Fix www (www.rockmud.com)
+## 1. Remove Squarespace defaults (so Vercel can take over)
 
-Squarespace Defaults has **www** as a **CNAME** to `ext-sq.squarespace.com`. We need **www** to point to Vercel.
+In the **“Squarespace Defaults”** table at the top:
 
-**Option A – Edit Squarespace Defaults**
+- Click the **trash** icon and delete **all four A records** for host **@** (IPs 198.49.23.144, 198.49.23.145, 198.185.159.144, 198.185.159.145).
+- Click the **trash** icon and delete the **CNAME** for host **www** (the one pointing to `ext-sq.squarespace.com`).
 
-- Delete the **CNAME** for host **www**.
-- Add one **A** record:
-  - **Host:** `www`
-  - **Type:** `A`
-  - **Data:** `76.76.21.21`
-  - **TTL:** default.
-
-**Option B – Custom records**
-
-1. In **Custom records**, click **ADD RECORD**.
-2. Set:
-   - **Host:** `www`
-   - **Type:** `A`
-   - **Priority:** `0` (or blank)
-   - **Data:** `76.76.21.21`
-3. Save.
-
-(If Squarespace still resolves www to Squarespace, remove the default **www** CNAME so your custom A record is used.)
+Save if there’s a Save button.
 
 ---
 
-## Summary – two records for Vercel
+## 2. Add Vercel’s records (Custom records)
 
-| Type | Host | Data        |
-|------|------|-------------|
-| **A** | `@`  | `76.76.21.21` |
-| **A** | `www` | `76.76.21.21` |
+Scroll to **“Custom records”** and click **ADD RECORD**.
 
-After saving, wait a few minutes (up to an hour). Then check:
+**Record 1 – root domain (rockmud.com)**
 
-- https://rockmud.com  
-- https://www.rockmud.com  
+- **Host:** `@`
+- **Type:** `A`
+- **Data (or “Points to”):** `76.76.21.21`
+- **Priority:** 0 or leave blank  
+- **TTL:** default (e.g. 4 hrs)
 
-Vercel will verify the domain; you may get an email when it’s active.
+Save / Add.
+
+**Record 2 – www (www.rockmud.com)**
+
+Click **ADD RECORD** again.
+
+- **Host:** `www`
+- **Type:** `A`
+- **Data (or “Points to”):** `76.76.21.21`
+- **Priority:** 0 or leave blank  
+- **TTL:** default
+
+Save.
+
+---
+
+## 3. Wait and recheck
+
+- Wait **5–15 minutes** (up to an hour).
+- In Vercel → **Domains**, click **Refresh** next to rockmud.com and www.rockmud.com. They should switch to **Valid Configuration**.
+- Open https://rockmud.com and https://www.rockmud.com to confirm.
+
+**Copy-paste:** both records use **Data:** `76.76.21.21` (Vercel’s IP).
