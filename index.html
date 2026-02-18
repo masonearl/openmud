@@ -10,111 +10,162 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="has-app">
     <header class="header">
-        <div class="container">
+        <div class="header-inner">
             <a href="/" class="logo">Rockmud</a>
             <nav class="nav">
                 <a href="/about.html">About</a>
                 <a href="/documentation.html">Documentation</a>
+                <button type="button" class="btn-text" id="btn-estimate">Quick estimate</button>
                 <a href="mailto:hi@masonearl.com?subject=Message%20from%20rockmud.com&body=This%20message%20was%20sent%20via%20rockmud.com%0A%0A">Contact</a>
             </nav>
         </div>
     </header>
 
-    <main class="chat-layout">
-        <div class="chat-container">
-            <div class="chat-messages" id="chat-messages">
-                <div class="msg msg-assistant">
-                    <p>Hi, I'm the Rockmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. "Estimate 1500 LF of 8 inch sewer in clay."</p>
-                </div>
+    <div class="app-layout">
+        <aside class="projects-sidebar" id="projects-sidebar">
+            <div class="projects-header">
+                <h3>Projects</h3>
+                <button type="button" class="btn-new-project" id="btn-new-project" title="New project">+ New</button>
             </div>
-            <form class="chat-input-form" id="chat-form" action="#" method="post">
-                <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
-                <button type="submit" class="chat-send" id="chat-send" aria-label="Send">Send</button>
+            <ul class="projects-list" id="projects-list"></ul>
+        </aside>
+
+        <main class="chat-main">
+            <div class="chat-panel">
+                <div class="chat-messages" id="chat-messages"></div>
+                <form class="chat-input-form" id="chat-form" action="#" method="post">
+                    <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
+                    <button type="submit" class="chat-send" id="chat-send" aria-label="Send">Send</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- New project modal -->
+    <div class="modal-overlay" id="modal-new-project" hidden>
+        <div class="modal">
+            <h3>New project</h3>
+            <form id="form-new-project">
+                <input type="text" id="input-project-name" placeholder="Project name" required autocomplete="off">
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-cancel-project">Cancel</button>
+                    <button type="submit" class="btn-primary">Create</button>
+                </div>
             </form>
         </div>
-    </main>
+    </div>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; <span id="year"></span> Rockmud. All rights reserved.</p>
+    <!-- Quick estimate modal -->
+    <div class="modal-overlay" id="modal-estimate" hidden>
+        <div class="modal modal-wide">
+            <h3>Quick estimate</h3>
+            <form id="form-estimate">
+                <div class="form-row">
+                    <label>Project type</label>
+                    <select id="est-project-type" required>
+                        <option value="waterline">Waterline</option>
+                        <option value="sewer">Sewer</option>
+                        <option value="storm_drain">Storm drain</option>
+                        <option value="gas">Gas</option>
+                        <option value="electrical">Electrical</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Linear feet</label>
+                    <input type="number" id="est-linear-feet" value="1500" min="1" required>
+                </div>
+                <div class="form-row">
+                    <label>Pipe diameter (in)</label>
+                    <input type="number" id="est-pipe-diameter" value="8" min="1" required>
+                </div>
+                <div class="form-row">
+                    <label>Trench depth (ft)</label>
+                    <input type="number" id="est-trench-depth" value="4.5" min="0" step="0.1" required>
+                </div>
+                <div class="form-row">
+                    <label>Soil type</label>
+                    <select id="est-soil-type">
+                        <option value="sand">Sand</option>
+                        <option value="clay" selected>Clay</option>
+                        <option value="gravel">Gravel</option>
+                        <option value="rock">Rock</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Location</label>
+                    <select id="est-location">
+                        <option value="salt_lake_metro" selected>Salt Lake Metro</option>
+                        <option value="utah_county">Utah County</option>
+                        <option value="davis_weber">Davis/Weber</option>
+                        <option value="rural_utah">Rural Utah</option>
+                        <option value="mountain_areas">Mountain areas</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Crew size</label>
+                    <input type="number" id="est-crew-size" value="5" min="1" max="20">
+                </div>
+                <div class="form-row">
+                    <label>Season</label>
+                    <select id="est-season">
+                        <option value="winter">Winter</option>
+                        <option value="spring">Spring</option>
+                        <option value="summer" selected>Summer</option>
+                        <option value="fall">Fall</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Pipe material</label>
+                    <select id="est-pipe-material">
+                        <option value="PVC C900" selected>PVC C900</option>
+                        <option value="HDPE">HDPE</option>
+                        <option value="DIP">DIP</option>
+                        <option value="PVC SDR 35">PVC SDR 35</option>
+                        <option value="RCP">RCP</option>
+                        <option value="PE">PE</option>
+                        <option value="Steel">Steel</option>
+                        <option value="PVC Conduit">PVC Conduit</option>
+                    </select>
+                </div>
+                <div class="form-row form-row-inline">
+                    <label><input type="checkbox" id="est-dewatering"> Dewatering</label>
+                </div>
+                <div class="form-row form-row-inline">
+                    <label><input type="checkbox" id="est-rock"> Rock excavation</label>
+                </div>
+                <div class="form-row">
+                    <label>Fittings</label>
+                    <input type="number" id="est-fittings" value="0" min="0">
+                </div>
+                <div class="form-row">
+                    <label>Road crossings</label>
+                    <input type="number" id="est-road-crossings" value="0" min="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-close-estimate">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btn-run-estimate">Run estimate</button>
+                </div>
+            </form>
+            <div id="estimate-result" class="estimate-result" hidden></div>
+            <div id="estimate-feedback" class="estimate-feedback" hidden>
+                <h4>Submit actual cost (optional)</h4>
+                <form id="form-feedback">
+                    <input type="number" id="input-actual-cost" placeholder="Actual cost ($)" min="0" step="1000">
+                    <button type="submit" class="btn-primary">Submit feedback</button>
+                </form>
+            </div>
         </div>
+    </div>
+
+    <footer class="footer footer-mini">
+        <p>&copy; <span id="year"></span> Rockmud</p>
     </footer>
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
-
-        (function () {
-            var API_BASE = 'https://www.masonearl.com/api/contech';
-            var messagesEl = document.getElementById('chat-messages');
-            var form = document.getElementById('chat-form');
-            var input = document.getElementById('chat-input');
-            var sendBtn = document.getElementById('chat-send');
-
-            function addMessage(role, content) {
-                var wrap = document.createElement('div');
-                wrap.className = 'msg msg-' + role;
-                var p = document.createElement('p');
-                p.textContent = content;
-                wrap.appendChild(p);
-                messagesEl.appendChild(wrap);
-                messagesEl.scrollTop = messagesEl.scrollHeight;
-            }
-
-            function setLoading(on) {
-                sendBtn.disabled = on;
-                sendBtn.textContent = on ? '…' : 'Send';
-            }
-
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                var text = (input.value || '').trim();
-                if (!text) return;
-
-                addMessage('user', text);
-                input.value = '';
-                setLoading(true);
-
-                var history = [];
-                var msgNodes = messagesEl.querySelectorAll('.msg');
-                for (var i = 0; i < msgNodes.length; i++) {
-                    var node = msgNodes[i];
-                    var role = node.classList.contains('msg-user') ? 'user' : 'assistant';
-                    var content = node.querySelector('p');
-                    if (content && (role !== 'user' || content.textContent.trim() !== '')) {
-                        history.push({ role: role, content: content.textContent.trim() });
-                    }
-                }
-
-                fetch(API_BASE + '/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        messages: history.slice(-20),
-                        temperature: 0.7,
-                        max_tokens: 256
-                    })
-                })
-                    .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        addMessage('assistant', data.response || 'No response.');
-                    })
-                    .catch(function () {
-                        addMessage('assistant', 'Sorry, I couldn’t reach the assistant right now. Try again or use the Contech tool at masonearl.com.');
-                    })
-                    .then(function () {
-                        setLoading(false);
-                    });
-            });
-
-            input.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    form.dispatchEvent(new Event('submit'));
-                }
-            });
-        })();
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
