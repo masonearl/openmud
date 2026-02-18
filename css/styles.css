@@ -1,0 +1,126 @@
+:root {
+    --bg: #111111;
+    --bg-alt: #0a0a0a;
+    --text: #e5e5e5;
+    --text-secondary: #a0a0a0;
+    --border: #222;
+    --link: #e5e5e5;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg);
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.container.narrow {
+    max-width: 640px;
+}
+
+/* Header */
+.header {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.nav a {
+    margin-left: 24px;
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.nav a:hover {
+    color: var(--text);
+}
+
+/* Hero */
+.hero {
+    padding: 80px 0 60px;
+    text-align: center;
+}
+
+.hero h1 {
+    margin: 0 0 16px;
+    font-size: 2.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.hero-sub {
+    margin: 0;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+}
+
+/* Sections */
+.section {
+    padding: 60px 0;
+}
+
+.section-alt {
+    background: var(--bg-alt);
+}
+
+.section h2 {
+    margin: 0 0 16px;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.section p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.link {
+    color: var(--link);
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+/* Footer */
+.footer {
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+}
+
+.footer p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 600px) {
+    .hero h1 {
+        font-size: 1.75rem;
+    }
+}
