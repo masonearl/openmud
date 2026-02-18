@@ -81,6 +81,115 @@ body.has-app .app-layout {
     color: var(--text);
 }
 
+/* Tools dropdown */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown .btn-text {
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    min-width: 160px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 50;
+}
+
+.dropdown-menu[hidden] {
+    display: none !important;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+}
+
+/* Inline tool panel in chat */
+.chat-tool-panel {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: var(--bg-alt);
+    overflow: hidden;
+}
+
+.chat-tool-panel[hidden] {
+    display: none !important;
+}
+
+.tool-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.tool-panel-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.btn-close-tool {
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.btn-close-tool:hover {
+    color: var(--text);
+}
+
+.tool-panel-content {
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tool-form-wrap {
+    display: none;
+}
+
+.tool-form-wrap.active {
+    display: block;
+}
+
+.tool-panel-content .form-row {
+    margin-bottom: 12px;
+}
+
+.tool-panel-content .modal-actions {
+    margin-top: 16px;
+}
+
 /* Hero */
 .hero {
     padding: 80px 0 60px;
@@ -324,11 +433,14 @@ body {
 }
 
 .chat-input-form {
+    padding: 12px 0 20px;
+    border-top: 1px solid var(--border);
+}
+
+.chat-input-row {
     display: flex;
     align-items: flex-end;
     gap: 10px;
-    padding: 12px 0 20px;
-    border-top: 1px solid var(--border);
 }
 
 .chat-input {
@@ -374,6 +486,28 @@ body {
 .chat-send:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.model-select {
+    flex-shrink: 0;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.model-select:hover {
+    color: var(--text);
+}
+
+.model-select:focus {
+    outline: none;
+    border-color: var(--text-secondary);
 }
 
 /* Modals */
@@ -624,5 +758,10 @@ body {
     }
     .nav {
         gap: 12px;
+    }
+    .model-select {
+        font-size: 0.75rem;
+        padding: 8px 10px;
+        max-width: 110px;
     }
 }

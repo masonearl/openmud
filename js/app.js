@@ -5,8 +5,9 @@
     var STORAGE_PROJECTS = 'rockmud_projects';
     var STORAGE_ACTIVE = 'rockmud_activeProject';
     var STORAGE_MESSAGES = 'rockmud_messages';
+    var STORAGE_MODEL = 'rockmud_model';
 
-    var WELCOME_MSG = "Hi, I'm the Rockmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\"";
+    var WELCOME_MSG = "Hi, I'm the Rockmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
 
     function id() { return 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
 
@@ -55,10 +56,7 @@
     var formNewProject = document.getElementById('form-new-project');
     var inputProjectName = document.getElementById('input-project-name');
     var btnCancelProject = document.getElementById('btn-cancel-project');
-    var modalEstimate = document.getElementById('modal-estimate');
     var formEstimate = document.getElementById('form-estimate');
-    var btnEstimate = document.getElementById('btn-estimate');
-    var btnCloseEstimate = document.getElementById('btn-close-estimate');
     var estimateResult = document.getElementById('estimate-result');
     var estimateFeedback = document.getElementById('estimate-feedback');
     var formFeedback = document.getElementById('form-feedback');
@@ -67,6 +65,13 @@
     var activeProjectId = null;
     var lastEstimatePayload = null;
     var lastEstimateResult = null;
+    var activeTool = null;
+
+    var btnTools = document.getElementById('btn-tools');
+    var toolsDropdown = document.getElementById('tools-dropdown');
+    var chatToolPanel = document.getElementById('chat-tool-panel');
+    var toolPanelTitle = document.getElementById('tool-panel-title');
+    var btnCloseTool = document.getElementById('btn-close-tool');
 
     function addMessage(role, content, projectId) {
         projectId = projectId || activeProjectId;
@@ -150,6 +155,27 @@
         sendBtn.textContent = on ? '…' : 'Send';
     }
 
+    function getToolContext() {
+        if (!activeTool) return '';
+        if (activeTool === 'estimate' && lastEstimatePayload) {
+            var p = lastEstimatePayload;
+            return '\n[Active: Quick estimate. Current: ' + p.linear_feet + ' LF ' + p.pipe_diameter + '" ' + p.project_type + ', ' + p.soil_type + ', crew ' + p.crew_size + '. Last result: $' + (lastEstimateResult ? lastEstimateResult.predicted_cost.toLocaleString() : '—') + ', ' + (lastEstimateResult ? lastEstimateResult.duration_days : '—') + ' days. User can ask to change values—suggest the new value and they can update the form.]';
+        }
+        if (activeTool === 'proposal') {
+            var client = document.getElementById('prop-client').value;
+            var scope = document.getElementById('prop-scope').value;
+            var total = document.getElementById('prop-total').value;
+            return '\n[Active: Proposal. Client: ' + (client || '—') + ', Scope: ' + (scope ? scope.slice(0, 80) + '…' : '—') + ', Total: $' + (total || '—') + '. User can edit via form or ask for changes in chat.]';
+        }
+        if (activeTool === 'schedule') {
+            var proj = document.getElementById('sched-project').value;
+            var dur = document.getElementById('sched-duration').value;
+            var phases = document.getElementById('sched-phases').value;
+            return '\n[Active: Schedule. Project: ' + (proj || '—') + ', Duration: ' + (dur || '—') + ' days, Phases: ' + (phases ? phases.slice(0, 60) + '…' : '—') + '. User can edit via form or ask for changes in chat.]';
+        }
+        return '';
+    }
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         var text = (input.value || '').trim();
@@ -161,11 +187,19 @@
 
         var msgs = getMessages(activeProjectId);
         var history = msgs.map(function (m) { return { role: m.role, content: m.content }; }).slice(-20);
+        var toolCtx = getToolContext();
+        if (toolCtx && history.length > 0) {
+            history[history.length - 1].content = history[history.length - 1].content + toolCtx;
+        }
+
+        var modelSelect = document.getElementById('model-select');
+        var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
+        if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
 
         fetch(API_BASE + '/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: history, temperature: 0.7, max_tokens: 256 })
+            body: JSON.stringify({ messages: history, model: model, temperature: 0.7, max_tokens: 512 })
         })
             .then(function (r) { return r.json(); })
             .then(function (data) {
@@ -209,15 +243,52 @@
         if (name) createProject(name);
     });
 
-    btnEstimate.addEventListener('click', function () {
-        modalEstimate.hidden = false;
-        estimateResult.hidden = true;
-        estimateFeedback.hidden = true;
-        lastEstimatePayload = null;
+    function openTool(tool) {
+        activeTool = tool;
+        toolsDropdown.hidden = true;
+        btnTools.setAttribute('aria-expanded', 'false');
+        document.querySelectorAll('.tool-form-wrap').forEach(function (el) { el.classList.remove('active'); });
+        var wrap = document.getElementById('tool-form-' + tool);
+        if (wrap) wrap.classList.add('active');
+        var titles = { estimate: 'Quick estimate', proposal: 'Proposal', schedule: 'Build schedule' };
+        toolPanelTitle.textContent = titles[tool] || 'Tool';
+        chatToolPanel.hidden = false;
+        if (tool === 'estimate') {
+            estimateResult.hidden = true;
+            estimateFeedback.hidden = true;
+            lastEstimatePayload = null;
+        }
+        if (tool === 'schedule') {
+            document.getElementById('sched-start').value = new Date().toISOString().slice(0, 10);
+        }
+    }
+
+    function closeTool() {
+        activeTool = null;
+        chatToolPanel.hidden = true;
+        document.querySelectorAll('.tool-form-wrap').forEach(function (el) { el.classList.remove('active'); });
+    }
+
+    btnTools.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = toolsDropdown.hidden === false;
+        toolsDropdown.hidden = isOpen;
+        btnTools.setAttribute('aria-expanded', String(!isOpen));
     });
 
-    btnCloseEstimate.addEventListener('click', function () {
-        modalEstimate.hidden = true;
+    document.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+            var tool = item.getAttribute('data-tool');
+            if (tool) openTool(tool);
+        });
+    });
+
+    btnCloseTool.addEventListener('click', closeTool);
+
+    toolsDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+    document.addEventListener('click', function () {
+        toolsDropdown.hidden = true;
+        btnTools.setAttribute('aria-expanded', 'false');
     });
 
     function getEstimatePayload() {
@@ -276,6 +347,8 @@
                 estimateFeedback.hidden = false;
                 lastEstimateResult = data;
                 bindEstimateActions();
+                var summary = 'Estimate: $' + (data.predicted_cost || 0).toLocaleString() + ', ' + (data.duration_days || 0) + ' days. Use the buttons above to generate a proposal or schedule, or ask me to adjust values.';
+                addMessage('assistant', summary);
             })
             .catch(function () {
                 estimateResult.innerHTML = '<p class="est-error">Could not reach the API. Try again later.</p>';
@@ -306,10 +379,6 @@
             });
     });
 
-    modalEstimate.addEventListener('click', function (e) {
-        if (e.target === modalEstimate) modalEstimate.hidden = true;
-    });
-
     modalNewProject.addEventListener('click', function (e) {
         if (e.target === modalNewProject) modalNewProject.hidden = true;
     });
@@ -321,14 +390,8 @@
         if (btnSched) btnSched.onclick = function () { openScheduleFromEstimate(); };
     }
 
-    var modalProposal = document.getElementById('modal-proposal');
     var formProposal = document.getElementById('form-proposal');
-    var btnProposal = document.getElementById('btn-proposal');
-    var btnCloseProposal = document.getElementById('btn-close-proposal');
-    var modalSchedule = document.getElementById('modal-schedule');
     var formSchedule = document.getElementById('form-schedule');
-    var btnSchedule = document.getElementById('btn-schedule');
-    var btnCloseSchedule = document.getElementById('btn-close-schedule');
 
     var projectTypeLabels = { waterline: 'waterline', sewer: 'sewer', storm_drain: 'storm drain', gas: 'gas', electrical: 'electrical' };
     function openProposalFromEstimate() {
@@ -339,27 +402,16 @@
             document.getElementById('prop-total').value = lastEstimateResult.predicted_cost || '';
             document.getElementById('prop-duration').value = lastEstimateResult.duration_days || '';
         }
-        modalEstimate.hidden = true;
-        modalProposal.hidden = false;
+        openTool('proposal');
     }
 
     function openScheduleFromEstimate() {
         if (lastEstimateResult) {
             document.getElementById('sched-duration').value = lastEstimateResult.duration_days || 14;
         }
-        modalEstimate.hidden = true;
-        modalSchedule.hidden = false;
-    }
-
-    btnProposal.addEventListener('click', function () {
-        modalProposal.hidden = false;
-    });
-    btnCloseProposal.addEventListener('click', function () { modalProposal.hidden = true; });
-    btnSchedule.addEventListener('click', function () {
-        modalSchedule.hidden = false;
         document.getElementById('sched-start').value = new Date().toISOString().slice(0, 10);
-    });
-    btnCloseSchedule.addEventListener('click', function () { modalSchedule.hidden = true; });
+        openTool('schedule');
+    }
 
     formProposal.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -390,14 +442,12 @@
         if (typeof html2pdf !== 'undefined') {
             html2pdf().set({ filename: 'proposal-' + (client || 'project').replace(/\s+/g, '-').slice(0, 30) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
                 document.body.removeChild(el);
-                modalProposal.hidden = true;
             });
         } else {
             var w = window.open('', '_blank');
             w.document.write(html);
             w.document.close();
             document.body.removeChild(el);
-            modalProposal.hidden = true;
         }
     });
 
@@ -439,19 +489,21 @@
         if (typeof html2pdf !== 'undefined') {
             html2pdf().set({ filename: 'schedule-' + project.replace(/\s+/g, '-').slice(0, 20) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
                 document.body.removeChild(el);
-                modalSchedule.hidden = true;
             });
         } else {
             var w = window.open('', '_blank');
             w.document.write(html);
             w.document.close();
             document.body.removeChild(el);
-            modalSchedule.hidden = true;
         }
     });
 
-    modalProposal.addEventListener('click', function (e) { if (e.target === modalProposal) modalProposal.hidden = true; });
-    modalSchedule.addEventListener('click', function (e) { if (e.target === modalSchedule) modalSchedule.hidden = true; });
+    var modelSelect = document.getElementById('model-select');
+    if (modelSelect) {
+        var saved = localStorage.getItem(STORAGE_MODEL);
+        if (saved) modelSelect.value = saved;
+        modelSelect.addEventListener('change', function () { localStorage.setItem(STORAGE_MODEL, modelSelect.value); });
+    }
 
     ensureProject();
     renderProjects();

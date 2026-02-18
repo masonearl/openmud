@@ -18,9 +18,14 @@
             <nav class="nav">
                 <a href="/about.html">About</a>
                 <a href="/documentation.html">Documentation</a>
-                <button type="button" class="btn-text" id="btn-estimate">Quick estimate</button>
-                <button type="button" class="btn-text" id="btn-proposal">Proposal</button>
-                <button type="button" class="btn-text" id="btn-schedule">Schedule</button>
+                <div class="nav-dropdown">
+                    <button type="button" class="btn-text" id="btn-tools" aria-haspopup="true" aria-expanded="false">Tools ▾</button>
+                    <div class="dropdown-menu" id="tools-dropdown" hidden>
+                        <button type="button" class="dropdown-item" data-tool="estimate">Quick estimate</button>
+                        <button type="button" class="dropdown-item" data-tool="proposal">Proposal</button>
+                        <button type="button" class="dropdown-item" data-tool="schedule">Schedule</button>
+                    </div>
+                </div>
                 <a href="mailto:hi@masonearl.com?subject=Message%20from%20rockmud.com&body=This%20message%20was%20sent%20via%20rockmud.com%0A%0A">Contact</a>
             </nav>
         </div>
@@ -43,10 +48,67 @@
                     <button type="button" class="quick-btn" data-prompt="Draft a proposal for 2000 LF of 12 inch waterline in gravel">Proposal</button>
                     <button type="button" class="quick-btn" data-prompt="How long for 1000 LF of 10 inch storm drain with a 5-person crew?">Schedule</button>
                 </div>
+                <div class="chat-tool-panel" id="chat-tool-panel" hidden>
+                    <div class="tool-panel-header">
+                        <h3 id="tool-panel-title">Tool</h3>
+                        <button type="button" class="btn-close-tool" id="btn-close-tool" aria-label="Close">×</button>
+                    </div>
+                    <div class="tool-panel-content" id="tool-panel-content">
+                        <div id="tool-form-estimate" class="tool-form-wrap">
+                            <form id="form-estimate">
+                                <div class="form-row"><label>Project type</label><select id="est-project-type" required><option value="waterline">Waterline</option><option value="sewer">Sewer</option><option value="storm_drain">Storm drain</option><option value="gas">Gas</option><option value="electrical">Electrical</option></select></div>
+                                <div class="form-row"><label>Linear feet</label><input type="number" id="est-linear-feet" value="1500" min="1" required></div>
+                                <div class="form-row"><label>Pipe diameter (in)</label><input type="number" id="est-pipe-diameter" value="8" min="1" required></div>
+                                <div class="form-row"><label>Trench depth (ft)</label><input type="number" id="est-trench-depth" value="4.5" min="0" step="0.1" required></div>
+                                <div class="form-row"><label>Soil type</label><select id="est-soil-type"><option value="sand">Sand</option><option value="clay" selected>Clay</option><option value="gravel">Gravel</option><option value="rock">Rock</option></select></div>
+                                <div class="form-row"><label>Location</label><select id="est-location"><option value="salt_lake_metro" selected>Salt Lake Metro</option><option value="utah_county">Utah County</option><option value="davis_weber">Davis/Weber</option><option value="rural_utah">Rural Utah</option><option value="mountain_areas">Mountain areas</option></select></div>
+                                <div class="form-row"><label>Crew size</label><input type="number" id="est-crew-size" value="5" min="1" max="20"></div>
+                                <div class="form-row"><label>Season</label><select id="est-season"><option value="winter">Winter</option><option value="spring">Spring</option><option value="summer" selected>Summer</option><option value="fall">Fall</option></select></div>
+                                <div class="form-row"><label>Pipe material</label><select id="est-pipe-material"><option value="PVC C900" selected>PVC C900</option><option value="HDPE">HDPE</option><option value="DIP">DIP</option><option value="PVC SDR 35">PVC SDR 35</option><option value="RCP">RCP</option><option value="PE">PE</option><option value="Steel">Steel</option><option value="PVC Conduit">PVC Conduit</option></select></div>
+                                <div class="form-row form-row-inline"><label><input type="checkbox" id="est-dewatering"> Dewatering</label></div>
+                                <div class="form-row form-row-inline"><label><input type="checkbox" id="est-rock"> Rock excavation</label></div>
+                                <div class="form-row"><label>Fittings</label><input type="number" id="est-fittings" value="0" min="0"></div>
+                                <div class="form-row"><label>Road crossings</label><input type="number" id="est-road-crossings" value="0" min="0"></div>
+                                <div class="modal-actions"><button type="submit" class="btn-primary" id="btn-run-estimate">Run estimate</button></div>
+                            </form>
+                            <div id="estimate-result" class="estimate-result" hidden></div>
+                            <div id="estimate-feedback" class="estimate-feedback" hidden><h4>Submit actual cost (optional)</h4><form id="form-feedback"><input type="number" id="input-actual-cost" placeholder="Actual cost ($)" min="0" step="1000"><button type="submit" class="btn-primary">Submit feedback</button></form></div>
+                        </div>
+                        <div id="tool-form-proposal" class="tool-form-wrap">
+                            <form id="form-proposal">
+                                <div class="form-row"><label>Client / project name</label><input type="text" id="prop-client" placeholder="e.g. City of Salt Lake - Main St" required></div>
+                                <div class="form-row"><label>Scope summary</label><textarea id="prop-scope" rows="3" placeholder="e.g. 1,500 LF of 8&quot; sewer, clay soil, 4.5 ft depth"></textarea></div>
+                                <div class="form-row"><label>Total bid ($)</label><input type="number" id="prop-total" placeholder="From estimate or enter manually" min="0" step="1000"></div>
+                                <div class="form-row"><label>Duration (days)</label><input type="number" id="prop-duration" placeholder="From estimate" min="1"></div>
+                                <div class="form-row"><label>Assumptions</label><textarea id="prop-assumptions" rows="2" placeholder="e.g. Existing utilities to be located by others"></textarea></div>
+                                <div class="form-row"><label>Exclusions</label><textarea id="prop-exclusions" rows="2" placeholder="e.g. Traffic control by owner"></textarea></div>
+                                <div class="modal-actions"><button type="submit" class="btn-primary">Generate & download PDF</button></div>
+                            </form>
+                        </div>
+                        <div id="tool-form-schedule" class="tool-form-wrap">
+                            <form id="form-schedule">
+                                <div class="form-row"><label>Project name</label><input type="text" id="sched-project" placeholder="Project name"></div>
+                                <div class="form-row"><label>Start date</label><input type="date" id="sched-start"></div>
+                                <div class="form-row"><label>Duration (days)</label><input type="number" id="sched-duration" value="14" min="1" required></div>
+                                <div class="form-row"><label>Phases (comma-separated)</label><input type="text" id="sched-phases" value="Mobilization, Trenching, Pipe install, Backfill, Restoration" placeholder="Mobilization, Trenching, Pipe, Backfill, Restoration"></div>
+                                <div class="modal-actions"><button type="submit" class="btn-primary">Generate & download PDF</button></div>
+                            </form>
+                            <div id="schedule-preview" class="schedule-preview" hidden></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="chat-messages" id="chat-messages"></div>
                 <form class="chat-input-form" id="chat-form" action="#" method="post">
-                    <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
-                    <button type="submit" class="chat-send" id="chat-send" aria-label="Send">Send</button>
+                    <div class="chat-input-row">
+                        <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
+                        <select class="model-select" id="model-select" aria-label="AI model">
+                            <option value="gpt-4o-mini">GPT-4o mini</option>
+                            <option value="gpt-4o">GPT-4o</option>
+                            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        </select>
+                        <button type="submit" class="chat-send" id="chat-send" aria-label="Send">Send</button>
+                    </div>
                 </form>
             </div>
         </main>
@@ -63,175 +125,6 @@
                     <button type="submit" class="btn-primary">Create</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Quick estimate modal -->
-    <div class="modal-overlay" id="modal-estimate" hidden>
-        <div class="modal modal-wide">
-            <h3>Quick estimate</h3>
-            <form id="form-estimate">
-                <div class="form-row">
-                    <label>Project type</label>
-                    <select id="est-project-type" required>
-                        <option value="waterline">Waterline</option>
-                        <option value="sewer">Sewer</option>
-                        <option value="storm_drain">Storm drain</option>
-                        <option value="gas">Gas</option>
-                        <option value="electrical">Electrical</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label>Linear feet</label>
-                    <input type="number" id="est-linear-feet" value="1500" min="1" required>
-                </div>
-                <div class="form-row">
-                    <label>Pipe diameter (in)</label>
-                    <input type="number" id="est-pipe-diameter" value="8" min="1" required>
-                </div>
-                <div class="form-row">
-                    <label>Trench depth (ft)</label>
-                    <input type="number" id="est-trench-depth" value="4.5" min="0" step="0.1" required>
-                </div>
-                <div class="form-row">
-                    <label>Soil type</label>
-                    <select id="est-soil-type">
-                        <option value="sand">Sand</option>
-                        <option value="clay" selected>Clay</option>
-                        <option value="gravel">Gravel</option>
-                        <option value="rock">Rock</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label>Location</label>
-                    <select id="est-location">
-                        <option value="salt_lake_metro" selected>Salt Lake Metro</option>
-                        <option value="utah_county">Utah County</option>
-                        <option value="davis_weber">Davis/Weber</option>
-                        <option value="rural_utah">Rural Utah</option>
-                        <option value="mountain_areas">Mountain areas</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label>Crew size</label>
-                    <input type="number" id="est-crew-size" value="5" min="1" max="20">
-                </div>
-                <div class="form-row">
-                    <label>Season</label>
-                    <select id="est-season">
-                        <option value="winter">Winter</option>
-                        <option value="spring">Spring</option>
-                        <option value="summer" selected>Summer</option>
-                        <option value="fall">Fall</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label>Pipe material</label>
-                    <select id="est-pipe-material">
-                        <option value="PVC C900" selected>PVC C900</option>
-                        <option value="HDPE">HDPE</option>
-                        <option value="DIP">DIP</option>
-                        <option value="PVC SDR 35">PVC SDR 35</option>
-                        <option value="RCP">RCP</option>
-                        <option value="PE">PE</option>
-                        <option value="Steel">Steel</option>
-                        <option value="PVC Conduit">PVC Conduit</option>
-                    </select>
-                </div>
-                <div class="form-row form-row-inline">
-                    <label><input type="checkbox" id="est-dewatering"> Dewatering</label>
-                </div>
-                <div class="form-row form-row-inline">
-                    <label><input type="checkbox" id="est-rock"> Rock excavation</label>
-                </div>
-                <div class="form-row">
-                    <label>Fittings</label>
-                    <input type="number" id="est-fittings" value="0" min="0">
-                </div>
-                <div class="form-row">
-                    <label>Road crossings</label>
-                    <input type="number" id="est-road-crossings" value="0" min="0">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="btn-close-estimate">Cancel</button>
-                    <button type="submit" class="btn-primary" id="btn-run-estimate">Run estimate</button>
-                </div>
-            </form>
-            <div id="estimate-result" class="estimate-result" hidden></div>
-            <div id="estimate-feedback" class="estimate-feedback" hidden>
-                <h4>Submit actual cost (optional)</h4>
-                <form id="form-feedback">
-                    <input type="number" id="input-actual-cost" placeholder="Actual cost ($)" min="0" step="1000">
-                    <button type="submit" class="btn-primary">Submit feedback</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Proposal generator modal -->
-    <div class="modal-overlay" id="modal-proposal" hidden>
-        <div class="modal modal-wide">
-            <h3>Generate proposal</h3>
-            <form id="form-proposal">
-                <div class="form-row">
-                    <label>Client / project name</label>
-                    <input type="text" id="prop-client" placeholder="e.g. City of Salt Lake - Main St" required>
-                </div>
-                <div class="form-row">
-                    <label>Scope summary</label>
-                    <textarea id="prop-scope" rows="3" placeholder="e.g. 1,500 LF of 8&quot; sewer, clay soil, 4.5 ft depth"></textarea>
-                </div>
-                <div class="form-row">
-                    <label>Total bid ($)</label>
-                    <input type="number" id="prop-total" placeholder="From estimate or enter manually" min="0" step="1000">
-                </div>
-                <div class="form-row">
-                    <label>Duration (days)</label>
-                    <input type="number" id="prop-duration" placeholder="From estimate" min="1">
-                </div>
-                <div class="form-row">
-                    <label>Assumptions</label>
-                    <textarea id="prop-assumptions" rows="2" placeholder="e.g. Existing utilities to be located by others"></textarea>
-                </div>
-                <div class="form-row">
-                    <label>Exclusions</label>
-                    <textarea id="prop-exclusions" rows="2" placeholder="e.g. Traffic control by owner"></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="btn-close-proposal">Cancel</button>
-                    <button type="submit" class="btn-primary">Generate & download PDF</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Schedule builder modal -->
-    <div class="modal-overlay" id="modal-schedule" hidden>
-        <div class="modal modal-wide">
-            <h3>Build schedule</h3>
-            <form id="form-schedule">
-                <div class="form-row">
-                    <label>Project name</label>
-                    <input type="text" id="sched-project" placeholder="Project name">
-                </div>
-                <div class="form-row">
-                    <label>Start date</label>
-                    <input type="date" id="sched-start">
-                </div>
-                <div class="form-row">
-                    <label>Duration (days)</label>
-                    <input type="number" id="sched-duration" value="14" min="1" required>
-                </div>
-                <div class="form-row">
-                    <label>Phases (comma-separated)</label>
-                    <input type="text" id="sched-phases" value="Mobilization, Trenching, Pipe install, Backfill, Restoration" placeholder="Mobilization, Trenching, Pipe, Backfill, Restoration">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="btn-close-schedule">Cancel</button>
-                    <button type="submit" class="btn-primary">Generate & download PDF</button>
-                </div>
-            </form>
-            <div id="schedule-preview" class="schedule-preview" hidden></div>
         </div>
     </div>
 
