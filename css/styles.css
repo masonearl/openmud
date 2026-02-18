@@ -13,7 +13,7 @@
 
 body {
     margin: 0;
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Merriweather', Georgia, serif;
     font-size: 1rem;
     line-height: 1.6;
     color: var(--text);
