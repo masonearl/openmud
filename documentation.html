@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation – Rockmud</title>
+    <meta name="description" content="Rockmud skills: Proposal Generator, Schedule Builder, Quick Bid. What the assistant can do.">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">Rockmud</a>
+            <nav class="nav">
+                <a href="/about.html">About</a>
+                <a href="/documentation.html">Documentation</a>
+                <a href="mailto:hi@masonearl.com?subject=Message%20from%20rockmud.com&body=This%20message%20was%20sent%20via%20rockmud.com%0A%0A">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Documentation</h1>
+                <p class="hero-sub">Skills built into the assistant and what it can do.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <p class="doc-intro">The Rockmud assistant is trained on construction context and can help with estimates, proposals, schedules, and quick bids. Use the chat on the homepage to try these in natural language. Below is a reference for each skill.</p>
+            </div>
+        </section>
+
+        <section class="section section-alt">
+            <div class="container narrow">
+                <h2 class="skill-title">Proposal Generator</h2>
+                <p>Generate client-ready proposals from a project description or from an estimate you’ve already run. Tell the assistant the project scope (e.g. linear feet, pipe size, soil type, location) and ask for a proposal; it will produce structured text you can paste into a document or send to a client. You can request different tones (formal, concise) and include exclusions or assumptions.</p>
+                <p class="skill-tip">Try in chat: “Draft a proposal for 1,500 LF of 8 inch sewer in clay, Salt Lake Metro, for [client name].”</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <h2 class="skill-title">Schedule Builder</h2>
+                <p>Get a high-level schedule or duration estimate based on scope. The assistant uses project parameters (length, crew size, complexity) to suggest a realistic timeline and, when you ask, can break it into phases (mobilization, trenching, pipe, backfill, restoration). Useful for internal planning and for including schedule assumptions in proposals.</p>
+                <p class="skill-tip">Try in chat: “How long for 2,000 LF of 12 inch waterline with a 5-person crew?” or “Break that into a simple schedule.”</p>
+            </div>
+        </section>
+
+        <section class="section section-alt">
+            <div class="container narrow">
+                <h2 class="skill-title">Quick Bid</h2>
+                <p>Run a cost estimate in plain language. Describe the job (e.g. “1,500 LF of 8 inch sewer in clay, 4.5 ft depth, Salt Lake, summer”) and the assistant will call the estimation model and return a total cost, confidence range, per-linear-foot rate, and optional breakdown (material, labor, equipment, etc.). You can refine with more detail (fittings, road crossings, dewatering, pipe material) for a tighter number.</p>
+                <p class="skill-tip">Try in chat: “Quick bid: 1,200 LF 10 inch storm drain, gravel, Utah County, crew of 6.”</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <h2>What’s next</h2>
+                <p>We’re shipping version 1 with these skills in the chat and via the Contech API. After v1 we’ll introduce subscription plans so teams can subscribe and use the service at scale. If you want early access or to shape the plans, <a href="mailto:hi@masonearl.com?subject=Message%20from%20rockmud.com&body=This%20message%20was%20sent%20via%20rockmud.com%0A%0A" class="link">get in touch</a>.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> Rockmud. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
