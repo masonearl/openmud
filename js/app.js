@@ -123,11 +123,140 @@
         });
     }
 
+    var DB_NAME = 'rockmud_docs';
+    var DB_VERSION = 1;
+    var DOC_STORE = 'documents';
+    var MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+    function openDB() {
+        return new Promise(function (resolve, reject) {
+            var req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onerror = function () { reject(req.error); };
+            req.onsuccess = function () { resolve(req.result); };
+            req.onupgradeneeded = function (e) {
+                var db = e.target.result;
+                if (!db.objectStoreNames.contains(DOC_STORE)) {
+                    var store = db.createObjectStore(DOC_STORE, { keyPath: 'id' });
+                    store.createIndex('projectId', 'projectId', { unique: false });
+                }
+            };
+        });
+    }
+
+    function saveDocument(projectId, file) {
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function () {
+                    var doc = {
+                        id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
+                        projectId: projectId,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        data: reader.result,
+                        createdAt: Date.now()
+                    };
+                    var tx = db.transaction(DOC_STORE, 'readwrite');
+                    tx.objectStore(DOC_STORE).add(doc);
+                    tx.oncomplete = function () { resolve(doc.id); };
+                    tx.onerror = function () { reject(tx.error); };
+                };
+                reader.onerror = function () { reject(reader.error); };
+                reader.readAsArrayBuffer(file);
+            });
+        });
+    }
+
+    function getDocuments(projectId) {
+        return openDB().then(function (db) {
+            return new Promise(function (resolve) {
+                var tx = db.transaction(DOC_STORE, 'readonly');
+                var index = tx.objectStore(DOC_STORE).index('projectId');
+                var req = index.getAll(projectId);
+                req.onsuccess = function () {
+                    resolve(req.result || []);
+                };
+                req.onerror = function () { resolve([]); };
+            });
+        });
+    }
+
+    function deleteDocument(docId) {
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var tx = db.transaction(DOC_STORE, 'readwrite');
+                tx.objectStore(DOC_STORE).delete(docId);
+                tx.oncomplete = function () { resolve(); };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        });
+    }
+
+    function downloadDocument(doc) {
+        var blob = new Blob([doc.data], { type: doc.type || 'application/octet-stream' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = doc.name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function renderDocuments() {
+        var listEl = document.getElementById('documents-list');
+        var hintEl = document.getElementById('documents-hint');
+        var uploadLabel = document.querySelector('.btn-upload');
+        if (!listEl || !hintEl) return;
+
+        if (!activeProjectId) {
+            listEl.innerHTML = '';
+            hintEl.textContent = 'Select a project to add documents';
+            hintEl.hidden = false;
+            if (uploadLabel) uploadLabel.style.pointerEvents = 'none';
+            return;
+        }
+
+        if (uploadLabel) uploadLabel.style.pointerEvents = '';
+
+        getDocuments(activeProjectId).then(function (docs) {
+            listEl.innerHTML = '';
+            hintEl.textContent = docs.length === 0 ? 'No documents. Click + Add to upload.' : '';
+            hintEl.hidden = docs.length > 0;
+            docs.forEach(function (doc) {
+                var li = document.createElement('div');
+                li.className = 'document-item';
+                li.innerHTML = '<span class="document-name" title="' + (doc.name || '').replace(/"/g, '&quot;') + '">' + (doc.name || 'Document') + '</span>' +
+                    '<span class="document-size">' + formatSize(doc.size || 0) + '</span>' +
+                    '<button type="button" class="btn-download-doc" data-id="' + doc.id + '" title="Download">↓</button>' +
+                    '<button type="button" class="btn-delete-doc" data-id="' + doc.id + '" title="Remove">×</button>';
+                listEl.appendChild(li);
+            });
+            listEl.querySelectorAll('.btn-delete-doc').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    deleteDocument(btn.getAttribute('data-id')).then(function () { renderDocuments(); });
+                });
+            });
+            listEl.querySelectorAll('.btn-download-doc').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var doc = docs.find(function (d) { return d.id === btn.getAttribute('data-id'); });
+                    if (doc) downloadDocument(doc);
+                });
+            });
+        });
+    }
+
     function switchProject(id) {
         activeProjectId = id;
         setActiveId(id);
         renderProjects();
         renderMessages();
+        renderDocuments();
     }
 
     function createProject(name) {
@@ -139,6 +268,30 @@
         switchProject(p.id);
         modalNewProject.hidden = true;
         inputProjectName.value = '';
+    }
+
+    var docUpload = document.getElementById('doc-upload');
+    if (docUpload) {
+        docUpload.addEventListener('change', function () {
+            if (!activeProjectId || !this.files || this.files.length === 0) return;
+            var files = Array.from(this.files);
+            var rejected = 0;
+            files.forEach(function (file) {
+                if (file.size > MAX_FILE_SIZE) {
+                    rejected++;
+                    return;
+                }
+                saveDocument(activeProjectId, file).then(function () {
+                    renderDocuments();
+                }).catch(function (err) {
+                    console.error('Upload failed:', err);
+                });
+            });
+            if (rejected > 0) {
+                addMessage('assistant', 'Some files were skipped (max 5 MB per file).');
+            }
+            this.value = '';
+        });
     }
 
     function ensureProject() {
@@ -176,6 +329,36 @@
         return '';
     }
 
+    function getDocumentsContext() {
+        return new Promise(function (resolve) {
+            if (!activeProjectId) { resolve(''); return; }
+            getDocuments(activeProjectId).then(function (docs) {
+                if (docs.length === 0) { resolve(''); return; }
+                var names = docs.map(function (d) { return d.name + ' (' + formatSize(d.size) + ')'; }).join(', ');
+                resolve('\n[Project has ' + docs.length + ' uploaded document(s): ' + names + '. User may ask about these files.]');
+            });
+        });
+    }
+
+    function getCopyableChat() {
+        var msgs = activeProjectId ? getMessages(activeProjectId) : [];
+        if (msgs.length === 0) return '';
+        var modelSelect = document.getElementById('model-select');
+        var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
+        var lines = ['Model: ' + model, 'Project: ' + (activeProjectId || '—'), ''];
+        msgs.forEach(function (m) {
+            lines.push((m.role === 'user' ? 'User' : 'Assistant') + ':');
+            lines.push(m.content);
+            lines.push('');
+        });
+        return lines.join('\n');
+    }
+
+    var TOOL_TRIGGERS = /generate|build|create|make|draft|estimate|bid|proposal|schedule/i;
+    function shouldUseTools(text) {
+        return TOOL_TRIGGERS.test(text);
+    }
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         var text = (input.value || '').trim();
@@ -192,27 +375,42 @@
             history[history.length - 1].content = history[history.length - 1].content + toolCtx;
         }
 
-        var modelSelect = document.getElementById('model-select');
-        var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
-        if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
+        getDocumentsContext().then(function (docCtx) {
+            if (docCtx && history.length > 0) {
+                history[history.length - 1].content = history[history.length - 1].content + docCtx;
+            }
+            var modelSelect = document.getElementById('model-select');
+            var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
+            if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
 
-        fetch(API_BASE + '/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: history, model: model, temperature: 0.7, max_tokens: 512 })
-        })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                addMessage('assistant', data.response || 'No response.');
+            var useTools = shouldUseTools(text);
+            var payload = {
+                messages: history,
+                model: model,
+                temperature: 0.7,
+                max_tokens: 512,
+                use_tools: useTools,
+                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
+            };
+            if (!useTools) delete payload.available_tools;
+
+            fetch(API_BASE + '/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
-            .catch(function () {
-                addMessage('assistant', 'Sorry, I couldn\'t reach the assistant right now. Try again or use the Contech tool at masonearl.com.');
-            })
-            .then(function () {
-                setLoading(false);
-                scrollToLatest();
-            });
-    });
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    addMessage('assistant', data.response || 'No response.');
+                })
+                .catch(function () {
+                    addMessage('assistant', 'Sorry, I couldn\'t reach the assistant right now. Try again or use the Contech tool at masonearl.com.');
+                })
+                .then(function () {
+                    setLoading(false);
+                    scrollToLatest();
+                });
+        });
 
     input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -227,6 +425,28 @@
             if (prompt) { input.value = prompt; input.focus(); }
         });
     });
+
+    var btnCopyChat = document.getElementById('btn-copy-chat');
+    if (btnCopyChat) {
+        btnCopyChat.addEventListener('click', function () {
+            var text = getCopyableChat();
+            if (!text) {
+                addMessage('assistant', 'No messages to copy yet.');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(function () {
+                var orig = btnCopyChat.textContent;
+                btnCopyChat.textContent = 'Copied!';
+                btnCopyChat.classList.add('copied');
+                setTimeout(function () {
+                    btnCopyChat.textContent = orig;
+                    btnCopyChat.classList.remove('copied');
+                }, 1500);
+            }).catch(function () {
+                addMessage('assistant', 'Could not copy. Try selecting the chat manually.');
+            });
+        });
+    }
 
     btnNewProject.addEventListener('click', function () {
         modalNewProject.hidden = false;
@@ -508,4 +728,5 @@
     ensureProject();
     renderProjects();
     renderMessages();
+    renderDocuments();
 })();

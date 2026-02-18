@@ -38,6 +38,17 @@
                 <button type="button" class="btn-new-project" id="btn-new-project" title="New project">+ New</button>
             </div>
             <ul class="projects-list" id="projects-list"></ul>
+            <div class="documents-section" id="documents-section">
+                <div class="documents-header">
+                    <h3>Documents</h3>
+                    <label class="btn-upload" title="Upload document">
+                        <span>+ Add</span>
+                        <input type="file" id="doc-upload" multiple hidden>
+                    </label>
+                </div>
+                <div class="documents-list" id="documents-list"></div>
+                <p class="documents-hint" id="documents-hint">Select a project to add documents</p>
+            </div>
         </aside>
 
         <main class="chat-main">
@@ -47,6 +58,7 @@
                     <button type="button" class="quick-btn" data-prompt="Estimate 1500 LF of 8 inch sewer in clay, Salt Lake Metro">Quick bid</button>
                     <button type="button" class="quick-btn" data-prompt="Draft a proposal for 2000 LF of 12 inch waterline in gravel">Proposal</button>
                     <button type="button" class="quick-btn" data-prompt="How long for 1000 LF of 10 inch storm drain with a 5-person crew?">Schedule</button>
+                    <button type="button" class="btn-copy-chat" id="btn-copy-chat" title="Copy chat for debugging">Copy chat</button>
                 </div>
                 <div class="chat-tool-panel" id="chat-tool-panel" hidden>
                     <div class="tool-panel-header">
@@ -102,10 +114,20 @@
                     <div class="chat-input-row">
                         <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
                         <select class="model-select" id="model-select" aria-label="AI model">
-                            <option value="gpt-4o-mini">GPT-4o mini</option>
-                            <option value="gpt-4o">GPT-4o</option>
-                            <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <optgroup label="Rockmud">
+                                <option value="mud1">mud1 (dev)</option>
+                            </optgroup>
+                            <optgroup label="OpenAI">
+                                <option value="gpt-4o-mini">GPT-4o mini</option>
+                                <option value="gpt-4o">GPT-4o</option>
+                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            </optgroup>
+                            <optgroup label="Anthropic">
+                                <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                                <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                                <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+                            </optgroup>
                         </select>
                         <button type="submit" class="chat-send" id="chat-send" aria-label="Send">Send</button>
                     </div>

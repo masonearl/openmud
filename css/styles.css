@@ -346,6 +346,114 @@ body {
     line-height: 1.5;
 }
 
+/* Documents section */
+.documents-section {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.documents-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.documents-header h3 {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-upload {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--border);
+    border: none;
+    border-radius: 6px;
+    padding: 5px 8px;
+    cursor: pointer;
+}
+
+.btn-upload:hover {
+    color: var(--text);
+    background: #333;
+}
+
+.documents-list {
+    max-height: 140px;
+    overflow-y: auto;
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 6px 8px;
+    margin-bottom: 2px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.02);
+    border-radius: 4px;
+}
+
+.document-item:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.document-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-size {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+.btn-delete-doc {
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    padding: 0 4px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.btn-download-doc {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--link);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.btn-delete-doc:hover,
+.btn-download-doc:hover {
+    color: var(--text);
+}
+
+.documents-hint {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 8px 0 0;
+    opacity: 0.8;
+}
+
 .chat-main {
     flex: 1;
     display: flex;
@@ -392,6 +500,28 @@ body {
 .quick-btn:hover {
     color: var(--text);
     border-color: var(--text-secondary);
+}
+
+.btn-copy-chat {
+    font-family: inherit;
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.btn-copy-chat:hover {
+    color: var(--text);
+    border-color: var(--text-secondary);
+}
+
+.btn-copy-chat.copied {
+    color: #6ee7b7;
+    border-color: #6ee7b7;
 }
 
 .chat-messages {
@@ -499,6 +629,7 @@ body {
     border-radius: 8px;
     cursor: pointer;
     min-width: 0;
+    max-width: 160px;
 }
 
 .model-select:hover {
