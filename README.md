@@ -18,3 +18,7 @@ python3 -m http.server 8000
 ```
 
 Then visit http://localhost:8000
+
+## Deploy
+
+Push to `main` and Vercel deploys automatically. Live at [rockmudcom.vercel.app](https://rockmudcom.vercel.app) and (once DNS is set) [rockmud.com](https://rockmud.com).
