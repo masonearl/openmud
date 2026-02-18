@@ -255,6 +255,36 @@ body {
     padding: 0 20px;
 }
 
+.chat-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.quick-label {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.quick-btn {
+    font-family: inherit;
+    font-size: 0.8125rem;
+    padding: 6px 12px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.quick-btn:hover {
+    color: var(--text);
+    border-color: var(--text-secondary);
+}
+
 .chat-messages {
     flex: 1;
     overflow-y: auto;
@@ -502,6 +532,31 @@ body {
 
 .feedback-success { color: #6ee7b7; margin: 0; }
 .feedback-error { color: #f87171; margin: 0; }
+
+.est-actions {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.est-actions .btn-sm {
+    padding: 8px 14px;
+    font-size: 0.875rem;
+    margin-right: 8px;
+}
+
+.modal textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 4px;
+    resize: vertical;
+}
 
 /* Footer */
 .footer {

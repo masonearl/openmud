@@ -66,6 +66,7 @@
 
     var activeProjectId = null;
     var lastEstimatePayload = null;
+    var lastEstimateResult = null;
 
     function addMessage(role, content, projectId) {
         projectId = projectId || activeProjectId;
@@ -186,6 +187,13 @@
         }
     });
 
+    document.querySelectorAll('.quick-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var prompt = btn.getAttribute('data-prompt');
+            if (prompt) { input.value = prompt; input.focus(); }
+        });
+    });
+
     btnNewProject.addEventListener('click', function () {
         modalNewProject.hidden = false;
         inputProjectName.focus();
@@ -261,9 +269,13 @@
                     if (data.breakdown.markup) parts.push('Markup $' + data.breakdown.markup.toLocaleString());
                     html += parts.join(', ') + '</div>';
                 }
+                html += '<div class="est-actions"><button type="button" class="btn-secondary btn-sm" id="btn-gen-proposal">Generate proposal</button> ' +
+                    '<button type="button" class="btn-secondary btn-sm" id="btn-gen-schedule">Generate schedule</button></div>';
                 estimateResult.innerHTML = html;
                 estimateResult.hidden = false;
                 estimateFeedback.hidden = false;
+                lastEstimateResult = data;
+                bindEstimateActions();
             })
             .catch(function () {
                 estimateResult.innerHTML = '<p class="est-error">Could not reach the API. Try again later.</p>';
@@ -301,6 +313,145 @@
     modalNewProject.addEventListener('click', function (e) {
         if (e.target === modalNewProject) modalNewProject.hidden = true;
     });
+
+    function bindEstimateActions() {
+        var btnProp = document.getElementById('btn-gen-proposal');
+        var btnSched = document.getElementById('btn-gen-schedule');
+        if (btnProp) btnProp.onclick = function () { openProposalFromEstimate(); };
+        if (btnSched) btnSched.onclick = function () { openScheduleFromEstimate(); };
+    }
+
+    var modalProposal = document.getElementById('modal-proposal');
+    var formProposal = document.getElementById('form-proposal');
+    var btnProposal = document.getElementById('btn-proposal');
+    var btnCloseProposal = document.getElementById('btn-close-proposal');
+    var modalSchedule = document.getElementById('modal-schedule');
+    var formSchedule = document.getElementById('form-schedule');
+    var btnSchedule = document.getElementById('btn-schedule');
+    var btnCloseSchedule = document.getElementById('btn-close-schedule');
+
+    var projectTypeLabels = { waterline: 'waterline', sewer: 'sewer', storm_drain: 'storm drain', gas: 'gas', electrical: 'electrical' };
+    function openProposalFromEstimate() {
+        if (lastEstimatePayload && lastEstimateResult) {
+            var pt = projectTypeLabels[lastEstimatePayload.project_type] || lastEstimatePayload.project_type || 'pipe';
+            document.getElementById('prop-scope').value = lastEstimatePayload.linear_feet + ' LF of ' + lastEstimatePayload.pipe_diameter + '" ' +
+                pt + ', ' + lastEstimatePayload.soil_type + ' soil, ' + lastEstimatePayload.trench_depth + ' ft depth';
+            document.getElementById('prop-total').value = lastEstimateResult.predicted_cost || '';
+            document.getElementById('prop-duration').value = lastEstimateResult.duration_days || '';
+        }
+        modalEstimate.hidden = true;
+        modalProposal.hidden = false;
+    }
+
+    function openScheduleFromEstimate() {
+        if (lastEstimateResult) {
+            document.getElementById('sched-duration').value = lastEstimateResult.duration_days || 14;
+        }
+        modalEstimate.hidden = true;
+        modalSchedule.hidden = false;
+    }
+
+    btnProposal.addEventListener('click', function () {
+        modalProposal.hidden = false;
+    });
+    btnCloseProposal.addEventListener('click', function () { modalProposal.hidden = true; });
+    btnSchedule.addEventListener('click', function () {
+        modalSchedule.hidden = false;
+        document.getElementById('sched-start').value = new Date().toISOString().slice(0, 10);
+    });
+    btnCloseSchedule.addEventListener('click', function () { modalSchedule.hidden = true; });
+
+    formProposal.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var client = document.getElementById('prop-client').value.trim();
+        var scope = document.getElementById('prop-scope').value.trim();
+        var total = document.getElementById('prop-total').value;
+        var duration = document.getElementById('prop-duration').value;
+        var assumptions = document.getElementById('prop-assumptions').value.trim();
+        var exclusions = document.getElementById('prop-exclusions').value.trim();
+        var html = '<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;">' +
+            '<h1 style="margin:0 0 8px;">Proposal</h1>' +
+            '<p style="color:#666;margin:0 0 24px;">' + client + '</p>' +
+            '<h2 style="font-size:1.1rem;margin:24px 0 8px;">Scope</h2>' +
+            '<p style="margin:0;line-height:1.6;">' + (scope || '—').replace(/\n/g, '<br>') + '</p>' +
+            '<h2 style="font-size:1.1rem;margin:24px 0 8px;">Pricing</h2>' +
+            '<p style="margin:0;font-size:1.25rem;font-weight:700;">' + (total ? '$' + parseInt(total, 10).toLocaleString() : '—') + '</p>' +
+            (duration ? '<p style="margin:8px 0 0;">Duration: ' + duration + ' days</p>' : '') +
+            (assumptions ? '<h2 style="font-size:1.1rem;margin:24px 0 8px;">Assumptions</h2><p style="margin:0;line-height:1.6;">' + assumptions.replace(/\n/g, '<br>') + '</p>' : '') +
+            (exclusions ? '<h2 style="font-size:1.1rem;margin:24px 0 8px;">Exclusions</h2><p style="margin:0;line-height:1.6;">' + exclusions.replace(/\n/g, '<br>') + '</p>' : '') +
+            '<p style="margin:32px 0 0;font-size:0.875rem;color:#666;">Generated by Rockmud · rockmud.com</p></div>';
+        var el = document.createElement('div');
+        el.innerHTML = html;
+        el.style.position = 'absolute';
+        el.style.left = '-9999px';
+        el.style.background = '#fff';
+        el.style.color = '#111';
+        document.body.appendChild(el);
+        if (typeof html2pdf !== 'undefined') {
+            html2pdf().set({ filename: 'proposal-' + (client || 'project').replace(/\s+/g, '-').slice(0, 30) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
+                document.body.removeChild(el);
+                modalProposal.hidden = true;
+            });
+        } else {
+            var w = window.open('', '_blank');
+            w.document.write(html);
+            w.document.close();
+            document.body.removeChild(el);
+            modalProposal.hidden = true;
+        }
+    });
+
+    formSchedule.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var project = document.getElementById('sched-project').value.trim() || 'Project';
+        var startStr = document.getElementById('sched-start').value;
+        var duration = parseInt(document.getElementById('sched-duration').value, 10) || 14;
+        var phasesStr = document.getElementById('sched-phases').value.trim();
+        var phases = phasesStr ? phasesStr.split(',').map(function (p) { return p.trim(); }).filter(Boolean) : ['Mobilization', 'Trenching', 'Pipe install', 'Backfill', 'Restoration'];
+        var start = startStr ? new Date(startStr) : new Date();
+        var daysPerPhase = Math.max(1, Math.floor(duration / phases.length));
+        var rows = [];
+        var d = new Date(start);
+        for (var i = 0; i < phases.length; i++) {
+            var phaseDays = i === phases.length - 1 ? (duration - (phases.length - 1) * daysPerPhase) : daysPerPhase;
+            var end = new Date(d);
+            end.setDate(end.getDate() + phaseDays - 1);
+            rows.push({ phase: phases[i], start: d.toLocaleDateString(), end: end.toLocaleDateString(), days: phaseDays });
+            d.setDate(d.getDate() + phaseDays);
+        }
+        var table = '<table style="width:100%;border-collapse:collapse;"><tr style="background:#f0f0f0;"><th style="padding:10px;text-align:left;">Phase</th><th>Start</th><th>End</th><th>Days</th></tr>';
+        rows.forEach(function (r) {
+            table += '<tr><td style="padding:10px;border-bottom:1px solid #ddd;">' + r.phase + '</td><td style="padding:10px;border-bottom:1px solid #ddd;">' + r.start + '</td><td style="padding:10px;border-bottom:1px solid #ddd;">' + r.end + '</td><td style="padding:10px;border-bottom:1px solid #ddd;">' + r.days + '</td></tr>';
+        });
+        table += '</table>';
+        var html = '<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;">' +
+            '<h1 style="margin:0 0 8px;">Schedule</h1>' +
+            '<p style="color:#666;margin:0 0 24px;">' + project + ' · ' + duration + ' days</p>' +
+            table +
+            '<p style="margin:24px 0 0;font-size:0.875rem;color:#666;">Generated by Rockmud · rockmud.com</p></div>';
+        var el = document.createElement('div');
+        el.innerHTML = html;
+        el.style.position = 'absolute';
+        el.style.left = '-9999px';
+        el.style.background = '#fff';
+        el.style.color = '#111';
+        document.body.appendChild(el);
+        if (typeof html2pdf !== 'undefined') {
+            html2pdf().set({ filename: 'schedule-' + project.replace(/\s+/g, '-').slice(0, 20) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
+                document.body.removeChild(el);
+                modalSchedule.hidden = true;
+            });
+        } else {
+            var w = window.open('', '_blank');
+            w.document.write(html);
+            w.document.close();
+            document.body.removeChild(el);
+            modalSchedule.hidden = true;
+        }
+    });
+
+    modalProposal.addEventListener('click', function (e) { if (e.target === modalProposal) modalProposal.hidden = true; });
+    modalSchedule.addEventListener('click', function (e) { if (e.target === modalSchedule) modalSchedule.hidden = true; });
 
     ensureProject();
     renderProjects();

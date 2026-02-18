@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rockmud – AI for Construction</title>
     <meta name="description" content="AI built for construction. Plan, estimate, and run jobs on solid ground.">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +19,8 @@
                 <a href="/about.html">About</a>
                 <a href="/documentation.html">Documentation</a>
                 <button type="button" class="btn-text" id="btn-estimate">Quick estimate</button>
+                <button type="button" class="btn-text" id="btn-proposal">Proposal</button>
+                <button type="button" class="btn-text" id="btn-schedule">Schedule</button>
                 <a href="mailto:hi@masonearl.com?subject=Message%20from%20rockmud.com&body=This%20message%20was%20sent%20via%20rockmud.com%0A%0A">Contact</a>
             </nav>
         </div>
@@ -34,6 +37,12 @@
 
         <main class="chat-main">
             <div class="chat-panel">
+                <div class="chat-quick-actions" id="chat-quick-actions">
+                    <span class="quick-label">Try:</span>
+                    <button type="button" class="quick-btn" data-prompt="Estimate 1500 LF of 8 inch sewer in clay, Salt Lake Metro">Quick bid</button>
+                    <button type="button" class="quick-btn" data-prompt="Draft a proposal for 2000 LF of 12 inch waterline in gravel">Proposal</button>
+                    <button type="button" class="quick-btn" data-prompt="How long for 1000 LF of 10 inch storm drain with a 5-person crew?">Schedule</button>
+                </div>
                 <div class="chat-messages" id="chat-messages"></div>
                 <form class="chat-input-form" id="chat-form" action="#" method="post">
                     <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
@@ -156,6 +165,73 @@
                     <button type="submit" class="btn-primary">Submit feedback</button>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <!-- Proposal generator modal -->
+    <div class="modal-overlay" id="modal-proposal" hidden>
+        <div class="modal modal-wide">
+            <h3>Generate proposal</h3>
+            <form id="form-proposal">
+                <div class="form-row">
+                    <label>Client / project name</label>
+                    <input type="text" id="prop-client" placeholder="e.g. City of Salt Lake - Main St" required>
+                </div>
+                <div class="form-row">
+                    <label>Scope summary</label>
+                    <textarea id="prop-scope" rows="3" placeholder="e.g. 1,500 LF of 8&quot; sewer, clay soil, 4.5 ft depth"></textarea>
+                </div>
+                <div class="form-row">
+                    <label>Total bid ($)</label>
+                    <input type="number" id="prop-total" placeholder="From estimate or enter manually" min="0" step="1000">
+                </div>
+                <div class="form-row">
+                    <label>Duration (days)</label>
+                    <input type="number" id="prop-duration" placeholder="From estimate" min="1">
+                </div>
+                <div class="form-row">
+                    <label>Assumptions</label>
+                    <textarea id="prop-assumptions" rows="2" placeholder="e.g. Existing utilities to be located by others"></textarea>
+                </div>
+                <div class="form-row">
+                    <label>Exclusions</label>
+                    <textarea id="prop-exclusions" rows="2" placeholder="e.g. Traffic control by owner"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-close-proposal">Cancel</button>
+                    <button type="submit" class="btn-primary">Generate & download PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule builder modal -->
+    <div class="modal-overlay" id="modal-schedule" hidden>
+        <div class="modal modal-wide">
+            <h3>Build schedule</h3>
+            <form id="form-schedule">
+                <div class="form-row">
+                    <label>Project name</label>
+                    <input type="text" id="sched-project" placeholder="Project name">
+                </div>
+                <div class="form-row">
+                    <label>Start date</label>
+                    <input type="date" id="sched-start">
+                </div>
+                <div class="form-row">
+                    <label>Duration (days)</label>
+                    <input type="number" id="sched-duration" value="14" min="1" required>
+                </div>
+                <div class="form-row">
+                    <label>Phases (comma-separated)</label>
+                    <input type="text" id="sched-phases" value="Mobilization, Trenching, Pipe install, Backfill, Restoration" placeholder="Mobilization, Trenching, Pipe, Backfill, Restoration">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-close-schedule">Cancel</button>
+                    <button type="submit" class="btn-primary">Generate & download PDF</button>
+                </div>
+            </form>
+            <div id="schedule-preview" class="schedule-preview" hidden></div>
         </div>
     </div>
 
