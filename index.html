@@ -16,42 +16,23 @@
             <a href="/" class="logo">Rockmud</a>
             <nav class="nav">
                 <a href="/about.html">About</a>
-                <a href="#contact">Contact</a>
+                <a href="mailto:hi@masonearl.com">Contact</a>
             </nav>
         </div>
     </header>
 
-    <main>
-        <section class="hero">
-            <div class="container">
-                <h1>AI built for construction</h1>
-                <p class="hero-sub">Plan, estimate, and run jobs on solid ground.</p>
+    <main class="chat-layout">
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <div class="msg msg-assistant">
+                    <p>Hi, I'm the Rockmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. "Estimate 1500 LF of 8 inch sewer in clay."</p>
+                </div>
             </div>
-        </section>
-
-        <section id="about" class="section">
-            <div class="container narrow">
-                <h2>Coming soon</h2>
-                <p>Rockmud is in development. Built for contractors and teams who want AI that speaks the language of the job site.</p>
-                <p><a href="/about.html" class="link">Our mission →</a></p>
-            </div>
-        </section>
-
-        <section id="contech" class="section section-alt">
-            <div class="container narrow">
-                <h2>Contech API</h2>
-                <p>Cost estimation and an AI assistant for construction, available as an API and via our web tool.</p>
-                <p class="contech-status">API status: <span id="api-status">checking…</span></p>
-                <p><a href="https://masonearl.com" class="link link-cta" target="_blank" rel="noopener">Use the Contech tool at masonearl.com →</a></p>
-            </div>
-        </section>
-
-        <section id="contact" class="section">
-            <div class="container narrow">
-                <h2>Get in touch</h2>
-                <p><a href="mailto:hi@masonearl.com" class="link">hi@masonearl.com</a></p>
-            </div>
-        </section>
+            <form class="chat-input-form" id="chat-form" action="#" method="post">
+                <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
+                <button type="submit" class="chat-send" id="chat-send" aria-label="Send">Send</button>
+            </form>
+        </div>
     </main>
 
     <footer class="footer">
@@ -64,18 +45,74 @@
         document.getElementById('year').textContent = new Date().getFullYear();
 
         (function () {
-            var el = document.getElementById('api-status');
-            if (!el) return;
-            fetch('https://www.masonearl.com/api/contech/health')
-                .then(function (r) { return r.json(); })
-                .then(function (d) {
-                    el.textContent = d.status === 'healthy' ? 'Operational' : d.status || 'Unknown';
-                    el.classList.add('status-ok');
+            var API_BASE = 'https://www.masonearl.com/api/contech';
+            var messagesEl = document.getElementById('chat-messages');
+            var form = document.getElementById('chat-form');
+            var input = document.getElementById('chat-input');
+            var sendBtn = document.getElementById('chat-send');
+
+            function addMessage(role, content) {
+                var wrap = document.createElement('div');
+                wrap.className = 'msg msg-' + role;
+                var p = document.createElement('p');
+                p.textContent = content;
+                wrap.appendChild(p);
+                messagesEl.appendChild(wrap);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+
+            function setLoading(on) {
+                sendBtn.disabled = on;
+                sendBtn.textContent = on ? '…' : 'Send';
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var text = (input.value || '').trim();
+                if (!text) return;
+
+                addMessage('user', text);
+                input.value = '';
+                setLoading(true);
+
+                var history = [];
+                var msgNodes = messagesEl.querySelectorAll('.msg');
+                for (var i = 0; i < msgNodes.length; i++) {
+                    var node = msgNodes[i];
+                    var role = node.classList.contains('msg-user') ? 'user' : 'assistant';
+                    var content = node.querySelector('p');
+                    if (content && (role !== 'user' || content.textContent.trim() !== '')) {
+                        history.push({ role: role, content: content.textContent.trim() });
+                    }
+                }
+
+                fetch(API_BASE + '/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: history.slice(-20),
+                        temperature: 0.7,
+                        max_tokens: 256
+                    })
                 })
-                .catch(function () {
-                    el.textContent = 'Unavailable';
-                    el.classList.add('status-error');
-                });
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        addMessage('assistant', data.response || 'No response.');
+                    })
+                    .catch(function () {
+                        addMessage('assistant', 'Sorry, I couldn’t reach the assistant right now. Try again or use the Contech tool at masonearl.com.');
+                    })
+                    .then(function () {
+                        setLoading(false);
+                    });
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
         })();
     </script>
 </body>
