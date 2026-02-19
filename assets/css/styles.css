@@ -269,20 +269,68 @@ body {
 .app-layout {
     display: flex;
     flex: 1;
-    min-height: calc(100vh - 52px);
+    min-height: 0;
 }
 
 .projects-sidebar {
-    position: sticky;
-    top: 0;
-    align-self: flex-start;
-    width: 200px;
+    flex: 0 0 auto;
+    width: var(--sidebar-width, 220px);
     min-width: 160px;
-    max-height: calc(100vh - 52px);
-    overflow-y: auto;
+    max-width: 400px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
     border-right: 1px solid var(--border);
     padding: 12px 10px;
     background: var(--bg-alt);
+    overflow: hidden;
+}
+
+.projects-sidebar .projects-header,
+.projects-sidebar .projects-list {
+    flex-shrink: 0;
+}
+
+.projects-sidebar .documents-section {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.projects-sidebar .documents-list {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+}
+
+.sidebar-resize-handle {
+    flex-shrink: 0;
+    width: 6px;
+    cursor: col-resize;
+    background: transparent;
+    position: relative;
+}
+
+.sidebar-resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 2px;
+    height: 100%;
+    background: transparent;
+    transition: background 0.15s;
+}
+
+.sidebar-resize-handle:hover::after,
+.sidebar-resize-handle:active::after {
+    background: var(--border);
+}
+
+.sidebar-resize-handle:hover {
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .projects-header {
@@ -398,8 +446,26 @@ body {
 }
 
 .documents-list {
-    max-height: 140px;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #404040 transparent;
+}
+
+.documents-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.documents-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.documents-list::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 3px;
+}
+
+.documents-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .document-item {
@@ -481,8 +547,7 @@ body {
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
-    max-width: 680px;
-    margin: 0 auto;
+    min-width: 0;
     width: 100%;
     padding: 0 20px;
 }
@@ -549,6 +614,25 @@ body {
     flex-direction: column;
     gap: 10px;
     overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #404040 transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .msg {
@@ -1033,8 +1117,12 @@ body {
 
 @media (max-width: 768px) {
     .projects-sidebar {
-        width: 160px;
+        width: 180px !important;
         min-width: 140px;
+        max-width: 240px;
+    }
+    .sidebar-resize-handle {
+        display: none;
     }
     .projects-header h3,
     .documents-header h3 {

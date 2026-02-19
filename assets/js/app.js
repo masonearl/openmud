@@ -6,6 +6,7 @@
     var STORAGE_ACTIVE = 'rockmud_activeProject';
     var STORAGE_MESSAGES = 'rockmud_messages';
     var STORAGE_MODEL = 'rockmud_model';
+    var STORAGE_SIDEBAR_WIDTH = 'rockmud_sidebarWidth';
 
     var WELCOME_MSG = "Hi, I'm the Rockmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
 
@@ -862,4 +863,37 @@
     renderProjects();
     renderMessages();
     renderDocuments();
+
+    (function initSidebarResize() {
+        var sidebar = document.getElementById('projects-sidebar');
+        var handle = document.getElementById('sidebar-resize-handle');
+        if (!sidebar || !handle) return;
+        var saved = localStorage.getItem(STORAGE_SIDEBAR_WIDTH);
+        if (saved) {
+            var w = parseInt(saved, 10);
+            if (w >= 160 && w <= 400) sidebar.style.setProperty('--sidebar-width', w + 'px');
+        }
+        var startX, startW;
+        handle.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            startX = e.clientX;
+            startW = sidebar.offsetWidth;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            function onMove(e) {
+                var dx = e.clientX - startX;
+                var newW = Math.max(160, Math.min(400, startW + dx));
+                sidebar.style.setProperty('--sidebar-width', newW + 'px');
+            }
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                localStorage.setItem(STORAGE_SIDEBAR_WIDTH, String(sidebar.offsetWidth));
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    })();
 })();
