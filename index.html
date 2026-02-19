@@ -111,36 +111,40 @@
                 </div>
                 <div class="chat-messages" id="chat-messages"></div>
                 <form class="chat-input-form" id="chat-form" action="javascript:void(0)" method="post" onsubmit="return false;">
-                    <div class="chat-input-row">
-                        <div class="chat-bar-left">
-                            <button type="button" class="chat-bar-dropdown" id="agent-dropdown" aria-haspopup="true" aria-expanded="false" title="Mode">
-                                <span class="chat-bar-icon">∞</span>
-                                <span>Agent</span>
-                                <span class="chat-bar-chevron">▾</span>
-                            </button>
-                            <select class="chat-bar-dropdown chat-bar-model" id="model-select" aria-label="AI model">
-                                <optgroup label="Rockmud">
-                                    <option value="mud1">mud1</option>
-                                </optgroup>
-                                <optgroup label="OpenAI">
-                                    <option value="gpt-4o-mini">GPT-4o mini</option>
-                                    <option value="gpt-4o">GPT-4o</option>
-                                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                </optgroup>
-                                <optgroup label="Anthropic">
-                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-                                    <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-                                    <option value="claude-3-opus-20240229">Claude 3 Opus</option>
-                                </optgroup>
-                            </select>
+                    <div class="chat-composer">
+                        <div class="chat-composer-text-wrap">
+                            <textarea class="chat-composer-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
                         </div>
-                        <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
-                        <div class="chat-bar-right">
-                            <button type="button" class="chat-bar-icon-btn" id="btn-refresh-chat" aria-label="Refresh">↻</button>
-                            <label class="chat-bar-icon-btn" for="chat-doc-upload" title="Attach document">📎</label>
-                            <input type="file" id="chat-doc-upload" multiple hidden>
-                            <button type="submit" class="chat-send-circle" id="chat-send" aria-label="Send">↑</button>
+                        <div class="chat-composer-bar">
+                            <div class="chat-composer-left">
+                                <button type="button" class="chat-composer-pill" id="agent-dropdown" aria-haspopup="true" title="Mode">
+                                    <span class="chat-composer-pill-icon">∞</span>
+                                    <span>Agent</span>
+                                    <span class="chat-composer-chevron">▾</span>
+                                </button>
+                                <select class="chat-composer-pill chat-composer-model" id="model-select" aria-label="AI model">
+                                    <optgroup label="Rockmud">
+                                        <option value="mud1">mud1</option>
+                                    </optgroup>
+                                    <optgroup label="OpenAI">
+                                        <option value="gpt-4o-mini">GPT-4o mini</option>
+                                        <option value="gpt-4o">GPT-4o</option>
+                                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                    </optgroup>
+                                    <optgroup label="Anthropic">
+                                        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                                        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                                        <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="chat-composer-right">
+                                <button type="button" class="chat-composer-icon" id="btn-refresh-chat" aria-label="Clear">↻</button>
+                                <label class="chat-composer-icon" for="chat-doc-upload" title="Attach document">📎</label>
+                                <input type="file" id="chat-doc-upload" multiple hidden>
+                                <button type="submit" class="chat-composer-send" id="chat-send" aria-label="Send">↑</button>
+                            </div>
                         </div>
                     </div>
                 </form>
