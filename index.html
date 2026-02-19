@@ -6,7 +6,7 @@
     <title>Rockmud – AI for Construction</title>
     <meta name="description" content="AI built for construction. Plan, estimate, and run jobs on solid ground.">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -112,24 +112,36 @@
                 <div class="chat-messages" id="chat-messages"></div>
                 <form class="chat-input-form" id="chat-form" action="#" method="post">
                     <div class="chat-input-row">
+                        <div class="chat-bar-left">
+                            <button type="button" class="chat-bar-dropdown" id="agent-dropdown" aria-haspopup="true" aria-expanded="false" title="Mode">
+                                <span class="chat-bar-icon">∞</span>
+                                <span>Agent</span>
+                                <span class="chat-bar-chevron">▾</span>
+                            </button>
+                            <select class="chat-bar-dropdown chat-bar-model" id="model-select" aria-label="AI model">
+                                <optgroup label="Rockmud">
+                                    <option value="mud1">mud1</option>
+                                </optgroup>
+                                <optgroup label="OpenAI">
+                                    <option value="gpt-4o-mini">GPT-4o mini</option>
+                                    <option value="gpt-4o">GPT-4o</option>
+                                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                </optgroup>
+                                <optgroup label="Anthropic">
+                                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                                    <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                                    <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+                                </optgroup>
+                            </select>
+                        </div>
                         <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
-                        <select class="model-select" id="model-select" aria-label="AI model">
-                            <optgroup label="Rockmud">
-                                <option value="mud1">mud1 (dev)</option>
-                            </optgroup>
-                            <optgroup label="OpenAI">
-                                <option value="gpt-4o-mini">GPT-4o mini</option>
-                                <option value="gpt-4o">GPT-4o</option>
-                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                            </optgroup>
-                            <optgroup label="Anthropic">
-                                <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-                                <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-                                <option value="claude-3-opus-20240229">Claude 3 Opus</option>
-                            </optgroup>
-                        </select>
-                        <button type="submit" class="chat-send" id="chat-send" aria-label="Send">Send</button>
+                        <div class="chat-bar-right">
+                            <button type="button" class="chat-bar-icon-btn" id="btn-refresh-chat" aria-label="Refresh">↻</button>
+                            <label class="chat-bar-icon-btn" for="chat-doc-upload" title="Attach document">📎</label>
+                            <input type="file" id="chat-doc-upload" multiple hidden>
+                            <button type="submit" class="chat-send-circle" id="chat-send" aria-label="Send">↑</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -157,6 +169,6 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
-    <script src="js/app.js"></script>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

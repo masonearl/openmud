@@ -6,10 +6,10 @@ The frontend calls `POST /chat` on the Contech API. Backend should support:
 
 **Never put API keys in the chat or in the frontend.** They would be exposed in logs, browser dev tools, and chat history.
 
-Put keys in your **backend** (the server that hosts `masonearl.com/api/contech`):
+Put keys in your **Rockmud Vercel project** (the `/api` serverless functions use them):
 
-1. **If using Vercel** – Project → Settings → Environment Variables
-2. **If using a Node/Python server** – `.env` file in the backend repo (add `.env` to `.gitignore`)
+1. **Vercel** – Project → Settings → Environment Variables
+2. **Local** – Copy `config/env.example` to `.env` (add `.env` to `.gitignore`)
 
 ```
 OPENAI_API_KEY=sk-...

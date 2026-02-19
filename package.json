@@ -1,0 +1,9 @@
+{
+  "name": "rockmud",
+  "version": "1.0.0",
+  "description": "AI for construction",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "openai": "^4.73.0"
+  }
+}

@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var API_BASE = 'https://www.masonearl.com/api/contech';
+    var API_BASE = '/api';
     var STORAGE_PROJECTS = 'rockmud_projects';
     var STORAGE_ACTIVE = 'rockmud_activeProject';
     var STORAGE_MESSAGES = 'rockmud_messages';
@@ -270,27 +270,36 @@
         inputProjectName.value = '';
     }
 
+    function handleDocUpload(inputEl) {
+        if (!inputEl || !activeProjectId || !inputEl.files || inputEl.files.length === 0) return;
+        var files = Array.from(inputEl.files);
+        var rejected = 0;
+        files.forEach(function (file) {
+            if (file.size > MAX_FILE_SIZE) {
+                rejected++;
+                return;
+            }
+            saveDocument(activeProjectId, file).then(function () {
+                renderDocuments();
+            }).catch(function (err) {
+                console.error('Upload failed:', err);
+            });
+        });
+        if (rejected > 0) {
+            addMessage('assistant', 'Some files were skipped (max 5 MB per file).');
+        }
+        inputEl.value = '';
+    }
     var docUpload = document.getElementById('doc-upload');
     if (docUpload) {
         docUpload.addEventListener('change', function () {
-            if (!activeProjectId || !this.files || this.files.length === 0) return;
-            var files = Array.from(this.files);
-            var rejected = 0;
-            files.forEach(function (file) {
-                if (file.size > MAX_FILE_SIZE) {
-                    rejected++;
-                    return;
-                }
-                saveDocument(activeProjectId, file).then(function () {
-                    renderDocuments();
-                }).catch(function (err) {
-                    console.error('Upload failed:', err);
-                });
-            });
-            if (rejected > 0) {
-                addMessage('assistant', 'Some files were skipped (max 5 MB per file).');
-            }
-            this.value = '';
+            handleDocUpload(this);
+        });
+    }
+    var chatDocUpload = document.getElementById('chat-doc-upload');
+    if (chatDocUpload) {
+        chatDocUpload.addEventListener('change', function () {
+            handleDocUpload(this);
         });
     }
 
@@ -305,7 +314,7 @@
 
     function setLoading(on) {
         sendBtn.disabled = on;
-        sendBtn.textContent = on ? '…' : 'Send';
+        sendBtn.textContent = on ? '…' : '↑';
     }
 
     function getToolContext() {
@@ -723,6 +732,14 @@
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved) modelSelect.value = saved;
         modelSelect.addEventListener('change', function () { localStorage.setItem(STORAGE_MODEL, modelSelect.value); });
+    }
+
+    var btnRefreshChat = document.getElementById('btn-refresh-chat');
+    if (btnRefreshChat) {
+        btnRefreshChat.addEventListener('click', function () {
+            input.value = '';
+            input.focus();
+        });
     }
 
     ensureProject();

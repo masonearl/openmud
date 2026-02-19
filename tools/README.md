@@ -2,6 +2,23 @@
 
 World-class Python tools for construction estimating, scheduling, and proposals. Accessible through the Rockmud chat interface and API.
 
+## Layout
+
+```
+tools/
+├── estimating/     # Material, labor, equipment costs and full estimates
+│   ├── __init__.py
+│   └── estimating_tools.py
+├── schedule/      # Construction schedules with phases and dates
+│   ├── __init__.py
+│   └── schedule_tools.py
+├── proposal/      # Proposal HTML for PDF export
+│   ├── __init__.py
+│   └── proposal_tools.py
+├── registry.py    # OpenAI-compatible tool schemas
+└── README.md
+```
+
 ## Tools
 
 | Tool | Description |

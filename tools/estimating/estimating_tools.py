@@ -1,14 +1,9 @@
 """
 Construction Estimating Tools
-From masonearl/contech1 - bidding tools live on masonearl.com
-https://github.com/masonearl/contech1
-
-Used by the Contech API for material, labor, equipment cost calculations.
-Rockmud uses the masonearl.com/api/contech /predict endpoint for ML-based estimates;
-these functions support granular cost breakdowns (material, labor, equipment).
+Material, labor, equipment cost calculations and full project estimates.
 """
 
-# Material pricing (from contech1 tools/estimating_tools.py)
+# Material pricing
 MATERIAL_PRICING = {
     "pipe": {
         "4_inch": {"unit": "linear_foot", "cost": 8.50},

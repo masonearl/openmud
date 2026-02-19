@@ -4,7 +4,7 @@ World-class Python tools for construction estimating, scheduling, and proposals.
 Accessible through the Rockmud chat interface and API.
 """
 
-from .estimating_tools import (
+from .estimating import (
     calculate_material_cost,
     calculate_labor_cost,
     calculate_equipment_cost,
@@ -13,8 +13,8 @@ from .estimating_tools import (
     LABOR_RATES,
     EQUIPMENT_RATES,
 )
-from .schedule_tools import build_schedule, parse_phases
-from .proposal_tools import render_proposal_html
+from .schedule import build_schedule, parse_phases
+from .proposal import render_proposal_html
 from .registry import get_all_tools, get_tool_schema
 
 __all__ = [
