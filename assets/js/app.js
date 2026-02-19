@@ -107,12 +107,20 @@
     function renderMessageContent(content, wrap) {
         var text = (content || '').trim();
         var scheduleMatch = text.match(/\[ROCKMUD_SCHEDULE\]([\s\S]*?)\[\/ROCKMUD_SCHEDULE\]/);
+        var proposalMatch = text.match(/\[ROCKMUD_PROPOSAL\]([\s\S]*?)\[\/ROCKMUD_PROPOSAL\]/);
         var displayText = text;
         var scheduleData = null;
+        var proposalData = null;
         if (scheduleMatch) {
-            displayText = text.replace(/\[ROCKMUD_SCHEDULE\][\s\S]*?\[\/ROCKMUD_SCHEDULE\]/, '').trim();
+            displayText = displayText.replace(/\[ROCKMUD_SCHEDULE\][\s\S]*?\[\/ROCKMUD_SCHEDULE\]/, '').trim();
             try {
                 scheduleData = JSON.parse(scheduleMatch[1].trim());
+            } catch (e) { /* ignore */ }
+        }
+        if (proposalMatch) {
+            displayText = displayText.replace(/\[ROCKMUD_PROPOSAL\][\s\S]*?\[\/ROCKMUD_PROPOSAL\]/, '').trim();
+            try {
+                proposalData = JSON.parse(proposalMatch[1].trim());
             } catch (e) { /* ignore */ }
         }
         displayText = sanitizeResponse(displayText);
@@ -214,6 +222,62 @@
                 })
             }).then(function (r) { return r.json(); }).then(renderScheduleCard).catch(function () {
                 card.innerHTML = '<div class="msg-schedule-error">Could not load schedule.</div>';
+            });
+        }
+        if (proposalData && proposalData.scope != null) {
+            var propCard = document.createElement('div');
+            propCard.className = 'msg-schedule-card msg-proposal-card';
+            propCard.innerHTML = '<div class="msg-schedule-loading">Loading proposal…</div>';
+            wrap.appendChild(propCard);
+            fetch(API_BASE + '/proposal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    client: proposalData.client || 'Project',
+                    scope: proposalData.scope || '',
+                    total: proposalData.total || 0,
+                    duration: proposalData.duration || null,
+                    bid_items: proposalData.bid_items || []
+                })
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                if (data && data.html) {
+                    var inner = document.createElement('div');
+                    inner.className = 'msg-schedule-inner';
+                    inner.innerHTML = data.html;
+                    var btnWrap = document.createElement('div');
+                    btnWrap.className = 'msg-schedule-actions';
+                    var pdfBtn = document.createElement('button');
+                    pdfBtn.type = 'button';
+                    pdfBtn.className = 'btn-primary btn-sm';
+                    pdfBtn.textContent = 'Download PDF';
+                    pdfBtn.addEventListener('click', function () {
+                        var el = document.createElement('div');
+                        el.innerHTML = data.html;
+                        el.style.position = 'absolute';
+                        el.style.left = '-9999px';
+                        el.style.background = '#fff';
+                        el.style.color = '#111';
+                        document.body.appendChild(el);
+                        if (typeof html2pdf !== 'undefined') {
+                            html2pdf().set({ filename: 'proposal-' + (data.client || 'project').replace(/\s+/g, '-').slice(0, 30) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
+                                document.body.removeChild(el);
+                            });
+                        } else {
+                            var w = window.open('', '_blank');
+                            w.document.write(data.html);
+                            w.document.close();
+                            document.body.removeChild(el);
+                        }
+                    });
+                    btnWrap.appendChild(pdfBtn);
+                    inner.appendChild(btnWrap);
+                    propCard.innerHTML = '';
+                    propCard.appendChild(inner);
+                } else {
+                    propCard.innerHTML = '<div class="msg-schedule-error">Could not load proposal.</div>';
+                }
+            }).catch(function () {
+                propCard.innerHTML = '<div class="msg-schedule-error">Could not load proposal.</div>';
             });
         }
     }
@@ -557,6 +621,12 @@
                 use_tools: useTools,
                 available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
             };
+            if (useTools && lastEstimatePayload && lastEstimateResult) {
+                payload.estimate_context = {
+                    payload: lastEstimatePayload,
+                    result: lastEstimateResult
+                };
+            }
             if (!useTools) delete payload.available_tools;
 
             var controller = new AbortController();

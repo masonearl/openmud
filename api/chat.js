@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const Anthropic = require('@anthropic-ai/sdk');
 const buildSchedule = require('./schedule').buildSchedule;
+const buildProposal = require('./proposal').buildProposal;
 
 const OUTPUT_RULES = `
 Output format: Plain text only. No markdown (no **, ##, ###). No LaTeX or math blocks (no \\[, \\], $$). Be concise. Short sentences. Get to the point. Use simple bullets with - if needed.`;
@@ -14,7 +15,7 @@ Your purpose: Be the go-to AI for construction pros using rockmud.com. You under
 When to use tools:
 - "Estimate", "cost", "price", "bid", "how much" → use estimate_project_cost, calculate_material_cost, calculate_labor_cost, or calculate_equipment_cost
 - "Schedule", "timeline", "phases", "duration", "turn into PDF", "generate schedule" → use build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Project Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Task1","Task2",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
-- "Proposal", "scope", "quote" → use render_proposal_html
+- "Proposal", "scope", "quote", "generate proposal" → use render_proposal_html. When generating a proposal from an estimate, ALWAYS end with: [ROCKMUD_PROPOSAL]{"client":"Name","scope":"...","total":N,"duration":N,"bid_items":[{"description":"Material","amount":N},...]}[/ROCKMUD_PROPOSAL]
 
 Be concise and practical. When you don't have a tool result, give ballpark guidance and suggest using the Tools menu (Quick estimate, Schedule, Proposal) for full outputs.${OUTPUT_RULES}`,
 
@@ -23,7 +24,7 @@ Be concise and practical. When you don't have a tool result, give ballpark guida
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
 - Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
-- Proposal/scope questions → render_proposal_html
+- Proposal/scope questions → render_proposal_html. When generating a proposal from an estimate, ALWAYS end with: [ROCKMUD_PROPOSAL]{"client":"Name","scope":"...","total":N,"duration":N,"bid_items":[{"description":"Material","amount":N},...]}[/ROCKMUD_PROPOSAL]
 
 Be concise and practical.${OUTPUT_RULES}`,
 
@@ -32,7 +33,7 @@ Be concise and practical.${OUTPUT_RULES}`,
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
 - Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
-- Proposal/scope questions → render_proposal_html
+- Proposal/scope questions → render_proposal_html. When generating a proposal from an estimate, ALWAYS end with: [ROCKMUD_PROPOSAL]{"client":"Name","scope":"...","total":N,"duration":N,"bid_items":[{"description":"Material","amount":N},...]}[/ROCKMUD_PROPOSAL]
 
 Be concise and practical.${OUTPUT_RULES}`,
 
@@ -41,7 +42,7 @@ Be concise and practical.${OUTPUT_RULES}`,
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
 - Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
-- Proposal/scope questions → render_proposal_html
+- Proposal/scope questions → render_proposal_html. When generating a proposal from an estimate, ALWAYS end with: [ROCKMUD_PROPOSAL]{"client":"Name","scope":"...","total":N,"duration":N,"bid_items":[{"description":"Material","amount":N},...]}[/ROCKMUD_PROPOSAL]
 
 Be concise and practical.${OUTPUT_RULES}`,
 
@@ -50,7 +51,7 @@ Be concise and practical.${OUTPUT_RULES}`,
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
 - Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
-- Proposal/scope questions → render_proposal_html
+- Proposal/scope questions → render_proposal_html. When generating a proposal from an estimate, ALWAYS end with: [ROCKMUD_PROPOSAL]{"client":"Name","scope":"...","total":N,"duration":N,"bid_items":[{"description":"Material","amount":N},...]}[/ROCKMUD_PROPOSAL]
 
 Be concise and practical.${OUTPUT_RULES}`,
 
@@ -59,7 +60,7 @@ Be concise and practical.${OUTPUT_RULES}`,
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
 - Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
-- Proposal/scope questions → render_proposal_html
+- Proposal/scope questions → render_proposal_html. When generating a proposal from an estimate, ALWAYS end with: [ROCKMUD_PROPOSAL]{"client":"Name","scope":"...","total":N,"duration":N,"bid_items":[{"description":"Material","amount":N},...]}[/ROCKMUD_PROPOSAL]
 
 Be concise and practical.${OUTPUT_RULES}`,
 };
@@ -85,6 +86,45 @@ const OPENAI_MODELS = {
 };
 
 const SCHEDULE_INTENT = /generate\s+(a\s+)?schedule|create\s+(a\s+)?schedule|build\s+(a\s+)?schedule|help\s+me\s+generate\s+(a\s+)?schedule|make\s+(a\s+)?schedule|schedule\s+for|need\s+(a\s+)?schedule|want\s+(a\s+)?schedule|get\s+(a\s+)?schedule|turn\s+(it\s+)?into\s+(a\s+)?pdf|turn\s+this\s+into\s+(a\s+)?pdf|download\s+(the\s+)?pdf|make\s+(a\s+)?pdf|create\s+(a\s+)?pdf/i;
+
+const PROPOSAL_INTENT = /generate\s+(a\s+)?proposal|create\s+(a\s+)?proposal|build\s+(a\s+)?proposal|draft\s+(a\s+)?proposal|make\s+(a\s+)?proposal|proposal\s+for|need\s+(a\s+)?proposal|want\s+(a\s+)?proposal|get\s+(a\s+)?proposal|turn\s+(it\s+)?into\s+(a\s+)?proposal|proposal\s+pdf/i;
+
+const PROJECT_TYPE_LABELS = { waterline: 'waterline', sewer: 'sewer', storm_drain: 'storm drain', gas: 'gas', electrical: 'electrical' };
+
+function buildProposalFromEstimate(estimateContext) {
+  if (!estimateContext || !estimateContext.payload || !estimateContext.result) return null;
+  const p = estimateContext.payload;
+  const r = estimateContext.result;
+  const pt = PROJECT_TYPE_LABELS[p.project_type] || p.project_type || 'pipe';
+  const scope = `${p.linear_feet || 0} LF of ${p.pipe_diameter || ''}" ${pt}, ${p.soil_type || ''} soil, ${p.trench_depth || ''} ft depth`;
+  const total = r.predicted_cost || 0;
+  const duration = r.duration_days || null;
+  const breakdown = r.breakdown || {};
+  const bidItems = [];
+  if (breakdown.material) bidItems.push({ description: 'Material', amount: breakdown.material });
+  if (breakdown.labor) bidItems.push({ description: 'Labor', amount: breakdown.labor });
+  if (breakdown.equipment) bidItems.push({ description: 'Equipment', amount: breakdown.equipment });
+  if (breakdown.misc) bidItems.push({ description: 'Miscellaneous', amount: breakdown.misc });
+  if (breakdown.overhead) bidItems.push({ description: 'Overhead', amount: breakdown.overhead });
+  if (breakdown.markup) bidItems.push({ description: 'Markup', amount: breakdown.markup });
+  return { client: 'Project', scope, total, duration, bid_items: bidItems };
+}
+
+function ensureProposalBlock(responseText, userMsg, useTools, estimateContext) {
+  if (!useTools || !PROPOSAL_INTENT.test(userMsg || '')) return responseText;
+  if (/\[ROCKMUD_PROPOSAL\]/.test(responseText || '')) return responseText;
+  const params = buildProposalFromEstimate(estimateContext);
+  if (!params) return responseText;
+  try {
+    const result = buildProposal(params);
+    const block = `[ROCKMUD_PROPOSAL]${JSON.stringify({ client: params.client, scope: params.scope, total: params.total, duration: params.duration, bid_items: params.bid_items })}[/ROCKMUD_PROPOSAL]`;
+    const trimmed = (responseText || '').trim();
+    return trimmed ? trimmed + '\n\n' + block : block;
+  } catch (e) {
+    console.error('Proposal injection error:', e);
+    return responseText;
+  }
+}
 
 function extractPhasesFromText(text) {
   if (!text || typeof text !== 'string') return null;
@@ -151,7 +191,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { messages, model = 'gpt-4o-mini', temperature = 0.7, max_tokens = 1024, use_tools = false } = req.body || {};
+    const { messages, model = 'gpt-4o-mini', temperature = 0.7, max_tokens = 1024, use_tools = false, estimate_context = null } = req.body || {};
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: 'messages array required', response: null });
@@ -195,7 +235,8 @@ module.exports = async function handler(req, res) {
           });
           const rawText = response.content?.[0]?.type === 'text' ? response.content[0].text : '';
           const lastUser = chatMessages.filter((m) => m.role === 'user').pop();
-          const text = ensureScheduleBlock(rawText || 'No response.', lastUser?.content, use_tools, messages);
+          let text = ensureScheduleBlock(rawText || 'No response.', lastUser?.content, use_tools, messages);
+          text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
           return res.status(200).json({ response: text, tools_used: [] });
         } catch (e) {
           lastErr = e;
@@ -234,7 +275,8 @@ module.exports = async function handler(req, res) {
 
     const rawText = completion.choices?.[0]?.message?.content || 'No response.';
     const lastUser = messages.filter((m) => m.role === 'user').pop();
-    const text = ensureScheduleBlock(rawText, lastUser?.content, use_tools, messages);
+    let text = ensureScheduleBlock(rawText, lastUser?.content, use_tools, messages);
+    text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
     return res.status(200).json({ response: text, tools_used: [] });
   } catch (err) {
     console.error('Chat error:', err);
