@@ -23,9 +23,16 @@ body {
     min-height: 100vh;
 }
 
+html.has-app,
+body.has-app {
+    overflow: hidden;
+    height: 100vh;
+}
+
 body.has-app .app-layout {
     flex: 1;
     min-height: 0;
+    overflow: hidden;
 }
 
 .container {
@@ -266,10 +273,15 @@ body {
 }
 
 .projects-sidebar {
-    width: 220px;
-    min-width: 180px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    width: 200px;
+    min-width: 160px;
+    max-height: calc(100vh - 52px);
+    overflow-y: auto;
     border-right: 1px solid var(--border);
-    padding: 16px 12px;
+    padding: 12px 10px;
     background: var(--bg-alt);
 }
 
@@ -277,12 +289,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .projects-header h3 {
     margin: 0;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -291,13 +303,13 @@ body {
 
 .btn-new-project {
     font-family: inherit;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--text);
     background: var(--border);
     border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
+    border-radius: 5px;
+    padding: 5px 8px;
     cursor: pointer;
 }
 
@@ -316,11 +328,11 @@ body {
     width: 100%;
     text-align: left;
     font-family: inherit;
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
     color: var(--text-secondary);
     background: none;
     border: none;
-    padding: 8px 10px;
+    padding: 6px 8px;
     margin-bottom: 2px;
     border-radius: 6px;
     cursor: pointer;
@@ -340,16 +352,16 @@ body {
 }
 
 .projects-empty {
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     color: var(--text-secondary);
-    padding: 12px 0;
+    padding: 8px 0;
     line-height: 1.5;
 }
 
 /* Documents section */
 .documents-section {
-    margin-top: 20px;
-    padding-top: 16px;
+    margin-top: 14px;
+    padding-top: 12px;
     border-top: 1px solid var(--border);
 }
 
@@ -357,12 +369,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .documents-header h3 {
     margin: 0;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -370,7 +382,7 @@ body {
 }
 
 .btn-upload {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--text-secondary);
     background: var(--border);
@@ -395,9 +407,9 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 6px;
-    padding: 6px 8px;
+    padding: 5px 6px;
     margin-bottom: 2px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--text-secondary);
     background: rgba(255,255,255,0.02);
     border-radius: 4px;
@@ -448,9 +460,9 @@ body {
 }
 
 .documents-hint {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--text-secondary);
-    margin: 8px 0 0;
+    margin: 6px 0 0;
     opacity: 0.8;
 }
 
@@ -459,6 +471,8 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .chat-panel {
@@ -466,6 +480,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
     max-width: 680px;
     margin: 0 auto;
     width: 100%;
@@ -473,6 +488,7 @@ body {
 }
 
 .chat-quick-actions {
+    flex-shrink: 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -526,6 +542,7 @@ body {
 
 .chat-messages {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding: 16px 0 12px;
     display: flex;
@@ -562,9 +579,75 @@ body {
     border: 1px solid var(--border);
 }
 
+.msg-content.msg-collapsible.msg-collapsed {
+    max-height: 6em;
+    overflow: hidden;
+}
+
+.msg-toggle {
+    display: block;
+    margin-top: 6px;
+    padding: 4px 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.msg-toggle:hover {
+    color: var(--text);
+}
+
+.msg-schedule-card {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: auto;
+}
+
+.msg-schedule-inner {
+    color: var(--text);
+}
+
+.msg-schedule-inner .pdf-doc {
+    padding: 20px !important;
+    font-size: 0.875rem;
+    background: #1a1a1a;
+    color: var(--text);
+    border-radius: 6px;
+}
+
+.msg-schedule-inner table {
+    font-size: 0.8125rem;
+    color: var(--text);
+}
+
+.msg-schedule-inner th {
+    background: #2a2a2a !important;
+    color: var(--text) !important;
+}
+
+.msg-schedule-inner td {
+    border-color: #333 !important;
+}
+
+.msg-schedule-actions {
+    margin-top: 12px;
+}
+
+.msg-schedule-loading,
+.msg-schedule-error {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
 .chat-input-form {
+    flex-shrink: 0;
     padding: 12px 0 20px;
     border-top: 1px solid var(--border);
+    background: var(--bg);
 }
 
 /* Cursor-style composer: text area on top, controls bar on bottom (per Cursor docs/changelog) */
@@ -953,8 +1036,9 @@ body {
         width: 160px;
         min-width: 140px;
     }
-    .projects-header h3 {
-        font-size: 0.75rem;
+    .projects-header h3,
+    .documents-header h3 {
+        font-size: 0.625rem;
     }
 }
 

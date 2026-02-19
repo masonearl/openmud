@@ -82,6 +82,80 @@
         if (projectId === activeProjectId) renderMessages();
     }
 
+    var MSG_COLLAPSE_THRESHOLD = 400;
+
+    function renderMessageContent(content, wrap) {
+        var text = (content || '').trim();
+        var scheduleMatch = text.match(/\[ROCKMUD_SCHEDULE\]([\s\S]*?)\[\/ROCKMUD_SCHEDULE\]/);
+        var displayText = text;
+        var scheduleData = null;
+        if (scheduleMatch) {
+            displayText = text.replace(/\[ROCKMUD_SCHEDULE\][\s\S]*?\[\/ROCKMUD_SCHEDULE\]/, '').trim();
+            try {
+                scheduleData = JSON.parse(scheduleMatch[1].trim());
+            } catch (e) { /* ignore */ }
+        }
+        var p = document.createElement('p');
+        p.textContent = displayText;
+        wrap.appendChild(p);
+        if (scheduleData && scheduleData.project && scheduleData.phases && Array.isArray(scheduleData.phases)) {
+            var card = document.createElement('div');
+            card.className = 'msg-schedule-card';
+            card.innerHTML = '<div class="msg-schedule-loading">Loading schedule…</div>';
+            wrap.appendChild(card);
+            fetch(API_BASE + '/schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    project_name: scheduleData.project,
+                    duration_days: scheduleData.duration || 14,
+                    start_date: scheduleData.start_date || new Date().toISOString().slice(0, 10),
+                    phases: scheduleData.phases
+                })
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                if (data.html) {
+                    var inner = document.createElement('div');
+                    inner.className = 'msg-schedule-inner';
+                    inner.innerHTML = data.html;
+                    var btnWrap = document.createElement('div');
+                    btnWrap.className = 'msg-schedule-actions';
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn-primary btn-sm';
+                    btn.textContent = 'Download PDF';
+                    btn.addEventListener('click', function () {
+                        var el = document.createElement('div');
+                        el.innerHTML = data.html;
+                        el.style.position = 'absolute';
+                        el.style.left = '-9999px';
+                        el.style.background = '#fff';
+                        el.style.color = '#111';
+                        document.body.appendChild(el);
+                        if (typeof html2pdf !== 'undefined') {
+                            html2pdf().set({ filename: 'schedule-' + (data.project_name || 'project').replace(/\s+/g, '-').slice(0, 20) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
+                                document.body.removeChild(el);
+                            });
+                        } else {
+                            var w = window.open('', '_blank');
+                            w.document.write(data.html);
+                            w.document.close();
+                            document.body.removeChild(el);
+                        }
+                    });
+                    btnWrap.appendChild(btn);
+                    inner.appendChild(btnWrap);
+                    card.innerHTML = '';
+                    card.appendChild(inner);
+                    card.classList.remove('loading');
+                } else {
+                    card.innerHTML = '<div class="msg-schedule-error">Could not load schedule.</div>';
+                }
+            }).catch(function () {
+                card.innerHTML = '<div class="msg-schedule-error">Could not load schedule.</div>';
+            });
+        }
+    }
+
     function renderMessages() {
         messagesEl.innerHTML = '';
         var msgs = activeProjectId ? getMessages(activeProjectId) : [];
@@ -91,9 +165,24 @@
         msgs.forEach(function (m) {
             var wrap = document.createElement('div');
             wrap.className = 'msg msg-' + m.role;
-            var p = document.createElement('p');
-            p.textContent = m.content;
-            wrap.appendChild(p);
+            var contentWrap = document.createElement('div');
+            contentWrap.className = 'msg-content';
+            renderMessageContent(m.content, contentWrap);
+            wrap.appendChild(contentWrap);
+            var contentEl = contentWrap.querySelector('p');
+            if (contentEl && contentEl.textContent.length > MSG_COLLAPSE_THRESHOLD) {
+                contentWrap.classList.add('msg-collapsible');
+                contentWrap.classList.add('msg-collapsed');
+                var toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'msg-toggle';
+                toggle.textContent = 'Show more';
+                toggle.addEventListener('click', function () {
+                    contentWrap.classList.toggle('msg-collapsed');
+                    toggle.textContent = contentWrap.classList.contains('msg-collapsed') ? 'Show more' : 'Show less';
+                });
+                wrap.appendChild(toggle);
+            }
             messagesEl.appendChild(wrap);
         });
         scrollToLatest();

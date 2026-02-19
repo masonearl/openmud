@@ -9,7 +9,7 @@ Your purpose: Be the go-to AI for construction pros using rockmud.com. You under
 
 When to use tools:
 - "Estimate", "cost", "price", "bid", "how much" → use estimate_project_cost, calculate_material_cost, calculate_labor_cost, or calculate_equipment_cost
-- "Schedule", "timeline", "phases", "duration" → use build_schedule
+- "Schedule", "timeline", "phases", "duration" → use build_schedule. Extract tasks/phases from the user's scope (e.g. from a spec or document they pasted). When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Project Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Task1","Task2",...]}[/ROCKMUD_SCHEDULE]
 - "Proposal", "scope", "quote" → use render_proposal_html
 
 Be concise and practical. When you don't have a tool result, give ballpark guidance and suggest using the Tools menu (Quick estimate, Schedule, Proposal) for full outputs.`,
@@ -18,7 +18,7 @@ Be concise and practical. When you don't have a tool result, give ballpark guida
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule
+- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.`,
@@ -27,7 +27,7 @@ Be concise and practical.`,
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule
+- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.`,
@@ -36,7 +36,7 @@ Be concise and practical.`,
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule
+- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.`,
@@ -45,7 +45,7 @@ Be concise and practical.`,
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule
+- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.`,
@@ -54,7 +54,7 @@ Be concise and practical.`,
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule
+- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.`,
