@@ -122,22 +122,41 @@
                                     <span>Agent</span>
                                     <span class="chat-composer-chevron">▾</span>
                                 </button>
-                                <select class="chat-composer-pill chat-composer-model" id="model-select" aria-label="AI model">
-                                    <optgroup label="Rockmud">
+                                <div class="model-select-wrap">
+                                    <button type="button" class="chat-composer-pill chat-composer-model" id="model-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="AI model">
+                                        <span id="model-select-label">GPT-4o mini</span>
+                                        <span class="chat-composer-chevron chat-composer-chevron-up">▾</span>
+                                    </button>
+                                    <div class="model-dropdown" id="model-dropdown" role="listbox" hidden>
+                                        <div class="model-dropdown-group">
+                                            <div class="model-dropdown-label">Rockmud</div>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="mud1">mud1</button>
+                                        </div>
+                                        <div class="model-dropdown-group">
+                                            <div class="model-dropdown-label">OpenAI</div>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o-mini">GPT-4o mini</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o">GPT-4o</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4-turbo">GPT-4 Turbo</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-3.5-turbo">GPT-3.5 Turbo</button>
+                                        </div>
+                                        <div class="model-dropdown-group">
+                                            <div class="model-dropdown-label">Anthropic</div>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-haiku-4-5-20251001">Claude Haiku 4.5</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-sonnet-4-6">Claude Sonnet 4.6</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-opus-4-6">Claude Opus 4.6</button>
+                                        </div>
+                                    </div>
+                                    <select id="model-select" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
                                         <option value="mud1">mud1</option>
-                                    </optgroup>
-                                    <optgroup label="OpenAI">
                                         <option value="gpt-4o-mini">GPT-4o mini</option>
                                         <option value="gpt-4o">GPT-4o</option>
                                         <option value="gpt-4-turbo">GPT-4 Turbo</option>
                                         <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                    </optgroup>
-                                    <optgroup label="Anthropic">
                                         <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
                                         <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
                                         <option value="claude-opus-4-6">Claude Opus 4.6</option>
-                                    </optgroup>
-                                </select>
+                                    </select>
+                                </div>
                             </div>
                             <div class="chat-composer-right">
                                 <button type="button" class="chat-composer-icon" id="btn-refresh-chat" aria-label="Clear">

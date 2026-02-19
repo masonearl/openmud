@@ -861,7 +861,41 @@
     });
 
     var modelSelect = document.getElementById('model-select');
-    if (modelSelect) {
+    var modelTrigger = document.getElementById('model-select-trigger');
+    var modelDropdown = document.getElementById('model-dropdown');
+    var modelLabel = document.getElementById('model-select-label');
+    if (modelSelect && modelTrigger && modelDropdown && modelLabel) {
+        var saved = localStorage.getItem(STORAGE_MODEL);
+        if (saved && modelSelect.querySelector('option[value="' + saved + '"]')) modelSelect.value = saved;
+        function updateModelLabel() {
+            var opt = modelSelect.querySelector('option[value="' + modelSelect.value + '"]');
+            modelLabel.textContent = opt ? opt.textContent : modelSelect.value;
+            modelDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
+                btn.setAttribute('aria-selected', btn.getAttribute('data-value') === modelSelect.value ? 'true' : 'false');
+            });
+        }
+        updateModelLabel();
+        modelTrigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var open = !modelDropdown.hidden;
+            modelDropdown.hidden = open;
+            modelTrigger.setAttribute('aria-expanded', String(!open));
+        });
+        modelDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+        modelDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                modelSelect.value = btn.getAttribute('data-value');
+                localStorage.setItem(STORAGE_MODEL, modelSelect.value);
+                updateModelLabel();
+                modelDropdown.hidden = true;
+                modelTrigger.setAttribute('aria-expanded', 'false');
+            });
+        });
+        document.addEventListener('click', function () {
+            modelDropdown.hidden = true;
+            modelTrigger.setAttribute('aria-expanded', 'false');
+        });
+    } else if (modelSelect) {
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved) modelSelect.value = saved;
         modelSelect.addEventListener('change', function () { localStorage.setItem(STORAGE_MODEL, modelSelect.value); });
