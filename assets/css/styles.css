@@ -682,7 +682,7 @@ select.chat-bar-dropdown {
 .chat-input {
     flex: 1;
     min-height: 40px;
-    max-height: 100px;
+    max-height: 200px;
     padding: 10px 14px;
     font-family: inherit;
     font-size: 0.9375rem;
@@ -691,6 +691,7 @@ select.chat-bar-dropdown {
     border: 1px solid var(--border);
     border-radius: 10px;
     resize: none;
+    overflow-y: hidden;
 }
 
 .chat-input::placeholder {

@@ -375,6 +375,7 @@
 
         addMessage('user', text);
         input.value = '';
+        input.style.height = 'auto';
         setLoading(true);
 
         var msgs = getMessages(activeProjectId);
@@ -424,9 +425,19 @@
     input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            form.dispatchEvent(new Event('submit'));
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            } else {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
         }
     });
+
+    function autoGrowTextarea() {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 200) + 'px';
+    }
+    input.addEventListener('input', autoGrowTextarea);
 
     document.querySelectorAll('.quick-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -738,6 +749,7 @@
     if (btnRefreshChat) {
         btnRefreshChat.addEventListener('click', function () {
             input.value = '';
+            input.style.height = 'auto';
             input.focus();
         });
     }
