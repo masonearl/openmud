@@ -85,6 +85,19 @@
 
     var MSG_COLLAPSE_THRESHOLD = 400;
 
+    function sanitizeResponse(text) {
+        if (!text || typeof text !== 'string') return text;
+        var s = text
+            .replace(/\*\*([^*]+)\*\*/g, '$1')
+            .replace(/\*([^*]+)\*/g, '$1')
+            .replace(/\\\[[\s\S]*?\\\]/g, '')
+            .replace(/\$\$[\s\S]*?\$\$/g, '')
+            .replace(/^#{1,6}\s+/gm, '')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+        return s;
+    }
+
     function renderMessageContent(content, wrap) {
         var text = (content || '').trim();
         var scheduleMatch = text.match(/\[ROCKMUD_SCHEDULE\]([\s\S]*?)\[\/ROCKMUD_SCHEDULE\]/);
@@ -96,6 +109,7 @@
                 scheduleData = JSON.parse(scheduleMatch[1].trim());
             } catch (e) { /* ignore */ }
         }
+        displayText = sanitizeResponse(displayText);
         var p = document.createElement('p');
         p.textContent = displayText;
         wrap.appendChild(p);
@@ -163,6 +177,7 @@
         if (msgs.length === 0) {
             msgs = [{ role: 'assistant', content: WELCOME_MSG }];
         }
+        var firstAssistantSeen = false;
         msgs.forEach(function (m) {
             var wrap = document.createElement('div');
             wrap.className = 'msg msg-' + m.role;
@@ -171,7 +186,9 @@
             renderMessageContent(m.content, contentWrap);
             wrap.appendChild(contentWrap);
             var contentEl = contentWrap.querySelector('p');
-            if (contentEl && contentEl.textContent.length > MSG_COLLAPSE_THRESHOLD) {
+            var isFirstAssistant = m.role === 'assistant' && !firstAssistantSeen;
+            if (m.role === 'assistant') firstAssistantSeen = true;
+            if (contentEl && contentEl.textContent.length > MSG_COLLAPSE_THRESHOLD && !isFirstAssistant) {
                 contentWrap.classList.add('msg-collapsible');
                 contentWrap.classList.add('msg-collapsed');
                 var toggle = document.createElement('button');
