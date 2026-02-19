@@ -109,7 +109,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-messages-inner" id="chat-messages-inner"></div>
+                    <div class="msg msg-assistant chat-loading-indicator" id="chat-loading-indicator" hidden aria-live="polite">
+                        <div class="msg-content msg-loading-bubbles">
+                            <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+                        </div>
+                    </div>
+                </div>
                 <form class="chat-input-form" id="chat-form" action="javascript:void(0)" method="post" onsubmit="return false;">
                     <div class="chat-composer">
                         <div class="chat-composer-text-wrap">

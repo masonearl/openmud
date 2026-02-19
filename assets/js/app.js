@@ -47,7 +47,7 @@
         localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
     }
 
-    var messagesEl = document.getElementById('chat-messages');
+    var messagesEl = document.getElementById('chat-messages-inner') || document.getElementById('chat-messages');
     var form = document.getElementById('chat-form');
     var input = document.getElementById('chat-input');
     var sendBtn = document.getElementById('chat-send');
@@ -90,9 +90,15 @@
         var s = text
             .replace(/\*\*([^*]+)\*\*/g, '$1')
             .replace(/\*([^*]+)\*/g, '$1')
+            .replace(/__([^_]+)__/g, '$1')
+            .replace(/_([^_]+)_/g, '$1')
+            .replace(/`([^`]+)`/g, '$1')
             .replace(/\\\[[\s\S]*?\\\]/g, '')
             .replace(/\$\$[\s\S]*?\$\$/g, '')
             .replace(/^#{1,6}\s+/gm, '')
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+            .replace(/^[-*_]{3,}\s*$/gm, '')
+            .replace(/^\s*[-*]\s+/gm, '• ')
             .replace(/\n{3,}/g, '\n\n')
             .trim();
         return s;
@@ -207,8 +213,8 @@
     }
 
     function scrollToLatest() {
-        var last = messagesEl.lastElementChild;
-        if (last) last.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        var container = document.getElementById('chat-messages');
+        if (container) container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     }
 
     function renderProjects() {
@@ -422,6 +428,8 @@
     function setLoading(on) {
         sendBtn.disabled = on;
         sendBtn.setAttribute('aria-busy', on ? 'true' : 'false');
+        var indicator = document.getElementById('chat-loading-indicator');
+        if (indicator) indicator.hidden = !on;
     }
 
     function getToolContext() {

@@ -42,7 +42,7 @@ ${table}
   return { project_name: projectName, duration, phases: rows, table_html: table, html };
 }
 
-module.exports = async function handler(req, res) {
+async function scheduleHandler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -66,4 +66,7 @@ module.exports = async function handler(req, res) {
     console.error('Schedule error:', err);
     return res.status(500).json({ error: err.message || 'Schedule generation failed' });
   }
-};
+}
+
+scheduleHandler.buildSchedule = buildSchedule;
+module.exports = scheduleHandler;
