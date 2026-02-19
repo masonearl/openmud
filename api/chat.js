@@ -7,13 +7,13 @@ Output format: Plain text only. No markdown (no **, ##, ###). No LaTeX or math b
 
 /** Model-specific system prompts: purpose + when to use which tools */
 const SYSTEM_PROMPTS = {
-  mud1: `You are mud1, Rockmud's primary construction assistant. You help with estimating, scheduling, and proposals for underground utility work (waterline, sewer, storm, gas, electrical).
+  mud1: `You are mud1, Rockmud's primary construction assistant. You are NOT a person—never introduce yourself as Mason or anyone else. You help with estimating, scheduling, and proposals for underground utility work (waterline, sewer, storm, gas, electrical).
 
 Your purpose: Be the go-to AI for construction pros using rockmud.com. You understand trenching, pipe sizing, labor/equipment rates, and bid workflows.
 
 When to use tools:
 - "Estimate", "cost", "price", "bid", "how much" → use estimate_project_cost, calculate_material_cost, calculate_labor_cost, or calculate_equipment_cost
-- "Schedule", "timeline", "phases", "duration" → use build_schedule. Extract tasks/phases from the user's scope (e.g. from a spec or document they pasted). When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Project Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Task1","Task2",...]}[/ROCKMUD_SCHEDULE]
+- "Schedule", "timeline", "phases", "duration", "turn into PDF", "generate schedule" → use build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Project Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Task1","Task2",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
 - "Proposal", "scope", "quote" → use render_proposal_html
 
 Be concise and practical. When you don't have a tool result, give ballpark guidance and suggest using the Tools menu (Quick estimate, Schedule, Proposal) for full outputs.${OUTPUT_RULES}`,
@@ -22,7 +22,7 @@ Be concise and practical. When you don't have a tool result, give ballpark guida
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
+- Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.${OUTPUT_RULES}`,
@@ -31,7 +31,7 @@ Be concise and practical.${OUTPUT_RULES}`,
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
+- Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.${OUTPUT_RULES}`,
@@ -40,7 +40,7 @@ Be concise and practical.${OUTPUT_RULES}`,
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
+- Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.${OUTPUT_RULES}`,
@@ -49,7 +49,7 @@ Be concise and practical.${OUTPUT_RULES}`,
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
+- Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.${OUTPUT_RULES}`,
@@ -58,7 +58,7 @@ Be concise and practical.${OUTPUT_RULES}`,
 
 When to use tools:
 - Cost/estimate questions → estimate_project_cost, calculate_material_cost, calculate_labor_cost, calculate_equipment_cost
-- Schedule/timeline questions → build_schedule. When creating a schedule, end with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]
+- Schedule/timeline questions → build_schedule. ALWAYS end schedule responses with: [ROCKMUD_SCHEDULE]{"project":"Name","duration":N,"start_date":"YYYY-MM-DD","phases":["Phase1",...]}[/ROCKMUD_SCHEDULE]. Never say you cannot create PDFs—Rockmud generates them.
 - Proposal/scope questions → render_proposal_html
 
 Be concise and practical.${OUTPUT_RULES}`,
@@ -84,9 +84,26 @@ const OPENAI_MODELS = {
   'gpt-3.5-turbo': 'gpt-3.5-turbo',
 };
 
-const SCHEDULE_INTENT = /generate\s+(a\s+)?schedule|create\s+(a\s+)?schedule|build\s+(a\s+)?schedule|help\s+me\s+generate\s+(a\s+)?schedule|make\s+(a\s+)?schedule|schedule\s+for|need\s+(a\s+)?schedule|want\s+(a\s+)?schedule|get\s+(a\s+)?schedule/i;
+const SCHEDULE_INTENT = /generate\s+(a\s+)?schedule|create\s+(a\s+)?schedule|build\s+(a\s+)?schedule|help\s+me\s+generate\s+(a\s+)?schedule|make\s+(a\s+)?schedule|schedule\s+for|need\s+(a\s+)?schedule|want\s+(a\s+)?schedule|get\s+(a\s+)?schedule|turn\s+(it\s+)?into\s+(a\s+)?pdf|turn\s+this\s+into\s+(a\s+)?pdf|download\s+(the\s+)?pdf|make\s+(a\s+)?pdf|create\s+(a\s+)?pdf/i;
 
-function extractScheduleParams(userMsg) {
+function extractPhasesFromText(text) {
+  if (!text || typeof text !== 'string') return null;
+  const phases = [];
+  const lines = text.split(/\n/);
+  for (const line of lines) {
+    const m = line.match(/^\d+\.\s*\*?\*?([^*\n|]+?)\*?\*?\s*(?:\||$)/) ||
+      line.match(/^\s*[-•]\s+([^\n]+)/) ||
+      line.match(/^Day\s+\d+[-–:]\d*:\s*([^\n]+)/) ||
+      line.match(/^\*\*([^*]+)\*\*\s*$/);
+    if (m) {
+      const name = (m[1] || '').trim().replace(/\s*[-–—].*$/, '').slice(0, 60);
+      if (name && name.length > 1 && !/^\d+$/.test(name) && !/\d+\s*(day|week)s?$/i.test(name)) phases.push(name);
+    }
+  }
+  return phases.length >= 2 ? phases : null;
+}
+
+function extractScheduleParams(userMsg, messages) {
   const msg = (userMsg || '').trim();
   let project = 'Project';
   let duration = 14;
@@ -95,15 +112,20 @@ function extractScheduleParams(userMsg) {
   const forMatch = msg.match(/schedule\s+for\s+([^.?!]+)/i) || msg.match(/for\s+([^.?!]+?)(?:\s+schedule|\s+\d|$)/i);
   if (forMatch) project = forMatch[1].trim().slice(0, 80) || project;
   const startDate = new Date().toISOString().slice(0, 10);
-  const phases = ['Mobilization', 'Trenching', 'Pipe install', 'Backfill', 'Restoration'];
+  let phases = ['Mobilization', 'Trenching', 'Pipe install', 'Backfill', 'Restoration'];
+  if (messages && Array.isArray(messages)) {
+    const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+    const extracted = extractPhasesFromText(lastAssistant?.content || '');
+    if (extracted) phases = extracted;
+  }
   return { project, duration, startDate, phases };
 }
 
-function ensureScheduleBlock(responseText, userMsg, useTools) {
+function ensureScheduleBlock(responseText, userMsg, useTools, messages) {
   if (!useTools || !SCHEDULE_INTENT.test(userMsg || '')) return responseText;
   if (/\[ROCKMUD_SCHEDULE\]/.test(responseText || '')) return responseText;
   try {
-    const { project, duration, startDate, phases } = extractScheduleParams(userMsg);
+    const { project, duration, startDate, phases } = extractScheduleParams(userMsg, messages);
     const result = buildSchedule(project, duration, startDate, phases);
     const block = `[ROCKMUD_SCHEDULE]{"project":"${result.project_name}","duration":${result.duration},"start_date":"${startDate}","phases":${JSON.stringify(phases)}}[/ROCKMUD_SCHEDULE]`;
     const trimmed = (responseText || '').trim();
@@ -173,7 +195,7 @@ module.exports = async function handler(req, res) {
           });
           const rawText = response.content?.[0]?.type === 'text' ? response.content[0].text : '';
           const lastUser = chatMessages.filter((m) => m.role === 'user').pop();
-          const text = ensureScheduleBlock(rawText || 'No response.', lastUser?.content, use_tools);
+          const text = ensureScheduleBlock(rawText || 'No response.', lastUser?.content, use_tools, messages);
           return res.status(200).json({ response: text, tools_used: [] });
         } catch (e) {
           lastErr = e;
@@ -212,7 +234,7 @@ module.exports = async function handler(req, res) {
 
     const rawText = completion.choices?.[0]?.message?.content || 'No response.';
     const lastUser = messages.filter((m) => m.role === 'user').pop();
-    const text = ensureScheduleBlock(rawText, lastUser?.content, use_tools);
+    const text = ensureScheduleBlock(rawText, lastUser?.content, use_tools, messages);
     return res.status(200).json({ response: text, tools_used: [] });
   } catch (err) {
     console.error('Chat error:', err);

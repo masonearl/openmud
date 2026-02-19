@@ -124,54 +124,95 @@
             card.className = 'msg-schedule-card';
             card.innerHTML = '<div class="msg-schedule-loading">Loading schedule…</div>';
             wrap.appendChild(card);
+            var scheduleState = {
+                project: scheduleData.project,
+                duration: scheduleData.duration || 14,
+                start_date: scheduleData.start_date || new Date().toISOString().slice(0, 10),
+                phases: scheduleData.phases.slice()
+            };
+            function renderScheduleCard(data) {
+                if (!data || !data.html) {
+                    card.innerHTML = '<div class="msg-schedule-error">Could not load schedule.</div>';
+                    return;
+                }
+                var inner = document.createElement('div');
+                inner.className = 'msg-schedule-inner';
+                inner.innerHTML = data.html;
+                var editWrap = document.createElement('div');
+                editWrap.className = 'msg-schedule-edit';
+                editWrap.innerHTML = '<div class="msg-schedule-edit-row"><label>Project</label><input type="text" class="sched-edit-project" value="' + (data.project_name || '').replace(/"/g, '&quot;') + '"></div>' +
+                    '<div class="msg-schedule-edit-row"><label>Start date</label><input type="date" class="sched-edit-start" value="' + (scheduleState.start_date || '') + '"></div>' +
+                    '<div class="msg-schedule-edit-row"><label>Duration (days)</label><input type="number" class="sched-edit-duration" value="' + (data.duration || 14) + '" min="1"></div>' +
+                    '<div class="msg-schedule-edit-row"><label>Phases (comma-separated)</label><input type="text" class="sched-edit-phases" value="' + (scheduleState.phases || []).join(', ').replace(/"/g, '&quot;') + '"></div>';
+                var btnWrap = document.createElement('div');
+                btnWrap.className = 'msg-schedule-actions';
+                var updateBtn = document.createElement('button');
+                updateBtn.type = 'button';
+                updateBtn.className = 'btn-secondary btn-sm';
+                updateBtn.textContent = 'Update';
+                updateBtn.addEventListener('click', function () {
+                    var proj = editWrap.querySelector('.sched-edit-project').value.trim() || 'Project';
+                    var start = editWrap.querySelector('.sched-edit-start').value;
+                    var dur = parseInt(editWrap.querySelector('.sched-edit-duration').value, 10) || 14;
+                    var phasesStr = editWrap.querySelector('.sched-edit-phases').value.trim();
+                    var phasesList = phasesStr ? phasesStr.split(',').map(function (p) { return p.trim(); }).filter(Boolean) : ['Mobilization', 'Trenching', 'Pipe install', 'Backfill', 'Restoration'];
+                    scheduleState = { project: proj, duration: dur, start_date: start || new Date().toISOString().slice(0, 10), phases: phasesList };
+                    updateBtn.disabled = true;
+                    updateBtn.textContent = 'Updating…';
+                    fetch(API_BASE + '/schedule', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ project_name: proj, duration_days: dur, start_date: start || null, phases: phasesList })
+                    }).then(function (r) { return r.json(); }).then(function (d) {
+                        renderScheduleCard(d);
+                    }).catch(function () {
+                        if (updateBtn.parentNode) {
+                            updateBtn.disabled = false;
+                            updateBtn.textContent = 'Update';
+                        }
+                        card.innerHTML = '<div class="msg-schedule-error">Could not update schedule.</div>';
+                    });
+                });
+                var pdfBtn = document.createElement('button');
+                pdfBtn.type = 'button';
+                pdfBtn.className = 'btn-primary btn-sm';
+                pdfBtn.textContent = 'Download PDF';
+                pdfBtn.addEventListener('click', function () {
+                    var el = document.createElement('div');
+                    el.innerHTML = data.html;
+                    el.style.position = 'absolute';
+                    el.style.left = '-9999px';
+                    el.style.background = '#fff';
+                    el.style.color = '#111';
+                    document.body.appendChild(el);
+                    if (typeof html2pdf !== 'undefined') {
+                        html2pdf().set({ filename: 'schedule-' + (data.project_name || 'project').replace(/\s+/g, '-').slice(0, 20) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
+                            document.body.removeChild(el);
+                        });
+                    } else {
+                        var w = window.open('', '_blank');
+                        w.document.write(data.html);
+                        w.document.close();
+                        document.body.removeChild(el);
+                    }
+                });
+                btnWrap.appendChild(updateBtn);
+                btnWrap.appendChild(pdfBtn);
+                inner.appendChild(editWrap);
+                inner.appendChild(btnWrap);
+                card.innerHTML = '';
+                card.appendChild(inner);
+            }
             fetch(API_BASE + '/schedule', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    project_name: scheduleData.project,
-                    duration_days: scheduleData.duration || 14,
-                    start_date: scheduleData.start_date || new Date().toISOString().slice(0, 10),
-                    phases: scheduleData.phases
+                    project_name: scheduleState.project,
+                    duration_days: scheduleState.duration,
+                    start_date: scheduleState.start_date,
+                    phases: scheduleState.phases
                 })
-            }).then(function (r) { return r.json(); }).then(function (data) {
-                if (data.html) {
-                    var inner = document.createElement('div');
-                    inner.className = 'msg-schedule-inner';
-                    inner.innerHTML = data.html;
-                    var btnWrap = document.createElement('div');
-                    btnWrap.className = 'msg-schedule-actions';
-                    var btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'btn-primary btn-sm';
-                    btn.textContent = 'Download PDF';
-                    btn.addEventListener('click', function () {
-                        var el = document.createElement('div');
-                        el.innerHTML = data.html;
-                        el.style.position = 'absolute';
-                        el.style.left = '-9999px';
-                        el.style.background = '#fff';
-                        el.style.color = '#111';
-                        document.body.appendChild(el);
-                        if (typeof html2pdf !== 'undefined') {
-                            html2pdf().set({ filename: 'schedule-' + (data.project_name || 'project').replace(/\s+/g, '-').slice(0, 20) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
-                                document.body.removeChild(el);
-                            });
-                        } else {
-                            var w = window.open('', '_blank');
-                            w.document.write(data.html);
-                            w.document.close();
-                            document.body.removeChild(el);
-                        }
-                    });
-                    btnWrap.appendChild(btn);
-                    inner.appendChild(btnWrap);
-                    card.innerHTML = '';
-                    card.appendChild(inner);
-                    card.classList.remove('loading');
-                } else {
-                    card.innerHTML = '<div class="msg-schedule-error">Could not load schedule.</div>';
-                }
-            }).catch(function () {
+            }).then(function (r) { return r.json(); }).then(renderScheduleCard).catch(function () {
                 card.innerHTML = '<div class="msg-schedule-error">Could not load schedule.</div>';
             });
         }

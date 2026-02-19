@@ -752,8 +752,44 @@ body {
     border-color: #333 !important;
 }
 
+.msg-schedule-edit {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.msg-schedule-edit-row {
+    margin-bottom: 8px;
+}
+
+.msg-schedule-edit-row label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.msg-schedule-edit-row input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.875rem;
+    padding: 6px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+}
+
+.msg-schedule-edit-row input:focus {
+    outline: none;
+    border-color: #555;
+}
+
 .msg-schedule-actions {
     margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .msg-schedule-loading,
