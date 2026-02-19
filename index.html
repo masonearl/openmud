@@ -133,17 +133,23 @@
                                         <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                                     </optgroup>
                                     <optgroup label="Anthropic">
-                                        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-                                        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-                                        <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+                                        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
+                                        <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
+                                        <option value="claude-opus-4-6">Claude Opus 4.6</option>
                                     </optgroup>
                                 </select>
                             </div>
                             <div class="chat-composer-right">
-                                <button type="button" class="chat-composer-icon" id="btn-refresh-chat" aria-label="Clear">↻</button>
-                                <label class="chat-composer-icon" for="chat-doc-upload" title="Attach document">📎</label>
+                                <button type="button" class="chat-composer-icon" id="btn-refresh-chat" aria-label="Clear">
+                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                </button>
+                                <label class="chat-composer-icon" for="chat-doc-upload" title="Attach document">
+                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                </label>
                                 <input type="file" id="chat-doc-upload" multiple hidden>
-                                <button type="submit" class="chat-composer-send" id="chat-send" aria-label="Send">↑</button>
+                                <button type="submit" class="chat-composer-send" id="chat-send" aria-label="Send">
+                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                                </button>
                             </div>
                         </div>
                     </div>

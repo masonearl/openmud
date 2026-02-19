@@ -314,7 +314,7 @@
 
     function setLoading(on) {
         sendBtn.disabled = on;
-        sendBtn.textContent = on ? '…' : '↑';
+        sendBtn.setAttribute('aria-busy', on ? 'true' : 'false');
     }
 
     function getToolContext() {
@@ -368,8 +368,7 @@
         return TOOL_TRIGGERS.test(text);
     }
 
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
+    function doSend() {
         var text = (input.value || '').trim();
         if (!text || !activeProjectId) return;
 
@@ -398,38 +397,54 @@
                 messages: history,
                 model: model,
                 temperature: 0.7,
-                max_tokens: 512,
+                max_tokens: 1024,
                 use_tools: useTools,
                 available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
             };
             if (!useTools) delete payload.available_tools;
 
+            var controller = new AbortController();
+            var timeoutId = setTimeout(function () { controller.abort(); }, 60000);
             fetch(API_BASE + '/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                signal: controller.signal
             })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    addMessage('assistant', data.response || 'No response.');
+                .then(function (r) {
+                    clearTimeout(timeoutId);
+                    return r.json().then(function (data) {
+                        if (!r.ok) {
+                            var errMsg = (data && data.error) ? data.error : 'Request failed (' + r.status + ')';
+                            addMessage('assistant', 'Error: ' + errMsg);
+                        } else {
+                            addMessage('assistant', (data && data.response) || 'No response.');
+                        }
+                    }).catch(function () {
+                        addMessage('assistant', 'Error: Request failed (' + r.status + '). Check API keys in Vercel.');
+                    });
                 })
-                .catch(function () {
-                    addMessage('assistant', 'Sorry, I couldn\'t reach the assistant right now. Try again or use the Contech tool at masonearl.com.');
+                .catch(function (err) {
+                    clearTimeout(timeoutId);
+                    var msg = err.name === 'AbortError' ? 'Request timed out. Try again.' : (err.message || 'Check your connection and try again.');
+                    addMessage('assistant', 'Could not reach the assistant. ' + msg);
                 })
                 .then(function () {
                     setLoading(false);
                     scrollToLatest();
                 });
         });
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        doSend();
+    });
 
     input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            if (typeof form.requestSubmit === 'function') {
-                form.requestSubmit();
-            } else {
-                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-            }
+            doSend();
         }
     });
 
