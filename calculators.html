@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Calculators – openmud</title>
+    <meta name="description" content="Free construction calculators for heavy civil and underground utility work: trench volume, pipe flow, thrust blocks, OSHA trench safety, markup, production rates, and more.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/calculators.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">openmud</a>
+            <nav class="nav">
+                <a href="/about.html">About</a>
+                <a href="/calculators.html" style="color:var(--text)">Calculators</a>
+                <a href="/documentation.html">Documentation</a>
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
+                <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="calc-layout">
+        <!-- Sidebar nav -->
+        <aside class="calc-sidebar">
+            <div class="calc-sidebar-inner">
+                <p class="calc-sidebar-label">Takeoff &amp; Quantities</p>
+                <a href="#trench-volume" class="calc-nav-link active" data-panel="trench-volume">Trench Volume</a>
+                <a href="#concrete-volume" class="calc-nav-link" data-panel="concrete-volume">Concrete Volume</a>
+                <a href="#asphalt-tonnage" class="calc-nav-link" data-panel="asphalt-tonnage">Asphalt Tonnage</a>
+                <a href="#pipe-quantity" class="calc-nav-link" data-panel="pipe-quantity">Pipe &amp; Fittings</a>
+
+                <p class="calc-sidebar-label">Engineering &amp; Field</p>
+                <a href="#pipe-flow" class="calc-nav-link" data-panel="pipe-flow">Pipe Flow (Manning's)</a>
+                <a href="#min-slope" class="calc-nav-link" data-panel="min-slope">Minimum Pipe Slope</a>
+                <a href="#trench-safety" class="calc-nav-link" data-panel="trench-safety">Trench Safety (OSHA)</a>
+                <a href="#thrust-block" class="calc-nav-link" data-panel="thrust-block">Thrust Block Sizing</a>
+                <a href="#grade-slope" class="calc-nav-link" data-panel="grade-slope">Grade &amp; Slope</a>
+                <a href="#compaction" class="calc-nav-link" data-panel="compaction">Compaction</a>
+
+                <p class="calc-sidebar-label">Cost &amp; Bid</p>
+                <a href="#markup" class="calc-nav-link" data-panel="markup">Markup &amp; Bid Price</a>
+                <a href="#unit-price" class="calc-nav-link" data-panel="unit-price">Unit Price Builder</a>
+                <a href="#change-order" class="calc-nav-link" data-panel="change-order">Change Order</a>
+                <a href="#production-rate" class="calc-nav-link" data-panel="production-rate">Production Rate</a>
+                <a href="#crew-day" class="calc-nav-link" data-panel="crew-day">Crew Day Cost</a>
+
+                <p class="calc-sidebar-label">Reference &amp; Conversion</p>
+                <a href="#unit-converter" class="calc-nav-link" data-panel="unit-converter">Unit Converter</a>
+                <a href="#pipe-reference" class="calc-nav-link" data-panel="pipe-reference">Pipe Reference Table</a>
+                <a href="#mannings-n" class="calc-nav-link" data-panel="mannings-n">Manning's n Values</a>
+            </div>
+        </aside>
+
+        <!-- Calculator panels -->
+        <main class="calc-main">
+
+            <!-- Trench Volume -->
+            <section class="calc-panel active" id="panel-trench-volume">
+                <h1 class="calc-title">Trench Volume Calculator</h1>
+                <p class="calc-desc">Calculate excavation volume, import backfill, and spoil haul for a trench. Accounts for pipe void and soil swell.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Trench length (LF)</label><input type="number" id="tv-length" value="1000" min="1"></div>
+                        <div class="form-row"><label>Trench width (ft)</label><input type="number" id="tv-width" value="3.5" min="0.5" step="0.5"></div>
+                        <div class="form-row"><label>Trench depth (ft)</label><input type="number" id="tv-depth" value="6" min="1" step="0.5"></div>
+                        <div class="form-row"><label>Pipe OD (inches)</label><input type="number" id="tv-pipe-od" value="8" min="0" step="1"></div>
+                        <div class="form-row"><label>Bedding thickness (inches)</label><input type="number" id="tv-bedding" value="6" min="0" step="1"></div>
+                        <div class="form-row"><label>Soil swell factor (%)</label><input type="number" id="tv-swell" value="25" min="0" max="50"></div>
+                        <div class="form-row"><label>Import backfill needed?</label>
+                            <select id="tv-import"><option value="yes">Yes – use import material</option><option value="no">No – compact native</option></select>
+                        </div>
+                        <button class="calc-btn" onclick="calcTrenchVolume()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="tv-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>Notes:</strong> Swell factor of 25% is typical for clay/silty soils. Sandy/granular: 10–15%. Rock: 30–40%. Import backfill volume = excavation volume minus pipe void.
+                </div>
+            </section>
+
+            <!-- Concrete Volume -->
+            <section class="calc-panel" id="panel-concrete-volume">
+                <h1 class="calc-title">Concrete Volume Calculator</h1>
+                <p class="calc-desc">Calculate concrete volume in cubic yards for slabs, walls, footings, and cylindrical structures (manholes, vaults).</p>
+                <div class="calc-tabs">
+                    <button class="calc-tab active" onclick="showConcreteTab('slab', this)">Slab / Footing</button>
+                    <button class="calc-tab" onclick="showConcreteTab('wall', this)">Wall</button>
+                    <button class="calc-tab" onclick="showConcreteTab('cylinder', this)">Cylinder / Manhole</button>
+                </div>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div id="concrete-slab">
+                            <div class="form-row"><label>Length (ft)</label><input type="number" id="cv-slab-l" value="20" min="1"></div>
+                            <div class="form-row"><label>Width (ft)</label><input type="number" id="cv-slab-w" value="10" min="1"></div>
+                            <div class="form-row"><label>Thickness (inches)</label><input type="number" id="cv-slab-t" value="6" min="1"></div>
+                        </div>
+                        <div id="concrete-wall" style="display:none">
+                            <div class="form-row"><label>Length (ft)</label><input type="number" id="cv-wall-l" value="20" min="1"></div>
+                            <div class="form-row"><label>Height (ft)</label><input type="number" id="cv-wall-h" value="8" min="1"></div>
+                            <div class="form-row"><label>Thickness (inches)</label><input type="number" id="cv-wall-t" value="12" min="1"></div>
+                        </div>
+                        <div id="concrete-cylinder" style="display:none">
+                            <div class="form-row"><label>Outside diameter (ft)</label><input type="number" id="cv-cyl-od" value="5" min="1" step="0.5"></div>
+                            <div class="form-row"><label>Inside diameter (ft)</label><input type="number" id="cv-cyl-id" value="4" min="0" step="0.5"></div>
+                            <div class="form-row"><label>Height (ft)</label><input type="number" id="cv-cyl-h" value="6" min="1"></div>
+                        </div>
+                        <div class="form-row"><label>Waste factor (%)</label><input type="number" id="cv-waste" value="5" min="0" max="20"></div>
+                        <div class="form-row"><label>Concrete strength</label>
+                            <select id="cv-psi">
+                                <option value="3000">3,000 PSI – $166/CY</option>
+                                <option value="4000" selected>4,000 PSI – $180/CY</option>
+                                <option value="5000">5,000 PSI – $195/CY</option>
+                            </select>
+                        </div>
+                        <button class="calc-btn" onclick="calcConcreteVolume()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="cv-results"></div>
+                </div>
+            </section>
+
+            <!-- Asphalt Tonnage -->
+            <section class="calc-panel" id="panel-asphalt-tonnage">
+                <h1 class="calc-title">Asphalt Tonnage Calculator</h1>
+                <p class="calc-desc">Calculate asphalt tonnage for pavement, patching, or trench restoration. HMA density ~145 lb/CF.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Area (square feet)</label><input type="number" id="at-area" value="1000" min="1"></div>
+                        <div class="form-row"><label>Thickness (inches)</label><input type="number" id="at-thickness" value="3" min="1" step="0.5"></div>
+                        <div class="form-row"><label>Mix density (lb/CF)</label><input type="number" id="at-density" value="145" min="100" max="165"></div>
+                        <div class="form-row"><label>Price per ton ($/ton)</label><input type="number" id="at-price" value="90" min="0"></div>
+                        <div class="form-row"><label>Waste factor (%)</label><input type="number" id="at-waste" value="5" min="0" max="20"></div>
+                        <button class="calc-btn" onclick="calcAsphalt()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="at-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>Typical densities:</strong> Dense-graded HMA: 140–150 lb/CF. SMA: 148–152 lb/CF. Open-graded: 110–120 lb/CF.
+                </div>
+            </section>
+
+            <!-- Pipe Quantity -->
+            <section class="calc-panel" id="panel-pipe-quantity">
+                <h1 class="calc-title">Pipe &amp; Fittings Quantity</h1>
+                <p class="calc-desc">Calculate pipe, fittings, and bedding quantities for a pipeline. Add additional line items as needed.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Pipe length (LF)</label><input type="number" id="pq-length" value="1000" min="1"></div>
+                        <div class="form-row"><label>Pipe diameter (inches)</label><input type="number" id="pq-diameter" value="8" min="2" max="120"></div>
+                        <div class="form-row"><label>Pipe material</label>
+                            <select id="pq-material">
+                                <option value="PVC C900">PVC C900</option>
+                                <option value="HDPE">HDPE</option>
+                                <option value="DIP">Ductile Iron (DIP)</option>
+                                <option value="PVC SDR35">PVC SDR 35</option>
+                                <option value="RCP">RCP</option>
+                                <option value="Steel">Steel</option>
+                            </select>
+                        </div>
+                        <div class="form-row"><label>Joint length (ft)</label><input type="number" id="pq-joint" value="20" min="5" max="40"></div>
+                        <div class="form-row"><label>90° elbows</label><input type="number" id="pq-90" value="0" min="0"></div>
+                        <div class="form-row"><label>45° elbows</label><input type="number" id="pq-45" value="2" min="0"></div>
+                        <div class="form-row"><label>Tees</label><input type="number" id="pq-tees" value="1" min="0"></div>
+                        <div class="form-row"><label>Couplings / repair sleeves</label><input type="number" id="pq-couplings" value="2" min="0"></div>
+                        <div class="form-row"><label>Bedding depth below pipe (inches)</label><input type="number" id="pq-bedding" value="6" min="0"></div>
+                        <div class="form-row"><label>Trench width at pipe (ft)</label><input type="number" id="pq-tw" value="3" min="1" step="0.5"></div>
+                        <button class="calc-btn" onclick="calcPipeQuantity()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="pq-results"></div>
+                </div>
+            </section>
+
+            <!-- Pipe Flow -->
+            <section class="calc-panel" id="panel-pipe-flow">
+                <h1 class="calc-title">Pipe Flow Calculator (Manning's Equation)</h1>
+                <p class="calc-desc">Calculate flow capacity and velocity for gravity-flow pipes: storm drains, sanitary sewer, culverts.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Pipe diameter (inches)</label><input type="number" id="pf-diameter" value="12" min="4" max="144"></div>
+                        <div class="form-row"><label>Pipe slope (ft/ft)</label><input type="number" id="pf-slope" value="0.005" min="0.0001" max="0.5" step="0.0001"></div>
+                        <div class="form-row"><label>Manning's n coefficient</label>
+                            <select id="pf-n">
+                                <option value="0.013" selected>0.013 – Concrete / RCP</option>
+                                <option value="0.011">0.011 – HDPE / smooth plastic</option>
+                                <option value="0.012">0.012 – PVC</option>
+                                <option value="0.015">0.015 – Ductile iron</option>
+                                <option value="0.024">0.024 – Corrugated metal</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="form-row" id="pf-n-custom-row" style="display:none"><label>Custom n value</label><input type="number" id="pf-n-custom" value="0.013" min="0.005" max="0.1" step="0.001"></div>
+                        <div class="form-row"><label>Flow depth ratio (d/D)</label>
+                            <select id="pf-depth">
+                                <option value="1.0" selected>1.0 – Full pipe</option>
+                                <option value="0.8">0.8 – 80% full (max capacity)</option>
+                                <option value="0.5">0.5 – Half full</option>
+                                <option value="custom">Custom ratio</option>
+                            </select>
+                        </div>
+                        <div class="form-row" id="pf-depth-custom-row" style="display:none"><label>Custom d/D ratio</label><input type="number" id="pf-depth-custom" value="0.8" min="0.1" max="1.0" step="0.05"></div>
+                        <button class="calc-btn" onclick="calcPipeFlow()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="pf-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>Manning's Equation:</strong> Q = (1/n) × A × R<sup>2/3</sup> × S<sup>1/2</sup> — where A = flow area, R = hydraulic radius, S = slope. Maximum hydraulic capacity occurs at ~93–94% full, not 100%.
+                </div>
+            </section>
+
+            <!-- Minimum Pipe Slope -->
+            <section class="calc-panel" id="panel-min-slope">
+                <h1 class="calc-title">Minimum Pipe Slope</h1>
+                <p class="calc-desc">Find the minimum slope required to maintain self-cleaning velocity (2.0 ft/s minimum, 2.5 ft/s recommended) for gravity sewer and storm drain.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Pipe diameter (inches)</label><input type="number" id="ms-diameter" value="8" min="4" max="72" step="1"></div>
+                        <div class="form-row"><label>Manning's n</label>
+                            <select id="ms-n">
+                                <option value="0.013">0.013 – Concrete / RCP</option>
+                                <option value="0.011" selected>0.011 – HDPE / smooth plastic</option>
+                                <option value="0.012">0.012 – PVC</option>
+                                <option value="0.015">0.015 – Ductile iron</option>
+                            </select>
+                        </div>
+                        <div class="form-row"><label>Target velocity (ft/s)</label>
+                            <select id="ms-velocity">
+                                <option value="2.0">2.0 ft/s – Minimum (ASCE)</option>
+                                <option value="2.5" selected>2.5 ft/s – Recommended</option>
+                                <option value="3.0">3.0 ft/s – Conservative</option>
+                            </select>
+                        </div>
+                        <button class="calc-btn" onclick="calcMinSlope()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="ms-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>ASCE Standard:</strong> Minimum 2.0 ft/s at design flow for sanitary sewer per ASCE MOP 36. Many agencies require 2.5 ft/s. Maximum velocity: 10–15 ft/s to prevent scour.
+                </div>
+            </section>
+
+            <!-- Trench Safety -->
+            <section class="calc-panel" id="panel-trench-safety">
+                <h1 class="calc-title">Trench Safety – OSHA Requirements</h1>
+                <p class="calc-desc">OSHA 29 CFR 1926 Subpart P sloping, benching, and shoring requirements by soil type and depth. This is a reference tool — always consult a competent person on site.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Trench depth (ft)</label><input type="number" id="ts-depth" value="8" min="1" max="40" step="0.5"></div>
+                        <div class="form-row"><label>Soil type</label>
+                            <select id="ts-soil">
+                                <option value="A">Type A – Cohesive, unconfined strength ≥ 1.5 tsf (stiff clay)</option>
+                                <option value="B" selected>Type B – Cohesive or granular, 0.5–1.5 tsf (silty clay, angular gravel)</option>
+                                <option value="C">Type C – Cohesive, &lt; 0.5 tsf, or granular / submerged (sand, gravel, soft clay)</option>
+                            </select>
+                        </div>
+                        <div class="form-row"><label>Protection method</label>
+                            <select id="ts-method">
+                                <option value="slope">Sloping</option>
+                                <option value="bench">Benching</option>
+                                <option value="shield">Trench shield / box</option>
+                            </select>
+                        </div>
+                        <button class="calc-btn" onclick="calcTrenchSafety()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="ts-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>Disclaimer:</strong> This tool provides general OSHA Subpart P reference information only. All excavation safety decisions must be made by a competent person on site per OSHA 29 CFR 1926.651. Conditions vary — shoring or shielding may be required regardless of soil type.
+                </div>
+            </section>
+
+            <!-- Thrust Block -->
+            <section class="calc-panel" id="panel-thrust-block">
+                <h1 class="calc-title">Thrust Block Sizing</h1>
+                <p class="calc-desc">Calculate thrust force and minimum bearing area for concrete thrust blocks at pipe bends, tees, and dead ends.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Pipe diameter (inches)</label><input type="number" id="tb-diameter" value="8" min="2" max="120"></div>
+                        <div class="form-row"><label>Test pressure (PSI)</label><input type="number" id="tb-pressure" value="150" min="10" max="500"></div>
+                        <div class="form-row"><label>Fitting type</label>
+                            <select id="tb-fitting">
+                                <option value="90">90° bend</option>
+                                <option value="45" selected>45° bend</option>
+                                <option value="22.5">22.5° bend</option>
+                                <option value="11.25">11.25° bend</option>
+                                <option value="tee">Tee (branch)</option>
+                                <option value="dead">Dead end / cap</option>
+                            </select>
+                        </div>
+                        <div class="form-row"><label>Soil bearing capacity (PSF)</label>
+                            <select id="tb-soil">
+                                <option value="1500">1,500 PSF – Soft clay</option>
+                                <option value="2000" selected>2,000 PSF – Sandy clay</option>
+                                <option value="3000">3,000 PSF – Sand / gravel</option>
+                                <option value="4000">4,000 PSF – Dense gravel</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="form-row" id="tb-soil-custom-row" style="display:none"><label>Custom bearing (PSF)</label><input type="number" id="tb-soil-custom" value="2000" min="500"></div>
+                        <button class="calc-btn" onclick="calcThrustBlock()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="tb-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>Formula:</strong> T = 2 × P × A × sin(θ/2) for bends. T = P × A for dead ends and tees. Bearing area = T ÷ soil bearing capacity. Always verify with project engineer for design pressure.
+                </div>
+            </section>
+
+            <!-- Grade & Slope -->
+            <section class="calc-panel" id="panel-grade-slope">
+                <h1 class="calc-title">Grade &amp; Slope Calculator</h1>
+                <p class="calc-desc">Convert between percent grade, ft/ft slope, rise/run, and degrees. Calculate elevation change over a given distance.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="calc-tabs">
+                            <button class="calc-tab active" onclick="showGradeTab('from-percent', this)">From % Grade</button>
+                            <button class="calc-tab" onclick="showGradeTab('from-elevations', this)">From Elevations</button>
+                        </div>
+                        <div id="grade-from-percent">
+                            <div class="form-row"><label>Grade (%)</label><input type="number" id="gs-pct" value="0.5" step="0.001"></div>
+                            <div class="form-row"><label>Distance (ft)</label><input type="number" id="gs-dist" value="200" min="1"></div>
+                        </div>
+                        <div id="grade-from-elevations" style="display:none">
+                            <div class="form-row"><label>Start elevation (ft)</label><input type="number" id="gs-elev-start" value="4526.00" step="0.01"></div>
+                            <div class="form-row"><label>End elevation (ft)</label><input type="number" id="gs-elev-end" value="4525.00" step="0.01"></div>
+                            <div class="form-row"><label>Distance (ft)</label><input type="number" id="gs-elev-dist" value="200" min="1"></div>
+                        </div>
+                        <button class="calc-btn" onclick="calcGrade()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="gs-results"></div>
+                </div>
+            </section>
+
+            <!-- Compaction -->
+            <section class="calc-panel" id="panel-compaction">
+                <h1 class="calc-title">Compaction Calculator</h1>
+                <p class="calc-desc">Calculate compaction requirements: passes needed, lift thickness, and relative compaction from Proctor test data.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="calc-tabs">
+                            <button class="calc-tab active" onclick="showCompTab('relative', this)">Relative Compaction</button>
+                            <button class="calc-tab" onclick="showCompTab('lifts', this)">Lift / Pass Calculator</button>
+                        </div>
+                        <div id="comp-relative">
+                            <div class="form-row"><label>Max dry density – Proctor (pcf)</label><input type="number" id="comp-mdd" value="120" min="80" max="160" step="0.1"></div>
+                            <div class="form-row"><label>Field dry density (pcf)</label><input type="number" id="comp-fdd" value="115" min="80" max="160" step="0.1"></div>
+                            <div class="form-row"><label>Required compaction (%)</label>
+                                <select id="comp-req">
+                                    <option value="90">90% – Subgrade / fill</option>
+                                    <option value="95" selected>95% – Trench backfill standard</option>
+                                    <option value="98">98% – Pavement subbase</option>
+                                    <option value="100">100% – Special (airport, bridge)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="comp-lifts" style="display:none">
+                            <div class="form-row"><label>Total fill depth (ft)</label><input type="number" id="comp-fill" value="6" min="0.5" step="0.5"></div>
+                            <div class="form-row"><label>Compactor type</label>
+                                <select id="comp-type">
+                                    <option value="12">Vibratory plate – 6–8" lifts</option>
+                                    <option value="8" selected>Jumping jack / tamper – 4–8" lifts</option>
+                                    <option value="6">Hand tamper – 3–6" lifts</option>
+                                    <option value="18">Roller – 8–12" lifts</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="calc-btn" onclick="calcCompaction()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="comp-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>Common requirements:</strong> APWA/AWWA trench backfill: 95% Standard Proctor within 3 ft of surface, 90% below. Check project specs — requirements vary by owner and pavement class.
+                </div>
+            </section>
+
+            <!-- Markup -->
+            <section class="calc-panel" id="panel-markup">
+                <h1 class="calc-title">Markup &amp; Bid Price Calculator</h1>
+                <p class="calc-desc">Calculate bid price from direct cost using separate overhead and profit markup. Works from cost-to-bid or bid-to-cost.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="calc-tabs">
+                            <button class="calc-tab active" onclick="showMarkupTab('cost-to-bid', this)">Cost → Bid Price</button>
+                            <button class="calc-tab" onclick="showMarkupTab('bid-to-cost', this)">Bid → Implied Cost</button>
+                        </div>
+                        <div id="markup-cost-to-bid">
+                            <div class="form-row"><label>Direct cost ($)</label><input type="number" id="mk-cost" value="100000" min="0" step="1000"></div>
+                            <div class="form-row"><label>Overhead (%)</label><input type="number" id="mk-oh" value="12" min="0" max="50" step="0.5"></div>
+                            <div class="form-row"><label>Profit (%)</label><input type="number" id="mk-profit" value="10" min="0" max="50" step="0.5"></div>
+                        </div>
+                        <div id="markup-bid-to-cost" style="display:none">
+                            <div class="form-row"><label>Bid price ($)</label><input type="number" id="mk-bid" value="125000" min="0" step="1000"></div>
+                            <div class="form-row"><label>Overhead (%)</label><input type="number" id="mk-oh2" value="12" min="0" max="50" step="0.5"></div>
+                            <div class="form-row"><label>Profit (%)</label><input type="number" id="mk-profit2" value="10" min="0" max="50" step="0.5"></div>
+                        </div>
+                        <button class="calc-btn" onclick="calcMarkup()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="mk-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>Overhead vs. markup:</strong> Overhead is applied to direct cost first, then profit is applied to the overhead-loaded cost. Typical heavy civil overhead: 10–15%. Profit: 8–15% depending on risk and competition.
+                </div>
+            </section>
+
+            <!-- Unit Price Builder -->
+            <section class="calc-panel" id="panel-unit-price">
+                <h1 class="calc-title">Unit Price Builder</h1>
+                <p class="calc-desc">Build a unit price from scratch — material, labor, equipment, subcontractor, and markup per unit of work (LF, CY, EA).</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Unit of measure</label>
+                            <select id="up-unit">
+                                <option value="LF">LF – Linear foot</option>
+                                <option value="CY">CY – Cubic yard</option>
+                                <option value="EA">EA – Each</option>
+                                <option value="TON">TON</option>
+                                <option value="SF">SF – Square foot</option>
+                                <option value="LS">LS – Lump sum</option>
+                            </select>
+                        </div>
+                        <div class="form-row"><label>Material cost per unit ($)</label><input type="number" id="up-material" value="18" min="0" step="0.01"></div>
+                        <div class="form-row"><label>Labor cost per unit ($)</label><input type="number" id="up-labor" value="22" min="0" step="0.01"></div>
+                        <div class="form-row"><label>Equipment cost per unit ($)</label><input type="number" id="up-equipment" value="8" min="0" step="0.01"></div>
+                        <div class="form-row"><label>Subcontractor cost per unit ($)</label><input type="number" id="up-sub" value="0" min="0" step="0.01"></div>
+                        <div class="form-row"><label>Overhead (%)</label><input type="number" id="up-oh" value="12" min="0" step="0.5"></div>
+                        <div class="form-row"><label>Profit (%)</label><input type="number" id="up-profit" value="10" min="0" step="0.5"></div>
+                        <div class="form-row"><label>Quantity (for total)</label><input type="number" id="up-qty" value="1000" min="1"></div>
+                        <button class="calc-btn" onclick="calcUnitPrice()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="up-results"></div>
+                </div>
+            </section>
+
+            <!-- Change Order -->
+            <section class="calc-panel" id="panel-change-order">
+                <h1 class="calc-title">Change Order Calculator</h1>
+                <p class="calc-desc">Calculate change order value: T&amp;M or unit price basis. Includes labor burden, equipment, materials, markup.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="calc-tabs">
+                            <button class="calc-tab active" onclick="showCOTab('tm', this)">Time &amp; Materials</button>
+                            <button class="calc-tab" onclick="showCOTab('unit', this)">Unit Price</button>
+                        </div>
+                        <div id="co-tm">
+                            <div class="form-row"><label>Superintendent hours</label><input type="number" id="co-super-hrs" value="8" min="0"></div>
+                            <div class="form-row"><label>Superintendent rate ($/hr)</label><input type="number" id="co-super-rate" value="95" min="0"></div>
+                            <div class="form-row"><label>Laborer hours</label><input type="number" id="co-lab-hrs" value="16" min="0"></div>
+                            <div class="form-row"><label>Laborer rate ($/hr)</label><input type="number" id="co-lab-rate" value="55" min="0"></div>
+                            <div class="form-row"><label>Equipment hours</label><input type="number" id="co-eq-hrs" value="8" min="0"></div>
+                            <div class="form-row"><label>Equipment rate ($/hr)</label><input type="number" id="co-eq-rate" value="120" min="0"></div>
+                            <div class="form-row"><label>Material cost ($)</label><input type="number" id="co-mat" value="500" min="0"></div>
+                        </div>
+                        <div id="co-unit" style="display:none">
+                            <div class="form-row"><label>Description</label><input type="text" id="co-desc" placeholder="e.g. Rock excavation"></div>
+                            <div class="form-row"><label>Quantity</label><input type="number" id="co-qty" value="50" min="0"></div>
+                            <div class="form-row"><label>Unit</label><select id="co-unit-uom"><option>CY</option><option>LF</option><option>EA</option><option>TON</option><option>SF</option></select></div>
+                            <div class="form-row"><label>Unit price ($/unit)</label><input type="number" id="co-unit-price" value="85" min="0"></div>
+                        </div>
+                        <div class="form-row"><label>Overhead &amp; profit (%)</label><input type="number" id="co-markup" value="15" min="0" max="50"></div>
+                        <div class="form-row"><label>Bond rate (% of bid, optional)</label><input type="number" id="co-bond" value="1.0" min="0" max="5" step="0.1"></div>
+                        <button class="calc-btn" onclick="calcChangeOrder()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="co-results"></div>
+                </div>
+            </section>
+
+            <!-- Production Rate -->
+            <section class="calc-panel" id="panel-production-rate">
+                <h1 class="calc-title">Production Rate Calculator</h1>
+                <p class="calc-desc">Calculate daily output, cost per unit, and project duration from crew size, hours, and production rate.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Work type</label>
+                            <select id="pr-type" onchange="fillProductionDefaults()">
+                                <option value="pipe-install">Pipe installation</option>
+                                <option value="excavation">Trench excavation</option>
+                                <option value="backfill">Backfill &amp; compaction</option>
+                                <option value="pavement">Pavement restoration</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="form-row"><label>Production rate (units/day)</label><input type="number" id="pr-rate" value="250" min="1"></div>
+                        <div class="form-row"><label>Unit of measure</label><select id="pr-uom"><option>LF</option><option>CY</option><option>SF</option><option>EA</option><option>TON</option></select></div>
+                        <div class="form-row"><label>Total quantity</label><input type="number" id="pr-qty" value="5000" min="1"></div>
+                        <div class="form-row"><label>Crew size (workers)</label><input type="number" id="pr-crew" value="5" min="1" max="50"></div>
+                        <div class="form-row"><label>Avg crew rate ($/hr all-in)</label><input type="number" id="pr-crew-rate" value="65" min="1"></div>
+                        <div class="form-row"><label>Hours per day</label><input type="number" id="pr-hours" value="10" min="4" max="16"></div>
+                        <div class="form-row"><label>Equipment cost ($/day)</label><input type="number" id="pr-equip" value="500" min="0"></div>
+                        <button class="calc-btn" onclick="calcProductionRate()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="pr-results"></div>
+                </div>
+                <div class="calc-notes">
+                    <strong>Typical production rates (heavy civil):</strong> 8" waterline in average soil: 150–300 LF/day. 8" sewer: 100–200 LF/day. Trench excavation: 300–600 LF/day. Backfill: 400–800 LF/day.
+                </div>
+            </section>
+
+            <!-- Crew Day Cost -->
+            <section class="calc-panel" id="panel-crew-day">
+                <h1 class="calc-title">Crew Day Cost Calculator</h1>
+                <p class="calc-desc">Calculate total daily crew cost including labor, equipment, and overhead burden. Useful for T&amp;M pricing and daily report tracking.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div id="crew-rows">
+                            <p class="form-section-label">Labor</p>
+                            <div class="crew-row"><input type="text" placeholder="Role (e.g. Operator)" class="crew-role" value="Operator"><input type="number" class="crew-hrs" value="10" min="0"><input type="number" class="crew-rate" value="85" min="0"><span class="crew-remove" onclick="removeCrewRow(this)">×</span></div>
+                            <div class="crew-row"><input type="text" placeholder="Role" class="crew-role" value="Laborer"><input type="number" class="crew-hrs" value="10" min="0"><input type="number" class="crew-rate" value="45" min="0"><span class="crew-remove" onclick="removeCrewRow(this)">×</span></div>
+                            <div class="crew-row"><input type="text" placeholder="Role" class="crew-role" value="Foreman"><input type="number" class="crew-hrs" value="10" min="0"><input type="number" class="crew-rate" value="65" min="0"><span class="crew-remove" onclick="removeCrewRow(this)">×</span></div>
+                        </div>
+                        <button type="button" class="calc-btn-secondary" onclick="addCrewRow()">+ Add person</button>
+                        <div id="equip-rows" style="margin-top:16px">
+                            <p class="form-section-label">Equipment</p>
+                            <div class="crew-row"><input type="text" placeholder="Equipment" class="crew-role" value="Excavator"><input type="number" class="crew-hrs" value="1" min="0" style="display:none"><input type="number" class="crew-rate" value="400" min="0" placeholder="$/day"><span class="crew-remove" onclick="removeEquipRow(this)">×</span></div>
+                        </div>
+                        <button type="button" class="calc-btn-secondary" onclick="addEquipRow()">+ Add equipment</button>
+                        <div style="margin-top:16px">
+                            <div class="form-row"><label>Small tools / consumables ($)</label><input type="number" id="cd-tools" value="150" min="0"></div>
+                            <div class="form-row"><label>Overhead burden (%)</label><input type="number" id="cd-oh" value="25" min="0" max="100"></div>
+                        </div>
+                        <button class="calc-btn" onclick="calcCrewDay()">Calculate</button>
+                    </div>
+                    <div class="calc-results" id="cd-results"></div>
+                </div>
+            </section>
+
+            <!-- Unit Converter -->
+            <section class="calc-panel" id="panel-unit-converter">
+                <h1 class="calc-title">Construction Unit Converter</h1>
+                <p class="calc-desc">Common unit conversions for heavy civil: volume, area, weight, pressure, length.</p>
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="form-row"><label>Category</label>
+                            <select id="uc-category" onchange="updateUCUnits()">
+                                <option value="volume">Volume</option>
+                                <option value="area">Area</option>
+                                <option value="weight">Weight / Mass</option>
+                                <option value="pressure">Pressure</option>
+                                <option value="length">Length</option>
+                                <option value="flow">Flow rate</option>
+                                <option value="earthwork">Earthwork volume</option>
+                            </select>
+                        </div>
+                        <div class="form-row"><label>Value</label><input type="number" id="uc-value" value="1" step="any"></div>
+                        <div class="form-row"><label>From</label><select id="uc-from"></select></div>
+                        <div class="form-row"><label>To</label><select id="uc-to"></select></div>
+                        <button class="calc-btn" onclick="calcConverter()">Convert</button>
+                    </div>
+                    <div class="calc-results" id="uc-results"></div>
+                </div>
+            </section>
+
+            <!-- Pipe Reference -->
+            <section class="calc-panel" id="panel-pipe-reference">
+                <h1 class="calc-title">Pipe Reference Table</h1>
+                <p class="calc-desc">Outside diameter, wall thickness, weight, and pressure class for common pipe materials used in underground utility work.</p>
+                <div class="calc-filter-row">
+                    <label>Filter by material:</label>
+                    <select id="pipe-ref-filter" onchange="filterPipeTable()">
+                        <option value="all">All materials</option>
+                        <option value="PVC">PVC</option>
+                        <option value="HDPE">HDPE</option>
+                        <option value="DIP">Ductile Iron</option>
+                        <option value="RCP">Reinforced Concrete</option>
+                        <option value="Steel">Steel</option>
+                    </select>
+                </div>
+                <div class="calc-table-wrap">
+                    <table class="calc-table" id="pipe-ref-table">
+                        <thead><tr><th>Material</th><th>Nom. Size (in)</th><th>OD (in)</th><th>Wall (in)</th><th>Weight (lb/ft)</th><th>Pressure Class</th><th>Standard</th></tr></thead>
+                        <tbody id="pipe-ref-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Manning's n -->
+            <section class="calc-panel" id="panel-mannings-n">
+                <h1 class="calc-title">Manning's n Reference Values</h1>
+                <p class="calc-desc">Roughness coefficients for common pipe and channel materials. Use in Manning's equation for open-channel and partially-full pipe flow.</p>
+                <div class="calc-table-wrap">
+                    <table class="calc-table">
+                        <thead><tr><th>Material / Condition</th><th>n (low)</th><th>n (typical)</th><th>n (high)</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>Concrete pipe (RCP)</td><td>0.011</td><td>0.013</td><td>0.015</td><td>New, good joints</td></tr>
+                            <tr><td>PVC pipe</td><td>0.010</td><td>0.012</td><td>0.013</td><td>Smooth interior</td></tr>
+                            <tr><td>HDPE (smooth interior)</td><td>0.009</td><td>0.011</td><td>0.013</td><td>Profile wall varies</td></tr>
+                            <tr><td>Ductile iron pipe</td><td>0.013</td><td>0.015</td><td>0.016</td><td>New; use 0.017–0.020 for aged/tuberculated</td></tr>
+                            <tr><td>Steel pipe</td><td>0.012</td><td>0.014</td><td>0.017</td><td>Welded; smooth interior</td></tr>
+                            <tr><td>Corrugated metal pipe (CMP)</td><td>0.020</td><td>0.024</td><td>0.030</td><td>Standard corrugations</td></tr>
+                            <tr><td>CMP – annular corrugated</td><td>0.022</td><td>0.027</td><td>0.033</td><td></td></tr>
+                            <tr><td>Vitrified clay pipe (VCP)</td><td>0.011</td><td>0.013</td><td>0.015</td><td>Good condition</td></tr>
+                            <tr><td>Cast iron pipe</td><td>0.012</td><td>0.013</td><td>0.015</td><td>Old; increases with age</td></tr>
+                            <tr><td colspan="5" class="table-section-header">Open Channels</td></tr>
+                            <tr><td>Concrete lined channel</td><td>0.012</td><td>0.013</td><td>0.015</td><td>Troweled finish</td></tr>
+                            <tr><td>Riprap lined channel</td><td>0.020</td><td>0.030</td><td>0.040</td><td>Varies with D50</td></tr>
+                            <tr><td>Earth channel – clean</td><td>0.020</td><td>0.025</td><td>0.030</td><td>Regular section</td></tr>
+                            <tr><td>Earth channel – weedy</td><td>0.025</td><td>0.035</td><td>0.045</td><td>Light vegetation</td></tr>
+                            <tr><td>Natural stream – clean</td><td>0.025</td><td>0.030</td><td>0.033</td><td>Straight, uniform</td></tr>
+                            <tr><td>Natural stream – irregular</td><td>0.035</td><td>0.045</td><td>0.060</td><td>Stones, weeds</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="calc-notes">
+                    Source: Chaudhry (2008), Ven Te Chow (1959), ASCE manuals of practice. Values for design use — verify with project-specific conditions.
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> openmud · <a href="https://github.com/masonearl/openmud" class="link" target="_blank" rel="noopener">Open source on GitHub</a> · <a href="/" class="link">AI chat →</a></p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+    <script src="assets/js/calculators.js"></script>
+</body>
+</html>

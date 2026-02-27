@@ -41,7 +41,8 @@ The AI returns a structured cost breakdown, which you can export to PDF or turn 
 | Quick estimate | Material, labor, and equipment cost calculator for common underground work |
 | Schedule generator | Phased construction schedule — downloadable as PDF |
 | Proposal generator | Formatted proposal from your estimate, ready to send |
-| Python tool library | Estimating, scheduling, and proposal tools you can import or extend |
+| **Calculators** | 18 construction calculators — trench volume, pipe flow, OSHA safety, markup, production rates, unit converter, pipe reference, Manning's n, and more |
+| Python tool library | Estimating, hydraulics, trench takeoff, safety, bid math, and unit conversion tools |
 
 ---
 
@@ -113,25 +114,57 @@ openmud/
 
 ---
 
+## Calculators
+
+**[openmud.ai/calculators](https://openmud.ai/calculators)** — 18 free construction calculators, all client-side (no sign-up, works offline after load):
+
+| Category | Calculators |
+|---|---|
+| Takeoff & Quantities | Trench Volume, Concrete Volume, Asphalt Tonnage, Pipe & Fittings |
+| Engineering & Field | Pipe Flow (Manning's), Minimum Pipe Slope, Trench Safety (OSHA), Thrust Block, Grade & Slope, Compaction |
+| Cost & Bid | Markup & Bid Price, Unit Price Builder, Change Order, Production Rate, Crew Day Cost |
+| Reference | Unit Converter, Pipe Reference Table, Manning's n Values |
+
+---
+
 ## Python tools
 
 The `tools/` directory contains a standalone Python library you can use independently of the web app:
 
 ```python
-from tools.estimating.estimating_tools import estimate_project_cost, calculate_material_cost
-
-# Estimate materials for a waterline job
-pipe_cost = calculate_material_cost("pipe", quantity=500, size="8")
-print(pipe_cost)  # → {unit_cost: 18.00, total_cost: 9000.00, total_with_waste: 9900.00}
+from tools import (
+    estimate_project_cost, calculate_material_cost,
+    pipe_flow_full, minimum_slope,
+    trench_volume, thrust_block,
+    markup_bid_price, production_rate,
+    convert,
+)
 
 # Full project estimate
 estimate = estimate_project_cost(
     materials=[{"type": "pipe", "quantity": 500, "size": "8"}],
     labor=[{"type": "operator", "hours": 80}, {"type": "laborer", "hours": 160}],
     equipment=[{"type": "excavator", "days": 10}],
-    markup=0.15
+    markup=0.15,
 )
+
+# Pipe flow — 12" RCP at 0.5% slope
+flow = pipe_flow_full(12, 0.005)
+print(flow["flow_gpm"])  # → 748.3 GPM
+
+# Trench volumes for 500 LF of 8" waterline
+vol = trench_volume(500, width_ft=3.5, depth_ft=6, pipe_od_in=8)
+print(vol["excavation_cy"])  # → 388.9 CY
+
+# Bid price with 12% overhead, 10% profit
+bid = markup_bid_price(250000, overhead_pct=12, profit_pct=10)
+print(bid["bid_price"])  # → $308,000.00
+
+# Unit conversion
+convert(10, "cy", "cf", "volume")  # → 270.0 CF
 ```
+
+Full tool reference: [tools/README.md](./tools/README.md)
 
 ---
 
