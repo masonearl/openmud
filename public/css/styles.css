@@ -1,10 +1,15 @@
 :root {
-    --bg: #111111;
-    --bg-alt: #0a0a0a;
-    --text: #e5e5e5;
-    --text-secondary: #a0a0a0;
-    --border: #222;
-    --link: #e5e5e5;
+    --bg: #111009;
+    --bg-alt: #0d0b09;
+    --text: #eae7e0;
+    --text-secondary: #8a8278;
+    --border: #252018;
+    --border-light: #302820;
+    --link: #c4a87a;
+    --earth: #c4a87a;
+    --earth-dark: #8b6b46;
+    --earth-light: #d4bb96;
+    --earth-subtle: rgba(196, 168, 122, 0.08);
 }
 
 * {
@@ -13,7 +18,7 @@
 
 body {
     margin: 0;
-    font-family: 'Merriweather', Georgia, serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-size: 1rem;
     line-height: 1.6;
     color: var(--text);
@@ -61,10 +66,11 @@ body.has-app .app-layout {
 }
 
 .logo {
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1.25rem;
-    color: var(--text);
+    color: var(--earth);
     text-decoration: none;
+    letter-spacing: -0.02em;
 }
 
 .nav {
@@ -85,7 +91,7 @@ body.has-app .app-layout {
 }
 
 .nav a:hover, .btn-text:hover {
-    color: var(--text);
+    color: var(--earth-light);
 }
 
 /* Tools dropdown */
@@ -1079,13 +1085,13 @@ body {
 }
 
 .btn-primary {
-    background: var(--text);
-    color: var(--bg);
+    background: var(--earth);
+    color: #0d0b09;
     font-weight: 700;
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: var(--text-secondary);
+    background: var(--earth-light);
 }
 
 .btn-secondary {
