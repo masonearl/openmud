@@ -1,9 +1,9 @@
 /* Resources & Companies page styles */
 :root {
-    --earth: #c4a87a;
-    --earth-dark: #8b6b46;
-    --earth-light: #d4bb96;
-    --earth-subtle: rgba(196, 168, 122, 0.07);
+    --earth: #8a7a6a;
+    --earth-dark: #5c4e40;
+    --earth-light: #a09080;
+    --earth-subtle: rgba(138, 122, 106, 0.07);
 }
 .res-layout {
     display: flex;
@@ -51,7 +51,7 @@
 }
 
 .res-nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-.res-nav-link.active { color: var(--earth-light); background: var(--earth-subtle, rgba(196,168,122,0.07)); }
+.res-nav-link.active { color: var(--earth-light); background: var(--earth-subtle, rgba(138,122,106,0.07)); }
 
 /* Main content */
 .res-main {
@@ -385,7 +385,7 @@
     letter-spacing: 0.02em;
 }
 
-.company-tag.tag-esop { background: rgba(196,168,122,0.12); color: var(--earth-light); }
+.company-tag.tag-esop { background: rgba(138,122,106,0.12); color: var(--earth-light); }
 .company-tag.tag-public { background: rgba(96,165,250,0.1); color: #60a5fa; }
 .company-tag.tag-pe { background: rgba(251,191,36,0.1); color: #fbbf24; }
 

@@ -5,15 +5,38 @@
     --text-secondary: #8a8278;
     --border: #252018;
     --border-light: #302820;
-    --link: #c4a87a;
-    --earth: #c4a87a;
-    --earth-dark: #8b6b46;
-    --earth-light: #d4bb96;
-    --earth-subtle: rgba(196, 168, 122, 0.08);
+    --link: #8a7a6a;
+    --earth: #8a7a6a;
+    --earth-dark: #5c4e40;
+    --earth-light: #a09080;
+    --earth-subtle: rgba(138, 122, 106, 0.08);
 }
 
 * {
     box-sizing: border-box;
+}
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #2a2520 transparent;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2a2520;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a3028;
 }
 
 body {
@@ -66,11 +89,14 @@ body.has-app .app-layout {
 }
 
 .logo {
-    font-weight: 800;
-    font-size: 1.25rem;
-    color: var(--earth);
     text-decoration: none;
-    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+}
+.logo img {
+    height: 28px;
+    width: auto;
+    display: block;
 }
 
 .nav {

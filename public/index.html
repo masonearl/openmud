@@ -22,7 +22,7 @@
 
     <!-- Nav -->
     <nav class="lp-nav">
-        <a href="/" class="lp-nav-logo">openmud</a>
+        <a href="/" class="lp-nav-logo"><img src="/images/logo-white.png" alt="openmud"></a>
         <div class="lp-nav-links">
             <a href="/chat.html">AI Chat</a>
             <a href="/calculators.html">Calculators</a>
@@ -54,42 +54,44 @@
                 Open source · MIT license · v0.1.0 on GitHub
             </a>
             <h1 class="lp-hero-title">
-                AI for heavy civil<br><em>construction.</em>
+                AI for<br><em>construction.</em>
             </h1>
             <p class="lp-hero-sub">
                 Free tools for estimating, scheduling, and proposals — built by contractors, for contractors. Use the AI, fork the code, contribute what you know.
             </p>
 
             <!-- Search bar -->
-            <div class="lp-search-wrap">
-                <form class="lp-search-form" id="site-search-form" onsubmit="runSearch(event)">
-                    <input
-                        type="text"
-                        id="site-search-input"
-                        class="lp-search-input"
-                        placeholder="Ask anything — trench slope for Type B soil, Manning's n for PVC, ESOP vs private equity…"
-                        autocomplete="off"
-                        spellcheck="false"
-                    >
-                    <button type="submit" class="lp-search-btn" aria-label="Search">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    </button>
-                </form>
-                <div class="lp-search-suggestions">
-                    <span onclick="quickSearch('minimum slope 8 inch sewer')">min slope 8" sewer</span>
-                    <span onclick="quickSearch('OSHA Type B soil trench')">OSHA Type B slope</span>
-                    <span onclick="quickSearch('what is an ESOP')">what is an ESOP?</span>
-                    <span onclick="quickSearch('thrust block 45 degree bend')">thrust block 45° bend</span>
-                    <span onclick="quickSearch('811 blue stakes Utah')">811 blue stakes</span>
-                    <span onclick="quickSearch('Manning n value PVC pipe')">Manning's n PVC</span>
+            <div class="lp-search-container">
+                <div class="lp-search-wrap">
+                    <form class="lp-search-form" id="site-search-form" onsubmit="runSearch(event)">
+                        <input
+                            type="text"
+                            id="site-search-input"
+                            class="lp-search-input"
+                            placeholder="Ask anything — trench slope for Type B soil, Manning's n for PVC, ESOP vs private equity…"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <button type="submit" class="lp-search-btn" aria-label="Search">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        </button>
+                    </form>
+                    <div class="lp-search-suggestions">
+                        <span onclick="quickSearch('minimum slope 8 inch sewer')">min slope 8" sewer</span>
+                        <span onclick="quickSearch('OSHA Type B soil trench')">OSHA Type B slope</span>
+                        <span onclick="quickSearch('what is an ESOP')">what is an ESOP?</span>
+                        <span onclick="quickSearch('thrust block 45 degree bend')">thrust block 45° bend</span>
+                        <span onclick="quickSearch('811 blue stakes Utah')">811 blue stakes</span>
+                        <span onclick="quickSearch('Manning n value PVC pipe')">Manning's n PVC</span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Search results -->
-            <div class="lp-search-results" id="search-results" hidden>
-                <div class="lp-search-answer" id="search-answer"></div>
-                <div class="lp-search-sources" id="search-sources"></div>
-                <button class="lp-search-close" onclick="closeSearch()">Close ×</button>
+                <!-- Search results — floats below, doesn't push layout -->
+                <div class="lp-search-results" id="search-results" hidden>
+                    <div class="lp-search-answer" id="search-answer"></div>
+                    <div class="lp-search-sources" id="search-sources"></div>
+                    <button class="lp-search-close" onclick="closeSearch()">Close ×</button>
+                </div>
             </div>
 
             <div class="lp-hero-actions" id="hero-actions">
@@ -317,7 +319,7 @@
     <footer>
         <div class="lp-footer">
             <div>
-                <a href="/" class="lp-footer-logo">openmud</a>
+                <a href="/" class="lp-footer-logo"><img src="/images/logo-white.png" alt="openmud"></a>
                 <p class="lp-footer-tagline">Open-source AI for heavy civil construction.<br>MIT license. Free forever.</p>
             </div>
             <div class="lp-footer-links">
