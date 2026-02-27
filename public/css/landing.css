@@ -55,19 +55,10 @@ body {
 
 .lp-nav-logo {
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 9px;
     color: var(--text);
     font-size: 1.0625rem;
     font-weight: 600;
     letter-spacing: -0.02em;
-}
-
-.lp-nav-logo img {
-    height: 30px;
-    width: auto;
-    display: block;
 }
 
 .lp-nav-links {
@@ -525,21 +516,12 @@ body {
 
 .lp-footer-logo {
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
     color: var(--text);
     font-size: 0.9375rem;
     font-weight: 600;
     letter-spacing: -0.02em;
-    margin-bottom: 8px;
-}
-
-.lp-footer-logo img {
-    height: 22px;
-    width: auto;
     display: block;
-    opacity: 0.85;
+    margin-bottom: 8px;
 }
 
 .lp-footer-tagline {
@@ -747,6 +729,7 @@ body {
 /* ─── Search results ───────────────────────────────────────── */
 /* Search backdrop */
 .lp-search-backdrop {
+    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.5);
@@ -755,8 +738,11 @@ body {
     -webkit-backdrop-filter: blur(2px);
 }
 
+.lp-search-backdrop.visible { display: block; }
+
 /* Search results — fixed overlay, never clipped by hero */
 .lp-search-results {
+    display: none;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -768,10 +754,11 @@ body {
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 16px;
     box-shadow: 0 24px 64px rgba(0,0,0,0.7);
-    display: flex;
     flex-direction: column;
     overflow: hidden;
 }
+
+.lp-search-results.visible { display: flex; }
 
 .lp-search-results-inner {
     overflow-y: auto;

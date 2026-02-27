@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="shortcut icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>openmud – Open-source AI for Heavy Civil Construction</title>
     <meta name="description" content="The open-source AI platform for heavy civil and underground utility construction. Free estimating, calculators, scheduling, proposals, and field resources. Built by contractors, for contractors.">
@@ -22,7 +24,7 @@
 
     <!-- Nav -->
     <nav class="lp-nav">
-        <a href="/" class="lp-nav-logo"><img src="/images/logo-excavator.png" alt="">openmud</a>
+        <a href="/" class="lp-nav-logo">openmud</a>
         <div class="lp-nav-links">
             <a href="/chat.html">AI Chat</a>
             <a href="/calculators.html">Calculators</a>
@@ -101,14 +103,14 @@
     </section>
 
     <!-- Search results overlay — outside hero so overflow:hidden doesn't clip it -->
-    <div class="lp-search-results" id="search-results" hidden>
+    <div class="lp-search-results" id="search-results">
         <div class="lp-search-results-inner">
             <div class="lp-search-answer" id="search-answer"></div>
             <div class="lp-search-sources" id="search-sources"></div>
             <button class="lp-search-close" onclick="closeSearch()">Close ×</button>
         </div>
     </div>
-    <div class="lp-search-backdrop" id="search-backdrop" onclick="closeSearch()" hidden></div>
+    <div class="lp-search-backdrop" id="search-backdrop" onclick="closeSearch()"></div>
 
     <hr class="lp-divider">
 
@@ -324,7 +326,7 @@
     <footer>
         <div class="lp-footer">
             <div>
-                <a href="/" class="lp-footer-logo"><img src="/images/logo-excavator.png" alt="">openmud</a>
+                <a href="/" class="lp-footer-logo">openmud</a>
                 <p class="lp-footer-tagline">Open-source AI for heavy civil construction.<br>MIT license. Free forever.</p>
             </div>
             <div class="lp-footer-links">
@@ -382,8 +384,8 @@
             const answerEl = document.getElementById('search-answer');
             const sourcesEl = document.getElementById('search-sources');
 
-            resultsEl.hidden = false;
-            backdropEl.hidden = false;
+            resultsEl.classList.add('visible');
+            backdropEl.classList.add('visible');
             document.body.style.overflow = 'hidden';
             answerEl.innerHTML = '<div class="lp-search-loading"><span></span><span></span><span></span></div>';
             sourcesEl.innerHTML = '';
@@ -414,8 +416,8 @@
         }
 
         function closeSearch() {
-            document.getElementById('search-results').hidden = true;
-            document.getElementById('search-backdrop').hidden = true;
+            document.getElementById('search-results').classList.remove('visible');
+            document.getElementById('search-backdrop').classList.remove('visible');
             document.body.style.overflow = '';
             document.getElementById('site-search-input').value = '';
             startPlaceholderCycle();
