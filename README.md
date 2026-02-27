@@ -10,6 +10,18 @@ openmud is a free, open-source AI assistant built specifically for the construct
 
 It understands trenching, pipe sizing, labor and equipment rates, phased scheduling, and the bid workflows contractors actually use. Not a generic AI with a construction coat of paint.
 
+**Try it live → [rockmud.com](https://rockmud.com)**
+
+---
+
+## Demo
+
+> **Ask the AI:** *"Give me a quick estimate for 800 LF of 8-inch waterline — materials, labor, and equipment."*
+
+The AI returns a structured cost breakdown, which you can export to PDF or turn into a proposal in one click. The Quick Estimate form does the same thing without AI — just fill in quantities and get a line-item cost breakdown.
+
+*(Screenshot / GIF coming — [open a PR](https://github.com/masonearl/openmud/pulls) if you want to add one)*
+
 ---
 
 ## Who it's for
@@ -167,6 +179,14 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for full details.
 - [ ] Notion / project management integrations
 
 Full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
+
+---
+
+## Community
+
+- **[GitHub Discussions](https://github.com/masonearl/openmud/discussions)** — questions, ideas, show your builds
+- **[Open Issues](https://github.com/masonearl/openmud/issues)** — bugs, feature requests, pricing corrections
+- **[Good first issues](https://github.com/masonearl/openmud/issues?q=label%3A%22good+first+issue%22)** — new here? start here
 
 ---
 
