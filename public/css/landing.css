@@ -727,21 +727,46 @@ body {
 }
 
 /* ─── Search results ───────────────────────────────────────── */
-.lp-search-results {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    right: 0;
-    width: 100%;
-    background: rgba(10,10,10,0.92);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 14px;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    padding: 24px;
-    text-align: left;
-    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+/* Search backdrop */
+.lp-search-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
+
+/* Search results — fixed overlay, never clipped by hero */
+.lp-search-results {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(660px, calc(100vw - 32px));
+    max-height: 80vh;
+    z-index: 200;
+    background: #111009;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.lp-search-results-inner {
+    overflow-y: auto;
+    padding: 24px;
+    scrollbar-width: thin;
+    scrollbar-color: #2a2520 transparent;
+    flex: 1;
+    min-height: 0;
+}
+
+.lp-search-results-inner::-webkit-scrollbar { width: 5px; }
+.lp-search-results-inner::-webkit-scrollbar-track { background: transparent; }
+.lp-search-results-inner::-webkit-scrollbar-thumb { background: #2a2520; border-radius: 3px; }
 
 .lp-search-answer-text {
     font-size: 0.9375rem;

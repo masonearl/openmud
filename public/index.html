@@ -87,12 +87,6 @@
                     </div>
                 </div>
 
-                <!-- Search results — floats below, doesn't push layout -->
-                <div class="lp-search-results" id="search-results" hidden>
-                    <div class="lp-search-answer" id="search-answer"></div>
-                    <div class="lp-search-sources" id="search-sources"></div>
-                    <button class="lp-search-close" onclick="closeSearch()">Close ×</button>
-                </div>
             </div>
 
             <div class="lp-hero-actions" id="hero-actions">
@@ -105,6 +99,16 @@
             </p>
         </div>
     </section>
+
+    <!-- Search results overlay — outside hero so overflow:hidden doesn't clip it -->
+    <div class="lp-search-results" id="search-results" hidden>
+        <div class="lp-search-results-inner">
+            <div class="lp-search-answer" id="search-answer"></div>
+            <div class="lp-search-sources" id="search-sources"></div>
+            <button class="lp-search-close" onclick="closeSearch()">Close ×</button>
+        </div>
+    </div>
+    <div class="lp-search-backdrop" id="search-backdrop" onclick="closeSearch()" hidden></div>
 
     <hr class="lp-divider">
 
@@ -374,12 +378,13 @@
             if (!query) return;
 
             const resultsEl = document.getElementById('search-results');
+            const backdropEl = document.getElementById('search-backdrop');
             const answerEl = document.getElementById('search-answer');
             const sourcesEl = document.getElementById('search-sources');
-            const actionsEl = document.getElementById('hero-actions');
 
             resultsEl.hidden = false;
-            actionsEl.style.display = 'none';
+            backdropEl.hidden = false;
+            document.body.style.overflow = 'hidden';
             answerEl.innerHTML = '<div class="lp-search-loading"><span></span><span></span><span></span></div>';
             sourcesEl.innerHTML = '';
 
@@ -410,10 +415,15 @@
 
         function closeSearch() {
             document.getElementById('search-results').hidden = true;
-            document.getElementById('hero-actions').style.display = '';
+            document.getElementById('search-backdrop').hidden = true;
+            document.body.style.overflow = '';
             document.getElementById('site-search-input').value = '';
             startPlaceholderCycle();
         }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSearch();
+        });
 
         // Rolling placeholder animation
         const PLACEHOLDER_QUERIES = [
