@@ -333,16 +333,16 @@
 /* Company cards */
 .company-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-    margin: 16px 0;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+    margin: 12px 0;
 }
 
 .company-card {
     background: var(--bg-alt);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 18px;
+    border-radius: 6px;
+    padding: 12px 14px;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     transition: border-color 0.15s;
 }
@@ -350,10 +350,11 @@
 .company-card:hover { border-color: rgba(255,255,255,0.2); }
 
 .company-name {
-    font-weight: 700;
-    font-size: 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
     color: var(--text);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
+    line-height: 1.3;
 }
 
 .company-name a {
@@ -363,22 +364,22 @@
 .company-name a:hover { text-decoration: underline; }
 
 .company-location {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin-bottom: 7px;
 }
 
 .company-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 10px;
+    gap: 4px;
+    margin-bottom: 7px;
 }
 
 .company-tag {
-    font-size: 0.72rem;
-    padding: 3px 8px;
-    border-radius: 4px;
+    font-size: 0.67rem;
+    padding: 2px 6px;
+    border-radius: 3px;
     background: rgba(255,255,255,0.07);
     color: var(--text-secondary);
     font-weight: 600;
@@ -390,16 +391,16 @@
 .company-tag.tag-pe { background: rgba(251,191,36,0.1); color: #fbbf24; }
 
 .company-revenue {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: var(--text);
     font-weight: 600;
     margin-bottom: 4px;
 }
 
 .company-desc {
-    font-size: 0.8125rem;
+    font-size: 0.775rem;
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.45;
 }
 
 /* Filter buttons */
