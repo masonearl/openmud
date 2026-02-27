@@ -176,6 +176,39 @@
 .res-list li { margin-bottom: 4px; }
 .res-list strong { color: var(--text); }
 
+/* AI Prompt blocks */
+.ai-prompt-block {
+    margin: 12px 0 24px;
+    border: 1px solid rgba(138, 122, 106, 0.25);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.ai-prompt-label {
+    background: rgba(138, 122, 106, 0.1);
+    border-bottom: 1px solid rgba(138, 122, 106, 0.2);
+    padding: 7px 14px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--earth-light);
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.ai-prompt-code {
+    margin: 0;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.02);
+    font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Cascadia Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.65;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+}
+
 /* Checklists */
 .res-checklist {
     display: flex;

@@ -60,6 +60,11 @@
                 <a href="#opensource" class="res-nav-link" data-section="opensource">Open-Source Tools</a>
                 <a href="#datasets" class="res-nav-link" data-section="datasets">Public Datasets</a>
 
+                <p class="res-sidebar-label">AI in Construction</p>
+                <a href="#ai-guide" class="res-nav-link" data-section="ai-guide">What AI Is &amp; How It Works</a>
+                <a href="#ai-workflows" class="res-nav-link" data-section="ai-workflows">Workflows &amp; Prompt Templates</a>
+                <a href="#ai-autonomy" class="res-nav-link" data-section="ai-autonomy">Autonomy, Equipment &amp; Drones</a>
+
                 <p class="res-sidebar-label">Reference</p>
                 <a href="#soil-types" class="res-nav-link" data-section="soil-types">Soil Classification</a>
                 <a href="#color-codes" class="res-nav-link" data-section="color-codes">Utility Color Codes</a>
@@ -592,6 +597,325 @@
                             <tr><td><strong>VCP (Vitrified Clay)</strong></td><td>Sanitary sewer (existing systems)</td><td>4"–42"</td><td>Push-on, compression</td><td>ASTM C700</td><td>Chemically inert, common in older sewer systems. Brittle.</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- ═══ AI IN CONSTRUCTION ═══ -->
+
+            <!-- Section 1: What AI Is & History -->
+            <section class="res-section" id="section-ai-guide">
+                <h1 class="res-title">AI in Construction — What It Is &amp; Where It Came From</h1>
+                <p class="res-desc">Construction is one of the least digitized industries in the world — and one of the most data-rich. AI is changing that fast. This guide covers the history, the tools, and the real-world workflows that the sharpest people in the industry are using right now.</p>
+
+                <div class="res-callout">
+                    <strong>The bottom line for contractors:</strong> AI won't replace you. But a contractor who knows how to use AI will replace a contractor who doesn't. The productivity gap between users and non-users is already measurable and growing.
+                </div>
+
+                <h2 class="res-h2">A Brief History of AI</h2>
+                <p class="res-text">You don't need a computer science degree to use AI effectively, but knowing where it came from helps you understand what it's actually good at — and what it's not.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Era</th><th>What Happened</th><th>Relevance to Construction</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>1950s–60s</strong></td><td>Alan Turing asks "Can machines think?" Early symbolic AI: programs follow explicit rules coded by humans. Chess-playing programs.</td><td>Early expert systems tried to encode engineering knowledge as if/then rules. Limited and brittle.</td></tr>
+                            <tr><td><strong>1980s–90s</strong></td><td>Expert systems peak and fall. Neural networks are studied but too computationally expensive. The "AI winter."</td><td>Estimating software and scheduling tools (P6, Timberline) emerge — rule-based, not AI.</td></tr>
+                            <tr><td><strong>2012</strong></td><td>Deep learning breaks through. AlexNet wins ImageNet by a huge margin using convolutional neural networks on GPUs. AI can now "see."</td><td>Computer vision becomes viable — drones, cameras, safety detection all become possible.</td></tr>
+                            <tr><td><strong>2017</strong></td><td>Google publishes "Attention Is All You Need" — the Transformer architecture. AI can now process language in context, not just word by word.</td><td>The foundation for every modern AI text tool. This paper changed everything.</td></tr>
+                            <tr><td><strong>2020–21</strong></td><td>GPT-3 (OpenAI) demonstrates that large language models trained on huge text datasets can write, reason, and code at a surprisingly high level.</td><td>First practical AI writing tools. Estimators and PMs start experimenting with drafting.</td></tr>
+                            <tr><td><strong>Nov 2022</strong></td><td>ChatGPT launches. 1 million users in 5 days. 100 million in 2 months. AI becomes a mainstream conversation.</td><td>Every GC, sub, and owner starts asking "what do we do with this?"</td></tr>
+                            <tr><td><strong>2023–24</strong></td><td>GPT-4, Claude 2/3, Gemini — multimodal models that can read images, PDFs, spreadsheets. Context windows expand to 200,000+ tokens (entire project files).</td><td>AI can now read drawings, specs, and RFIs directly. Document review becomes a real use case.</td></tr>
+                            <tr><td><strong>2025–26</strong></td><td>AI agents: models that don't just answer questions but take actions — searching the web, running code, sending emails, calling APIs autonomously.</td><td>Agentic workflows: AI that drafts the RFI <em>and</em> emails it. Autonomous equipment hitting real job sites.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">How Large Language Models Actually Work</h2>
+                <p class="res-text">LLMs (like ChatGPT, Claude, and Gemini) are trained on enormous amounts of text — books, websites, code, technical papers. Through a process called self-supervised learning, the model learns to predict what comes next in a sequence. Do this billions of times with billions of parameters, and the model develops something that looks a lot like understanding: the ability to reason, summarize, translate, and generate.</p>
+                <p class="res-text">What the model actually stores is patterns in weights — it doesn't "know" facts the way a database does. This is why it can be confidently wrong (hallucination). For construction, this means: always verify specific numbers, code citations, and material specs. Use AI for reasoning and drafting. Use authoritative sources (OSHA, ASTM, AWWA) for specifications you'll build or bid from.</p>
+
+                <h2 class="res-h2">The Main AI Tools Right Now</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Tool</th><th>Made By</th><th>Best For in Construction</th><th>Access</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>ChatGPT (GPT-4o)</strong></td><td>OpenAI</td><td>General-purpose: writing, summarizing, estimating math checks, code, image analysis. The most widely adopted.</td><td>chatgpt.com — free tier available</td></tr>
+                            <tr><td><strong>Claude (Sonnet/Opus)</strong></td><td>Anthropic</td><td>Long documents, nuanced writing, careful reasoning. Excellent for spec review and RFI drafting. Larger context window.</td><td>claude.ai — free tier available</td></tr>
+                            <tr><td><strong>Gemini (2.0 Flash/Pro)</strong></td><td>Google</td><td>Google Workspace integration — Gmail, Docs, Sheets. Summarizing email threads, drafting in Docs, building formulas.</td><td>gemini.google.com — included with Workspace</td></tr>
+                            <tr><td><strong>Copilot</strong></td><td>Microsoft</td><td>Embedded in Excel, Word, Outlook, Teams. Summarizes meetings, drafts emails from your Outlook, builds spreadsheet formulas.</td><td>Microsoft 365 subscription</td></tr>
+                            <tr><td><strong>openmud / mud1</strong></td><td>Open source</td><td>Construction-specific: trench calcs, pipe sizing, OSHA reference, scheduling, proposals. Tuned for heavy civil and utility work.</td><td>openmud.ai — free, MIT license</td></tr>
+                            <tr><td><strong>Local models (Ollama)</strong></td><td>Community</td><td>Privacy-sensitive work: confidential bid data, personnel info, proprietary methods. Runs on your laptop, no data leaves your machine.</td><td>ollama.ai — free, open source</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Where the Industry Is Right Now</h2>
+                <ul class="res-list">
+                    <li>37% of construction firms reported using AI or machine learning in 2024, up from 26% the year before — growing fast</li>
+                    <li>75% of organizations are still in exploratory or pilot stages — early adopters have a real window right now</li>
+                    <li>Only 16% have reached consistent operational usage — the companies in that group are pulling ahead</li>
+                    <li>The AI construction market is growing at 24% CAGR — from $4B in 2024 to $12B by 2029</li>
+                    <li>Labor shortages are the primary driver — AI lets smaller crews do more, and helps newer workers access institutional knowledge</li>
+                    <li>The biggest barrier isn't the technology — it's data quality. Bad data gives bad AI output. Disciplined project documentation pays off.</li>
+                </ul>
+
+                <div class="res-callout">
+                    <strong>openmud is built for this moment.</strong> The AI here is tuned for heavy civil and underground utility work — not generic responses. <a href="/chat.html" class="link">Try the AI chat →</a> Ask about pipe sizing, OSHA requirements, change order pricing, or anything else you'd ask an experienced PE or estimator.
+                </div>
+            </section>
+
+            <!-- Section 2: Workflows & Prompts -->
+            <section class="res-section" id="section-ai-workflows">
+                <h1 class="res-title">AI Workflows &amp; Prompt Templates for Construction</h1>
+                <p class="res-desc">The single biggest factor in how useful AI is for you is how you talk to it. A vague prompt gets a vague answer. A specific, structured prompt gets something you can actually use. Below are the workflows that experienced users in heavy civil are getting real value from — with actual prompt templates you can copy, modify, and use today.</p>
+
+                <h2 class="res-h2">1. Email: Searching, Triaging, and Drafting Responses</h2>
+                <p class="res-text">Construction email is out of control. Most PMs and supers get 100+ emails a day — change order requests, RFI responses, owner updates, supplier quotes, subcontractor questions. AI can triage, summarize, and draft responses in minutes.</p>
+
+                <p class="res-text"><strong>Search your email with AI:</strong> In Gmail + Gemini, or Outlook + Copilot, you can ask: "Find all emails from [subcontractor] about the water main delay" or "Summarize all emails about the change order for rock excavation." You get a summary instead of digging through a thread.</p>
+
+                <p class="res-text"><strong>Draft responses:</strong> Copy the email thread into ChatGPT or Claude and say:</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Email Response</div>
+                    <pre class="ai-prompt-code">You are a project manager at a heavy civil construction company.
+Read this email thread and draft a professional response that:
+- Acknowledges the issue clearly
+- States our position without overcommitting
+- Asks for any information we still need
+- Ends with a clear next step or request for a meeting
+
+Keep it under 150 words. Tone: direct, professional, not confrontational.
+
+[Paste email thread here]</pre>
+                </div>
+
+                <h2 class="res-h2">2. RFI Drafting</h2>
+                <p class="res-text">A good RFI is specific, includes a proposed solution, and identifies schedule/cost impact. AI drafts these in under 5 minutes when you give it the right inputs. A well-written RFI gets answered faster and protects you on change orders.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — RFI Draft</div>
+                    <pre class="ai-prompt-code">You are an expert construction project manager writing an RFI.
+Draft a professional, concise RFI using this information:
+
+Project: [Project name]
+Contract: [Contract # or type]
+Location: [Grid / station / area]
+Specification section or drawing reference: [e.g., Section 02320 or Sheet C-4]
+Issue / conflict / missing information: [Describe the problem clearly]
+Proposed solution or options: [What do you think the answer should be, or offer options]
+Schedule impact if not answered by [date]: [e.g., 5 work days, crew reassignment required]
+Cost impact: [Yes/No, and if yes, estimate magnitude]
+
+Format it as a formal RFI with numbered sections. Keep it under 300 words.</pre>
+                </div>
+
+                <h2 class="res-h2">3. Daily Reports &amp; Progress Summaries</h2>
+                <p class="res-text">Daily reports are a legal record and a project management tool — but they take time. AI can turn rough field notes into a professional daily report, or summarize a week of reports into an owner progress update.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Daily Report</div>
+                    <pre class="ai-prompt-code">Turn these field notes into a professional construction daily report.
+
+Date: [Date]
+Weather: [Conditions, temp, wind]
+Crew: [Who was on site, count]
+Equipment: [What equipment was operating]
+Work completed today: [Rough notes — don't worry about formatting]
+Issues / delays: [Any problems, even minor]
+Visitors / inspections: [Owner, inspector, anyone on site]
+Plan for tomorrow: [What's next]
+
+Format with clear sections. Use professional language. Flag any safety issues in a separate callout. Keep it under 400 words.</pre>
+                </div>
+
+                <h2 class="res-h2">4. Change Order Narratives</h2>
+                <p class="res-text">Winning a change order often comes down to the quality of the narrative — not just the numbers. AI drafts a compelling, professional CO narrative that tells the story clearly and supports your cost claim.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Change Order Narrative</div>
+                    <pre class="ai-prompt-code">Write a change order narrative for a construction contract.
+The narrative should:
+1. State what changed and why it is outside the original contract scope
+2. Reference the specific drawing, spec section, or owner direction that caused the change
+3. Describe the additional work required
+4. State the cost and schedule impact clearly
+5. Reference any relevant contract clause or change order provision
+
+Change type: [Owner-directed / Differing site condition / Design conflict]
+Original scope: [What the contract required]
+What changed: [What actually happened or was directed]
+Reference: [Drawing #, RFI #, email from owner dated X]
+Cost impact: $[Amount] — breakdown: [Labor / material / equipment]
+Schedule impact: [X days, reason]
+
+Tone: factual, professional, not adversarial. Under 350 words.</pre>
+                </div>
+
+                <h2 class="res-h2">5. Specification &amp; Contract Review</h2>
+                <p class="res-text">Upload a spec section or contract clause to Claude or ChatGPT and ask it to identify risk items, ambiguous language, and missing submittals. This used to take a lawyer or senior PM. Now it takes minutes.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Spec / Contract Review</div>
+                    <pre class="ai-prompt-code">Review this construction specification section and identify:
+1. Any requirements that are unclear, ambiguous, or contradictory
+2. Submittals required (list each one)
+3. Testing and inspection requirements
+4. Any requirements that are unusual or could be a source of cost risk
+5. Any conflicts with standard practice that I should flag to the engineer
+
+For each item, state the section number and explain the issue in plain language.
+
+[Paste specification section text here]</pre>
+                </div>
+
+                <h2 class="res-h2">6. Estimating Assistance &amp; Bid Review</h2>
+                <p class="res-text">AI doesn't replace your estimator, but it can sanity-check unit prices, fill gaps in productivity data, and help you think through risk items you might have missed.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Bid Sanity Check</div>
+                    <pre class="ai-prompt-code">I'm bidding a heavy civil project in [region/state]. Review my unit prices below and flag any that look out of range based on current market conditions. Also identify any scope items I may have missed.
+
+Project type: [e.g., 8" water main installation, urban, open cut]
+Soil conditions: [Type B clay, 6-8 ft depth]
+My unit prices:
+- 8" PVC C900 installed: $[$/LF]
+- Trench excavation (machine): $[$/LF]
+- Select import backfill: $[$/LF]
+- Asphalt restoration, 3": $[$/SF]
+- [Add your items]
+
+Flag anything outside typical range. Note what typical range is and why.</pre>
+                </div>
+
+                <h2 class="res-h2">7. OSHA &amp; Code Research</h2>
+                <p class="res-text">AI can answer OSHA questions faster than searching PDF regulations, but always verify with the actual standard before making compliance decisions. Use AI to understand the framework, then confirm the specifics.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Regulatory Research</div>
+                    <pre class="ai-prompt-code">I have a specific question about OSHA 29 CFR 1926 Subpart P (Excavations).
+
+Question: [e.g., "Do we need a competent person inspection after it rains? What exactly does the inspection need to cover?"]
+
+Please:
+1. Answer the question clearly in plain language
+2. Cite the specific regulation section (e.g., 1926.651(k)(2))
+3. Flag any conditions where the requirement changes
+4. Note if this varies by state (OSHA state plan states)
+5. Tell me what I should verify with an actual OSHA consultant or attorney
+
+I am a superintendent/PM, not a safety professional. Write for a field audience.</pre>
+                </div>
+
+                <h2 class="res-h2">8. Automating Repetitive Tasks with Scripts</h2>
+                <p class="res-text">This is the next level. If you have a task you do the same way every week — weekly owner report, subcontractor pay app summary, job cost summary from your accounting system — AI can write a Python or Excel script to automate it.</p>
+                <p class="res-text">You don't need to know how to code. Describe what you want in plain English:</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Automate a Task</div>
+                    <pre class="ai-prompt-code">I need a Python script that does the following:
+1. Reads a CSV file exported from my accounting software. The file has columns: [list your columns]
+2. Filters rows where the "Job" column matches a specific job number I provide
+3. Groups costs by cost code and calculates total budget, actual cost, and variance
+4. Outputs a clean Excel file with that summary
+5. Emails the Excel file to [recipient] with a subject line of "Weekly Job Cost Report — [Job Name] — [Date]"
+
+I will run this script manually each Friday. I'm on a Mac. Write the full script, explain what each section does, and list any libraries I need to install.</pre>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Prompt engineering 101:</strong> The best prompts have four parts — <strong>Role</strong> (who the AI is), <strong>Context</strong> (what's happening), <strong>Task</strong> (what you want), and <strong>Format</strong> (how you want it delivered). Give it constraints: word count, audience, tone. The more specific, the better the output.
+                </div>
+
+                <h2 class="res-h2">9. AI-Assisted Scheduling</h2>
+                <p class="res-text">Feed AI your project scope and it can generate a draft CPM schedule with logic ties, durations, and critical path — in minutes. Use it as a starting point, not a final product. Then apply your experience.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Schedule Generation</div>
+                    <pre class="ai-prompt-code">Create a construction schedule in table format for the following project.
+List each activity, estimated duration (working days), predecessor activities, and responsible party.
+
+Project: [Description — e.g., "Install 2,000 LF of 8-inch water main along a city street. Includes traffic control, potholing, open cut excavation, pipe installation, backfill, compaction, and asphalt restoration."]
+Constraints: [e.g., "Owner requires 30-day substantial completion. Work hours 7am–5pm, no weekend work. City requires one lane open at all times."]
+Crew: [e.g., "One pipeline crew: 1 operator, 1 foreman, 2 laborers. Production rate: approximately 200 LF/day."]
+
+Output as a table with: Activity ID, Activity Name, Duration (days), Predecessors, Notes</pre>
+                </div>
+            </section>
+
+            <!-- Section 3: Autonomy, Equipment & Drones -->
+            <section class="res-section" id="section-ai-autonomy">
+                <h1 class="res-title">Autonomous Equipment, Drones &amp; AI Vision in Construction</h1>
+                <p class="res-desc">The most visible and capital-intensive AI applications in construction are happening at the machine level — autonomous haul trucks, GPS-guided dozers, drone-based survey, and computer vision safety monitoring. These aren't science fiction. They're on job sites now.</p>
+
+                <h2 class="res-h2">Autonomous Heavy Equipment</h2>
+                <p class="res-text">The two biggest equipment manufacturers in the world are both in. The productivity gains are real and already documented.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Company / System</th><th>What It Does</th><th>Documented Results</th><th>Where It's Working</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Caterpillar Autonomous</strong></td><td>Full autonomous haul trucks, excavators, dozers, and compactors. Uses AI, machine learning, computer vision, edge computing. 30+ years of R&amp;D culminating in 2026 fleet launch.</td><td>~30% productivity increase vs. manned operations in North American trials. 11 billion tonnes moved, 380 million km traveled autonomously (mining fleet).</td><td>Mining, large earthwork. Rolling to construction sites through 2025–26.</td></tr>
+                            <tr><td><strong>Komatsu + Pronto Smart Quarry</strong></td><td>Retrofittable autonomy for haul trucks. Camera, GPS/GNSS, edge AI. Works on existing Komatsu and third-party trucks. All-day operation with minimal human input.</td><td>Up to 20% productivity improvement through reduced idle time, better routing, lower unplanned maintenance.</td><td>Quarries, aggregate operations. Expanding to earthwork.</td></tr>
+                            <tr><td><strong>GPS Machine Control (all OEMs)</strong></td><td>Not fully autonomous but AI-guided. Dozer blade and motor grader blade controlled to within 0.1 ft of design grade using GPS, total station, or laser. Operator focuses on production; machine handles precision.</td><td>2–3x grade accuracy vs. stakes. Eliminates most grade checking. Cuts finish grading time 30–50%.</td><td>Widely adopted — most large earthwork contractors have machine control on dozers and graders.</td></tr>
+                            <tr><td><strong>Volvo / Built Robotics</strong></td><td>Autonomous excavator and compactor systems. Built Robotics retrofits existing machines with autonomy kits. Volvo building autonomous wheel loaders and compactors.</td><td>24/7 operation on repetitive compaction and hauling tasks. Eliminates fatigue-related safety incidents on night shifts.</td><td>Large site prep, utility trenching, compaction runs.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Drone Survey &amp; Photogrammetry</h2>
+                <p class="res-text">Drones with photogrammetry software have replaced survey crews for many earthwork quantity and progress tasks. What used to take a survey crew two days now takes a drone pilot two hours — and gives you a 3D point cloud, not just elevation data.</p>
+                <ul class="res-list">
+                    <li><strong>Quantity verification:</strong> Fly a cut/fill site before and after, compare point clouds. DroneDeploy, Pix4D, and Propeller Aero calculate volumes automatically. Accurate to ±0.5% on well-controlled sites.</li>
+                    <li><strong>Progress monitoring:</strong> Weekly or bi-weekly drone flights create a visual and quantitative record of earthwork progress. Owners love it. Helps resolve disputes.</li>
+                    <li><strong>As-built documentation:</strong> Drone orthomosaics create a searchable, measurable record of buried utilities, structural work, and site conditions at any point during construction.</li>
+                    <li><strong>Infrastructure inspection:</strong> Bridges, culverts, pipe outfalls, retaining walls — drones with high-resolution cameras get into areas that require lane closures or rappelling for human inspectors. AI vision flags cracks, spalling, and corrosion.</li>
+                    <li><strong>AI-powered analysis:</strong> DroneDeploy's AI annotates anomalies automatically. Skydio's AI navigation avoids obstacles. ROCK Robotic LiDAR drones give survey-grade point clouds without the survey crew.</li>
+                </ul>
+
+                <h2 class="res-h2">AI Vision — Safety &amp; Site Monitoring</h2>
+                <p class="res-text">Fixed cameras with AI vision are monitoring construction sites for safety violations, equipment proximity, and production tracking — in real time.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Application</th><th>How It Works</th><th>Tools / Companies</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>PPE compliance detection</strong></td><td>Camera on site detects workers without hard hats, high-vis vests, or safety glasses. Sends alert to super in real time.</td><td>Smartvid.io, Voxel51, Protex AI</td></tr>
+                            <tr><td><strong>Equipment proximity alerts</strong></td><td>Cameras or radar detect workers entering equipment exclusion zones. Alerts operator and super before a strike occurs.</td><td>SmartSite, Spot-r, Guardhat</td></tr>
+                            <tr><td><strong>Daily progress tracking</strong></td><td>Fixed cameras take periodic photos. AI measures concrete placed, pipe installed, structure erected. Auto-generates progress report.</td><td>OpenSpace, Reconstruct, Buildots</td></tr>
+                            <tr><td><strong>OSHA inspection AI</strong></td><td>Mobile robots or drones conduct safety walkthroughs using vision-language models (VLMs) that understand OSHA standards. Generate written inspection reports automatically.</td><td>Research stage — MIT, Stanford, Buildcheck</td></tr>
+                            <tr><td><strong>Defect detection</strong></td><td>AI reviews inspection photos and flags cracks, settlement, improper installation, misaligned joints. Faster than manual review at scale.</td><td>Scope.AI, OpenSpace QA</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Digital Twins &amp; LLM-Powered BIM</h2>
+                <p class="res-text">The next frontier: a live, queryable model of your project that ingests real-time data from sensors, cameras, and field reports — and that you can talk to in plain English.</p>
+                <ul class="res-list">
+                    <li><strong>What a digital twin is:</strong> A connected digital replica of the physical project. Not just a BIM model — a live model that receives data from IoT sensors (compaction, concrete cure, structural strain), equipment telematics, and weather feeds.</li>
+                    <li><strong>LLM interface:</strong> Instead of navigating Revit or Civil 3D, you ask: "What's the compaction status in the Zone 3 subgrade?" or "Show me all RFIs affecting the Storm Drain Phase 2 alignment." The model answers.</li>
+                    <li><strong>Autodesk Construction Cloud + AI:</strong> Autodesk's platform already uses AI for clash detection, schedule risk prediction, and document linking. Natural language query is coming.</li>
+                    <li><strong>Trimble + AI:</strong> Trimble's WorksOS platform integrates machine control, survey, and field data into a unified model. AI assists in identifying discrepancies between design and built conditions.</li>
+                    <li><strong>Safety geofencing:</strong> When the digital twin knows where every machine and worker is in real time, it can halt machines automatically when a worker enters a proximity zone. This is already deployed on some large projects.</li>
+                </ul>
+
+                <h2 class="res-h2">What's Coming (And How Fast)</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Capability</th><th>Current Status</th><th>Timeline</th></tr></thead>
+                        <tbody>
+                            <tr><td>Fully autonomous excavation (urban, unstructured)</td><td>Research / prototype</td><td>5–10 years for general use</td></tr>
+                            <tr><td>AI-generated project schedules from scope documents</td><td>Early commercial (Buildsy, Alice Technologies)</td><td>Usable now with supervision</td></tr>
+                            <tr><td>AI-reviewed submittals and shop drawings</td><td>Early commercial</td><td>Usable now for first pass</td></tr>
+                            <tr><td>Voice-to-daily-report (field → finished report)</td><td>Available now (Grain + AI, Otter.ai + GPT)</td><td>Now</td></tr>
+                            <tr><td>Autonomous haul trucks on earthwork sites</td><td>Commercial at quarries, expanding</td><td>Large sites: 2–3 years. Smaller sites: 5+ years</td></tr>
+                            <tr><td>AI that handles RFI submission end-to-end</td><td>Possible with current tools + automation</td><td>Now, with setup</td></tr>
+                            <tr><td>AI field superintendent (monitors, advises, logs)</td><td>Research</td><td>5+ years</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-callout">
+                    <strong>The honest take:</strong> Most of the transformative stuff at the machine level requires capital, large sites, and structured environments. What's available to every contractor right now — regardless of company size — is the language AI layer: drafting, summarizing, researching, calculating, and automating document workflows. Start there. The ROI is immediate and the barrier to entry is a browser tab.
+                </div>
+
+                <h2 class="res-h2">Resources for Going Deeper</h2>
+                <div class="res-links">
+                    <a href="https://www.autodesk.com/blogs/construction/top-2025-ai-construction-trends-according-to-the-experts/" target="_blank" rel="noopener" class="res-ext-link">Autodesk — Top 2025 AI Construction Trends ↗</a>
+                    <a href="https://www.caterpillar.com/en/news/corporate-press-releases/h/next-era-autonomy.html" target="_blank" rel="noopener" class="res-ext-link">Caterpillar — Next Era of Autonomy in Construction ↗</a>
+                    <a href="https://www.equipmentworld.com/technology/article/15753104/komatsu-launches-autonomous-haul-truck-collaboration-with-pronto" target="_blank" rel="noopener" class="res-ext-link">Komatsu + Pronto — Smart Quarry Autonomous ↗</a>
+                    <a href="https://alice.build" target="_blank" rel="noopener" class="res-ext-link">Alice Technologies — AI Schedule Optimization ↗</a>
+                    <a href="https://www.dronedeploy.com/industries/construction/" target="_blank" rel="noopener" class="res-ext-link">DroneDeploy — Construction Drone Platform ↗</a>
+                    <a href="https://openspace.ai" target="_blank" rel="noopener" class="res-ext-link">OpenSpace — AI-Powered Site Documentation ↗</a>
+                    <a href="https://ryangaiss.substack.com/p/the-5-minute-rfi-using-ai-to-draft" target="_blank" rel="noopener" class="res-ext-link">The 5-Minute RFI — AI Drafting Guide ↗</a>
                 </div>
             </section>
 
