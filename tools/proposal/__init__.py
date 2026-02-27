@@ -1,5 +1,5 @@
 """
-Rockmud Proposal Tools
+openmud Proposal Tools
 Generate construction proposal HTML for PDF export.
 """
 

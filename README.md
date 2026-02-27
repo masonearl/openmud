@@ -2,7 +2,7 @@
 
 **Open-source AI for heavy civil and underground utility construction.**
 
-[rockmud.com](https://rockmud.com) · [Contributing](#contributing) · [Deploy your own](#deploy-your-own)
+[openmud.ai](https://openmud.ai) · [Contributing](#contributing) · [Deploy your own](#deploy-your-own)
 
 ---
 
@@ -10,7 +10,7 @@ openmud is a free, open-source AI assistant built specifically for the construct
 
 It understands trenching, pipe sizing, labor and equipment rates, phased scheduling, and the bid workflows contractors actually use. Not a generic AI with a construction coat of paint.
 
-**Try it live → [rockmud.com](https://rockmud.com)**
+**Try it live → [openmud.ai](https://openmud.ai)**
 
 ---
 
@@ -196,4 +196,4 @@ MIT — free to use, fork, and build on.
 
 ---
 
-*Built on [rockmud.com](https://rockmud.com). Related project: [mudrag.ai](https://mudrag.ai)*
+*Built on [openmud.ai](https://openmud.ai). Related project: [mudrag.ai](https://mudrag.ai)*

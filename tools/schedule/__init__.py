@@ -1,5 +1,5 @@
 """
-Rockmud Schedule Tools
+openmud Schedule Tools
 Build construction schedules with phases and dates.
 """
 

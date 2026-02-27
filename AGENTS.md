@@ -8,7 +8,7 @@ This file helps AI assistants (Cursor, Copilot, Claude, etc.) understand the cod
 
 openmud is an open-source AI assistant for heavy civil and underground utility construction. It runs on Vercel as a static frontend + serverless API backend. The Python `tools/` library is standalone and can be used independently.
 
-**Live site:** https://rockmud.com  
+**Live site:** https://openmud.ai  
 **GitHub:** https://github.com/masonearl/openmud
 
 ---
@@ -93,7 +93,7 @@ openmud/
 |---|---|---|
 | `OPENAI_API_KEY` | One of these | OpenAI API access |
 | `ANTHROPIC_API_KEY` | One of these | Anthropic Claude access |
-| `CONTECH_API_URL` | Optional | Override for the predict/feedback proxy (defaults to rockmud.com) |
+| `CONTECH_API_URL` | Optional | Override for the predict/feedback proxy (defaults to openmud.ai) |
 
 Copy `config/env.example` to `.env.local` for local dev. Never commit real keys.
 

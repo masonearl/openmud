@@ -1,6 +1,6 @@
-# Rockmud Construction Tools
+# openmud Construction Tools
 
-World-class Python tools for construction estimating, scheduling, and proposals. Accessible through the Rockmud chat interface and API.
+Python tools for construction estimating, scheduling, and proposals. Accessible through the openmud chat interface and API.
 
 ## Layout
 

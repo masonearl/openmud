@@ -1,2 +1,2 @@
-# Rockmud tools - no external deps for core tools
+# openmud tools - no external deps for core tools
 # Add if extending: openai, fastapi, pydantic

@@ -1,4 +1,4 @@
-# Rockmud Chat API Contract
+# openmud Chat API Contract
 
 The frontend calls `POST /chat` on the Contech API. Backend should support:
 
@@ -6,7 +6,7 @@ The frontend calls `POST /chat` on the Contech API. Backend should support:
 
 **Never put API keys in the chat or in the frontend.** They would be exposed in logs, browser dev tools, and chat history.
 
-Put keys in your **Rockmud Vercel project** (the `/api` serverless functions use them):
+Put keys in your **openmud Vercel project** (the `/api` serverless functions use them):
 
 1. **Vercel** – Project → Settings → Environment Variables
 2. **Local** – Copy `config/env.example` to `.env` (add `.env` to `.gitignore`)
@@ -33,7 +33,7 @@ The frontend never sees or sends keys—it only sends the model name. The backen
 
 ## Model routing
 
-- **mud1** – Rockmud custom model (in development)
+- **mud1** – openmud custom model (in development)
 - **gpt-*** – OpenAI API (OPENAI_API_KEY)
 - **claude-*** – Anthropic API (ANTHROPIC_API_KEY)
 

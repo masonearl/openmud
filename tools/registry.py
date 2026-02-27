@@ -1,5 +1,5 @@
 """
-Rockmud Tool Registry
+openmud Tool Registry
 Defines all available tools with OpenAI-compatible function schemas for tool calling.
 """
 

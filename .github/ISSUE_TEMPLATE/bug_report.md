@@ -21,7 +21,7 @@ What should have happened.
 If applicable, paste any error messages or attach screenshots.
 
 **Environment**
-- Running locally or on Vercel? (local / vercel / rockmud.com)
+- Running locally or on Vercel? (local / vercel / openmud.ai)
 - Browser (if UI issue):
 - Node version (if local): `node -v`
 - OS:

@@ -1,4 +1,4 @@
-# Rockmud Roadmap
+# openmud Roadmap
 
 ## Phase 1: Web Version (Current Focus)
 
