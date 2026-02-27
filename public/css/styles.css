@@ -90,13 +90,10 @@ body.has-app .app-layout {
 
 .logo {
     text-decoration: none;
-    display: flex;
-    align-items: center;
-}
-.logo img {
-    height: 28px;
-    width: auto;
-    display: block;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
 }
 
 .nav {
