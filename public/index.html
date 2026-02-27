@@ -64,14 +64,14 @@
             <div class="lp-search-container">
                 <div class="lp-search-wrap">
                     <form class="lp-search-form" id="site-search-form" onsubmit="runSearch(event)">
-                        <input
-                            type="text"
-                            id="site-search-input"
-                            class="lp-search-input"
-                            placeholder="Ask anything — trench slope for Type B soil, Manning's n for PVC, ESOP vs private equity…"
-                            autocomplete="off"
-                            spellcheck="false"
-                        >
+                    <input
+                        type="text"
+                        id="site-search-input"
+                        class="lp-search-input"
+                        placeholder=""
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
                         <button type="submit" class="lp-search-btn" aria-label="Search">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                         </button>
@@ -100,7 +100,7 @@
                 <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-btn-secondary">GitHub ☆</a>
             </div>
             <p class="lp-hero-meta">
-                No account. No paywall. Bring your own <a href="/documentation.html">API key</a> or use <a href="https://rockmud.com">rockmud.com</a> directly.
+                No account. No paywall. Bring your own <a href="/documentation.html">API key</a> or use <a href="https://mudrag.com">mudrag.com</a> directly.
             </p>
         </div>
     </section>
@@ -411,7 +411,83 @@
             document.getElementById('search-results').hidden = true;
             document.getElementById('hero-actions').style.display = '';
             document.getElementById('site-search-input').value = '';
+            startPlaceholderCycle();
         }
+
+        // Rolling placeholder animation
+        const PLACEHOLDER_QUERIES = [
+            'minimum slope for 8" sewer pipe',
+            'OSHA Type B soil trench requirements',
+            'Manning\'s n value for PVC pipe',
+            'thrust block sizing for 45° bend',
+            'what is an ESOP in construction?',
+            '811 blue stakes — who do I call?',
+            'bedding requirements for ductile iron pipe',
+            'OSHA confined space entry checklist',
+            'how to calculate trench volume',
+            'water main pressure testing procedure',
+            'shoring vs sloping — which do I use?',
+            'pipe deflection limits for PVC',
+            'how deep before shoring is required?',
+            'union vs open shop in heavy civil',
+            'OSHA 1926 Subpart P summary',
+        ];
+
+        let phIndex = 0;
+        let phCharIndex = 0;
+        let phDeleting = false;
+        let phTimeout = null;
+        let phPaused = false;
+
+        function animatePlaceholder() {
+            const input = document.getElementById('site-search-input');
+            if (!input || document.activeElement === input || phPaused) return;
+
+            const current = PLACEHOLDER_QUERIES[phIndex];
+
+            if (!phDeleting) {
+                phCharIndex++;
+                input.placeholder = current.slice(0, phCharIndex);
+                if (phCharIndex === current.length) {
+                    phDeleting = true;
+                    phTimeout = setTimeout(animatePlaceholder, 2200);
+                } else {
+                    phTimeout = setTimeout(animatePlaceholder, 38);
+                }
+            } else {
+                phCharIndex--;
+                input.placeholder = current.slice(0, phCharIndex);
+                if (phCharIndex === 0) {
+                    phDeleting = false;
+                    phIndex = (phIndex + 1) % PLACEHOLDER_QUERIES.length;
+                    phTimeout = setTimeout(animatePlaceholder, 400);
+                } else {
+                    phTimeout = setTimeout(animatePlaceholder, 18);
+                }
+            }
+        }
+
+        function startPlaceholderCycle() {
+            phPaused = false;
+            clearTimeout(phTimeout);
+            phCharIndex = 0;
+            phDeleting = false;
+            phTimeout = setTimeout(animatePlaceholder, 800);
+        }
+
+        // Pause animation while user is typing
+        document.getElementById('site-search-input').addEventListener('focus', () => {
+            phPaused = true;
+            clearTimeout(phTimeout);
+            document.getElementById('site-search-input').placeholder = '';
+        });
+        document.getElementById('site-search-input').addEventListener('blur', () => {
+            if (!document.getElementById('site-search-input').value) {
+                startPlaceholderCycle();
+            }
+        });
+
+        startPlaceholderCycle();
     </script>
 </body>
 </html>
