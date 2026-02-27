@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "openmud"
+version = "0.1.0"
+description = "Open-source Python tools for heavy civil and underground utility construction — estimating, hydraulics, trench takeoff, bid math, and more."
+readme = "tools/README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = [
+    "construction", "heavy-civil", "estimating", "hydraulics",
+    "underground-utility", "pipe-flow", "trench", "bid", "contech"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Other Audience",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://openmud.ai"
+Repository = "https://github.com/masonearl/openmud"
+"Bug Tracker" = "https://github.com/masonearl/openmud/issues"
+Documentation = "https://github.com/masonearl/openmud/blob/main/tools/README.md"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tools*"]
+exclude = ["tests*", "node_modules*", ".venv*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+norecursedirs = ["node_modules", ".git", ".venv", "__pycache__", ".vercel"]
