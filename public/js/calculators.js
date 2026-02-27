@@ -20,7 +20,11 @@ function showPanel(id) {
     var link = document.querySelector('[data-panel="' + id + '"]');
     if (panel) panel.classList.add('active');
     if (link) link.classList.add('active');
-    document.querySelector('.calc-main').scrollTop = 0;
+    // Sync mobile select
+    var sel = document.querySelector('.calc-mobile-select');
+    if (sel) sel.value = id;
+    var main = document.querySelector('.calc-main');
+    if (main) main.scrollTop = 0;
     window.location.hash = id;
 }
 

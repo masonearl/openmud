@@ -42,6 +42,38 @@
         </div>
     </header>
 
+    <!-- Mobile calculator navigator (hidden on desktop) -->
+    <div class="calc-mobile-nav">
+        <select class="calc-mobile-select" onchange="if(this.value) { showPanel(this.value); }">
+            <optgroup label="Takeoff &amp; Quantities">
+                <option value="trench-volume">Trench Volume</option>
+                <option value="concrete-volume">Concrete Volume</option>
+                <option value="asphalt-tonnage">Asphalt Tonnage</option>
+                <option value="pipe-quantity">Pipe &amp; Fittings</option>
+            </optgroup>
+            <optgroup label="Engineering &amp; Field">
+                <option value="pipe-flow">Pipe Flow (Manning's)</option>
+                <option value="min-slope">Minimum Pipe Slope</option>
+                <option value="trench-safety">Trench Safety (OSHA)</option>
+                <option value="thrust-block">Thrust Block Sizing</option>
+                <option value="grade-slope">Grade &amp; Slope</option>
+                <option value="compaction">Compaction</option>
+            </optgroup>
+            <optgroup label="Cost &amp; Bid">
+                <option value="markup">Markup &amp; Bid Price</option>
+                <option value="unit-price">Unit Price Builder</option>
+                <option value="change-order">Change Order</option>
+                <option value="production-rate">Production Rate</option>
+                <option value="crew-day">Crew Day Cost</option>
+            </optgroup>
+            <optgroup label="Reference">
+                <option value="unit-converter">Unit Converter</option>
+                <option value="pipe-reference">Pipe Reference Table</option>
+                <option value="mannings-n">Manning's n Values</option>
+            </optgroup>
+        </select>
+    </div>
+
     <div class="calc-layout">
         <!-- Sidebar nav -->
         <aside class="calc-sidebar">

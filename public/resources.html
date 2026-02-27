@@ -40,6 +40,39 @@
         </div>
     </header>
 
+    <!-- Mobile resources navigator (hidden on desktop) -->
+    <div class="res-mobile-nav">
+        <select class="res-mobile-select" onchange="if(this.value) showSection(this.value)">
+            <optgroup label="Safety &amp; Compliance">
+                <option value="osha-excavation">OSHA Trenching &amp; Excavation</option>
+                <option value="osha-ppe">OSHA PPE Requirements</option>
+                <option value="bluestakes">811 / Blue Stakes Guide</option>
+                <option value="confined-space">Confined Space Entry</option>
+            </optgroup>
+            <optgroup label="Industry Knowledge">
+                <option value="youtube">YouTube Channels</option>
+                <option value="news">News &amp; AI Updates</option>
+                <option value="podcasts">Podcasts</option>
+                <option value="standards">Standards &amp; Codes</option>
+            </optgroup>
+            <optgroup label="Open Source">
+                <option value="opensource">Open-Source Tools</option>
+                <option value="datasets">Public Datasets</option>
+            </optgroup>
+            <optgroup label="AI in Construction">
+                <option value="ai-guide">What AI Is &amp; How It Works</option>
+                <option value="ai-workflows">Workflows &amp; Prompt Templates</option>
+                <option value="ai-autonomy">Autonomy, Equipment &amp; Drones</option>
+            </optgroup>
+            <optgroup label="Reference">
+                <option value="soil-types">Soil Classification</option>
+                <option value="color-codes">Utility Color Codes</option>
+                <option value="pipe-specs">Pipe Specifications</option>
+                <option value="glossary">Construction Glossary</option>
+            </optgroup>
+        </select>
+    </div>
+
     <div class="res-layout">
         <!-- Sidebar -->
         <aside class="res-sidebar">

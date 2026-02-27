@@ -537,10 +537,52 @@
     line-height: 1.5;
 }
 
+/* Mobile resources navigator */
+.res-mobile-nav {
+    display: none;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-alt);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.res-mobile-select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8278' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .res-sidebar { display: none; }
-    .res-section { padding: 24px 20px; }
+    .res-mobile-nav { display: block; }
+    .res-section { padding: 20px 16px; }
+    .res-title { font-size: 1.25rem; }
+    .res-h2 { font-size: 0.9375rem; }
     .res-card-grid, .company-grid, .ownership-cards { grid-template-columns: 1fr; }
     .glossary-grid { columns: 1; }
+    .res-table-wrap { margin-left: -16px; margin-right: -16px; }
+    .res-table th, .res-table td { padding: 7px 10px; font-size: 0.8rem; }
+    .ai-prompt-code { font-size: 0.72rem; }
+    .res-highlight-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .res-section { padding: 16px 12px; }
+    .res-desc { font-size: 0.875rem; margin-bottom: 18px; }
+    .res-callout { padding: 10px 12px; }
+    .ai-prompt-block { margin: 8px 0 18px; }
 }

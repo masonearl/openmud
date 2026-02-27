@@ -21,7 +21,11 @@ function showSection(id) {
     var link = document.querySelector('[data-section="' + id + '"]');
     if (section) { section.classList.add('active'); }
     if (link) { link.classList.add('active'); }
-    document.querySelector('.res-main') && (document.querySelector('.res-main').scrollTop = 0);
+    // Sync mobile select
+    var sel = document.querySelector('.res-mobile-select');
+    if (sel) sel.value = id;
+    var main = document.querySelector('.res-main');
+    if (main) main.scrollTop = 0;
     window.location.hash = id;
 }
 

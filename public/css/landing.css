@@ -944,4 +944,41 @@ body {
     .lp-video-bg { inset: 0; }
     .lp-hero-video-wrap { height: 100svh; min-height: 600px; }
     .lp-search-input { font-size: 0.875rem; padding: 14px 16px; }
+    /* Search results popup — full width on tablet */
+    .lp-search-results { top: 6vh; border-radius: 12px; }
+}
+
+@media (max-width: 480px) {
+    /* Hero */
+    .lp-hero { padding: 60px 16px 48px; }
+    .lp-hero-eyebrow { font-size: 0.75rem; padding: 4px 12px; margin-bottom: 22px; }
+    .lp-hero-sub { font-size: 0.9375rem; margin-bottom: 28px; }
+    /* Search */
+    .lp-search-container { margin-bottom: 20px; }
+    .lp-search-input { font-size: 0.875rem; padding: 13px 14px; }
+    .lp-search-suggestions { gap: 5px; }
+    .lp-search-suggestions span { font-size: 0.72rem; padding: 4px 10px; }
+    /* Results popup — edge to edge on phone */
+    .lp-search-results {
+        top: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
+        max-height: 85vh;
+        border-radius: 0 0 16px 16px;
+    }
+    .lp-search-results.visible {
+        transform: none;
+    }
+    /* Landing sections */
+    .lp-section { padding: 56px 16px; }
+    .lp-section-sm { padding: 48px 16px; }
+    .lp-divider { margin: 0 16px; }
+    .lp-oss { padding: 32px 20px; }
+    .lp-footer { padding: 36px 16px 28px; }
+    .lp-footer-bottom { padding: 16px; }
+    .lp-highlight-card { padding: 24px; }
+    .lp-stat { padding: 24px 20px; }
+    .lp-calc-card { padding: 16px; }
 }

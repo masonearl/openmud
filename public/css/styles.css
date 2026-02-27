@@ -1285,35 +1285,44 @@ body {
 }
 
 @media (max-width: 768px) {
+    /* Nav — allow horizontal scroll instead of overflow */
+    .header-inner { padding: 0 14px; }
+    .nav {
+        gap: 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-shrink: 1;
+        max-width: calc(100vw - 120px);
+    }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav a, .btn-text {
+        font-size: 0.8rem;
+        white-space: nowrap;
+        padding: 4px 8px;
+    }
+    /* Chat sidebar — narrow on tablet */
     .projects-sidebar {
-        width: 180px !important;
-        min-width: 140px;
-        max-width: 240px;
+        width: 160px !important;
+        min-width: 120px;
+        max-width: 200px;
     }
-    .sidebar-resize-handle {
-        display: none;
-    }
+    .sidebar-resize-handle { display: none; }
     .projects-header h3,
-    .documents-header h3 {
-        font-size: 0.625rem;
-    }
+    .documents-header h3 { font-size: 0.625rem; }
 }
 
 @media (max-width: 600px) {
-    .hero h1 {
-        font-size: 1.75rem;
-    }
-    .chat-panel {
-        padding: 0 16px;
-    }
-    .msg {
-        max-width: 92%;
-    }
-    .nav {
-        gap: 12px;
-    }
-    .chat-composer-model {
-        font-size: 0.75rem;
-        max-width: 120px;
-    }
+    .hero h1 { font-size: 1.75rem; }
+    /* Chat — hide sidebar entirely on phones, full-width chat */
+    .projects-sidebar { display: none !important; }
+    .sidebar-resize-handle { display: none !important; }
+    .chat-panel { padding: 0 12px; }
+    .msg { max-width: 94%; }
+    .nav { gap: 4px; }
+    .chat-composer-model { font-size: 0.75rem; max-width: 110px; }
+    /* Chat composer bar tighter on phone */
+    .chat-composer-bar { padding: 6px 8px 8px; gap: 6px; }
+    .chat-quick-actions { gap: 6px; padding: 6px 0 10px; }
+    .quick-btn { font-size: 0.75rem; padding: 5px 10px; }
 }
