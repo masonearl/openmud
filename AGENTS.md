@@ -122,6 +122,12 @@ python3 -c "from tools import calculate_material_cost; print(calculate_material_
 - **No AI-generated filler comments** — comments explain intent, not what the code does.
 - **One PR per thing** — focused, reviewable changes.
 
+## UI & Content rules
+
+- **No emojis** — do not use emoji characters anywhere on the site (HTML, CSS content, JS strings, or AI-generated copy) unless the user explicitly requests them in that specific instance.
+- **No decorative Unicode symbols** — avoid ★, ☆, ✓, ⌁, ◻, ⬡, and similar decorative characters as UI elements. Use plain text, dashes, or CSS pseudo-elements instead.
+- **Tone**: Direct, technical, no fluff. Written for people who work in the field, not marketing copy.
+
 ---
 
 ## What needs the most help

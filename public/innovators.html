@@ -16,21 +16,21 @@
     <style>
         .inv-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
-            margin-top: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 10px;
+            margin-top: 28px;
         }
 
         .inv-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: 8px;
+            padding: 16px 18px;
             text-decoration: none;
             transition: border-color 0.15s, background 0.15s;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
         }
 
         .inv-card:hover {
@@ -38,37 +38,32 @@
             background: var(--bg-card-hover);
         }
 
-        .inv-card-icon {
-            font-size: 1.5rem;
-            line-height: 1;
-        }
-
         .inv-card-tag {
-            font-size: 0.7rem;
-            letter-spacing: 0.08em;
+            font-size: 0.65rem;
+            letter-spacing: 0.09em;
             text-transform: uppercase;
             color: var(--earth);
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .inv-card-title {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 700;
             color: var(--text);
-            line-height: 1.4;
+            line-height: 1.35;
         }
 
         .inv-card-desc {
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             color: var(--text-secondary);
-            line-height: 1.6;
+            line-height: 1.55;
             flex: 1;
         }
 
         .inv-card-footer {
-            font-size: 0.8rem;
+            font-size: 0.775rem;
             color: var(--earth);
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         /* Video embeds */
@@ -115,18 +110,18 @@
         .inv-topics {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 32px;
+            gap: 6px;
+            margin-top: 24px;
         }
 
         .inv-topic {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 16px 20px;
+            gap: 12px;
+            padding: 12px 16px;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 8px;
             text-decoration: none;
             transition: border-color 0.15s, background 0.15s;
         }
@@ -241,45 +236,39 @@
 
         <div class="inv-grid">
             <a href="https://github.com/masonearl/openmud/discussions/categories/drones-uav" target="_blank" rel="noopener" class="inv-card">
-                <div class="inv-card-icon">🚁</div>
                 <div class="inv-card-tag">Drones & UAV</div>
                 <div class="inv-card-title">Aerial surveying, photogrammetry, and progress tracking</div>
-                <div class="inv-card-desc">LiDAR-equipped drones cutting survey time from days to hours. Volume calculations from flight data. Real-time cut/fill comparisons against design models. DJI, Skydio, senseFly — what's actually working on job sites.</div>
+                <div class="inv-card-desc">LiDAR drones cutting survey time from days to hours. Volume calculations from flight data. Real-time cut/fill vs. design models. DJI, Skydio, senseFly — what's actually working on job sites.</div>
                 <div class="inv-card-footer">Discuss →</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions/categories/autonomous-equipment" target="_blank" rel="noopener" class="inv-card">
-                <div class="inv-card-icon">🚜</div>
                 <div class="inv-card-tag">Autonomous Equipment</div>
                 <div class="inv-card-title">GPS machine control, autonomous dozers, and robotic excavation</div>
-                <div class="inv-card-desc">Komatsu Smart Construction. Caterpillar's autonomous mining trucks. Trimble and Leica machine control retrofits. How grade control systems are changing what an operator needs to know — and what the next generation of machines looks like.</div>
+                <div class="inv-card-desc">Komatsu Smart Construction. Cat autonomous trucks. Trimble and Leica machine control retrofits. How grade control is changing what operators need to know.</div>
                 <div class="inv-card-footer">Discuss →</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions/categories/ai-on-site" target="_blank" rel="noopener" class="inv-card">
-                <div class="inv-card-icon">🤖</div>
                 <div class="inv-card-tag">AI on the Job Site</div>
                 <div class="inv-card-title">AI for estimating, scheduling, RFIs, and field decisions</div>
-                <div class="inv-card-desc">LLMs reading geotech reports and flagging inconsistencies. AI generating RFI responses from spec sheets. Automated schedule updates from daily reports. What actually works vs. what's vaporware — real contractor experiences.</div>
+                <div class="inv-card-desc">AI reading geotech reports and flagging issues. Generating RFI responses from spec sheets. Automated schedule updates from daily reports. What works vs. what's vaporware.</div>
                 <div class="inv-card-footer">Discuss →</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions/categories/underground-tech" target="_blank" rel="noopener" class="inv-card">
-                <div class="inv-card-icon">🔩</div>
                 <div class="inv-card-tag">Underground Tech</div>
                 <div class="inv-card-title">HDD, pipe bursting, CIPP lining, and trenchless innovation</div>
-                <div class="inv-card-desc">Horizontal directional drilling with real-time bore path correction. Cured-in-place pipe lining for rehabilitation without dig-up. Microtunneling on urban projects. When trenchless beats open cut on cost — and when it doesn't.</div>
+                <div class="inv-card-desc">HDD with real-time bore path correction. CIPP lining without dig-up. Microtunneling on urban projects. When trenchless beats open cut on cost — and when it doesn't.</div>
                 <div class="inv-card-footer">Discuss →</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions/categories/software-tools" target="_blank" rel="noopener" class="inv-card">
-                <div class="inv-card-icon">⚙️</div>
                 <div class="inv-card-tag">Software & Tools</div>
                 <div class="inv-card-title">Project management, takeoff, BIM, and open-source contech</div>
-                <div class="inv-card-desc">Procore vs. Autodesk Construction Cloud vs. building your own. AGTEK for earthwork. BlueBeam on the field tablet. What the $1.2T IIJA is doing to software adoption. Open source tools that actually get used.</div>
+                <div class="inv-card-desc">Procore vs. Autodesk vs. building your own. AGTEK for earthwork. BlueBeam in the field. What the IIJA is doing to software adoption. Open source tools that actually get used.</div>
                 <div class="inv-card-footer">Discuss →</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions/categories/techniques" target="_blank" rel="noopener" class="inv-card">
-                <div class="inv-card-icon">🏗️</div>
                 <div class="inv-card-tag">Techniques & Methods</div>
                 <div class="inv-card-title">Digging methods, compaction, pipe installation, and field knowledge</div>
-                <div class="inv-card-desc">The tricks nobody teaches in the office. Rock breaking vs. ripping. Compaction spec compliance in tight spaces. Water management during deep excavations. Share what you've figured out the hard way so the next crew doesn't have to.</div>
+                <div class="inv-card-desc">The tricks nobody teaches in the office. Rock breaking vs. ripping. Compaction in tight spaces. Water management in deep excavations. Share what you've figured out the hard way.</div>
                 <div class="inv-card-footer">Discuss →</div>
             </a>
         </div>
@@ -350,7 +339,6 @@
 
         <div class="inv-topics">
             <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
-                <div class="inv-topic-icon">🚁</div>
                 <div class="inv-topic-body">
                     <div class="inv-topic-title">What drone + software stack are you using for volume calculations?</div>
                     <div class="inv-topic-sub">DJI Terra vs. DroneDeploy vs. Pix4D — real job site comparisons from people running the numbers</div>
@@ -358,7 +346,6 @@
                 <div class="inv-topic-arrow">→</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
-                <div class="inv-topic-icon">🤖</div>
                 <div class="inv-topic-body">
                     <div class="inv-topic-title">Has anyone used AI to write or review RFIs on a real project?</div>
                     <div class="inv-topic-sub">Share your prompt, your workflow, or your horror story — what actually saved time vs. what created more work</div>
@@ -366,7 +353,6 @@
                 <div class="inv-topic-arrow">→</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
-                <div class="inv-topic-icon">🚜</div>
                 <div class="inv-topic-body">
                     <div class="inv-topic-title">GPS machine control — worth the retrofit cost on a mid-size excavator?</div>
                     <div class="inv-topic-sub">Trimble, Leica, or Topcon — payback period, operator learning curve, what breaks in the field</div>
@@ -374,7 +360,6 @@
                 <div class="inv-topic-arrow">→</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
-                <div class="inv-topic-icon">🔩</div>
                 <div class="inv-topic-body">
                     <div class="inv-topic-title">CIPP lining vs. pipe bursting — when does each make sense?</div>
                     <div class="inv-topic-sub">Diameter, condition, traffic, ROW — walk through your decision process with real project examples</div>
@@ -382,7 +367,6 @@
                 <div class="inv-topic-arrow">→</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
-                <div class="inv-topic-icon">📱</div>
                 <div class="inv-topic-body">
                     <div class="inv-topic-title">What field software is actually getting used by crews (not just PMs)?</div>
                     <div class="inv-topic-sub">Tablets, apps, daily reports, safety checklists — what sticks and what crews ignore</div>
@@ -390,7 +374,6 @@
                 <div class="inv-topic-arrow">→</div>
             </a>
             <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
-                <div class="inv-topic-icon">🏗️</div>
                 <div class="inv-topic-body">
                     <div class="inv-topic-title">Share a technique — something that saved production or avoided a rework</div>
                     <div class="inv-topic-sub">Field knowledge that doesn't live in a spec book. The stuff worth passing on to the next generation of crews</div>
