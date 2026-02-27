@@ -11,9 +11,6 @@
             showPanel(this.dataset.panel);
         });
     });
-    // Init converter units
-    updateUCUnits();
-    buildPipeTable();
 })();
 
 function showPanel(id) {
@@ -788,3 +785,7 @@ function filterPipeTable() {
     var hash = window.location.hash.replace('#', '');
     if (hash && document.getElementById('panel-' + hash)) showPanel(hash);
 })();
+
+// Init data-dependent UI (must run after ucUnits and pipeData are defined)
+updateUCUnits();
+buildPipeTable();
