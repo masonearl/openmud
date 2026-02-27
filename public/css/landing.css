@@ -55,10 +55,19 @@ body {
 
 .lp-nav-logo {
     text-decoration: none;
-    font-size: 1.125rem;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 9px;
     color: var(--text);
+    font-size: 1.0625rem;
+    font-weight: 600;
     letter-spacing: -0.02em;
+}
+
+.lp-nav-logo img {
+    height: 30px;
+    width: auto;
+    display: block;
 }
 
 .lp-nav-links {
@@ -516,12 +525,21 @@ body {
 
 .lp-footer-logo {
     text-decoration: none;
-    font-size: 1rem;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: var(--text);
+    font-size: 0.9375rem;
+    font-weight: 600;
     letter-spacing: -0.02em;
-    display: block;
     margin-bottom: 8px;
+}
+
+.lp-footer-logo img {
+    height: 22px;
+    width: auto;
+    display: block;
+    opacity: 0.85;
 }
 
 .lp-footer-tagline {
