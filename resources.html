@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Resources – openmud</title>
+    <meta name="description" content="Free construction resources: OSHA trenching and excavation standards, 811 Blue Stakes guide, best construction YouTube channels, AI in construction news, and open-source tool directory.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/resources.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">openmud</a>
+            <nav class="nav">
+                <a href="/about.html">About</a>
+                <a href="/calculators.html">Calculators</a>
+                <a href="/resources.html" style="color:var(--text)">Resources</a>
+                <a href="/companies.html">Companies</a>
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
+                <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="res-layout">
+        <!-- Sidebar -->
+        <aside class="res-sidebar">
+            <div class="res-sidebar-inner">
+                <p class="res-sidebar-label">Safety & Compliance</p>
+                <a href="#osha-excavation" class="res-nav-link active" data-section="osha-excavation">OSHA Trenching & Excavation</a>
+                <a href="#osha-ppe" class="res-nav-link" data-section="osha-ppe">OSHA PPE Requirements</a>
+                <a href="#bluestakes" class="res-nav-link" data-section="bluestakes">811 / Blue Stakes Guide</a>
+                <a href="#confined-space" class="res-nav-link" data-section="confined-space">Confined Space Entry</a>
+
+                <p class="res-sidebar-label">Industry Knowledge</p>
+                <a href="#youtube" class="res-nav-link" data-section="youtube">YouTube Channels</a>
+                <a href="#news" class="res-nav-link" data-section="news">News & AI Updates</a>
+                <a href="#podcasts" class="res-nav-link" data-section="podcasts">Podcasts</a>
+                <a href="#standards" class="res-nav-link" data-section="standards">Standards & Codes</a>
+
+                <p class="res-sidebar-label">Open Source</p>
+                <a href="#opensource" class="res-nav-link" data-section="opensource">Open-Source Tools</a>
+                <a href="#datasets" class="res-nav-link" data-section="datasets">Public Datasets</a>
+
+                <p class="res-sidebar-label">Reference</p>
+                <a href="#soil-types" class="res-nav-link" data-section="soil-types">Soil Classification</a>
+                <a href="#color-codes" class="res-nav-link" data-section="color-codes">Utility Color Codes</a>
+                <a href="#pipe-specs" class="res-nav-link" data-section="pipe-specs">Pipe Specifications</a>
+                <a href="#glossary" class="res-nav-link" data-section="glossary">Construction Glossary</a>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="res-main">
+
+            <!-- OSHA Excavation -->
+            <section class="res-section active" id="section-osha-excavation">
+                <h1 class="res-title">OSHA Trenching & Excavation Standards</h1>
+                <p class="res-desc">29 CFR 1926 Subpart P — the federal standard for all open excavations. Public domain. Applies to every trench over 5 feet deep (and shallower trenches if hazardous conditions exist).</p>
+
+                <div class="res-callout res-callout-warn">
+                    <strong>Legal requirement:</strong> Any excavation deeper than 5 feet requires a protective system (sloping, benching, shoring, or shielding). Any excavation deeper than 20 feet requires a PE-designed system. This is federal law, not a suggestion.
+                </div>
+
+                <h2 class="res-h2">Soil Classification (OSHA Appendix A)</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Soil Type</th><th>Description</th><th>Test Method</th><th>Unconfined Strength</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Type A</strong></td><td>Cohesive, stable. Stiff clay, hardpan, caliche. No fissuring, no prior disturbance, no water seepage.</td><td>Thumb penetration: &lt;0.25"; Pocket penetrometer: ≥1.5 tsf</td><td>≥ 1.5 tsf</td></tr>
+                            <tr><td><strong>Type B</strong></td><td>Cohesive or granular. Angular gravel, silty clay, previously disturbed Type A, fissured soils, dry rock not hard enough for Type A.</td><td>Thumb penetration: 0.25"–1"; Penetrometer: 0.5–1.5 tsf</td><td>0.5 – 1.5 tsf</td></tr>
+                            <tr><td><strong>Type C</strong></td><td>Cohesive &lt;0.5 tsf, granular (sand, gravel), submerged soil, soil subject to water, layered systems sloping into excavation.</td><td>Thumb penetration: &gt;1"; crumbles easily. Water present.</td><td>&lt; 0.5 tsf</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Required Sloping Angles (OSHA Appendix B)</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Soil Type</th><th>Max Slope</th><th>H:V Ratio</th><th>Setback per foot of depth</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Type A</strong></td><td>53°</td><td>3/4 : 1</td><td>0.75 ft each side</td></tr>
+                            <tr><td><strong>Type B</strong></td><td>45°</td><td>1 : 1</td><td>1.0 ft each side</td></tr>
+                            <tr><td><strong>Type C</strong></td><td>34°</td><td>1.5 : 1</td><td>1.5 ft each side</td></tr>
+                            <tr><td><strong>Stable Rock</strong></td><td>90°</td><td>Vertical</td><td>0</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Competent Person Daily Checklist</h2>
+                <div class="res-checklist">
+                    <div class="checklist-item">✓ Soil type classified before workers enter</div>
+                    <div class="checklist-item">✓ Utilities located and protected (811 called ≥ 3 days prior)</div>
+                    <div class="checklist-item">✓ Surface encumbrances removed or supported</div>
+                    <div class="checklist-item">✓ Spoil placed minimum 2 ft from trench edge</div>
+                    <div class="checklist-item">✓ Protective system (slope / bench / shield / shore) in place</div>
+                    <div class="checklist-item">✓ Access and egress within 25 LF of all workers</div>
+                    <div class="checklist-item">✓ Water accumulation evaluated — dewatering if needed</div>
+                    <div class="checklist-item">✓ Atmospheric testing if depth &gt;4 ft (confined space risk)</div>
+                    <div class="checklist-item">✓ Adjacent structures evaluated for stability</div>
+                    <div class="checklist-item">✓ Inspection after rain, freeze-thaw, or any hazard change</div>
+                </div>
+
+                <h2 class="res-h2">Trench Shield (Box) Requirements</h2>
+                <ul class="res-list">
+                    <li>Permitted in all soil types as an alternative to sloping or shoring</li>
+                    <li>Must extend ≥ 18 inches above top of unstable soil, or within 2 ft of surface in stable soil</li>
+                    <li>Workers must not be in the shield during movement or repositioning</li>
+                    <li>Must be designed by a PE or meet manufacturer tabulated data</li>
+                    <li>Spoil minimum 2 ft from trench edge regardless of shield use</li>
+                    <li>Maximum 2 ft of unprotected trench in front of and behind the shield</li>
+                </ul>
+
+                <h2 class="res-h2">Key Regulations</h2>
+                <div class="res-links">
+                    <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.650" target="_blank" rel="noopener" class="res-ext-link">1926.650 — Scope and definitions ↗</a>
+                    <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.651" target="_blank" rel="noopener" class="res-ext-link">1926.651 — Specific excavation requirements ↗</a>
+                    <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.652" target="_blank" rel="noopener" class="res-ext-link">1926.652 — Requirements for protective systems ↗</a>
+                    <a href="https://www.osha.gov/etools/construction/trenching" target="_blank" rel="noopener" class="res-ext-link">OSHA Trenching eTool ↗</a>
+                    <a href="https://www.osha.gov/sites/default/files/publications/osha2226.pdf" target="_blank" rel="noopener" class="res-ext-link">OSHA 2226 — Trenching and Excavation Safety (Public Domain PDF) ↗</a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Use our OSHA calculator →</strong> The <a href="/calculators.html#trench-safety" class="link">Trench Safety Calculator</a> walks through protective system requirements by soil type, depth, and method.
+                </div>
+            </section>
+
+            <!-- OSHA PPE -->
+            <section class="res-section" id="section-osha-ppe">
+                <h1 class="res-title">OSHA PPE Requirements — Construction</h1>
+                <p class="res-desc">29 CFR 1926 Subpart E — Personal Protective Equipment requirements for construction sites. Applies to all contractors on federal projects and most state equivalents.</p>
+
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>PPE Item</th><th>When Required</th><th>Standard</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>Hard hat</td><td>All areas where head injury risk from falling objects, bumping, electrical</td><td>1926.100 / ANSI Z89.1</td><td>Class E for electrical work. Replace after impact.</td></tr>
+                            <tr><td>Safety glasses / goggles</td><td>Grinding, chipping, drilling, concrete work, chemical exposure</td><td>1926.102 / ANSI Z87.1</td><td>Side shields required for flying debris</td></tr>
+                            <tr><td>High-visibility vest</td><td>Work near moving vehicles or equipment (MUTCD / ANSI 107)</td><td>MUTCD / 23 CFR 634</td><td>Class 2 min near traffic; Class 3 on highway right-of-way</td></tr>
+                            <tr><td>Steel-toe boots</td><td>Heavy equipment operation, material handling</td><td>1926.96 / ASTM F2413</td><td>EH-rated for electrical hazards</td></tr>
+                            <tr><td>Gloves</td><td>Handling sharp materials, chemicals, concrete, hot surfaces</td><td>1926.28 (general duty)</td><td>Cut-resistant for pipe handling; chemical-resistant for solvents</td></tr>
+                            <tr><td>Hearing protection</td><td>Noise ≥ 85 dBA TWA (jackhammers, compactors, excavators)</td><td>1926.52 / 1910.95</td><td>Earplugs: ~33 NRR. Earmuffs: ~25–30 NRR</td></tr>
+                            <tr><td>Fall protection</td><td>Leading edges, excavations, elevated platforms ≥ 6 ft</td><td>1926.502</td><td>Harness + lanyard OR guardrail + safety net system</td></tr>
+                            <tr><td>Respiratory protection</td><td>Silica dust, confined spaces, spray-applied coatings</td><td>1926.1153 / 1910.134</td><td>Silica PEL: 50 μg/m³ TWA. N95 minimum for silica.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-callout res-callout-warn">
+                    <strong>Silica Rule (1926.1153):</strong> Effective 2017. Employers must have a written exposure control plan, limit worker exposure to 50 μg/m³ (action level: 25 μg/m³), and provide medical surveillance. Applies to grinding, cutting, or drilling concrete, stone, or mortar.
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.osha.gov/personal-protective-equipment" target="_blank" rel="noopener" class="res-ext-link">OSHA PPE Overview ↗</a>
+                    <a href="https://www.osha.gov/silica-crystalline" target="_blank" rel="noopener" class="res-ext-link">OSHA Silica Standard ↗</a>
+                </div>
+            </section>
+
+            <!-- Blue Stakes -->
+            <section class="res-section" id="section-bluestakes">
+                <h1 class="res-title">811 / Blue Stakes — Call Before You Dig</h1>
+                <p class="res-desc">811 is the national "call before you dig" number. Blue Stakes of Utah administers the program for Utah. Required by law before any excavation. Not optional.</p>
+
+                <div class="res-callout res-callout-warn">
+                    <strong>Utah law (Utah Code 54-8a):</strong> Every excavator must notify Blue Stakes at least 3 business days (72 hours) before digging. Failure to notify can result in fines and full liability for damage to underground facilities.
+                </div>
+
+                <h2 class="res-h2">The 5 Steps to Safer Digging</h2>
+                <div class="res-steps">
+                    <div class="res-step"><span class="step-num">1</span><div><strong>Call or click 811</strong> at least 3 business days before digging. Provide exact location, type of work, and dig depth. Online: <a href="https://www.bluestakes.org" target="_blank" rel="noopener" class="link">bluestakes.org</a></div></div>
+                    <div class="res-step"><span class="step-num">2</span><div><strong>Wait the full time.</strong> Facility operators have 3 business days to locate and mark utilities. Don't dig early — even if you think you know where lines are.</div></div>
+                    <div class="res-step"><span class="step-num">3</span><div><strong>Confirm all markings.</strong> Check Electronic Positive Response (EPR) to see which utilities responded. If a utility hasn't responded, submit a No Response Notice before digging.</div></div>
+                    <div class="res-step"><span class="step-num">4</span><div><strong>Respect the marks.</strong> Protect markings throughout excavation. Re-notify if marks are destroyed before work is complete or if work extends beyond 20 days.</div></div>
+                    <div class="res-step"><span class="step-num">5</span><div><strong>Hand dig within the tolerance zone.</strong> 24 inches on either side of any marking. No power equipment in the tolerance zone until utilities are hand-exposed and confirmed.</div></div>
+                </div>
+
+                <h2 class="res-h2">Utility Marking Color Codes (APWA Standard)</h2>
+                <div class="color-code-grid">
+                    <div class="color-chip" style="background:#ff0000"><span>Red</span><span>Electric power, lighting, cables, conduit</span></div>
+                    <div class="color-chip" style="background:#ffa500"><span>Orange</span><span>Communication, alarm, fiber optic, signal lines</span></div>
+                    <div class="color-chip" style="background:#ffff00;color:#222"><span>Yellow</span><span>Gas, oil, steam, petroleum, gaseous materials</span></div>
+                    <div class="color-chip" style="background:#00aa00"><span>Green</span><span>Sewer, storm drain, drain tile</span></div>
+                    <div class="color-chip" style="background:#0055ff"><span>Blue</span><span>Potable water</span></div>
+                    <div class="color-chip" style="background:#9900cc"><span>Purple</span><span>Reclaimed water, irrigation, slurry lines</span></div>
+                    <div class="color-chip" style="background:#ff69b4"><span>Pink</span><span>Temporary survey markings</span></div>
+                    <div class="color-chip" style="background:#ffffff;color:#222;border:1px solid #444"><span>White</span><span>Proposed excavation area (your markings)</span></div>
+                </div>
+
+                <h2 class="res-h2">What Blue Stakes Does NOT Cover</h2>
+                <ul class="res-list">
+                    <li>Private service lines (from meter to building) — these are the property owner's responsibility</li>
+                    <li>Abandoned lines — may still be present and energized</li>
+                    <li>Non-member utilities — some small utilities may not be registered</li>
+                    <li>Accuracy within the tolerance zone — 24" either side of marks is your responsibility to hand dig</li>
+                </ul>
+
+                <div class="res-links">
+                    <a href="https://www.bluestakes.org" target="_blank" rel="noopener" class="res-ext-link">Blue Stakes of Utah — bluestakes.org ↗</a>
+                    <a href="https://www.bluestakes.org/excavators-guide/" target="_blank" rel="noopener" class="res-ext-link">Blue Stakes Excavator's Guide ↗</a>
+                    <a href="https://www.bluestakes.org/pdfs/ExcavatorsGuide.pdf" target="_blank" rel="noopener" class="res-ext-link">Excavator's Guide PDF ↗</a>
+                    <a href="https://811.com" target="_blank" rel="noopener" class="res-ext-link">National 811 Center ↗</a>
+                    <a href="https://commongroundalliance.com/best-practices" target="_blank" rel="noopener" class="res-ext-link">CGA Best Practices ↗</a>
+                </div>
+            </section>
+
+            <!-- Confined Space -->
+            <section class="res-section" id="section-confined-space">
+                <h1 class="res-title">Confined Space Entry — Construction</h1>
+                <p class="res-desc">29 CFR 1926.1200–1213 — Confined spaces in construction. Covers manholes, vaults, tanks, excavations deeper than 4 ft with limited access. One of the most dangerous activities in underground utility work.</p>
+
+                <div class="res-callout res-callout-warn">
+                    <strong>Fatality risk:</strong> More than 60% of confined space fatalities are would-be rescuers. Never enter a confined space to rescue a downed worker without proper equipment and training. Call 911 first.
+                </div>
+
+                <h2 class="res-h2">Permit-Required Confined Space (PRCS) Criteria</h2>
+                <p class="res-text">A space is permit-required if it has one or more of:</p>
+                <ul class="res-list">
+                    <li>Hazardous atmosphere (or potential for one) — oxygen-deficient (&lt;19.5%), oxygen-enriched (&gt;23.5%), flammable &gt;10% LEL, toxic at or above PEL</li>
+                    <li>Material that could engulf an entrant (water, soil, grain)</li>
+                    <li>Internal configuration that could trap or asphyxiate</li>
+                    <li>Any other recognized serious safety or health hazard</li>
+                </ul>
+
+                <h2 class="res-h2">Atmospheric Testing Order (Always in this sequence)</h2>
+                <div class="res-steps">
+                    <div class="res-step"><span class="step-num">1</span><div><strong>Oxygen content</strong> — must be 19.5%–23.5% before entry</div></div>
+                    <div class="res-step"><span class="step-num">2</span><div><strong>Flammable gases/vapors</strong> — must be &lt;10% LEL</div></div>
+                    <div class="res-step"><span class="step-num">3</span><div><strong>Toxic contaminants</strong> — CO, H₂S, etc. below PEL (CO &lt;25 ppm, H₂S &lt;1 ppm for 8-hr TWA)</div></div>
+                </div>
+
+                <h2 class="res-h2">Common Confined Spaces in Underground Utility Work</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Space</th><th>Primary Hazards</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>Manholes</td><td>Oxygen deficiency, H₂S, methane, engulfment</td><td>Always treat as PRCS until tested. Sewer gas is heavier than air — pools at bottom.</td></tr>
+                            <tr><td>Valve vaults</td><td>Oxygen deficiency, gas leaks</td><td>Test all corners. Purge if O₂ low.</td></tr>
+                            <tr><td>Trenches &gt;4 ft</td><td>Cave-in, oxygen deficiency (near gas lines)</td><td>Atmospheric monitoring required if risk of gas infiltration.</td></tr>
+                            <tr><td>Wet wells / lift stations</td><td>H₂S, methane, oxygen deficiency, electrocution</td><td>Highest H₂S risk. Immediately dangerous to life at 100 ppm.</td></tr>
+                            <tr><td>Storage tanks</td><td>Flammable vapors, toxic residue, O₂ deficiency</td><td>Hot work permit required. Inert atmosphere possible.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.osha.gov/confined-spaces/construction" target="_blank" rel="noopener" class="res-ext-link">OSHA Confined Spaces in Construction ↗</a>
+                    <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1200" target="_blank" rel="noopener" class="res-ext-link">29 CFR 1926.1200 ↗</a>
+                </div>
+            </section>
+
+            <!-- YouTube -->
+            <section class="res-section" id="section-youtube">
+                <h1 class="res-title">Best Construction YouTube Channels</h1>
+                <p class="res-desc">The best free education in construction is on YouTube. These are the channels worth following — field knowledge, equipment, business, and industry news.</p>
+
+                <h2 class="res-h2">Heavy Civil & Underground Utility</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.youtube.com/@HCAchannel" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Heavy Construction Academy</div>
+                        <div class="res-card-desc">Equipment operation, site management, and heavy civil fundamentals. One of the most educational channels in the space. Covers excavators, graders, scrapers, and more.</div>
+                        <div class="res-card-tag">Equipment · Operations</div>
+                    </a>
+                    <a href="https://www.youtube.com/channel/UCfTxKG43eo2gSqObNLjW_Ng" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Premier Underground Construction</div>
+                        <div class="res-card-desc">Real underground utility construction work — pipe installation, trench work, water and sewer. Authentic field footage from an active contractor.</div>
+                        <div class="res-card-tag">Underground · Pipe · Field work</div>
+                    </a>
+                    <a href="https://www.youtube.com/@StanleyGenadek" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Stanley "Dirt Monkey" Genadek</div>
+                        <div class="res-card-desc">Excavation, landscaping, and field operations from a hands-on contractor. Great for understanding production rates, equipment selection, and running a crew.</div>
+                        <div class="res-card-tag">Excavation · Equipment · Business</div>
+                    </a>
+                    <a href="https://www.youtube.com/user/TrimbleConstruction" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Trimble Civil Construction</div>
+                        <div class="res-card-desc">Machine control, GPS grade technology, and field layout for heavy civil. If you're using or evaluating machine control systems, start here.</div>
+                        <div class="res-card-tag">Technology · Machine control · Grade</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">Business & Leadership</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.youtube.com/@BuildWitt" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BuildWitt</div>
+                        <div class="res-card-desc">Aaron Witt's channel on workforce development, culture, and the future of heavy civil. Excellent for PMs, supers, and anyone building a construction company.</div>
+                        <div class="res-card-tag">Leadership · Culture · Workforce</div>
+                    </a>
+                    <a href="https://www.youtube.com/@constructionleadershippodcast" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Leading Edge</div>
+                        <div class="res-card-desc">Business systems, project management, and leadership for construction company owners. Practical and no-fluff.</div>
+                        <div class="res-card-tag">PM · Business · Systems</div>
+                    </a>
+                    <a href="https://www.youtube.com/@MattRisinger" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Matt Risinger — Build Show</div>
+                        <div class="res-card-desc">Deep dives on building science, materials, and methods. More residential/commercial but excellent for anyone who values understanding WHY things are built the way they are.</div>
+                        <div class="res-card-tag">Building science · Materials · Methods</div>
+                    </a>
+                    <a href="https://www.youtube.com/@theconstructer" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">The Constructer</div>
+                        <div class="res-card-desc">Civil engineering concepts, structural design, and construction methods explained clearly. Good for field engineers and PMs wanting to understand the engineering behind the work.</div>
+                        <div class="res-card-tag">Civil engineering · Structures · Education</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">Equipment & Field Operations</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.youtube.com/@CaterpillarInc" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Caterpillar</div>
+                        <div class="res-card-desc">Equipment operation, maintenance, and machine innovation straight from Cat. Good for operator training reference and keeping up with new machine technology.</div>
+                        <div class="res-card-tag">Equipment · Maintenance · Technology</div>
+                    </a>
+                    <a href="https://www.youtube.com/@komatsu_official" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Komatsu</div>
+                        <div class="res-card-desc">Smart Construction, machine control, and equipment operation. Particularly strong on autonomous and semi-autonomous equipment — the future of heavy civil.</div>
+                        <div class="res-card-tag">Equipment · Autonomous · Smart construction</div>
+                    </a>
+                    <a href="https://www.youtube.com/@caseconstructionequipment" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Case Construction Equipment</div>
+                        <div class="res-card-desc">Backhoe, excavator, and compact equipment operation and maintenance. Useful for training operators and understanding equipment specs.</div>
+                        <div class="res-card-tag">Equipment · Operation · Training</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Missing a channel?</strong> <a href="https://github.com/masonearl/openmud/issues/new?template=feature_request.md&title=%5BFEATURE%5D+Add+YouTube+channel:+..." target="_blank" rel="noopener" class="link">Open a GitHub issue</a> and suggest it. We want this list to be community-maintained.
+                </div>
+            </section>
+
+            <!-- News -->
+            <section class="res-section" id="section-news">
+                <h1 class="res-title">News, AI in Construction & Industry Updates</h1>
+                <p class="res-desc">Where to stay current on what's happening in construction and how AI is changing it. No paywalls where possible.</p>
+
+                <h2 class="res-h2">Daily / Weekly News</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.constructiondive.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Dive</div>
+                        <div class="res-card-desc">The best free daily construction news. Covers industry, technology, labor, policy, and major project awards. Free newsletter — subscribe and actually read it.</div>
+                        <div class="res-card-tag">Daily news · Free · Industry</div>
+                    </a>
+                    <a href="https://www.enr.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Engineering News-Record (ENR)</div>
+                        <div class="res-card-desc">The industry paper of record. ENR Top 400, Top 100 Design Firms, regional lists. Some content behind paywall but headlines and rankings are accessible.</div>
+                        <div class="res-card-tag">Industry rankings · Paywalled · Authoritative</div>
+                    </a>
+                    <a href="https://www.constructionexec.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Executive</div>
+                        <div class="res-card-desc">Business-focused construction news — finance, risk, technology, workforce. Aimed at owners and executives but useful for anyone wanting to understand the business side.</div>
+                        <div class="res-card-tag">Business · Finance · Leadership</div>
+                    </a>
+                    <a href="https://www.constructionbusinessowner.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Business Owner</div>
+                        <div class="res-card-desc">Field operations, estimating, project management, and running a construction company. Practical articles for contractors at all levels.</div>
+                        <div class="res-card-tag">Operations · Estimating · Business</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">AI in Construction</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.constructionindustryai.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Industry AI</div>
+                        <div class="res-card-desc">The best dedicated source for AI in construction. Monthly roundups, tool reviews, and guides on how contractors are actually using AI. Some content is paid but free tier is solid.</div>
+                        <div class="res-card-tag">AI · Contech · Tools</div>
+                    </a>
+                    <a href="https://www.constructiondive.com/topic/technology/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Dive — Technology</div>
+                        <div class="res-card-desc">The tech section of Construction Dive covers AI, robotics, drones, BIM, and software. Heavy coverage in 2025 — best free option for AI-in-construction news.</div>
+                        <div class="res-card-tag">AI · Robotics · BIM · Free</div>
+                    </a>
+                    <a href="https://openmud.ai" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">openmud ← you're here</div>
+                        <div class="res-card-desc">Open-source AI tools for heavy civil. The only free, open-source construction AI project built by contractors for contractors. Contribute, fork, use it.</div>
+                        <div class="res-card-tag">Open source · Free · Heavy civil</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">Podcasts</h2>
+                <div class="res-card-grid">
+                    <a href="https://podcasts.apple.com/us/podcast/the-civil-engineering-podcast/id1159895675" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">The Civil Engineering Podcast</div>
+                        <div class="res-card-desc">Anthony Fasano interviews civil engineers and contractors on career, projects, and industry trends. Good for field engineers wanting to grow.</div>
+                        <div class="res-card-tag">Civil engineering · Career · Industry</div>
+                    </a>
+                    <a href="https://www.buildwitt.com/podcast" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">The Dirt World Podcast (BuildWitt)</div>
+                        <div class="res-card-desc">Aaron Witt interviews contractors, equipment operators, and industry leaders. One of the best pods for understanding the culture and future of heavy civil.</div>
+                        <div class="res-card-tag">Culture · Leadership · Heavy civil</div>
+                    </a>
+                    <a href="https://constructionleadingedge.com/podcast/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Leading Edge Podcast</div>
+                        <div class="res-card-desc">Systems, project management, and business operations for construction companies. Matt Verderamo interviews contractors building better companies.</div>
+                        <div class="res-card-tag">Business · Systems · PM</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Podcasts (redirect to news) -->
+            <section class="res-section" id="section-podcasts">
+                <h1 class="res-title">Podcasts</h1>
+                <p class="res-desc">The best podcasts for heavy civil, construction business, and industry news. See the full list in the <a href="#news" class="link" onclick="showSection('news')">News & AI Updates</a> section.</p>
+            </section>
+
+            <!-- Standards -->
+            <section class="res-section" id="section-standards">
+                <h1 class="res-title">Standards & Codes Reference</h1>
+                <p class="res-desc">Key standards for underground utility and heavy civil construction. Know which ones apply to your work.</p>
+
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Standard</th><th>What it covers</th><th>Who publishes</th><th>Applies to</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>29 CFR 1926 Subpart P</strong></td><td>Excavation and trenching safety</td><td>OSHA</td><td>All construction excavations</td></tr>
+                            <tr><td><strong>29 CFR 1926 Subpart E</strong></td><td>Personal Protective Equipment</td><td>OSHA</td><td>All construction workers</td></tr>
+                            <tr><td><strong>29 CFR 1926.1200</strong></td><td>Confined spaces in construction</td><td>OSHA</td><td>Manholes, vaults, tanks</td></tr>
+                            <tr><td><strong>AWWA C900</strong></td><td>PVC pressure pipe for water distribution</td><td>AWWA</td><td>Waterline, 4"–60"</td></tr>
+                            <tr><td><strong>AWWA C151</strong></td><td>Ductile iron pipe specifications</td><td>AWWA</td><td>Waterline, DIP</td></tr>
+                            <tr><td><strong>AWWA C200</strong></td><td>Steel water pipe specifications</td><td>AWWA</td><td>Large diameter steel pipe</td></tr>
+                            <tr><td><strong>ASTM D3034</strong></td><td>PVC sewer pipe (SDR 35)</td><td>ASTM</td><td>Gravity sewer, storm</td></tr>
+                            <tr><td><strong>ASTM D3035</strong></td><td>HDPE pipe for pressure applications</td><td>ASTM</td><td>Force mains, directional drill</td></tr>
+                            <tr><td><strong>ASTM C76</strong></td><td>Reinforced concrete pipe</td><td>ASTM</td><td>Storm drain, culverts</td></tr>
+                            <tr><td><strong>ASCE MOP 36</strong></td><td>Design and construction of sanitary sewers</td><td>ASCE</td><td>Sewer system design</td></tr>
+                            <tr><td><strong>MUTCD</strong></td><td>Manual on Uniform Traffic Control Devices</td><td>FHWA</td><td>All work zone traffic control</td></tr>
+                            <tr><td><strong>APWA Color Code</strong></td><td>Underground utility marking colors</td><td>APWA</td><td>All utility locates</td></tr>
+                            <tr><td><strong>CGA Best Practices</strong></td><td>Damage prevention for underground utilities</td><td>Common Ground Alliance</td><td>All excavators</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.osha.gov/laws-regs" target="_blank" rel="noopener" class="res-ext-link">OSHA Standards ↗</a>
+                    <a href="https://www.awwa.org/Standards-Research-Technology/Standards" target="_blank" rel="noopener" class="res-ext-link">AWWA Standards ↗</a>
+                    <a href="https://www.astm.org" target="_blank" rel="noopener" class="res-ext-link">ASTM International ↗</a>
+                    <a href="https://mutcd.fhwa.dot.gov" target="_blank" rel="noopener" class="res-ext-link">MUTCD (Free Online) ↗</a>
+                    <a href="https://commongroundalliance.com/best-practices" target="_blank" rel="noopener" class="res-ext-link">CGA Best Practices ↗</a>
+                </div>
+            </section>
+
+            <!-- Open Source -->
+            <section class="res-section" id="section-opensource">
+                <h1 class="res-title">Open-Source Construction Tools</h1>
+                <p class="res-desc">A curated directory of open-source tools for construction, civil engineering, and estimating. All free to use, fork, and contribute to.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">openmud ⭐</div>
+                        <div class="res-card-desc">AI chat, 18 calculators, Python tools for estimating, hydraulics, trench takeoff, OSHA safety, bid math, and unit conversion. MIT license. This is the project you're on.</div>
+                        <div class="res-card-tag">Python · JavaScript · MIT · Heavy civil</div>
+                    </a>
+                    <a href="https://github.com/xvanov/truecost" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">TrueCost</div>
+                        <div class="res-card-desc">AI-powered construction estimation engine using 7 specialized agents to analyze CAD plans and generate risk-adjusted cost estimates with Monte Carlo simulation.</div>
+                        <div class="res-card-tag">Python · AI · Estimation · CAD analysis</div>
+                    </a>
+                    <a href="https://github.com/madil4/awatif" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Awatif</div>
+                        <div class="res-card-desc">Web-based parametric structural engineering platform with FEM analysis and meshing. MIT license. Good for structural design calculations embedded in web tools.</div>
+                        <div class="res-card-tag">JavaScript · FEM · Structural · MIT</div>
+                    </a>
+                    <a href="https://github.com/mzjensen/Camber" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Camber</div>
+                        <div class="res-card-desc">Open-source Dynamo package for Autodesk Civil 3D. Extends Civil 3D functionality for heavy civil workflows. Good for firms using Civil 3D wanting automation.</div>
+                        <div class="res-card-tag">C# · Civil 3D · Dynamo · AutoCAD</div>
+                    </a>
+                    <a href="https://github.com/priyanshi0609/buildwise" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BuildWise</div>
+                        <div class="res-card-desc">AI-powered construction cost estimation with real-time calculations, material/labor optimization, and dashboards. React + Firebase + Gemini API.</div>
+                        <div class="res-card-tag">React · Firebase · AI · Estimation</div>
+                    </a>
+                    <a href="https://github.com/ara3d/connect" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Ara 3D Connect</div>
+                        <div class="res-card-desc">Open-source tracking, reviewing, and versioning for BIM data built on Git. Version-control your BIM models the way developers version-control code.</div>
+                        <div class="res-card-tag">BIM · Version control · .NET</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Know an open-source construction tool that should be here?</strong> <a href="https://github.com/masonearl/openmud/issues/new?template=feature_request.md&title=%5BFEATURE%5D+Add+to+open-source+directory:+..." target="_blank" rel="noopener" class="link">Open a GitHub issue</a> and we'll add it.
+                </div>
+            </section>
+
+            <!-- Datasets -->
+            <section class="res-section" id="section-datasets">
+                <h1 class="res-title">Public Construction Datasets</h1>
+                <p class="res-desc">Free, publicly available data sources for construction research, pricing, and analysis.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.bls.gov/oes/current/oes_nat.htm" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BLS Occupational Employment Statistics</div>
+                        <div class="res-card-desc">Federal wage data by occupation and region. The best source for construction labor rates by trade, region, and union/non-union status. Updated annually.</div>
+                        <div class="res-card-tag">Labor rates · Federal data · Free</div>
+                    </a>
+                    <a href="https://www.bls.gov/ppi/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BLS Producer Price Index — Construction</div>
+                        <div class="res-card-desc">Material price indices for construction materials: concrete, steel, pipe, lumber. The authoritative source for tracking material cost inflation over time.</div>
+                        <div class="res-card-tag">Material costs · Inflation · Free</div>
+                    </a>
+                    <a href="https://lni.wa.gov/licensing-permits/public-works-projects/prevailing-wage-rates/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">WA State L&I Prevailing Wages</div>
+                        <div class="res-card-desc">Washington State prevailing wage rates by trade and county. If you bid public works in WA, these are the rates. Updated quarterly.</div>
+                        <div class="res-card-tag">Labor · Prevailing wage · Washington</div>
+                    </a>
+                    <a href="https://laborcommission.utah.gov/divisions/uosh/prevailing-wage/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Utah Prevailing Wage Rates</div>
+                        <div class="res-card-desc">Utah Labor Commission prevailing wage rates for public works projects by county and trade. Required for public contracts in Utah.</div>
+                        <div class="res-card-tag">Labor · Prevailing wage · Utah</div>
+                    </a>
+                    <a href="https://www.census.gov/construction/c30/c30index.html" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Census Bureau — Value of Construction Put in Place</div>
+                        <div class="res-card-desc">Monthly construction spending data by sector: residential, commercial, infrastructure, utilities. The macro view of where construction money is flowing.</div>
+                        <div class="res-card-tag">Market data · Spending · Monthly</div>
+                    </a>
+                    <a href="https://www.ecfr.gov/current/title-29/part-1926" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">eCFR — 29 CFR Part 1926 (OSHA Construction)</div>
+                        <div class="res-card-desc">The complete OSHA construction standard in searchable, linkable format. Public domain. The primary source for all OSHA compliance questions.</div>
+                        <div class="res-card-tag">OSHA · Public domain · Searchable</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Soil Types -->
+            <section class="res-section" id="section-soil-types">
+                <h1 class="res-title">Soil Classification Reference</h1>
+                <p class="res-desc">Field identification methods and engineering properties of common soil types encountered in underground utility work.</p>
+
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Soil Type</th><th>Description</th><th>Field Test</th><th>Swell Factor</th><th>Shrink Factor</th><th>Bearing (PSF)</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Sand (clean)</strong></td><td>Loose to dense granular, no cohesion, drains freely</td><td>Falls apart in hand when dry. No ribbon forms when wet.</td><td>10–15%</td><td>5–10%</td><td>1,500–3,000</td></tr>
+                            <tr><td><strong>Gravel</strong></td><td>Coarse granular, excellent drainage, stable when compacted</td><td>Individual particles visible. No plasticity.</td><td>10–20%</td><td>5–10%</td><td>3,000–6,000</td></tr>
+                            <tr><td><strong>Silty clay</strong></td><td>Medium cohesion, moderate plasticity, slow drainage</td><td>Ribbon 1–2" before breaking. Thumb penetration 0.5"–1".</td><td>20–30%</td><td>10–15%</td><td>1,000–2,000</td></tr>
+                            <tr><td><strong>Stiff clay</strong></td><td>High cohesion, low permeability, stable excavation walls</td><td>Ribbon 2"+ before breaking. Thumb barely penetrates. Penetrometer ≥1.5 tsf.</td><td>25–35%</td><td>15–20%</td><td>2,000–4,000</td></tr>
+                            <tr><td><strong>Soft clay</strong></td><td>Low strength, high plasticity, unstable in excavation</td><td>Thumb penetrates easily. Oozes when squeezed.</td><td>30–40%</td><td>20–25%</td><td>500–1,000</td></tr>
+                            <tr><td><strong>Rock (soft)</strong></td><td>Shale, limestone, weak sandstone. Can be ripped.</td><td>Scratches with knife. Breaks with hammer blow.</td><td>25–40%</td><td>0%</td><td>10,000–50,000</td></tr>
+                            <tr><td><strong>Rock (hard)</strong></td><td>Granite, basalt, hard sandstone. Requires blasting or rock saw.</td><td>Cannot scratch with knife. Rings when struck.</td><td>30–50%</td><td>0%</td><td>50,000+</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="res-note">Swell factor: volume increase when excavated (BCY → LCY). Shrink factor: volume decrease when compacted (BCY → CCY). Always verify with actual soil testing for design.</p>
+            </section>
+
+            <!-- Color Codes -->
+            <section class="res-section" id="section-color-codes">
+                <h1 class="res-title">Utility Marking Color Codes</h1>
+                <p class="res-desc">APWA Uniform Color Code for underground utility markings. The national standard used by all 811 programs.</p>
+                <div class="color-code-grid" style="margin-top:24px">
+                    <div class="color-chip" style="background:#ff0000"><span>Red</span><span>Electric power lines, cables, conduit, lighting cables</span></div>
+                    <div class="color-chip" style="background:#ffa500"><span>Orange</span><span>Telecommunication, alarm/signal lines, cable TV, fiber optic</span></div>
+                    <div class="color-chip" style="background:#ffff00;color:#222"><span>Yellow</span><span>Gas/oil distribution, steam, petroleum, gaseous materials</span></div>
+                    <div class="color-chip" style="background:#00aa00"><span>Green</span><span>Sewers, drain lines, culverts</span></div>
+                    <div class="color-chip" style="background:#0055ff"><span>Blue</span><span>Potable water, irrigation, slurry lines</span></div>
+                    <div class="color-chip" style="background:#9900cc"><span>Purple</span><span>Reclaimed water, irrigation, slurry lines (non-potable)</span></div>
+                    <div class="color-chip" style="background:#ff69b4"><span>Pink</span><span>Temporary survey markings, unknown/unidentified</span></div>
+                    <div class="color-chip" style="background:#ffffff;color:#222;border:1px solid #444"><span>White</span><span>Proposed excavation limits (you mark your dig area in white)</span></div>
+                    <div class="color-chip" style="background:#666"><span>Gray</span><span>Temporary dewatering/pumping lines</span></div>
+                </div>
+                <p class="res-note" style="margin-top:20px">Source: APWA Uniform Color Code. Used by all 811 One-Call programs nationwide. Marks are typically flags, paint, or stakes. Respect all marks — even if you know where a line is.</p>
+            </section>
+
+            <!-- Pipe Specs -->
+            <section class="res-section" id="section-pipe-specs">
+                <h1 class="res-title">Pipe Specifications Quick Reference</h1>
+                <p class="res-desc">Common pipe materials, their typical applications, pressure ratings, and standards. Use the <a href="/calculators.html#pipe-reference" class="link">full pipe reference table in the Calculators</a> for OD, wall thickness, and weight.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Material</th><th>Typical Use</th><th>Size Range</th><th>Joint Type</th><th>Standard</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>PVC C900</strong></td><td>Water distribution, pressure pipe</td><td>4"–60"</td><td>Push-on gasket</td><td>AWWA C900</td><td>DR18 = 165 PSI, DR14 = 200 PSI. Most common water pipe.</td></tr>
+                            <tr><td><strong>PVC SDR 35</strong></td><td>Gravity sewer, storm drain</td><td>4"–15"</td><td>Push-on gasket</td><td>ASTM D3034</td><td>Gravity only. Not for pressure. Flexible ring-tight joints.</td></tr>
+                            <tr><td><strong>HDPE (DR11)</strong></td><td>Force mains, directional drill, gas</td><td>½"–63"</td><td>Butt fusion, electrofusion</td><td>ASTM D3035</td><td>200 PSI. Fully restrained joint. Excellent for DD crossings.</td></tr>
+                            <tr><td><strong>HDPE (DR17)</strong></td><td>Low-pressure water, reclaimed water</td><td>½"–63"</td><td>Butt fusion</td><td>ASTM D3035</td><td>100 PSI. Lighter wall, lower cost.</td></tr>
+                            <tr><td><strong>Ductile Iron (DIP)</strong></td><td>Water, sewer under pressure, harsh soils</td><td>3"–64"</td><td>Push-on or mechanical</td><td>AWWA C151</td><td>Restrained joints (TR Flex, Megalug) required at fittings and long runs.</td></tr>
+                            <tr><td><strong>RCP (Class III)</strong></td><td>Storm drain, culverts</td><td>12"–144"</td><td>Bell and spigot, O-ring</td><td>ASTM C76</td><td>Gravity only. Class I–V by wall strength. Class III most common.</td></tr>
+                            <tr><td><strong>Steel</strong></td><td>Water transmission, large diameter</td><td>4"–252"</td><td>Welded, flanged, mechanical</td><td>AWWA C200</td><td>Requires interior/exterior coating. Good for large diameter, high pressure.</td></tr>
+                            <tr><td><strong>VCP (Vitrified Clay)</strong></td><td>Sanitary sewer (existing systems)</td><td>4"–42"</td><td>Push-on, compression</td><td>ASTM C700</td><td>Chemically inert, common in older sewer systems. Brittle.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Glossary -->
+            <section class="res-section" id="section-glossary">
+                <h1 class="res-title">Construction Glossary</h1>
+                <p class="res-desc">Common terms in heavy civil and underground utility construction. From field slang to engineering terminology.</p>
+                <div class="glossary-search-wrap">
+                    <input type="text" id="glossary-search" placeholder="Search terms..." oninput="filterGlossary()" class="glossary-search">
+                </div>
+                <div class="glossary-grid" id="glossary-grid"></div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> openmud · <a href="https://github.com/masonearl/openmud" class="link" target="_blank" rel="noopener">Open source on GitHub</a> · <a href="/" class="link">AI chat →</a></p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+    <script src="assets/js/resources.js"></script>
+</body>
+</html>

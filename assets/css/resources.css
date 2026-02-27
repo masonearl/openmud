@@ -1,0 +1,506 @@
+/* Resources & Companies page styles */
+.res-layout {
+    display: flex;
+    flex: 1;
+    min-height: calc(100vh - 52px - 52px);
+}
+
+/* Sidebar */
+.res-sidebar {
+    flex: 0 0 220px;
+    background: var(--bg-alt);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 52px);
+}
+
+.res-sidebar-inner {
+    padding: 20px 12px 40px;
+}
+
+.res-sidebar-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin: 24px 0 6px;
+    padding: 0 8px;
+    font-family: system-ui, sans-serif;
+    font-weight: 600;
+}
+
+.res-sidebar-label:first-child { margin-top: 4px; }
+
+.res-nav-link {
+    display: block;
+    padding: 7px 8px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 5px;
+    font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.3;
+}
+
+.res-nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.res-nav-link.active { color: var(--text); background: rgba(255,255,255,0.08); }
+
+/* Main content */
+.res-main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0 80px;
+}
+
+.res-section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 960px;
+}
+
+.res-section.active { display: block; }
+
+.res-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+}
+
+.res-h2 {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    margin: 32px 0 12px;
+    color: var(--text);
+}
+
+.res-desc {
+    color: var(--text-secondary);
+    margin: 0 0 28px;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+}
+
+.res-text {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    margin: 0 0 12px;
+    line-height: 1.7;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.res-note {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-family: system-ui, -apple-system, sans-serif;
+    font-style: italic;
+    margin-top: 8px;
+}
+
+/* Callouts */
+.res-callout {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-left: 3px solid rgba(255,255,255,0.3);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 0.875rem;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 24px 0;
+}
+
+.res-callout strong { color: var(--text); }
+
+.res-callout-warn {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.05);
+}
+
+/* Tables */
+.res-table-wrap {
+    overflow-x: auto;
+    margin: 4px 0 16px;
+}
+
+.res-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.res-table th {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.res-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.res-table tr:hover td { background: rgba(255,255,255,0.02); }
+.positive { color: #6ee7b7; }
+.negative { color: #f87171; }
+
+/* Lists */
+.res-list {
+    color: var(--text-secondary);
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    padding-left: 20px;
+    margin: 0 0 16px;
+}
+
+.res-list li { margin-bottom: 4px; }
+.res-list strong { color: var(--text); }
+
+/* Checklists */
+.res-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checklist-item {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+}
+
+/* Steps */
+.res-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 0 16px;
+}
+
+.res-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.step-num {
+    flex: 0 0 28px;
+    height: 28px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 1px;
+}
+
+.res-step strong { color: var(--text); }
+
+/* External links */
+.res-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0 16px;
+}
+
+.res-ext-link {
+    display: inline-block;
+    padding: 7px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    font-family: system-ui, -apple-system, sans-serif;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.res-ext-link:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.3);
+}
+
+/* Card grids */
+.res-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin: 4px 0 16px;
+}
+
+.res-card {
+    display: block;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.res-card:hover {
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.04);
+}
+
+.res-card-featured {
+    border-color: rgba(255,255,255,0.2);
+}
+
+.res-card-title {
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.res-card-desc {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.res-card-tag {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Color code grid (utility colors) */
+.color-code-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.color-chip {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px;
+    border-radius: 6px;
+    gap: 4px;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.color-chip span:first-child {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: inherit;
+}
+
+.color-chip span:last-child {
+    font-size: 0.8125rem;
+    color: inherit;
+    opacity: 0.85;
+}
+
+/* Company cards */
+.company-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.company-card {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    font-family: system-ui, -apple-system, sans-serif;
+    transition: border-color 0.15s;
+}
+
+.company-card:hover { border-color: rgba(255,255,255,0.2); }
+
+.company-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.company-name a {
+    color: inherit;
+    text-decoration: none;
+}
+.company-name a:hover { text-decoration: underline; }
+
+.company-location {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.company-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.company-tag {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.07);
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.company-tag.tag-esop { background: rgba(110,231,183,0.1); color: #6ee7b7; }
+.company-tag.tag-public { background: rgba(96,165,250,0.1); color: #60a5fa; }
+.company-tag.tag-pe { background: rgba(251,191,36,0.1); color: #fbbf24; }
+
+.company-revenue {
+    font-size: 0.875rem;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.company-desc {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Filter buttons */
+.company-filter-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.co-filter {
+    padding: 6px 12px;
+    font-size: 0.8125rem;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.co-filter:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+.co-filter.active { background: rgba(255,255,255,0.1); color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+/* Ownership cards */
+.ownership-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.ownership-card {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ownership-card-title {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.ownership-card-body {
+    padding: 14px 16px;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+}
+
+.ownership-card-body p { margin: 0 0 8px; }
+.ownership-card-body p:last-child { margin: 0; }
+.ownership-card-body strong { color: var(--text); }
+
+/* Glossary */
+.glossary-search-wrap { margin-bottom: 20px; }
+
+.glossary-search {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 0.9375rem;
+    font-family: system-ui, -apple-system, sans-serif;
+    outline: none;
+}
+
+.glossary-search:focus { border-color: rgba(255,255,255,0.3); }
+
+.glossary-grid {
+    columns: 2;
+    column-gap: 32px;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.glossary-entry {
+    break-inside: avoid;
+    margin-bottom: 14px;
+}
+
+.glossary-term {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+
+.glossary-def {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .res-sidebar { display: none; }
+    .res-section { padding: 24px 20px; }
+    .res-card-grid, .company-grid, .ownership-cards { grid-template-columns: 1fr; }
+    .glossary-grid { columns: 1; }
+}

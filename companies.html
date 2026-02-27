@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Companies – openmud</title>
+    <meta name="description" content="Directory of major construction companies: Utah contractors, ENR Top 400, ESOP employee-owned companies, public vs private breakdown, and revenue data.">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/resources.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">openmud</a>
+            <nav class="nav">
+                <a href="/about.html">About</a>
+                <a href="/calculators.html">Calculators</a>
+                <a href="/resources.html">Resources</a>
+                <a href="/companies.html" style="color:var(--text)">Companies</a>
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
+                <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="res-layout">
+        <aside class="res-sidebar">
+            <div class="res-sidebar-inner">
+                <p class="res-sidebar-label">By Region</p>
+                <a href="#utah" class="res-nav-link active" data-section="utah">Utah Contractors</a>
+                <a href="#mountain-west" class="res-nav-link" data-section="mountain-west">Mountain West</a>
+                <a href="#national" class="res-nav-link" data-section="national">ENR Top 25 National</a>
+
+                <p class="res-sidebar-label">By Type</p>
+                <a href="#esop" class="res-nav-link" data-section="esop">ESOP / Employee-Owned</a>
+                <a href="#public" class="res-nav-link" data-section="public">Public Companies</a>
+                <a href="#underground" class="res-nav-link" data-section="underground">Underground Specialty</a>
+
+                <p class="res-sidebar-label">Industry Intel</p>
+                <a href="#what-is-esop" class="res-nav-link" data-section="what-is-esop">What is an ESOP?</a>
+                <a href="#ownership-types" class="res-nav-link" data-section="ownership-types">Ownership Types Explained</a>
+                <a href="#market-data" class="res-nav-link" data-section="market-data">Market Data & Trends</a>
+            </div>
+        </aside>
+
+        <main class="res-main">
+
+            <!-- Utah -->
+            <section class="res-section active" id="section-utah">
+                <h1 class="res-title">Utah Construction Companies</h1>
+                <p class="res-desc">Major construction contractors based in or operating heavily in Utah. Data sourced from ENR, company websites, and public filings. Revenue figures are approximate and may be dated — treat as order-of-magnitude.</p>
+
+                <div class="company-filter-row">
+                    <button class="co-filter active" onclick="filterCompanies('utah', 'all', this)">All</button>
+                    <button class="co-filter" onclick="filterCompanies('utah', 'heavy-civil', this)">Heavy Civil</button>
+                    <button class="co-filter" onclick="filterCompanies('utah', 'underground', this)">Underground</button>
+                    <button class="co-filter" onclick="filterCompanies('utah', 'gc', this)">General Contractor</button>
+                </div>
+
+                <div class="company-grid" id="utah-grid"></div>
+
+                <div class="res-callout" style="margin-top:32px">
+                    <strong>Know a Utah contractor that should be here?</strong> <a href="https://github.com/masonearl/openmud/issues/new?template=feature_request.md&title=%5BFEATURE%5D+Add+company+to+directory:+..." target="_blank" rel="noopener" class="link">Open a GitHub issue</a>. This directory is community-maintained — if you have better revenue data or corrections, submit a PR to the <code>companies.html</code> file.
+                </div>
+            </section>
+
+            <!-- Mountain West -->
+            <section class="res-section" id="section-mountain-west">
+                <h1 class="res-title">Mountain West Contractors</h1>
+                <p class="res-desc">Major contractors operating across Utah, Colorado, Nevada, Arizona, Idaho, and the broader Mountain West region.</p>
+                <div class="company-grid" id="mw-grid"></div>
+            </section>
+
+            <!-- National ENR -->
+            <section class="res-section" id="section-national">
+                <h1 class="res-title">ENR Top 25 National Contractors</h1>
+                <p class="res-desc">The 25 largest U.S. contractors by revenue per ENR 2025 Top 400 list. Combined, the Top 400 reported $600 billion in 2024 revenue. Source: <a href="https://www.enr.com/toplists/2025-Top-400-Contractors-1-preview" target="_blank" rel="noopener" class="link">ENR 2025 Top 400 ↗</a></p>
+
+                <div class="res-callout">
+                    <strong>2024 market growth:</strong> Sewer/waste +23.7% · Power +18.9% · Transportation +11.4% · Telecom +59.7%. Total Top 400 revenue up 7.9% YoY. Source: ENR 2025.
+                </div>
+
+                <div class="company-grid" id="national-grid"></div>
+            </section>
+
+            <!-- ESOP -->
+            <section class="res-section" id="section-esop">
+                <h1 class="res-title">ESOP & Employee-Owned Contractors</h1>
+                <p class="res-desc">Employee Stock Ownership Plan (ESOP) companies are 100% or majority employee-owned. In heavy civil, ESOP companies often have stronger culture, lower turnover, and competitive compensation. See <a href="#what-is-esop" class="link" onclick="showSection('what-is-esop')">What is an ESOP?</a> for more.</p>
+
+                <div class="company-grid" id="esop-grid"></div>
+
+                <div class="res-callout" style="margin-top:32px">
+                    <strong>Why ESOP matters in heavy civil:</strong> Employee-owners have a direct financial stake in project performance and company health. Studies consistently show ESOP companies outperform on retention, safety records, and long-term financial stability. For contractors, it's also a powerful succession planning tool.
+                </div>
+            </section>
+
+            <!-- Public Companies -->
+            <section class="res-section" id="section-public">
+                <h1 class="res-title">Publicly Traded Construction Companies</h1>
+                <p class="res-desc">Construction companies with publicly traded stock. Financial data is publicly available via SEC filings. These are the companies you can invest in, and whose financials give a window into industry health.</p>
+
+                <div class="company-grid" id="public-grid"></div>
+
+                <h2 class="res-h2" style="margin-top:40px">Where to find their financials</h2>
+                <div class="res-links">
+                    <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=10-K&dateb=&owner=include&count=40" target="_blank" rel="noopener" class="res-ext-link">SEC EDGAR — Annual Reports (10-K) ↗</a>
+                    <a href="https://finance.yahoo.com" target="_blank" rel="noopener" class="res-ext-link">Yahoo Finance ↗</a>
+                    <a href="https://www.macrotrends.net" target="_blank" rel="noopener" class="res-ext-link">Macrotrends — Revenue history ↗</a>
+                </div>
+            </section>
+
+            <!-- Underground Specialty -->
+            <section class="res-section" id="section-underground">
+                <h1 class="res-title">Underground Utility Specialty Contractors</h1>
+                <p class="res-desc">Companies that specialize in or are major players in underground utility construction — waterline, sewer, storm drain, gas, and electrical distribution.</p>
+                <div class="company-grid" id="underground-grid"></div>
+            </section>
+
+            <!-- What is an ESOP -->
+            <section class="res-section" id="section-what-is-esop">
+                <h1 class="res-title">What is an ESOP?</h1>
+                <p class="res-desc">An Employee Stock Ownership Plan (ESOP) is a qualified retirement plan that holds company stock on behalf of employees. In an ESOP company, employees gradually become owners of the company — typically without paying for the stock out of pocket.</p>
+
+                <h2 class="res-h2">How it works</h2>
+                <ul class="res-list">
+                    <li><strong>The company sets up an ESOP trust</strong> — a legal entity that holds shares on behalf of employees</li>
+                    <li><strong>Shares are allocated annually</strong> to employee accounts, typically based on compensation or years of service</li>
+                    <li><strong>Vesting schedule</strong> — employees typically vest over 3–6 years (meaning they earn full ownership over time)</li>
+                    <li><strong>When employees leave or retire</strong>, the ESOP buys back their shares at fair market value — providing a real payout</li>
+                    <li><strong>Tax advantages</strong> — ESOP companies get significant tax benefits; S-corp ESOPs may pay no federal income tax on the ESOP-owned portion</li>
+                </ul>
+
+                <h2 class="res-h2">Why contractors go ESOP</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Reason</th><th>How it works</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Succession planning</strong></td><td>Owner wants to retire without selling to a competitor or private equity. ESOP lets employees buy the company gradually, often at a tax-advantaged price.</td></tr>
+                            <tr><td><strong>Recruiting & retention</strong></td><td>"You're an owner" is a genuine statement, not a slogan. Employees build real wealth. Turnover drops dramatically.</td></tr>
+                            <tr><td><strong>Tax benefits</strong></td><td>S-corp ESOPs can eliminate federal income tax on ESOP-owned profit. Significant cash flow advantage over time.</td></tr>
+                            <tr><td><strong>Culture</strong></td><td>Employee-owners have skin in the game. Safety improves, waste decreases, people care more about project outcomes.</td></tr>
+                            <tr><td><strong>Protect from PE/acquisition</strong></td><td>ESOP protects a company's culture and local identity from being sold to private equity or a national firm.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">ESOP vs other ownership structures</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Structure</th><th>Who owns it</th><th>Liquidity</th><th>Common in construction?</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Private / founder-owned</strong></td><td>Founder, family, partners</td><td>Low — sell or pass down</td><td>Very common (most small–mid contractors)</td></tr>
+                            <tr><td><strong>ESOP</strong></td><td>Employees (via trust)</td><td>Employees get cash on exit</td><td>Growing fast — particularly in heavy civil</td></tr>
+                            <tr><td><strong>Private equity-backed</strong></td><td>PE firm + management</td><td>PE exits in 5–7 years</td><td>Increasingly common as PE rolls up contractors</td></tr>
+                            <tr><td><strong>Publicly traded</strong></td><td>Public shareholders</td><td>High — stock market</td><td>Rare — only the largest firms (Granite, MYR, EMCOR)</td></tr>
+                            <tr><td><strong>Joint venture / partnership</strong></td><td>Two or more firms</td><td>Varies</td><td>Common for large projects</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.nceo.org/articles/esop-employee-stock-ownership-plan" target="_blank" rel="noopener" class="res-ext-link">NCEO — ESOP Overview ↗</a>
+                    <a href="https://www.prairiecap.com/article/prairies-6th-annual-esop-construction-survey-insights-into-2025-and-beyond" target="_blank" rel="noopener" class="res-ext-link">2025 ESOP Construction Survey ↗</a>
+                    <a href="https://www.certifiedeo.com/companies" target="_blank" rel="noopener" class="res-ext-link">Certified Employee-Owned Directory ↗</a>
+                </div>
+            </section>
+
+            <!-- Ownership Types -->
+            <section class="res-section" id="section-ownership-types">
+                <h1 class="res-title">Construction Company Ownership Types</h1>
+                <p class="res-desc">Understanding who owns a contractor and what that means for how they operate, how they bid, and what their long-term priorities are.</p>
+
+                <div class="ownership-cards">
+                    <div class="ownership-card">
+                        <div class="ownership-card-title">Private / Founder-Owned</div>
+                        <div class="ownership-card-body">
+                            <p>Owner or founding family holds equity. Decisions are made close to the work. Culture tends to reflect the founder's values directly.</p>
+                            <p><strong>Typical size:</strong> Small to large ($1M–$500M+)</p>
+                            <p><strong>Bid behavior:</strong> Can be aggressive or conservative depending on backlog and owner's risk tolerance</p>
+                            <p><strong>Examples:</strong> Most small and mid-sized contractors you compete against locally</p>
+                        </div>
+                    </div>
+                    <div class="ownership-card">
+                        <div class="ownership-card-title">ESOP (Employee-Owned)</div>
+                        <div class="ownership-card-body">
+                            <p>Employees are the ultimate owners through a trust structure. Strong retention incentive. Often structured as S-corp for tax benefits.</p>
+                            <p><strong>Typical size:</strong> Mid to large ($50M–$2B+)</p>
+                            <p><strong>Bid behavior:</strong> Stable — employees think long-term. Less likely to take risky low-bid work.</p>
+                            <p><strong>Examples:</strong> Emery Sapp & Sons, Achen-Gardner, ESCO Construction, Rummel Construction</p>
+                        </div>
+                    </div>
+                    <div class="ownership-card">
+                        <div class="ownership-card-title">Private Equity-Backed</div>
+                        <div class="ownership-card-body">
+                            <p>PE firm invested and is driving toward a 5–7 year exit (sale or IPO). Growth focus. May be rolling up smaller contractors in a platform strategy.</p>
+                            <p><strong>Typical size:</strong> $50M–$1B+</p>
+                            <p><strong>Bid behavior:</strong> Aggressive on volume, focused on EBITDA margins. May underbid to win work and grow top line.</p>
+                            <p><strong>Examples:</strong> ESS Companies portfolio, various regional rollups</p>
+                        </div>
+                    </div>
+                    <div class="ownership-card">
+                        <div class="ownership-card-title">Publicly Traded</div>
+                        <div class="ownership-card-body">
+                            <p>Stock listed on NYSE or NASDAQ. Quarterly earnings pressure. Fully transparent financials via SEC filings.</p>
+                            <p><strong>Typical size:</strong> $1B–$20B+</p>
+                            <p><strong>Bid behavior:</strong> Volume-focused, margin-sensitive, driven by analyst expectations</p>
+                            <p><strong>Examples:</strong> Granite Construction (GVA), MYR Group (MYRG), EMCOR (EME), Primoris (PRIM)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Market Data -->
+            <section class="res-section" id="section-market-data">
+                <h1 class="res-title">Construction Market Data & Trends</h1>
+                <p class="res-desc">Key data points on where the construction market is, where it's going, and what's driving growth in heavy civil and underground utility.</p>
+
+                <h2 class="res-h2">2024–2025 Market Snapshot (ENR / Census Bureau)</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Market Segment</th><th>2024 Growth (YoY)</th><th>Driver</th></tr></thead>
+                        <tbody>
+                            <tr><td>Telecommunications / data centers</td><td class="positive">+59.7%</td><td>AI infrastructure buildout — data center demand is exploding</td></tr>
+                            <tr><td>Sewer & water</td><td class="positive">+23.7%</td><td>Infrastructure Investment & Jobs Act (IIJA) funding flowing through</td></tr>
+                            <tr><td>Power / electrical</td><td class="positive">+18.9%</td><td>Grid modernization, EV infrastructure, renewable energy</td></tr>
+                            <tr><td>Oil & gas</td><td class="positive">+16.6%</td><td>LNG export capacity, natural gas demand</td></tr>
+                            <tr><td>Transportation</td><td class="positive">+11.4%</td><td>IIJA highway and bridge funding</td></tr>
+                            <tr><td>Industrial process</td><td class="negative">-9.9%</td><td>Semiconductor fab buildout slowing after initial wave</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">IIJA Infrastructure Spending (2022–2026)</h2>
+                <ul class="res-list">
+                    <li><strong>$1.2 trillion total</strong> Infrastructure Investment and Jobs Act — the biggest infrastructure bill in U.S. history</li>
+                    <li><strong>$110 billion</strong> for roads and bridges over 5 years</li>
+                    <li><strong>$73 billion</strong> for power grid upgrades</li>
+                    <li><strong>$65 billion</strong> for broadband</li>
+                    <li><strong>$55 billion</strong> for water (clean water, wastewater, lead pipe replacement)</li>
+                    <li><strong>$39 billion</strong> for public transit</li>
+                    <li><strong>$25 billion</strong> for airports</li>
+                </ul>
+                <p class="res-note">Water infrastructure alone ($55B) is the single largest injection of federal money into underground utility construction in history. This is why sewer/water grew 23.7% in 2024 and why the sector is expected to remain elevated through 2028+.</p>
+
+                <h2 class="res-h2">Labor Market</h2>
+                <ul class="res-list">
+                    <li>Construction unemployment: ~4–5% (full employment for the industry)</li>
+                    <li>400,000+ construction job openings unfilled at any given time (AGC data)</li>
+                    <li>Average age of skilled trade worker: 43 years. Retirement wave ongoing.</li>
+                    <li>Apprenticeship enrollments up — but 5–7 year pipeline before they hit the field as journeymen</li>
+                    <li>AI and machine control are not replacing workers — they're allowing fewer workers to do more with equipment</li>
+                </ul>
+
+                <div class="res-links">
+                    <a href="https://www.agc.org/learn/construction-data/workforce-shortage" target="_blank" rel="noopener" class="res-ext-link">AGC Workforce Shortage Data ↗</a>
+                    <a href="https://www.census.gov/construction/c30/c30index.html" target="_blank" rel="noopener" class="res-ext-link">Census Construction Spending ↗</a>
+                    <a href="https://www.enr.com/toplists/2025-Top-400-Contractors-1-preview" target="_blank" rel="noopener" class="res-ext-link">ENR 2025 Top 400 ↗</a>
+                    <a href="https://home.treasury.gov/policy-issues/infrastructure" target="_blank" rel="noopener" class="res-ext-link">IIJA Spending Tracker ↗</a>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> openmud · <a href="https://github.com/masonearl/openmud" class="link" target="_blank" rel="noopener">Open source on GitHub</a> · Data is approximate — <a href="https://github.com/masonearl/openmud/issues" class="link" target="_blank" rel="noopener">submit corrections ↗</a></p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+    <script src="assets/js/companies.js"></script>
+    <script src="assets/js/resources.js"></script>
+</body>
+</html>
