@@ -55,21 +55,36 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "materials": {
                     "type": "array",
-                    "items": {"type": "object", "properties": {
-                    "type": {"type": "string"},
-                    "quantity": {"type": "number"},
-                    "size": {"type": "string"},
-                }},
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "type": {"type": "string"},
+                            "quantity": {"type": "number"},
+                            "size": {"type": "string"},
+                        },
+                    },
                     "description": "List of {type, quantity, size}",
                 },
                 "labor": {
                     "type": "array",
-                    "items": {"type": "object", "properties": {"type": {"type": "string"}, "hours": {"type": "number"}}},
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "type": {"type": "string"},
+                            "hours": {"type": "number"},
+                        },
+                    },
                     "description": "List of {type, hours}",
                 },
                 "equipment": {
                     "type": "array",
-                    "items": {"type": "object", "properties": {"type": {"type": "string"}, "days": {"type": "number"}}},
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "type": {"type": "string"},
+                            "days": {"type": "number"},
+                        },
+                    },
                     "description": "Optional list of {type, days}",
                 },
                 "markup": {"type": "number", "description": "Markup as decimal, e.g. 0.15 for 15%"},

@@ -2,7 +2,6 @@
 Bid & Cost Calculation Tools
 Markup, unit price building, production rates, change orders, crew day costs.
 """
-from typing import Optional
 
 
 def markup_bid_price(
@@ -126,9 +125,17 @@ def change_order_tm(
     total = subtotal_plus_op + bond
 
     return {
-        "labor_items": [{"description": i["description"], "hours": i["hours"], "rate": i["rate"], "cost": round(i["hours"] * i["rate"], 2)} for i in labor_items],
+        "labor_items": [
+            {"description": i["description"], "hours": i["hours"],
+             "rate": i["rate"], "cost": round(i["hours"] * i["rate"], 2)}
+            for i in labor_items
+        ],
         "labor_total": round(labor_total, 2),
-        "equipment_items": [{"description": i["description"], "hours": i["hours"], "rate": i["rate"], "cost": round(i["hours"] * i["rate"], 2)} for i in equipment_items],
+        "equipment_items": [
+            {"description": i["description"], "hours": i["hours"],
+             "rate": i["rate"], "cost": round(i["hours"] * i["rate"], 2)}
+            for i in equipment_items
+        ],
         "equipment_total": round(equip_total, 2),
         "material_cost": round(material_cost, 2),
         "subtotal": round(subtotal, 2),
@@ -211,7 +218,11 @@ def crew_day_cost(
     total = subtotal + overhead
 
     return {
-        "labor_items": [{"role": i["role"], "hours": i["hours"], "rate": i["rate"], "cost": round(i["hours"] * i["rate"], 2)} for i in labor_items],
+        "labor_items": [
+            {"role": i["role"], "hours": i["hours"],
+             "rate": i["rate"], "cost": round(i["hours"] * i["rate"], 2)}
+            for i in labor_items
+        ],
         "labor_total": round(labor_total, 2),
         "equipment_items": equipment_items,
         "equipment_total": round(equip_total, 2),

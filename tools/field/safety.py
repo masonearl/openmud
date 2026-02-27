@@ -7,7 +7,6 @@ DISCLAIMER: This module provides general reference information based on OSHA
 competent person on site. Conditions vary — do not use this as a substitute
 for on-site evaluation.
 """
-from dataclasses import dataclass
 
 
 OSHA_SLOPES = {

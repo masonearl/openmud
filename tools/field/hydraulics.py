@@ -4,7 +4,6 @@ Manning's equation, flow capacity, minimum slope, and velocity calculations
 for gravity-flow storm drain, sanitary sewer, and culverts.
 """
 import math
-from typing import Optional
 
 # Manning's n values for common pipe materials
 MANNINGS_N = {
@@ -57,8 +56,10 @@ def pipe_flow_full(diameter_in: float, slope: float, n: float = 0.013) -> dict:
     }
 
 
-def pipe_flow_partial(diameter_in: float, slope: float, depth_ratio: float = 0.8,
-                       n: float = 0.013) -> dict:
+def pipe_flow_partial(
+    diameter_in: float, slope: float,
+    depth_ratio: float = 0.8, n: float = 0.013,
+) -> dict:
     """
     Calculate partial-flow pipe capacity using Manning's equation.
 
@@ -116,8 +117,10 @@ def pipe_flow_partial(diameter_in: float, slope: float, depth_ratio: float = 0.8
     }
 
 
-def minimum_slope(diameter_in: float, target_velocity_fps: float = 2.5,
-                   n: float = 0.011) -> dict:
+def minimum_slope(
+    diameter_in: float, target_velocity_fps: float = 2.5,
+    n: float = 0.011,
+) -> dict:
     """
     Calculate minimum pipe slope to achieve a target self-cleaning velocity.
     Based on Manning's equation solved for slope: S = (V * n / R^(2/3))^2
@@ -150,8 +153,10 @@ def minimum_slope(diameter_in: float, target_velocity_fps: float = 2.5,
     }
 
 
-def flow_to_slope(diameter_in: float, target_flow_gpm: float,
-                   n: float = 0.013, depth_ratio: float = 1.0) -> dict:
+def flow_to_slope(
+    diameter_in: float, target_flow_gpm: float,
+    n: float = 0.013, depth_ratio: float = 1.0,
+) -> dict:
     """
     Solve for slope needed to convey a target flow at given depth.
 
