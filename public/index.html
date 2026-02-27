@@ -105,10 +105,16 @@
 
     <!-- Search results overlay — outside hero so overflow:hidden doesn't clip it -->
     <div class="lp-search-results" id="search-results">
+        <div class="lp-sr-header">
+            <div class="lp-sr-query-bar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lp-sr-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <span class="lp-sr-query-text" id="sr-query-text"></span>
+            </div>
+            <button class="lp-sr-esc" onclick="closeSearch()">esc</button>
+        </div>
         <div class="lp-search-results-inner">
             <div class="lp-search-answer" id="search-answer"></div>
             <div class="lp-search-sources" id="search-sources"></div>
-            <button class="lp-search-close" onclick="closeSearch()">Close ×</button>
         </div>
     </div>
     <div class="lp-search-backdrop" id="search-backdrop" onclick="closeSearch()"></div>
@@ -385,6 +391,7 @@
             const answerEl = document.getElementById('search-answer');
             const sourcesEl = document.getElementById('search-sources');
 
+            document.getElementById('sr-query-text').textContent = query;
             resultsEl.classList.add('visible');
             backdropEl.classList.add('visible');
             document.body.style.overflow = 'hidden';
