@@ -52,16 +52,11 @@
 
     <!-- Hero with YouTube background -->
     <section class="lp-hero-video-wrap">
-        <!-- YouTube background -->
+        <!-- Self-hosted background video -->
         <div class="lp-video-bg" aria-hidden="true">
-            <iframe id="yt-bg"
-                src="https://www.youtube.com/embed/XCMHzo3NMR4?autoplay=1&mute=1&loop=1&playlist=XCMHzo3NMR4&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&playsinline=1&vq=hd1080"
-                allow="autoplay; encrypted-media"
-                allowfullscreen
-                frameborder="0"
-                title="Construction background video"
-                style="pointer-events: none; user-select: none;">
-            </iframe>
+            <video id="bg-video" autoplay muted playsinline preload="metadata">
+                <source src="/video/bg1.mp4" type="video/mp4">
+            </video>
         </div>
         <div class="lp-video-overlay" aria-hidden="true"></div>
 
@@ -523,6 +518,20 @@
         });
 
         startPlaceholderCycle();
+
+        // Cycle through background videos
+        (function() {
+            var videos = ['/video/bg1.mp4', '/video/bg2.mp4', '/video/bg3.mp4'];
+            var idx = 0;
+            var vid = document.getElementById('bg-video');
+            if (!vid) return;
+            vid.addEventListener('ended', function() {
+                idx = (idx + 1) % videos.length;
+                vid.src = videos[idx];
+                vid.load();
+                vid.play();
+            });
+        })();
     </script>
 </body>
 </html>
