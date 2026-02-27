@@ -3,7 +3,6 @@ Trench & Excavation Calculation Tools
 Volume takeoff, backfill quantities, spoil haul, pipe bedding, and thrust blocks.
 """
 import math
-from typing import Optional
 
 
 def trench_volume(
@@ -113,7 +112,10 @@ def thrust_block(
         try:
             angle_deg = float(fitting_type)
         except ValueError:
-            raise ValueError(f"Unknown fitting type: {fitting_type}. Use '90', '45', '22.5', '11.25', 'tee', or 'dead_end'")
+            raise ValueError(
+                f"Unknown fitting type: {fitting_type}. "
+                "Use '90', '45', '22.5', '11.25', 'tee', or 'dead_end'"
+            )
         thrust = 2 * P_psf * A_pipe * math.sin(math.radians(angle_deg / 2))
         label = f"{angle_deg}° bend"
         angle = angle_deg
@@ -205,15 +207,15 @@ def concrete_volume(
     price_per_cy = concrete_prices.get(psi, 180)
 
     if shape == "slab":
-        l = dimensions["length_ft"]
+        length = dimensions["length_ft"]
         w = dimensions["width_ft"]
         t = dimensions.get("thickness_in", 6) / 12
-        volume_cf = l * w * t
+        volume_cf = length * w * t
     elif shape == "wall":
-        l = dimensions["length_ft"]
+        length = dimensions["length_ft"]
         h = dimensions["height_ft"]
         t = dimensions.get("thickness_in", 12) / 12
-        volume_cf = l * h * t
+        volume_cf = length * h * t
     elif shape in ("cylinder", "manhole", "vault"):
         od = dimensions["od_ft"]
         id_ = dimensions.get("id_ft", 0)

@@ -46,7 +46,8 @@ def render_proposal_html(
         )
 
     return (
-        '<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;">'
+        '<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;'
+        'padding:40px;max-width:700px;margin:0 auto;">'
         "<h1 style='margin:0 0 8px;'>Proposal</h1>"
         f"<p style='color:#666;margin:0 0 24px;'>{client}</p>"
         "<h2 style='font-size:1.1rem;margin:24px 0 8px;'>Scope</h2>"

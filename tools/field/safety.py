@@ -8,7 +8,6 @@ competent person on site. Conditions vary — do not use this as a substitute
 for on-site evaluation.
 """
 from dataclasses import dataclass
-from typing import Optional
 
 
 OSHA_SLOPES = {
@@ -18,9 +17,19 @@ OSHA_SLOPES = {
 }
 
 SOIL_DESCRIPTIONS = {
-    "A": "Cohesive soils with unconfined compressive strength ≥ 1.5 tsf (stiff clay, hardpan). No fissuring, no recent disturbance.",
-    "B": "Cohesive or granular with strength 0.5–1.5 tsf. Includes angular gravel, silty clay, previously disturbed Type A, or fissured soils.",
-    "C": "Cohesive soils with strength < 0.5 tsf, submerged soils, granular soils (sand, gravel), layered systems sloping into excavation, or soil subject to water infiltration.",
+    "A": (
+        "Cohesive soils with unconfined compressive strength ≥ 1.5 tsf "
+        "(stiff clay, hardpan). No fissuring, no recent disturbance."
+    ),
+    "B": (
+        "Cohesive or granular with strength 0.5–1.5 tsf. Includes angular "
+        "gravel, silty clay, previously disturbed Type A, or fissured soils."
+    ),
+    "C": (
+        "Cohesive soils with strength < 0.5 tsf, submerged soils, granular "
+        "soils (sand, gravel), layered systems sloping into excavation, or "
+        "soil subject to water infiltration."
+    ),
 }
 
 
@@ -51,11 +60,17 @@ def trench_safety(
         "soil_description": SOIL_DESCRIPTIONS[soil_type],
         "method": method,
         "protective_system_required": depth_ft > 4,
-        "disclaimer": "REFERENCE ONLY. All decisions must be made by a competent person per OSHA 29 CFR 1926.652.",
+        "disclaimer": (
+            "REFERENCE ONLY. All decisions must be made by a competent "
+            "person per OSHA 29 CFR 1926.652."
+        ),
     }
 
     if depth_ft <= 4:
-        result["note"] = "Trench ≤ 4 ft: Protective system not required by OSHA, but competent person must still evaluate hazards."
+        result["note"] = (
+            "Trench ≤ 4 ft: Protective system not required by OSHA, "
+            "but competent person must still evaluate hazards."
+        )
         return result
 
     slope_info = OSHA_SLOPES[soil_type]
@@ -69,13 +84,21 @@ def trench_safety(
             "horizontal_setback_each_side_ft": round(setback, 2),
             "additional_top_width_ft": round(top_width_additional, 2),
             "notes": [
-                f"Maximum slope {slope_info['ratio']} — for every 1 ft of depth, trench top must be wider by {h_ratio} ft on each side.",
+                (
+                    f"Maximum slope {slope_info['ratio']} — for every 1 ft "
+                    f"of depth, trench top must be wider by {h_ratio} ft "
+                    "on each side."
+                ),
                 "Spoil must be placed minimum 2 ft from trench edge.",
                 "All surface encumbrances and underground utilities must be addressed before excavation.",
             ],
         })
         if soil_type == "C":
-            result["warning"] = "Type C requires 1.5:1 slope — excavation face will be 1.5× the depth on each side. Significant right-of-way may be needed."
+            result["warning"] = (
+                "Type C requires 1.5:1 slope — excavation face will be "
+                "1.5× the depth on each side. Significant right-of-way "
+                "may be needed."
+            )
 
     elif method == "bench":
         if soil_type == "C":

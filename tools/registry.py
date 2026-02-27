@@ -3,13 +3,16 @@ openmud Tool Registry
 Defines all available tools with OpenAI-compatible function schemas for tool calling.
 """
 
-from typing import Any, Callable, Dict, List
+from typing import Any, Dict, List
 
 # Tool definitions with OpenAI function-calling schema
 TOOL_DEFINITIONS = [
     {
         "name": "calculate_material_cost",
-        "description": "Calculate material cost for construction. Use for pipe, concrete, rebar. Returns unit cost, total, and waste factor.",
+        "description": (
+            "Calculate material cost for construction. Use for pipe, "
+            "concrete, rebar. Returns unit cost, total, and waste factor."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
@@ -52,7 +55,11 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "materials": {
                     "type": "array",
-                    "items": {"type": "object", "properties": {"type": {"type": "string"}, "quantity": {"type": "number"}, "size": {"type": "string"}}},
+                    "items": {"type": "object", "properties": {
+                    "type": {"type": "string"},
+                    "quantity": {"type": "number"},
+                    "size": {"type": "string"},
+                }},
                     "description": "List of {type, quantity, size}",
                 },
                 "labor": {
@@ -106,7 +113,14 @@ TOOL_DEFINITIONS = [
 def get_all_tools() -> List[Dict[str, Any]]:
     """Return all tools in OpenAI function format."""
     return [
-        {"type": "function", "function": {"name": t["name"], "description": t["description"], "parameters": t["parameters"]}}
+        {
+            "type": "function",
+            "function": {
+                "name": t["name"],
+                "description": t["description"],
+                "parameters": t["parameters"],
+            },
+        }
         for t in TOOL_DEFINITIONS
     ]
 

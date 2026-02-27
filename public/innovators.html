@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovators – openmud</title>
+    <meta name="description" content="The construction tech frontier — drones, autonomous equipment, AI on the job site, new techniques, and the people pushing the industry forward. Discuss, share, and build.">
+    <link rel="stylesheet" href="css/landing.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+    <style>
+        .inv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .inv-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-decoration: none;
+            transition: border-color 0.15s, background 0.15s;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .inv-card:hover {
+            border-color: var(--earth);
+            background: var(--bg-card-hover);
+        }
+
+        .inv-card-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .inv-card-tag {
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--earth);
+            font-weight: 600;
+        }
+
+        .inv-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        .inv-card-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .inv-card-footer {
+            font-size: 0.8rem;
+            color: var(--earth);
+            margin-top: 4px;
+        }
+
+        /* Video embeds */
+        .inv-video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .inv-video-wrap {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #000;
+        }
+
+        .inv-video-wrap iframe {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border: none;
+            display: block;
+        }
+
+        .inv-video-label {
+            padding: 12px 14px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+        }
+
+        .inv-video-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .inv-video-sub {
+            font-size: 0.775rem;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        /* Discussion topics */
+        .inv-topics {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 32px;
+        }
+
+        .inv-topic {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-decoration: none;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .inv-topic:hover {
+            border-color: var(--earth);
+            background: var(--bg-card-hover);
+        }
+
+        .inv-topic-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            width: 36px;
+            text-align: center;
+        }
+
+        .inv-topic-body { flex: 1; min-width: 0; }
+
+        .inv-topic-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .inv-topic-sub {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .inv-topic-arrow {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* CTA banner */
+        .inv-cta {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px 48px;
+            text-align: center;
+            margin-top: 48px;
+        }
+
+        .inv-cta h2 {
+            font-size: clamp(1.25rem, 3vw, 1.75rem);
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .inv-cta p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin: 0 auto 28px;
+            line-height: 1.7;
+        }
+
+        .inv-cta-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 640px) {
+            .inv-grid { grid-template-columns: 1fr; }
+            .inv-video-grid { grid-template-columns: 1fr; }
+            .inv-cta { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="lp-nav">
+        <a href="/" class="lp-nav-logo"><img src="/images/logo-white.png" alt="openmud"></a>
+        <div class="lp-nav-links">
+            <a href="/chat.html">AI Chat</a>
+            <a href="/calculators.html">Calculators</a>
+            <a href="/resources.html">Resources</a>
+            <a href="/innovators.html" style="color:var(--text)">Innovators</a>
+            <a href="/companies.html">Companies</a>
+            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
+            <a href="/chat.html" class="lp-nav-cta">Try it free →</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="lp-hero" style="padding-bottom: 64px;">
+        <p class="lp-section-label" style="margin-bottom:16px">Innovators</p>
+        <h1 class="lp-hero-title" style="font-size: clamp(2rem,5vw,3.5rem)">
+            The job site is<br><em>getting smarter.</em>
+        </h1>
+        <p class="lp-hero-sub">
+            Drones mapping excavations. Autonomous dozers grading to the millimeter. AI reading soil reports and writing RFIs. This is where heavy civil is going — discuss it, share it, build it.
+        </p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:8px;">
+            <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="lp-btn-primary">Join the discussion →</a>
+            <a href="#topics" class="lp-btn-secondary">Browse topics</a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Innovation Areas -->
+    <section class="lp-section">
+        <p class="lp-section-label">What's changing</p>
+        <h2 class="lp-section-title">The technology reshaping heavy civil.</h2>
+
+        <div class="inv-grid">
+            <a href="https://github.com/masonearl/openmud/discussions/categories/drones-uav" target="_blank" rel="noopener" class="inv-card">
+                <div class="inv-card-icon">🚁</div>
+                <div class="inv-card-tag">Drones & UAV</div>
+                <div class="inv-card-title">Aerial surveying, photogrammetry, and progress tracking</div>
+                <div class="inv-card-desc">LiDAR-equipped drones cutting survey time from days to hours. Volume calculations from flight data. Real-time cut/fill comparisons against design models. DJI, Skydio, senseFly — what's actually working on job sites.</div>
+                <div class="inv-card-footer">Discuss →</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions/categories/autonomous-equipment" target="_blank" rel="noopener" class="inv-card">
+                <div class="inv-card-icon">🚜</div>
+                <div class="inv-card-tag">Autonomous Equipment</div>
+                <div class="inv-card-title">GPS machine control, autonomous dozers, and robotic excavation</div>
+                <div class="inv-card-desc">Komatsu Smart Construction. Caterpillar's autonomous mining trucks. Trimble and Leica machine control retrofits. How grade control systems are changing what an operator needs to know — and what the next generation of machines looks like.</div>
+                <div class="inv-card-footer">Discuss →</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions/categories/ai-on-site" target="_blank" rel="noopener" class="inv-card">
+                <div class="inv-card-icon">🤖</div>
+                <div class="inv-card-tag">AI on the Job Site</div>
+                <div class="inv-card-title">AI for estimating, scheduling, RFIs, and field decisions</div>
+                <div class="inv-card-desc">LLMs reading geotech reports and flagging inconsistencies. AI generating RFI responses from spec sheets. Automated schedule updates from daily reports. What actually works vs. what's vaporware — real contractor experiences.</div>
+                <div class="inv-card-footer">Discuss →</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions/categories/underground-tech" target="_blank" rel="noopener" class="inv-card">
+                <div class="inv-card-icon">🔩</div>
+                <div class="inv-card-tag">Underground Tech</div>
+                <div class="inv-card-title">HDD, pipe bursting, CIPP lining, and trenchless innovation</div>
+                <div class="inv-card-desc">Horizontal directional drilling with real-time bore path correction. Cured-in-place pipe lining for rehabilitation without dig-up. Microtunneling on urban projects. When trenchless beats open cut on cost — and when it doesn't.</div>
+                <div class="inv-card-footer">Discuss →</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions/categories/software-tools" target="_blank" rel="noopener" class="inv-card">
+                <div class="inv-card-icon">⚙️</div>
+                <div class="inv-card-tag">Software & Tools</div>
+                <div class="inv-card-title">Project management, takeoff, BIM, and open-source contech</div>
+                <div class="inv-card-desc">Procore vs. Autodesk Construction Cloud vs. building your own. AGTEK for earthwork. BlueBeam on the field tablet. What the $1.2T IIJA is doing to software adoption. Open source tools that actually get used.</div>
+                <div class="inv-card-footer">Discuss →</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions/categories/techniques" target="_blank" rel="noopener" class="inv-card">
+                <div class="inv-card-icon">🏗️</div>
+                <div class="inv-card-tag">Techniques & Methods</div>
+                <div class="inv-card-title">Digging methods, compaction, pipe installation, and field knowledge</div>
+                <div class="inv-card-desc">The tricks nobody teaches in the office. Rock breaking vs. ripping. Compaction spec compliance in tight spaces. Water management during deep excavations. Share what you've figured out the hard way so the next crew doesn't have to.</div>
+                <div class="inv-card-footer">Discuss →</div>
+            </a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Featured Videos -->
+    <section class="lp-section">
+        <p class="lp-section-label">Worth watching</p>
+        <h2 class="lp-section-title">Construction tech on video.</h2>
+        <p style="color: var(--text-secondary); font-size:0.9375rem; margin-top:12px; max-width:580px;">
+            The best way to understand what's actually happening in the field. From autonomous equipment demos to underground installation technique breakdowns.
+        </p>
+
+        <div class="inv-video-grid">
+            <div class="inv-video-wrap">
+                <iframe
+                    src="https://www.youtube.com/embed/rEyLKMqHLG0"
+                    title="Komatsu Smart Construction autonomous dozer"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy">
+                </iframe>
+                <div class="inv-video-label">
+                    <div class="inv-video-title">Komatsu Smart Construction</div>
+                    <div class="inv-video-sub">Autonomous dozer grading — GPS machine control in action</div>
+                </div>
+            </div>
+            <div class="inv-video-wrap">
+                <iframe
+                    src="https://www.youtube.com/embed/Lu56xVlZ40U"
+                    title="Drone surveying construction site photogrammetry"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy">
+                </iframe>
+                <div class="inv-video-label">
+                    <div class="inv-video-title">Drone Surveying & Photogrammetry</div>
+                    <div class="inv-video-sub">LiDAR mapping and volume calculations from flight data</div>
+                </div>
+            </div>
+            <div class="inv-video-wrap">
+                <iframe
+                    src="https://www.youtube.com/embed/tF4DML7FIWk"
+                    title="Horizontal directional drilling HDD"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy">
+                </iframe>
+                <div class="inv-video-label">
+                    <div class="inv-video-title">Horizontal Directional Drilling</div>
+                    <div class="inv-video-sub">Trenchless pipe installation — process, equipment, and applications</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Discussion Topics -->
+    <section class="lp-section" id="topics">
+        <p class="lp-section-label">Open discussions</p>
+        <h2 class="lp-section-title">What the industry is talking about.</h2>
+        <p style="color: var(--text-secondary); font-size:0.9375rem; margin-top:12px; max-width:580px;">
+            These live in GitHub Discussions — open to anyone. No account required to read. Sign in with GitHub to contribute.
+        </p>
+
+        <div class="inv-topics">
+            <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
+                <div class="inv-topic-icon">🚁</div>
+                <div class="inv-topic-body">
+                    <div class="inv-topic-title">What drone + software stack are you using for volume calculations?</div>
+                    <div class="inv-topic-sub">DJI Terra vs. DroneDeploy vs. Pix4D — real job site comparisons from people running the numbers</div>
+                </div>
+                <div class="inv-topic-arrow">→</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
+                <div class="inv-topic-icon">🤖</div>
+                <div class="inv-topic-body">
+                    <div class="inv-topic-title">Has anyone used AI to write or review RFIs on a real project?</div>
+                    <div class="inv-topic-sub">Share your prompt, your workflow, or your horror story — what actually saved time vs. what created more work</div>
+                </div>
+                <div class="inv-topic-arrow">→</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
+                <div class="inv-topic-icon">🚜</div>
+                <div class="inv-topic-body">
+                    <div class="inv-topic-title">GPS machine control — worth the retrofit cost on a mid-size excavator?</div>
+                    <div class="inv-topic-sub">Trimble, Leica, or Topcon — payback period, operator learning curve, what breaks in the field</div>
+                </div>
+                <div class="inv-topic-arrow">→</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
+                <div class="inv-topic-icon">🔩</div>
+                <div class="inv-topic-body">
+                    <div class="inv-topic-title">CIPP lining vs. pipe bursting — when does each make sense?</div>
+                    <div class="inv-topic-sub">Diameter, condition, traffic, ROW — walk through your decision process with real project examples</div>
+                </div>
+                <div class="inv-topic-arrow">→</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
+                <div class="inv-topic-icon">📱</div>
+                <div class="inv-topic-body">
+                    <div class="inv-topic-title">What field software is actually getting used by crews (not just PMs)?</div>
+                    <div class="inv-topic-sub">Tablets, apps, daily reports, safety checklists — what sticks and what crews ignore</div>
+                </div>
+                <div class="inv-topic-arrow">→</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="inv-topic">
+                <div class="inv-topic-icon">🏗️</div>
+                <div class="inv-topic-body">
+                    <div class="inv-topic-title">Share a technique — something that saved production or avoided a rework</div>
+                    <div class="inv-topic-sub">Field knowledge that doesn't live in a spec book. The stuff worth passing on to the next generation of crews</div>
+                </div>
+                <div class="inv-topic-arrow">→</div>
+            </a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Start a discussion CTA -->
+    <section class="lp-section" style="padding-bottom: 96px;">
+        <div class="inv-cta">
+            <h2>Got something worth sharing?</h2>
+            <p>
+                A drone setup that cut your survey budget in half. An AI tool that actually worked. A technique nobody's documenting anywhere. This is the place. The discussion is open source — just like the platform.
+            </p>
+            <div class="inv-cta-actions">
+                <a href="https://github.com/masonearl/openmud/discussions/new/choose" target="_blank" rel="noopener" class="lp-btn-primary">Start a discussion →</a>
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-btn-secondary">View on GitHub</a>
+                <a href="/chat.html" class="lp-btn-secondary">Ask the AI</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="lp-footer-bottom" style="border-top: 1px solid var(--border); padding-top: 24px;">
+            <span>© <span id="year"></span> openmud · MIT License</span>
+            <span>
+                <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener">Discussions</a> ·
+                <a href="/resources.html">Resources</a> ·
+                <a href="/chat.html">AI Chat</a>
+            </span>
+        </div>
+    </footer>
+
+    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
