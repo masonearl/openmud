@@ -1,77 +1,57 @@
-# Rockmud
+# openmud
 
-**Open-source AI for construction — estimate, schedule, and build proposals on solid ground.**
+**Open-source AI for heavy civil and underground utility construction.**
 
-Site: [rockmud.com](https://rockmud.com)
+[rockmud.com](https://rockmud.com) · [Contributing](#contributing) · [Deploy your own](#deploy-your-own)
 
-Rockmud is a free, open-source AI assistant built for underground utility and heavy civil construction. It understands trenching, pipe sizing, labor and equipment rates, and the bid workflows contractors actually use.
+---
+
+openmud is a free, open-source AI assistant built specifically for the construction industry — contractors, PMs, estimators, and field engineers working in underground utility, earthwork, and heavy civil.
+
+It understands trenching, pipe sizing, labor and equipment rates, phased scheduling, and the bid workflows contractors actually use. Not a generic AI with a construction coat of paint.
+
+---
+
+## Who it's for
+
+- **Estimators** — get material, labor, and equipment cost breakdowns for underground work fast
+- **PMs and supers** — build schedules, generate proposals, and answer scope questions
+- **Field engineers** — quick answers on specs, pipe sizing, trench depth, compaction
+- **Developers** — building AI tools for construction and want a working starting point
 
 ---
 
 ## What it does
 
-- **AI chat** — Ask about costs, specs, scheduling, scope, or any construction question. Uses OpenAI and Anthropic models.
-- **Quick estimate** — Get material, labor, and equipment cost breakdowns for common underground work.
-- **Schedule generator** — Build a phased construction schedule and download it as a PDF.
-- **Proposal generator** — Generate a formatted proposal from your estimate in one click.
+| Feature | Description |
+|---|---|
+| AI chat | Multi-model chat (OpenAI GPT-4o, Claude) tuned for heavy civil |
+| Quick estimate | Material, labor, and equipment cost calculator for common underground work |
+| Schedule generator | Phased construction schedule — downloadable as PDF |
+| Proposal generator | Formatted proposal from your estimate, ready to send |
+| Python tool library | Estimating, scheduling, and proposal tools you can import or extend |
 
 ---
 
-## Project structure
-
-```
-rockmud.com/
-├── api/                    # Serverless API functions (Vercel)
-│   ├── chat.js             # Chat: OpenAI + Anthropic, tool routing
-│   ├── predict.js          # Estimate proxy (configurable via CONTECH_API_URL)
-│   ├── feedback.js         # Feedback proxy (configurable via CONTECH_API_URL)
-│   ├── schedule.js         # Schedule generation + HTML output
-│   ├── proposal.js         # Proposal generation + HTML output
-│   └── health.js           # Health check
-├── assets/
-│   ├── css/styles.css
-│   └── js/app.js
-├── config/
-│   └── env.example         # Copy to .env.local, add your API keys
-├── docs/
-│   ├── API.md              # API contract and model routing
-│   └── ROADMAP.md          # What's being built next
-├── tools/                  # Python tools (estimating, scheduling, proposals)
-│   ├── estimating/
-│   ├── schedule/
-│   ├── proposal/
-│   ├── registry.py         # OpenAI-compatible tool schemas
-│   └── README.md
-├── index.html
-├── about.html
-├── documentation.html
-└── vercel.json
-```
-
----
-
-## Local development
+## Quick start (local)
 
 ```bash
-# Install dependencies
-npm install
+git clone https://github.com/masonearl/openmud.git
+cd openmud
 
-# Run with Vercel dev (includes API routes)
+npm install
+cp config/env.example .env.local
+# Add your OPENAI_API_KEY or ANTHROPIC_API_KEY to .env.local
+
 vercel dev
+# → http://localhost:3000
 ```
 
-Or serve the frontend only (no API):
+Or static only (no API):
 
 ```bash
 python3 -m http.server 8000
 # → http://localhost:8000
-```
-
-**Environment variables** — copy `config/env.example` to `.env.local` and add your keys:
-
-```bash
-cp config/env.example .env.local
-# Edit .env.local and add OPENAI_API_KEY and/or ANTHROPIC_API_KEY
 ```
 
 ---
@@ -79,20 +59,121 @@ cp config/env.example .env.local
 ## Deploy your own
 
 1. Fork this repo
-2. Connect to [Vercel](https://vercel.com)
-3. Add `OPENAI_API_KEY` and/or `ANTHROPIC_API_KEY` in Vercel → Project → Settings → Environment Variables
-4. Deploy — that's it
+2. Connect to [Vercel](https://vercel.com) (free tier works)
+3. Add environment variables in Vercel → Project → Settings → Environment Variables:
+   - `OPENAI_API_KEY` — from [platform.openai.com](https://platform.openai.com)
+   - `ANTHROPIC_API_KEY` — from [console.anthropic.com](https://console.anthropic.com)
+4. Deploy — your own AI construction assistant is live
+
+---
+
+## Project structure
+
+```
+openmud/
+├── api/                        # Serverless API (runs on Vercel)
+│   ├── chat.js                 # Multi-model chat: OpenAI + Anthropic
+│   ├── schedule.js             # Phased schedule generator
+│   ├── proposal.js             # Proposal HTML generator
+│   ├── predict.js              # Estimate proxy
+│   ├── feedback.js             # Feedback handler
+│   └── health.js               # Health check
+├── assets/
+│   ├── css/styles.css          # App styles
+│   └── js/app.js               # Frontend logic
+├── config/
+│   └── env.example             # Environment variable template
+├── docs/
+│   ├── API.md                  # API reference
+│   └── ROADMAP.md              # What's coming next
+├── tools/                      # Python tool library
+│   ├── estimating/             # Material, labor, equipment calculators
+│   ├── schedule/               # Schedule generation
+│   ├── proposal/               # Proposal generation
+│   ├── registry.py             # OpenAI-compatible tool schemas
+│   └── README.md               # Python tools documentation
+├── index.html                  # Main app
+├── about.html
+├── documentation.html
+├── package.json
+└── vercel.json
+```
+
+---
+
+## Python tools
+
+The `tools/` directory contains a standalone Python library you can use independently of the web app:
+
+```python
+from tools.estimating.estimating_tools import estimate_project_cost, calculate_material_cost
+
+# Estimate materials for a waterline job
+pipe_cost = calculate_material_cost("pipe", quantity=500, size="8")
+print(pipe_cost)  # → {unit_cost: 18.00, total_cost: 9000.00, total_with_waste: 9900.00}
+
+# Full project estimate
+estimate = estimate_project_cost(
+    materials=[{"type": "pipe", "quantity": 500, "size": "8"}],
+    labor=[{"type": "operator", "hours": 80}, {"type": "laborer", "hours": 160}],
+    equipment=[{"type": "excavator", "days": 10}],
+    markup=0.15
+)
+```
+
+---
+
+## AI models supported
+
+| Model | Provider |
+|---|---|
+| GPT-4o, GPT-4o-mini | OpenAI |
+| Claude Sonnet, Claude Haiku | Anthropic |
+| mud1 (default) | GPT-4o-mini tuned for heavy civil |
 
 ---
 
 ## Contributing
 
-Rockmud is built for construction people by construction people. Contributions welcome — new tools, better pricing data, additional workflows, bug fixes.
+openmud is built by and for construction people. Every contribution matters — better pricing data, new tools, improved prompts, bug fixes.
 
-Open an issue or submit a PR. See [docs/ROADMAP.md](docs/ROADMAP.md) for what's coming next.
+**Things we'd love help with:**
+
+- More accurate regional pricing (pipe, concrete, rebar, labor rates)
+- New tool types: change orders, RFIs, daily reports, takeoff calculator
+- Better AI prompts for specific trade work (waterline, sewer, storm, electrical, gas)
+- Integrations: Procore, Buildertrend, Autodesk, Bluebeam
+- Mobile-friendly UI improvements
+
+**To contribute:**
+
+1. Fork the repo
+2. Create a branch: `git checkout -b feat/your-feature`
+3. Make your changes
+4. Open a PR — describe what you built and why it matters in the field
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for full details.
+
+---
+
+## Roadmap
+
+- [ ] User-editable rate codebooks (labor, equipment, materials)
+- [ ] Real tool calling wired to Python estimating tools
+- [ ] Invoice generator
+- [ ] Takeoff calculator
+- [ ] PDF upload → AI reads your specs
+- [ ] Change order and RFI tracking
+- [ ] Notion / project management integrations
+
+Full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ---
 
 ## License
 
-MIT
+MIT — free to use, fork, and build on.
+
+---
+
+*Built on [rockmud.com](https://rockmud.com). Related project: [mudrag.ai](https://mudrag.ai)*
