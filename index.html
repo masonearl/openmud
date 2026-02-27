@@ -29,26 +29,74 @@
         </div>
     </nav>
 
-    <!-- Hero -->
-    <section class="lp-hero">
-        <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-hero-eyebrow">
-            <span class="lp-hero-eyebrow-dot"></span>
-            Open source · MIT license · v0.1.0 on GitHub
-        </a>
-        <h1 class="lp-hero-title">
-            AI for heavy civil<br><em>construction.</em>
-        </h1>
-        <p class="lp-hero-sub">
-            Free tools for estimating, scheduling, and proposals — built by contractors, for contractors. Use the AI, fork the code, contribute what you know.
-        </p>
-        <div class="lp-hero-actions">
-            <a href="/chat.html" class="lp-btn-primary">Try the AI free →</a>
-            <a href="/calculators.html" class="lp-btn-secondary">Open calculators</a>
-            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-btn-secondary">Star on GitHub ☆</a>
+    <!-- Hero with YouTube background -->
+    <section class="lp-hero-video-wrap">
+        <!-- YouTube background -->
+        <div class="lp-video-bg" aria-hidden="true">
+            <iframe id="yt-bg"
+                src="https://www.youtube.com/embed/XCMHzo3NMR4?autoplay=1&mute=1&loop=1&playlist=XCMHzo3NMR4&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&playsinline=1&vq=hd1080"
+                allow="autoplay; encrypted-media"
+                allowfullscreen
+                frameborder="0"
+                title="Construction background video">
+            </iframe>
         </div>
-        <p class="lp-hero-meta">
-            No account. No paywall. Bring your own <a href="/documentation.html">API key</a> or use <a href="https://rockmud.com">rockmud.com</a> directly.
-        </p>
+        <div class="lp-video-overlay" aria-hidden="true"></div>
+
+        <!-- Hero content -->
+        <div class="lp-hero lp-hero-over-video">
+            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-hero-eyebrow">
+                <span class="lp-hero-eyebrow-dot"></span>
+                Open source · MIT license · v0.1.0 on GitHub
+            </a>
+            <h1 class="lp-hero-title">
+                AI for heavy civil<br><em>construction.</em>
+            </h1>
+            <p class="lp-hero-sub">
+                Free tools for estimating, scheduling, and proposals — built by contractors, for contractors. Use the AI, fork the code, contribute what you know.
+            </p>
+
+            <!-- Search bar -->
+            <div class="lp-search-wrap">
+                <form class="lp-search-form" id="site-search-form" onsubmit="runSearch(event)">
+                    <input
+                        type="text"
+                        id="site-search-input"
+                        class="lp-search-input"
+                        placeholder="Ask anything — trench slope for Type B soil, Manning's n for PVC, ESOP vs private equity…"
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <button type="submit" class="lp-search-btn" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    </button>
+                </form>
+                <div class="lp-search-suggestions">
+                    <span onclick="quickSearch('minimum slope 8 inch sewer')">min slope 8" sewer</span>
+                    <span onclick="quickSearch('OSHA Type B soil trench')">OSHA Type B slope</span>
+                    <span onclick="quickSearch('what is an ESOP')">what is an ESOP?</span>
+                    <span onclick="quickSearch('thrust block 45 degree bend')">thrust block 45° bend</span>
+                    <span onclick="quickSearch('811 blue stakes Utah')">811 blue stakes</span>
+                    <span onclick="quickSearch('Manning n value PVC pipe')">Manning's n PVC</span>
+                </div>
+            </div>
+
+            <!-- Search results -->
+            <div class="lp-search-results" id="search-results" hidden>
+                <div class="lp-search-answer" id="search-answer"></div>
+                <div class="lp-search-sources" id="search-sources"></div>
+                <button class="lp-search-close" onclick="closeSearch()">Close ×</button>
+            </div>
+
+            <div class="lp-hero-actions" id="hero-actions">
+                <a href="/chat.html" class="lp-btn-primary">Try the AI free →</a>
+                <a href="/calculators.html" class="lp-btn-secondary">Calculators</a>
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-btn-secondary">GitHub ☆</a>
+            </div>
+            <p class="lp-hero-meta">
+                No account. No paywall. Bring your own <a href="/documentation.html">API key</a> or use <a href="https://rockmud.com">rockmud.com</a> directly.
+            </p>
+        </div>
     </section>
 
     <hr class="lp-divider">
@@ -305,6 +353,59 @@
         </div>
     </footer>
 
-    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        function quickSearch(q) {
+            document.getElementById('site-search-input').value = q;
+            runSearch(null);
+        }
+
+        async function runSearch(e) {
+            if (e) e.preventDefault();
+            const query = document.getElementById('site-search-input').value.trim();
+            if (!query) return;
+
+            const resultsEl = document.getElementById('search-results');
+            const answerEl = document.getElementById('search-answer');
+            const sourcesEl = document.getElementById('search-sources');
+            const actionsEl = document.getElementById('hero-actions');
+
+            resultsEl.hidden = false;
+            actionsEl.style.display = 'none';
+            answerEl.innerHTML = '<div class="lp-search-loading"><span></span><span></span><span></span></div>';
+            sourcesEl.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query }),
+                });
+                const data = await res.json();
+
+                answerEl.innerHTML = '<p class="lp-search-answer-text">' + (data.answer || 'No answer found.') + '</p>';
+
+                if (data.sources && data.sources.length) {
+                    sourcesEl.innerHTML = '<p class="lp-search-sources-label">Sources</p>' +
+                        data.sources.map(s =>
+                            '<a href="' + s.url + '" class="lp-search-source-card">' +
+                            '<span class="lp-src-category">' + s.category + '</span>' +
+                            '<span class="lp-src-title">' + s.title + '</span>' +
+                            '<span class="lp-src-excerpt">' + s.excerpt + '</span>' +
+                            '</a>'
+                        ).join('');
+                }
+            } catch (err) {
+                answerEl.innerHTML = '<p class="lp-search-answer-text" style="color:var(--text-secondary)">Search unavailable. Try the <a href="/resources.html" style="color:inherit;text-decoration:underline">Resources</a> or <a href="/calculators.html" style="color:inherit;text-decoration:underline">Calculators</a> pages.</p>';
+            }
+        }
+
+        function closeSearch() {
+            document.getElementById('search-results').hidden = true;
+            document.getElementById('hero-actions').style.display = '';
+            document.getElementById('site-search-input').value = '';
+        }
+    </script>
 </body>
 </html>
