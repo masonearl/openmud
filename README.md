@@ -197,7 +197,7 @@ openmud is built by and for construction people. Every contribution matters — 
 3. Make your changes
 4. Open a PR — describe what you built and why it matters in the field
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for full details.
+See [CONTRIBUTING.md](./.github/.github/CONTRIBUTING.md) for full details.
 
 ---
 
