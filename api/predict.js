@@ -1,4 +1,4 @@
-const CONTECH_API = 'https://www.masonearl.com/api/contech';
+const CONTECH_API = process.env.CONTECH_API_URL || 'https://www.masonearl.com/api/contech';
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
