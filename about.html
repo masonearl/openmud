@@ -4,89 +4,155 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About – openmud</title>
-    <meta name="description" content="Our mission: AI that speaks the language of the job site. Built for contractors and teams.">
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <meta name="description" content="openmud is open-source AI for heavy civil and underground utility construction. Our mission: make AI a practical tool for every phase of the job.">
+    <link rel="stylesheet" href="assets/css/landing.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <a href="/" class="logo">openmud</a>
-            <nav class="nav">
-                <a href="/about.html">About</a>
-                <a href="/calculators.html">Calculators</a>
-                <a href="/resources.html">Resources</a>
-                <a href="/companies.html">Companies</a>
-                <a href="/documentation.html">Documentation</a>
-                <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A">Contact</a>
-            </nav>
+
+    <nav class="lp-nav">
+        <a href="/" class="lp-nav-logo">openmud</a>
+        <div class="lp-nav-links">
+            <a href="/chat.html">AI Chat</a>
+            <a href="/calculators.html">Calculators</a>
+            <a href="/resources.html">Resources</a>
+            <a href="/companies.html">Companies</a>
+            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
+            <a href="/chat.html" class="lp-nav-cta">Try it free →</a>
         </div>
-    </header>
+    </nav>
 
-    <main>
-        <section class="hero">
-            <div class="container">
-                <h1>Our mission</h1>
-                <p class="hero-sub">AI that speaks the language of the job site.</p>
-            </div>
-        </section>
+    <section class="lp-hero" style="padding-bottom: 64px;">
+        <p class="lp-section-label" style="margin-bottom:16px">About</p>
+        <h1 class="lp-hero-title" style="font-size: clamp(2rem,5vw,3.5rem)">
+            AI that speaks the<br><em>language of the job site.</em>
+        </h1>
+        <p class="lp-hero-sub">
+            openmud is an open-source AI platform built for heavy civil and underground utility construction — estimators, project managers, supers, and field engineers.
+        </p>
+    </section>
 
-        <section class="section">
-            <div class="container narrow">
-                <h2>Why we exist</h2>
-                <p>Construction runs on estimates, schedules, and decisions made in the field. Most software doesn’t. We’re building AI that understands waterline and sewer, pipe and trench, labor and equipment—so contractors and teams can plan, bid, and run jobs on solid ground.</p>
-            </div>
-        </section>
+    <hr class="lp-divider">
 
-        <section class="section section-alt">
-            <div class="container narrow">
-                <h2>What we’re building</h2>
-                <p>openmud is in active development. We’re starting with cost estimation and an assistant that can answer construction questions and help run numbers. Our goal is to make AI a practical tool for every phase of the job, from bid to closeout.</p>
-            </div>
-        </section>
+    <!-- Mission -->
+    <section class="lp-section" style="max-width: 720px;">
+        <p class="lp-section-label">Mission</p>
+        <h2 class="lp-section-title">Make AI a practical tool for every phase of the job.</h2>
+        <p style="font-size:1.0625rem; color: var(--text-secondary); line-height:1.8; margin-top: 20px;">
+            Most construction software is built by people who've never run a crew, never bid a job, never stood at the bottom of a 10-foot trench figuring out soil type. The tools don't speak the language. The pricing data is wrong. The AI gives generic answers that would get you fired on a public works project.
+        </p>
+        <p style="font-size:1.0625rem; color: var(--text-secondary); line-height:1.8; margin-top: 16px;">
+            openmud is built differently. The AI is trained on actual construction context — pipe sizing, trench specs, labor and equipment rates, bid structure, OSHA standards. The calculators use real engineering equations. The resources are sourced from public domain federal standards, not generic safety content. And the whole thing is open source, so people who actually know the work can make it better.
+        </p>
+        <p style="font-size:1.0625rem; color: var(--text-secondary); line-height:1.8; margin-top: 16px;">
+            The goal: from bid to closeout, openmud has a tool, a reference, or an answer. Free. No paywall. No lock-in.
+        </p>
+    </section>
 
-        <section id="contech" class="section">
-            <div class="container narrow">
-                <h2>Contech API</h2>
-                <p>Our estimation and assistant engine is available as an API for integration into your own tools and workflows. The Contech API provides cost predictions, confidence ranges, and a chat assistant trained on construction context.</p>
-                <p class="contech-status">API status: <span id="api-status">checking…</span></p>
-                <p><a href="https://masonearl.com" class="link link-cta" target="_blank" rel="noopener">Use the Contech tool at masonearl.com →</a></p>
-            </div>
-        </section>
+    <hr class="lp-divider">
 
-        <section class="section section-alt">
-            <div class="container narrow">
-                <h2>Get in touch</h2>
-                <p><a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A" class="link">hi@masonearl.com</a></p>
-            </div>
-        </section>
-    </main>
+    <!-- Navigate the platform -->
+    <section class="lp-section">
+        <p class="lp-section-label">Navigate the platform</p>
+        <h2 class="lp-section-title">What's here and where to find it.</h2>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; <span id="year"></span> openmud. All rights reserved.</p>
+        <div class="lp-features" style="margin-top: 40px;">
+            <a href="/chat.html" class="lp-feature">
+                <div class="lp-feature-icon">⌁</div>
+                <div class="lp-feature-title">AI Chat — /chat</div>
+                <div class="lp-feature-desc">Multi-model AI chat tuned for heavy civil. Ask about costs, pipe sizing, scheduling, trench depth, compaction specs, or anything construction. Supports GPT-4o, Claude Sonnet, and mud1 (our custom heavy civil model). Bring your own API key or use it as-is.</div>
+                <div class="lp-feature-link">openmud.ai/chat →</div>
+            </a>
+            <a href="/calculators.html" class="lp-feature">
+                <div class="lp-feature-icon">◻</div>
+                <div class="lp-feature-title">Calculators — /calculators</div>
+                <div class="lp-feature-desc">18 construction calculators across four categories: Takeoff & Quantities (trench volume, concrete, asphalt), Engineering & Field (pipe flow, minimum slope, OSHA safety, thrust blocks), Cost & Bid (markup, unit price, change order, production rate), and Reference (unit converter, pipe table, Manning's n). All run client-side — no account.</div>
+                <div class="lp-feature-link">openmud.ai/calculators →</div>
+            </a>
+            <a href="/resources.html" class="lp-feature">
+                <div class="lp-feature-icon">◈</div>
+                <div class="lp-feature-title">Resources — /resources</div>
+                <div class="lp-feature-desc">Structured reference content: OSHA 29 CFR 1926 Subpart P (trenching/excavation), 811 Blue Stakes guide with utility color codes, confined space entry standards, pipe specifications, soil classification with swell/shrink factors, Manning's n table, curated YouTube channels, construction news sources, open-source tool directory, and a searchable 60-term field glossary.</div>
+                <div class="lp-feature-link">openmud.ai/resources →</div>
+            </a>
+            <a href="/companies.html" class="lp-feature">
+                <div class="lp-feature-icon">◇</div>
+                <div class="lp-feature-title">Companies — /companies</div>
+                <div class="lp-feature-desc">Directory of 50+ construction companies. Utah contractors. ENR Top 25 national. ESOP and employee-owned firms. Publicly traded companies with tickers. Underground specialty contractors. Plain-English explanation of ownership types, what an ESOP actually is, and where the market is heading with $1.2T in IIJA spending.</div>
+                <div class="lp-feature-link">openmud.ai/companies →</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/tree/main/tools" target="_blank" rel="noopener" class="lp-feature">
+                <div class="lp-feature-icon">⌬</div>
+                <div class="lp-feature-title">Python Tools — /tools</div>
+                <div class="lp-feature-desc">Standalone Python library: Manning's equation, trench takeoff, thrust block sizing, asphalt tonnage, concrete volume, OSHA trench safety reference, unit conversion, markup math, production rates, crew day cost, change orders. MIT licensed. Import into your own projects. pip install coming to PyPI.</div>
+                <div class="lp-feature-link">github.com/masonearl/openmud/tools →</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-feature">
+                <div class="lp-feature-icon">⬡</div>
+                <div class="lp-feature-title">GitHub — Open Source</div>
+                <div class="lp-feature-desc">The whole platform is open source. MIT license. 75 automated tests, CI on every PR, issue templates, PR template, AGENTS.md for AI contributors. Contribute better pricing data, new calculators, improved AI prompts, integrations, or anything that makes heavy civil work better.</div>
+                <div class="lp-feature-link">github.com/masonearl/openmud →</div>
+            </a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Contech API -->
+    <section class="lp-section" style="max-width: 720px;">
+        <p class="lp-section-label">Contech API</p>
+        <h2 class="lp-section-title">Build on top of it.</h2>
+        <p style="font-size:1.0625rem; color: var(--text-secondary); line-height:1.8; margin-top: 20px;">
+            The estimating and chat engine is available as an API for integration into your own tools and workflows. If you're building construction software and want a working AI backend tuned for heavy civil, openmud's API is a starting point.
+        </p>
+        <p class="lp-stat-label" style="margin-top:16px" id="api-status-wrap">API status: <span id="api-status" style="color:var(--text-secondary)">checking…</span></p>
+        <div style="margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;">
+            <a href="/documentation.html" class="lp-btn-secondary">API documentation</a>
+            <a href="https://github.com/masonearl/openmud/blob/main/docs/API.md" target="_blank" rel="noopener" class="lp-btn-secondary">API.md on GitHub →</a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Contact -->
+    <section class="lp-section" style="max-width: 720px; padding-bottom: 96px;">
+        <p class="lp-section-label">Contact</p>
+        <h2 class="lp-section-title">Get in touch.</h2>
+        <p style="font-size:1.0625rem; color: var(--text-secondary); line-height:1.8; margin-top: 20px;">
+            If you work in construction and want to contribute, have better pricing data, or want to talk about what openmud is building — reach out.
+        </p>
+        <div style="margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;">
+            <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai" class="lp-btn-primary">hi@masonearl.com →</a>
+            <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="lp-btn-secondary">GitHub Discussions</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="lp-footer-bottom" style="border-top: 1px solid var(--border); padding-top: 24px;">
+            <span>© <span id="year"></span> openmud · MIT License</span>
+            <span>
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a> ·
+                <a href="/chat.html">AI Chat</a> ·
+                <a href="/calculators.html">Calculators</a>
+            </span>
         </div>
     </footer>
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
-
-        (function () {
-            var el = document.getElementById('api-status');
-            if (!el) return;
-            fetch('/api/health')
-                .then(function (r) { return r.json(); })
-                .then(function (d) {
-                    el.textContent = d.status === 'healthy' ? 'Operational' : d.status || 'Unknown';
-                    el.classList.add('status-ok');
-                })
-                .catch(function () {
-                    el.textContent = 'Unavailable';
-                    el.classList.add('status-error');
-                });
-        })();
+        fetch('/api/health')
+            .then(r => r.json())
+            .then(d => {
+                var el = document.getElementById('api-status');
+                el.textContent = d.status === 'healthy' ? 'Operational' : d.status || 'Unknown';
+                el.style.color = '#6ee7b7';
+            })
+            .catch(() => {
+                document.getElementById('api-status').textContent = 'Unavailable';
+                document.getElementById('api-status').style.color = '#f87171';
+            });
     </script>
 </body>
 </html>

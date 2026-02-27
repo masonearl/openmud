@@ -1,213 +1,310 @@
 <!DOCTYPE html>
-<html lang="en" class="has-app">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>openmud – AI for Construction</title>
-    <meta name="description" content="AI built for construction. Plan, estimate, and run jobs on solid ground.">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>openmud – Open-source AI for Heavy Civil Construction</title>
+    <meta name="description" content="The open-source AI platform for heavy civil and underground utility construction. Free estimating, calculators, scheduling, proposals, and field resources. Built by contractors, for contractors.">
+    <meta property="og:title" content="openmud – Open-source AI for Heavy Civil Construction">
+    <meta property="og:description" content="Free AI tools for estimating, scheduling, and proposals. 18 construction calculators. OSHA reference. Company directory. Open source, MIT license.">
+    <meta property="og:url" content="https://openmud.ai">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="assets/css/landing.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="has-app">
-    <header class="header">
-        <div class="header-inner">
-            <a href="/" class="logo">openmud</a>
-            <nav class="nav">
-                <a href="/about.html">About</a>
-                <a href="/calculators.html">Calculators</a>
-                <a href="/resources.html">Resources</a>
-                <a href="/companies.html">Companies</a>
-                <a href="/documentation.html">Documentation</a>
-                <div class="nav-dropdown">
-                    <button type="button" class="btn-text" id="btn-tools" aria-haspopup="true" aria-expanded="false">Tools ▾</button>
-                    <div class="dropdown-menu" id="tools-dropdown" hidden>
-                        <button type="button" class="dropdown-item" data-tool="estimate">Quick estimate</button>
-                        <button type="button" class="dropdown-item" data-tool="proposal">Proposal</button>
-                        <button type="button" class="dropdown-item" data-tool="schedule">Schedule</button>
-                    </div>
-                </div>
-                <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A">Contact</a>
-            </nav>
+<body>
+
+    <!-- Nav -->
+    <nav class="lp-nav">
+        <a href="/" class="lp-nav-logo">openmud</a>
+        <div class="lp-nav-links">
+            <a href="/chat.html">AI Chat</a>
+            <a href="/calculators.html">Calculators</a>
+            <a href="/resources.html">Resources</a>
+            <a href="/companies.html">Companies</a>
+            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
+            <a href="/chat.html" class="lp-nav-cta">Try it free →</a>
         </div>
-    </header>
+    </nav>
 
-    <div class="app-layout">
-        <aside class="projects-sidebar" id="projects-sidebar">
-            <div class="projects-header">
-                <h3>Projects</h3>
-                <button type="button" class="btn-new-project" id="btn-new-project" title="New project">+ New</button>
-            </div>
-            <ul class="projects-list" id="projects-list"></ul>
-            <div class="documents-section" id="documents-section">
-                <div class="documents-header">
-                    <h3>Documents</h3>
-                    <label class="btn-upload" title="Upload document">
-                        <span>+ Add</span>
-                        <input type="file" id="doc-upload" multiple hidden>
-                    </label>
-                </div>
-                <div class="documents-list" id="documents-list"></div>
-                <p class="documents-hint" id="documents-hint">Select a project to add documents</p>
-            </div>
-        </aside>
-        <div class="sidebar-resize-handle" id="sidebar-resize-handle" aria-label="Resize sidebar"></div>
-        <main class="chat-main">
-            <div class="chat-panel">
-                <div class="chat-quick-actions" id="chat-quick-actions">
-                    <span class="quick-label">Try:</span>
-                    <button type="button" class="quick-btn" data-prompt="Estimate 1500 LF of 8 inch sewer in clay, Salt Lake Metro">Quick bid</button>
-                    <button type="button" class="quick-btn" data-prompt="Draft a proposal for 2000 LF of 12 inch waterline in gravel">Proposal</button>
-                    <button type="button" class="quick-btn" data-prompt="How long for 1000 LF of 10 inch storm drain with a 5-person crew?">Schedule</button>
-                    <button type="button" class="btn-copy-chat" id="btn-copy-chat" title="Copy chat for debugging">Copy chat</button>
-                </div>
-                <div class="chat-tool-panel" id="chat-tool-panel" hidden>
-                    <div class="tool-panel-header">
-                        <h3 id="tool-panel-title">Tool</h3>
-                        <button type="button" class="btn-close-tool" id="btn-close-tool" aria-label="Close">×</button>
-                    </div>
-                    <div class="tool-panel-content" id="tool-panel-content">
-                        <div id="tool-form-estimate" class="tool-form-wrap">
-                            <form id="form-estimate">
-                                <div class="form-row"><label>Project type</label><select id="est-project-type" required><option value="waterline">Waterline</option><option value="sewer">Sewer</option><option value="storm_drain">Storm drain</option><option value="gas">Gas</option><option value="electrical">Electrical</option></select></div>
-                                <div class="form-row"><label>Linear feet</label><input type="number" id="est-linear-feet" value="1500" min="1" required></div>
-                                <div class="form-row"><label>Pipe diameter (in)</label><input type="number" id="est-pipe-diameter" value="8" min="1" required></div>
-                                <div class="form-row"><label>Trench depth (ft)</label><input type="number" id="est-trench-depth" value="4.5" min="0" step="0.1" required></div>
-                                <div class="form-row"><label>Soil type</label><select id="est-soil-type"><option value="sand">Sand</option><option value="clay" selected>Clay</option><option value="gravel">Gravel</option><option value="rock">Rock</option></select></div>
-                                <div class="form-row"><label>Location</label><select id="est-location"><option value="salt_lake_metro" selected>Salt Lake Metro</option><option value="utah_county">Utah County</option><option value="davis_weber">Davis/Weber</option><option value="rural_utah">Rural Utah</option><option value="mountain_areas">Mountain areas</option></select></div>
-                                <div class="form-row"><label>Crew size</label><input type="number" id="est-crew-size" value="5" min="1" max="20"></div>
-                                <div class="form-row"><label>Season</label><select id="est-season"><option value="winter">Winter</option><option value="spring">Spring</option><option value="summer" selected>Summer</option><option value="fall">Fall</option></select></div>
-                                <div class="form-row"><label>Pipe material</label><select id="est-pipe-material"><option value="PVC C900" selected>PVC C900</option><option value="HDPE">HDPE</option><option value="DIP">DIP</option><option value="PVC SDR 35">PVC SDR 35</option><option value="RCP">RCP</option><option value="PE">PE</option><option value="Steel">Steel</option><option value="PVC Conduit">PVC Conduit</option></select></div>
-                                <div class="form-row form-row-inline"><label><input type="checkbox" id="est-dewatering"> Dewatering</label></div>
-                                <div class="form-row form-row-inline"><label><input type="checkbox" id="est-rock"> Rock excavation</label></div>
-                                <div class="form-row"><label>Fittings</label><input type="number" id="est-fittings" value="0" min="0"></div>
-                                <div class="form-row"><label>Road crossings</label><input type="number" id="est-road-crossings" value="0" min="0"></div>
-                                <div class="modal-actions"><button type="submit" class="btn-primary" id="btn-run-estimate">Run estimate</button></div>
-                            </form>
-                            <div id="estimate-result" class="estimate-result" hidden></div>
-                            <div id="estimate-feedback" class="estimate-feedback" hidden><h4>Submit actual cost (optional)</h4><form id="form-feedback"><input type="number" id="input-actual-cost" placeholder="Actual cost ($)" min="0" step="1000"><button type="submit" class="btn-primary">Submit feedback</button></form></div>
-                        </div>
-                        <div id="tool-form-proposal" class="tool-form-wrap">
-                            <form id="form-proposal">
-                                <div class="form-row"><label>Client / project name</label><input type="text" id="prop-client" placeholder="e.g. City of Salt Lake - Main St" required></div>
-                                <div class="form-row"><label>Scope summary</label><textarea id="prop-scope" rows="3" placeholder="e.g. 1,500 LF of 8&quot; sewer, clay soil, 4.5 ft depth"></textarea></div>
-                                <div class="form-row"><label>Total bid ($)</label><input type="number" id="prop-total" placeholder="From estimate or enter manually" min="0" step="1000"></div>
-                                <div class="form-row"><label>Duration (days)</label><input type="number" id="prop-duration" placeholder="From estimate" min="1"></div>
-                                <div class="form-row"><label>Assumptions</label><textarea id="prop-assumptions" rows="2" placeholder="e.g. Existing utilities to be located by others"></textarea></div>
-                                <div class="form-row"><label>Exclusions</label><textarea id="prop-exclusions" rows="2" placeholder="e.g. Traffic control by owner"></textarea></div>
-                                <div class="modal-actions"><button type="submit" class="btn-primary">Generate & download PDF</button></div>
-                            </form>
-                        </div>
-                        <div id="tool-form-schedule" class="tool-form-wrap">
-                            <form id="form-schedule">
-                                <div class="form-row"><label>Project name</label><input type="text" id="sched-project" placeholder="Project name"></div>
-                                <div class="form-row"><label>Start date</label><input type="date" id="sched-start"></div>
-                                <div class="form-row"><label>Duration (days)</label><input type="number" id="sched-duration" value="14" min="1" required></div>
-                                <div class="form-row"><label>Phases (comma-separated)</label><input type="text" id="sched-phases" value="Mobilization, Trenching, Pipe install, Backfill, Restoration" placeholder="Mobilization, Trenching, Pipe, Backfill, Restoration"></div>
-                                <div class="modal-actions"><button type="submit" class="btn-primary">Generate & download PDF</button></div>
-                            </form>
-                            <div id="schedule-preview" class="schedule-preview" hidden></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="chat-messages" id="chat-messages">
-                    <div class="chat-messages-inner" id="chat-messages-inner"></div>
-                    <div class="msg msg-assistant chat-loading-indicator" id="chat-loading-indicator" hidden aria-live="polite">
-                        <div class="msg-content msg-loading-bubbles">
-                            <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
-                        </div>
-                    </div>
-                </div>
-                <form class="chat-input-form" id="chat-form" action="javascript:void(0)" method="post" onsubmit="return false;">
-                    <div class="chat-composer">
-                        <div class="chat-composer-text-wrap">
-                            <textarea class="chat-composer-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
-                        </div>
-                        <div class="chat-composer-bar">
-                            <div class="chat-composer-left">
-                                <button type="button" class="chat-composer-pill" id="agent-dropdown" aria-haspopup="true" title="Mode">
-                                    <span class="chat-composer-pill-icon">∞</span>
-                                    <span>Agent</span>
-                                    <span class="chat-composer-chevron">▾</span>
-                                </button>
-                                <div class="model-select-wrap">
-                                    <button type="button" class="chat-composer-pill chat-composer-model" id="model-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="AI model">
-                                        <span id="model-select-label">GPT-4o mini</span>
-                                        <span class="chat-composer-chevron chat-composer-chevron-up">▾</span>
-                                    </button>
-                                    <div class="model-dropdown" id="model-dropdown" role="listbox" hidden>
-                                        <div class="model-dropdown-group">
-                                            <div class="model-dropdown-label">openmud</div>
-                                            <button type="button" class="model-dropdown-item" role="option" data-value="mud1">mud1</button>
-                                        </div>
-                                        <div class="model-dropdown-group">
-                                            <div class="model-dropdown-label">OpenAI</div>
-                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o-mini">GPT-4o mini</button>
-                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o">GPT-4o</button>
-                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4-turbo">GPT-4 Turbo</button>
-                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-3.5-turbo">GPT-3.5 Turbo</button>
-                                        </div>
-                                        <div class="model-dropdown-group">
-                                            <div class="model-dropdown-label">Anthropic</div>
-                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-haiku-4-5-20251001">Claude Haiku 4.5</button>
-                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-sonnet-4-6">Claude Sonnet 4.6</button>
-                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-opus-4-6">Claude Opus 4.6</button>
-                                        </div>
-                                    </div>
-                                    <select id="model-select" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
-                                        <option value="mud1">mud1</option>
-                                        <option value="gpt-4o-mini">GPT-4o mini</option>
-                                        <option value="gpt-4o">GPT-4o</option>
-                                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
-                                        <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
-                                        <option value="claude-opus-4-6">Claude Opus 4.6</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="chat-composer-right">
-                                <button type="button" class="chat-composer-icon" id="btn-refresh-chat" aria-label="Clear">
-                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                                </button>
-                                <label class="chat-composer-icon" for="chat-doc-upload" title="Attach document">
-                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                </label>
-                                <input type="file" id="chat-doc-upload" multiple hidden>
-                                <button type="submit" class="chat-composer-send" id="chat-send" aria-label="Send">
-                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </main>
-    </div>
+    <!-- Hero -->
+    <section class="lp-hero">
+        <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-hero-eyebrow">
+            <span class="lp-hero-eyebrow-dot"></span>
+            Open source · MIT license · v0.1.0 on GitHub
+        </a>
+        <h1 class="lp-hero-title">
+            AI for heavy civil<br><em>construction.</em>
+        </h1>
+        <p class="lp-hero-sub">
+            Free tools for estimating, scheduling, and proposals — built by contractors, for contractors. Use the AI, fork the code, contribute what you know.
+        </p>
+        <div class="lp-hero-actions">
+            <a href="/chat.html" class="lp-btn-primary">Try the AI free →</a>
+            <a href="/calculators.html" class="lp-btn-secondary">Open calculators</a>
+            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-btn-secondary">Star on GitHub ☆</a>
+        </div>
+        <p class="lp-hero-meta">
+            No account. No paywall. Bring your own <a href="/documentation.html">API key</a> or use <a href="https://rockmud.com">rockmud.com</a> directly.
+        </p>
+    </section>
 
-    <!-- New project modal -->
-    <div class="modal-overlay" id="modal-new-project" hidden>
-        <div class="modal">
-            <h3>New project</h3>
-            <form id="form-new-project">
-                <input type="text" id="input-project-name" placeholder="Project name" required autocomplete="off">
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="btn-cancel-project">Cancel</button>
-                    <button type="submit" class="btn-primary">Create</button>
-                </div>
-            </form>
+    <hr class="lp-divider">
+
+    <!-- Stats -->
+    <div class="lp-section-sm">
+        <div class="lp-stats">
+            <div class="lp-stat">
+                <div class="lp-stat-num">18</div>
+                <div class="lp-stat-label">Free construction calculators — trench volume, pipe flow, OSHA safety, markup, and more</div>
+            </div>
+            <div class="lp-stat">
+                <div class="lp-stat-num">75</div>
+                <div class="lp-stat-label">Automated tests across Python 3.10–3.12, running on every pull request</div>
+            </div>
+            <div class="lp-stat">
+                <div class="lp-stat-num">60+</div>
+                <div class="lp-stat-label">Construction terms in the searchable field glossary, from 811 to work zone</div>
+            </div>
+            <div class="lp-stat">
+                <div class="lp-stat-num">MIT</div>
+                <div class="lp-stat-label">License. Free to use, fork, and build on. No strings. Forever.</div>
+            </div>
         </div>
     </div>
 
-    <footer class="footer footer-mini">
-        <p>&copy; <span id="year"></span> openmud</p>
+    <hr class="lp-divider">
+
+    <!-- Features -->
+    <section class="lp-section">
+        <p class="lp-section-label">What's in openmud</p>
+        <h2 class="lp-section-title">Everything in one place.</h2>
+        <p class="lp-section-sub">AI that knows heavy civil, calculators that work without an account, and a reference library built from public domain standards.</p>
+
+        <div class="lp-features">
+            <a href="/chat.html" class="lp-feature">
+                <div class="lp-feature-icon">⌁</div>
+                <div class="lp-feature-title">AI Chat</div>
+                <div class="lp-feature-desc">Multi-model AI (GPT-4o, Claude, mud1) tuned for underground utility and heavy civil. Ask about costs, pipe sizing, scheduling, trench specs, or anything construction — and get answers that make sense in the field.</div>
+                <div class="lp-feature-link">Chat → openmud.ai/chat</div>
+            </a>
+            <a href="/calculators.html" class="lp-feature">
+                <div class="lp-feature-icon">◻</div>
+                <div class="lp-feature-title">Calculators</div>
+                <div class="lp-feature-desc">18 construction calculators: trench volume, pipe flow (Manning's), OSHA trench safety, thrust blocks, markup and bid price, unit price builder, change orders, production rates, crew day cost, unit converter, and more. All client-side — works offline.</div>
+                <div class="lp-feature-link">Calculators → openmud.ai/calculators</div>
+            </a>
+            <a href="/resources.html" class="lp-feature">
+                <div class="lp-feature-icon">◈</div>
+                <div class="lp-feature-title">Resources</div>
+                <div class="lp-feature-desc">Structured reference for the field: OSHA 29 CFR 1926 Subpart P, 811 Blue Stakes guide, confined space standards, utility color codes, pipe specs, soil classification, Manning's n values, YouTube channels, construction news, and a 60-term glossary.</div>
+                <div class="lp-feature-link">Resources → openmud.ai/resources</div>
+            </a>
+            <a href="/companies.html" class="lp-feature">
+                <div class="lp-feature-icon">◇</div>
+                <div class="lp-feature-title">Companies</div>
+                <div class="lp-feature-desc">Directory of 50+ construction companies: Utah contractors, ENR Top 25 national, ESOP employee-owned firms, publicly traded contractors with tickers. Revenue data, ownership type, what ESOP means, and where the industry market is heading.</div>
+                <div class="lp-feature-link">Companies → openmud.ai/companies</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud/tree/main/tools" target="_blank" rel="noopener" class="lp-feature">
+                <div class="lp-feature-icon">⌬</div>
+                <div class="lp-feature-title">Python Tool Library</div>
+                <div class="lp-feature-desc">Standalone Python tools you can import into your own projects. Manning's equation, trench takeoff, thrust blocks, unit conversion, markup math, production rates, OSHA safety reference, bid tools. pip install coming. MIT license.</div>
+                <div class="lp-feature-link">Tools → github.com/masonearl/openmud/tools</div>
+            </a>
+            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-feature">
+                <div class="lp-feature-icon">⬡</div>
+                <div class="lp-feature-title">Open Source</div>
+                <div class="lp-feature-desc">The whole thing is open source. Fork it, deploy your own instance, contribute better pricing data, build new tools, improve the AI prompts. 75 automated tests, GitHub Actions CI, issue templates, and a full contributor guide.</div>
+                <div class="lp-feature-link">GitHub → github.com/masonearl/openmud</div>
+            </a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Calc showcase -->
+    <section class="lp-section">
+        <p class="lp-section-label">Calculators</p>
+        <h2 class="lp-section-title">The math, done right.</h2>
+        <p class="lp-section-sub">Every calculator runs client-side — no account, no server, no API key required. Works on your phone on the job site.</p>
+
+        <div class="lp-calc-grid">
+            <a href="/calculators.html#trench-volume" class="lp-calc-card">
+                <div class="lp-calc-card-name">Trench Volume</div>
+                <div class="lp-calc-card-desc">LF × width × depth → excavation CY, backfill, bedding, spoil with swell factor</div>
+            </a>
+            <a href="/calculators.html#pipe-flow" class="lp-calc-card">
+                <div class="lp-calc-card-name">Pipe Flow (Manning's)</div>
+                <div class="lp-calc-card-desc">Diameter + slope + n → GPM, CFS, velocity. Full and partial flow. Min velocity check.</div>
+            </a>
+            <a href="/calculators.html#trench-safety" class="lp-calc-card">
+                <div class="lp-calc-card-name">Trench Safety (OSHA)</div>
+                <div class="lp-calc-card-desc">Type A/B/C soil × depth × method → slope setback, bench dims, shield requirements</div>
+            </a>
+            <a href="/calculators.html#thrust-block" class="lp-calc-card">
+                <div class="lp-calc-card-name">Thrust Block Sizing</div>
+                <div class="lp-calc-card-desc">Pipe size + pressure + fitting type → thrust force and concrete bearing area</div>
+            </a>
+            <a href="/calculators.html#markup" class="lp-calc-card">
+                <div class="lp-calc-card-name">Markup & Bid Price</div>
+                <div class="lp-calc-card-desc">Direct cost + overhead + profit → bid price. Or reverse: bid → implied cost.</div>
+            </a>
+            <a href="/calculators.html#change-order" class="lp-calc-card">
+                <div class="lp-calc-card-name">Change Order</div>
+                <div class="lp-calc-card-desc">T&M or unit price basis → CO total with O&P and bond. Print-ready breakdown.</div>
+            </a>
+            <a href="/calculators.html#production-rate" class="lp-calc-card">
+                <div class="lp-calc-card-name">Production Rate</div>
+                <div class="lp-calc-card-desc">Rate/day × crew cost × equip → duration, cost/LF, total project direct cost</div>
+            </a>
+            <a href="/calculators.html#unit-converter" class="lp-calc-card">
+                <div class="lp-calc-card-name">Unit Converter</div>
+                <div class="lp-calc-card-desc">CY ↔ CF ↔ tons · PSI ↔ ft water · BCY ↔ LCY ↔ CCY and more</div>
+            </a>
+            <a href="/calculators.html" class="lp-calc-card" style="border-style: dashed; justify-content: center; align-items: center; text-align: center; min-height: 80px;">
+                <div class="lp-calc-card-name" style="color: var(--text-tertiary)">+ 10 more calculators →</div>
+            </a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Highlight cards -->
+    <section class="lp-section">
+        <p class="lp-section-label">Industry intelligence</p>
+        <h2 class="lp-section-title">Built for the whole industry.</h2>
+        <p class="lp-section-sub">Not just tools — a resource for understanding who the major players are and where the market is going.</p>
+
+        <div class="lp-highlight">
+            <a href="/companies.html#esop" class="lp-highlight-card">
+                <div class="lp-highlight-card-label">Companies · ESOP</div>
+                <div class="lp-highlight-card-title">What is an employee-owned construction company?</div>
+                <div class="lp-highlight-card-desc">ESOPs are reshaping heavy civil. Emery Sapp & Sons, Achen-Gardner, ESCO, Rummel, Sundt — why employee ownership matters for culture, retention, and bid competitiveness. Plain-language explanation of how it works and why contractors do it.</div>
+                <div class="lp-highlight-card-arrow">Read more →</div>
+            </a>
+            <a href="/companies.html#market-data" class="lp-highlight-card">
+                <div class="lp-highlight-card-label">Market Data · IIJA</div>
+                <div class="lp-highlight-card-title">$55 billion for water. Where is all this infrastructure money going?</div>
+                <div class="lp-highlight-card-desc">The Infrastructure Investment and Jobs Act is the largest infrastructure bill in U.S. history. Sewer/water grew 23.7% in 2024. Power +18.9%. Telecom +59.7%. See the full breakdown of where the money is flowing and which markets are growing fastest.</div>
+                <div class="lp-highlight-card-arrow">Read more →</div>
+            </a>
+            <a href="/resources.html#osha-excavation" class="lp-highlight-card">
+                <div class="lp-highlight-card-label">Safety · OSHA Subpart P</div>
+                <div class="lp-highlight-card-title">The complete OSHA trenching and excavation reference.</div>
+                <div class="lp-highlight-card-desc">29 CFR 1926 Subpart P in plain language — soil classification table, required slope angles by type, competent person checklist, trench shield rules, and links to the full text. Public domain. Everything a super needs to know before anyone goes in a trench.</div>
+                <div class="lp-highlight-card-arrow">Read more →</div>
+            </a>
+            <a href="/resources.html#bluestakes" class="lp-highlight-card">
+                <div class="lp-highlight-card-label">Safety · 811 / Blue Stakes</div>
+                <div class="lp-highlight-card-title">Call before you dig. Utah law, color codes, and the 5 steps.</div>
+                <div class="lp-highlight-card-desc">811 is not optional. Utah Code 54-8a requires notification at least 3 business days before any excavation. Full guide: the 5 steps, utility color codes (all 9), what Blue Stakes doesn't cover, and how EPR works. Every excavator should know this cold.</div>
+                <div class="lp-highlight-card-arrow">Read more →</div>
+            </a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Who it's for -->
+    <section class="lp-section">
+        <p class="lp-section-label">Who it's for</p>
+        <h2 class="lp-section-title">Built for people who work in the dirt.</h2>
+        <p class="lp-section-sub">openmud is for the people who actually do the work — not generic AI with a hard hat sticker on it.</p>
+
+        <div class="lp-audience">
+            <div class="lp-audience-card">
+                <div class="lp-audience-role">Estimators</div>
+                <div class="lp-audience-desc">Quick bid on 1,500 LF of 8" sewer in clay. Material, labor, equipment breakdown in seconds. Unit price builder with overhead and profit. Change order calculator. Production rate cost analysis. All without a subscription.</div>
+            </div>
+            <div class="lp-audience-card">
+                <div class="lp-audience-role">Project Managers & Supers</div>
+                <div class="lp-audience-desc">Phased construction schedule from scope. Proposal generator for clients. Trench safety reference when you need to remember the Type C slope angle at 2am before a morning pour. Crew day cost calculator for T&M work.</div>
+            </div>
+            <div class="lp-audience-card">
+                <div class="lp-audience-role">Field Engineers</div>
+                <div class="lp-audience-desc">Pipe flow calculations for storm drain sizing. Minimum slope for 6" PVC sewer. Thrust block bearing area for a 45° bend at 150 PSI. Grade and slope from two elevations. All of it on your phone, no account required.</div>
+            </div>
+            <div class="lp-audience-card">
+                <div class="lp-audience-role">Developers & Contech Builders</div>
+                <div class="lp-audience-desc">Fork the repo. Import the Python tools. Build on the API. The estimating, hydraulics, safety, and bid math functions are standalone and MIT licensed — use them in your own apps, scripts, and workflows. No vendor lock-in.</div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Open source -->
+    <section class="lp-section-sm">
+        <div class="lp-oss">
+            <div>
+                <p class="lp-section-label">Open source</p>
+                <h2 class="lp-oss-title">The construction industry deserves open tools.</h2>
+                <p class="lp-oss-desc">Most construction software is expensive, locked down, and built by people who've never been on a job site. openmud is the opposite — free, open source, built in the field and for the field. Your experience is worth more than our code. Submit a PR with better pricing data. Open an issue with a field problem that needs a tool. Fork it and build what your company actually needs.</p>
+            </div>
+            <div class="lp-oss-actions">
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-btn-primary">Star on GitHub →</a>
+                <a href="https://github.com/masonearl/openmud/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener" class="lp-btn-secondary">How to contribute</a>
+                <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="lp-btn-secondary">Join the discussion</a>
+            </div>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Mission -->
+    <div class="lp-mission">
+        <p class="lp-section-label" style="text-align:center">Mission</p>
+        <h2 class="lp-mission-title">Make AI a practical tool<br><em>for every phase of the job.</em></h2>
+        <p class="lp-mission-body">From bid to closeout. The pricing data, the field math, the safety standards, the company intel — all of it open, free, and getting better because people who actually know construction are contributing to it. That's what openmud is building toward.</p>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="lp-footer">
+            <div>
+                <a href="/" class="lp-footer-logo">openmud</a>
+                <p class="lp-footer-tagline">Open-source AI for heavy civil construction.<br>MIT license. Free forever.</p>
+            </div>
+            <div class="lp-footer-links">
+                <div class="lp-footer-col">
+                    <div class="lp-footer-col-title">Tools</div>
+                    <a href="/chat.html">AI Chat</a>
+                    <a href="/calculators.html">Calculators</a>
+                    <a href="/calculators.html#trench-volume">Trench Volume</a>
+                    <a href="/calculators.html#pipe-flow">Pipe Flow</a>
+                    <a href="/calculators.html#markup">Markup Calculator</a>
+                </div>
+                <div class="lp-footer-col">
+                    <div class="lp-footer-col-title">Resources</div>
+                    <a href="/resources.html#osha-excavation">OSHA Subpart P</a>
+                    <a href="/resources.html#bluestakes">811 / Blue Stakes</a>
+                    <a href="/resources.html#youtube">YouTube Channels</a>
+                    <a href="/resources.html#glossary">Field Glossary</a>
+                    <a href="/companies.html">Companies</a>
+                </div>
+                <div class="lp-footer-col">
+                    <div class="lp-footer-col-title">Project</div>
+                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://github.com/masonearl/openmud/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+                    <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener">Discussions</a>
+                    <a href="https://github.com/masonearl/openmud/releases" target="_blank" rel="noopener">Releases</a>
+                    <a href="/documentation.html">Documentation</a>
+                </div>
+            </div>
+        </div>
+        <div class="lp-footer-bottom">
+            <span>© <span id="year"></span> openmud · MIT License</span>
+            <span>
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a> ·
+                <a href="/about.html">About</a> ·
+                <a href="mailto:hi@masonearl.com">Contact</a>
+            </span>
+        </div>
     </footer>
 
-    <script>
-        document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
-    <script src="assets/js/app.js"></script>
+    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
