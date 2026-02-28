@@ -4,6 +4,7 @@ const CONTENT = require('../data/site-content.json');
 const CHUNKS = CONTENT.chunks;
 const CACHE_TTL_MS = 15 * 60 * 1000;
 const CACHE_VERSION = 'v2';
+const CACHE_MAX_SIZE = 500;
 const SEARCH_CACHE = new Map();
 
 /** Simple TF-IDF-style scoring: score each chunk against the query */
@@ -59,6 +60,10 @@ function getFromCache(cacheKey) {
 }
 
 function setCache(cacheKey, data) {
+  if (SEARCH_CACHE.size >= CACHE_MAX_SIZE) {
+    const oldest = SEARCH_CACHE.keys().next().value;
+    SEARCH_CACHE.delete(oldest);
+  }
   SEARCH_CACHE.set(cacheKey, { timestamp: Date.now(), data });
 }
 
@@ -190,7 +195,7 @@ Answer rules:
           },
           {
             role: 'user',
-            content: `Question: ${normalizedQuery}\n\nContext:\n\n${context}`,
+            content: `Question: ${query.trim()}\n\nContext:\n\n${context}`,
           },
         ],
       }),
