@@ -98,8 +98,9 @@ These tools are already built and live. Link them prominently on the site. Consi
 
 | Tool | Platform | Description | Link |
 |---|---|---|---|
-| **Automated Bluestakes** | iOS App Store | Automates 811 bluestakes ticket submission for UT/surrounding states. | Add App Store URL |
-| **Construction Takeoff** | Web / TBD | Construction plan measurement and quantity takeoff software. | Add URL |
+| **Swift Stakes** | iOS App Store | Automates 811 bluestakes ticket submission for UT and surrounding states. | https://apps.apple.com/us/app/swift-stakes-blue-stakes-utah/id6737917498 |
+| **Construction Takeoff** | macOS App Store | PDF editor and markup tool for plan takeoffs. Measure LF, area, counts directly on plan sheets. | https://apps.apple.com/us/app/construction-takeoff/id6466373898 |
+| **Construction Docs Pro** | macOS App Store | Estimates and bid document generator. Proposals, cost tracking, bid packages. | https://apps.apple.com/us/app/construction-docs-pro/id6736613259 |
 
 When integrating the takeoff software: expose its core functions as openmud tool-registry entries so the chat agent can invoke a takeoff calculation during a conversation.
 
