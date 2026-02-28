@@ -97,7 +97,7 @@ RATE_TABLES = {
             "dump_truck":       {"daily": 350.00,  "hourly": 55.00,  "description": "Tandem Dump Truck"},
             "water_truck":      {"daily": 300.00,  "hourly": 45.00,  "description": "Water Truck"},
             "lowboy":           {"daily": 250.00,  "hourly": 38.00,  "description": "Lowboy / Equipment Trailer"},
-            "roller_sheepsfoot":{"daily": 350.00,  "hourly": 50.00,  "description": "Sheepsfoot Roller"},
+            "roller_sheepsfoot": {"daily": 350.00, "hourly": 50.00, "description": "Sheepsfoot Roller"},
             "plate_compactor":  {"daily": 75.00,   "hourly": 12.00,  "description": "Plate Compactor"},
             "jumping_jack":     {"daily": 100.00,  "hourly": 15.00,  "description": "Jumping Jack Tamper"},
             "dewatering_pump":  {"daily": 150.00,  "hourly": 22.00,  "description": "Dewatering Pump"},
@@ -175,7 +175,7 @@ RATE_TABLES = {
             "dozer_d6":         {"daily": 520.00,  "hourly": 75.00,  "description": "Dozer D6 Class"},
             "dump_truck":       {"daily": 320.00,  "hourly": 50.00,  "description": "Tandem Dump Truck"},
             "water_truck":      {"daily": 275.00,  "hourly": 42.00,  "description": "Water Truck"},
-            "roller_sheepsfoot":{"daily": 320.00,  "hourly": 46.00,  "description": "Sheepsfoot Roller"},
+            "roller_sheepsfoot": {"daily": 320.00, "hourly": 46.00, "description": "Sheepsfoot Roller"},
             "plate_compactor":  {"daily": 70.00,   "hourly": 11.00,  "description": "Plate Compactor"},
             "jumping_jack":     {"daily": 95.00,   "hourly": 14.00,  "description": "Jumping Jack Tamper"},
             "dewatering_pump":  {"daily": 140.00,  "hourly": 20.00,  "description": "Dewatering Pump"},
@@ -536,7 +536,8 @@ def calculate_labor_cost(
     if not labor:
         labor = RATE_TABLES["national"]["labor"].get(labor_type.lower())
     if not labor:
-        return {"error": f"Labor type '{labor_type}' not found. Available: {list(RATE_TABLES['national']['labor'].keys())}"}
+        available = list(RATE_TABLES['national']['labor'].keys())
+        return {"error": f"Labor type '{labor_type}' not found. Available: {available}"}
     hourly = labor["hourly"]
     total = hours * hourly
     return {
@@ -558,7 +559,8 @@ def calculate_equipment_cost(
     if not equip:
         equip = RATE_TABLES["national"]["equipment"].get(equipment_type.lower())
     if not equip:
-        return {"error": f"Equipment '{equipment_type}' not found. Available: {list(RATE_TABLES['national']['equipment'].keys())}"}
+        available = list(RATE_TABLES['national']['equipment'].keys())
+        return {"error": f"Equipment '{equipment_type}' not found. Available: {available}"}
     daily = equip["daily"]
     total = days * daily
     return {

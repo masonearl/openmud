@@ -59,7 +59,11 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "labor_type": {
                     "type": "string",
-                    "description": "Labor classification: operator, laborer, foreman, superintendent, pipe_layer, grade_checker, traffic_control, ironworker, electrician, plumber",
+                    "description": (
+                        "Labor classification: operator, laborer, foreman, "
+                        "superintendent, pipe_layer, grade_checker, "
+                        "traffic_control, ironworker, electrician, plumber"
+                    ),
                 },
                 "hours": {"type": "number", "description": "Number of hours"},
                 "region": {"type": "string", "description": REGION_DESCRIPTION, "enum": REGION_ENUM},
