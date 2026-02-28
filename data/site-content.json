@@ -1373,6 +1373,64 @@
         "estimating",
         "calculation sheets"
       ]
+    },
+    {
+      "id": "openstreetmap-construction",
+      "category": "Tools",
+      "title": "OpenStreetMap \u2014 Free Map Data for Construction",
+      "content": "OpenStreetMap (openstreetmap.org) is a free, open-source map of the world built by volunteers. It is the open-source alternative to Google Maps \u2014 no API key required, no billing account, no per-request cost. For construction, OSM is useful for marking job site locations and coordinates, reviewing road access and corridor routing, overlaying utility as-built data, generating site coordinates for bluestakes and permit applications, and embedding interactive maps in web tools. OSM can be embedded in any browser page using Leaflet.js (MIT license). Tile URL: tile.openstreetmap.org. OSM data can be downloaded as shapefiles or GeoJSON and imported into QGIS for more advanced analysis. State DOTs and utilities publish their own GIS layers that can be overlaid on OSM. For heavy civil contractors, the most practical uses are: (1) marking a job site address and verifying access routes, (2) measuring corridor length for pipe installation bids, (3) generating GPS coordinates for bluestakes submissions, and (4) site logistics planning for staging, equipment access, and traffic control.",
+      "url": "/resources.html#opensource",
+      "tags": [
+        "OpenStreetMap",
+        "OSM",
+        "mapping",
+        "GIS",
+        "job site",
+        "coordinates",
+        "Leaflet",
+        "bluestakes",
+        "corridor",
+        "free maps"
+      ]
+    },
+    {
+      "id": "ocr-document-extraction-construction",
+      "category": "Tools",
+      "title": "OCR and Document Extraction for Construction \u2014 PDF to Structured Data",
+      "content": "OCR (optical character recognition) converts scanned documents and PDFs into machine-readable text. In construction, most documents arrive as PDFs: plan sheets, specifications, invoices, RFIs, change orders, submittals. OCR and document extraction lets AI read these documents and extract structured data. Key open-source tools: pdfplumber (Python, MIT) extracts text and tables from native PDFs \u2014 useful for typed invoices and digital specs. Tesseract is the leading open-source OCR engine \u2014 reads scanned images and handwritten-style text. pdf2image converts PDF pages to images before Tesseract processes them. OpenCV preprocesses images (deskew, denoise, contrast) before OCR for better accuracy. The typical pipeline is: upload PDF \u2192 extract text with pdfplumber \u2192 if no text layer, run Tesseract OCR \u2192 pass raw text to GPT-4o to extract structured fields (line items, quantities, amounts, dates, addresses) \u2192 output JSON. For construction: extract line items from subcontractor invoices, pull pipe sizes and stationing from plan sheets, read RFI numbers and response deadlines, extract quantities from pay applications. This data can feed downstream tools like change order generators, invoice reconcilers, and proposal builders.",
+      "url": "/resources.html",
+      "tags": [
+        "OCR",
+        "document extraction",
+        "PDF",
+        "pdfplumber",
+        "Tesseract",
+        "invoice",
+        "plan sheets",
+        "RFI",
+        "structured data",
+        "automation",
+        "document processing"
+      ]
+    },
+    {
+      "id": "agentic-ai-construction-workflows",
+      "category": "Tools",
+      "title": "Agentic AI for Construction \u2014 Automated Workflows and Task Execution",
+      "content": "Agentic AI goes beyond answering questions \u2014 it executes tasks. In construction, this means AI that reads an invoice and flags discrepancies, pre-fills a bluestakes ticket from job address and scope, drafts an RFI response from project context, generates a change order from a field note, or processes an incoming email and routes it to the right action. openmud is building a tool library that AI agents can call during a conversation. When a user describes a task, the AI selects the right tool (proposal generator, bluestakes builder, schedule creator, OCR extractor), runs it, and returns a completed result. Two modes: user-triggered (user asks, agent executes) and event-triggered (a new document arrives, agent processes it automatically). The tool registry is in tools/registry.py using OpenAI function-calling schema. High-priority tools being built: bluestakes automation, email drafting agent, OCR document pipeline, change order generator, production tracker, and job site mapper using OpenStreetMap. All tools are free and open source under MIT license.",
+      "url": "/chat.html",
+      "tags": [
+        "agentic AI",
+        "automation",
+        "workflows",
+        "tool calling",
+        "bluestakes",
+        "email agent",
+        "document processing",
+        "change order",
+        "agent",
+        "AI tools"
+      ]
     }
   ]
 }
