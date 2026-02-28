@@ -384,6 +384,38 @@
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
+        const SEARCH_LOADING_MESSAGES = [
+            'Searching…',
+            'Cooking…',
+            'Generating…',
+            'Pulling sources…',
+            'Checking references…',
+        ];
+        let activeSearchController = null;
+        let activeSearchRequestId = 0;
+        let searchLoadingTimer = null;
+        let searchLoadingIndex = 0;
+
+        function startSearchLoading(answerEl) {
+            stopSearchLoading();
+            searchLoadingIndex = 0;
+            answerEl.innerHTML = '<div class="lp-search-loading">' +
+                '<div class="lp-search-loading-dots"><span></span><span></span><span></span></div>' +
+                '<p class="lp-search-loading-label" id="search-loading-label">' + SEARCH_LOADING_MESSAGES[0] + '</p>' +
+                '</div>';
+            searchLoadingTimer = setInterval(() => {
+                searchLoadingIndex = (searchLoadingIndex + 1) % SEARCH_LOADING_MESSAGES.length;
+                const loadingLabel = document.getElementById('search-loading-label');
+                if (loadingLabel) loadingLabel.textContent = SEARCH_LOADING_MESSAGES[searchLoadingIndex];
+            }, 950);
+        }
+
+        function stopSearchLoading() {
+            if (searchLoadingTimer) {
+                clearInterval(searchLoadingTimer);
+                searchLoadingTimer = null;
+            }
+        }
 
         function quickSearch(q) {
             document.getElementById('site-search-input').value = q;
@@ -404,16 +436,28 @@
             resultsEl.classList.add('visible');
             backdropEl.classList.add('visible');
             document.body.style.overflow = 'hidden';
-            answerEl.innerHTML = '<div class="lp-search-loading"><span></span><span></span><span></span></div>';
             sourcesEl.innerHTML = '';
+            startSearchLoading(answerEl);
+
+            if (activeSearchController) {
+                activeSearchController.abort();
+            }
+            const requestId = ++activeSearchRequestId;
+            activeSearchController = new AbortController();
+            const signal = activeSearchController.signal;
 
             try {
                 const res = await fetch('/api/search', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query }),
+                    signal,
                 });
+                if (!res.ok) throw new Error('Search request failed');
                 const data = await res.json();
+                if (requestId !== activeSearchRequestId) return;
+                stopSearchLoading();
+                activeSearchController = null;
 
                 answerEl.innerHTML = '<p class="lp-search-answer-text">' + (data.answer || 'No answer found.') + '</p>';
 
@@ -428,11 +472,21 @@
                         ).join('');
                 }
             } catch (err) {
+                if (requestId !== activeSearchRequestId) return;
+                if (err && err.name === 'AbortError') return;
+                stopSearchLoading();
+                activeSearchController = null;
                 answerEl.innerHTML = '<p class="lp-search-answer-text" style="color:var(--text-secondary)">Search unavailable. Try the <a href="/resources.html" style="color:inherit;text-decoration:underline">Resources</a> or <a href="/calculators.html" style="color:inherit;text-decoration:underline">Calculators</a> pages.</p>';
             }
         }
 
         function closeSearch() {
+            if (activeSearchController) {
+                activeSearchController.abort();
+                activeSearchController = null;
+            }
+            activeSearchRequestId += 1;
+            stopSearchLoading();
             document.getElementById('search-results').classList.remove('visible');
             document.getElementById('search-backdrop').classList.remove('visible');
             document.body.style.overflow = '';
