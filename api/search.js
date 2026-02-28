@@ -39,12 +39,6 @@ function getRankedChunks(query) {
     .sort((a, b) => b.score - a.score);
 }
 
-function findRelevantChunks(query, topN = 6) {
-  const ranked = getRankedChunks(query).slice(0, topN);
-  if (ranked.length === 0) return CHUNKS.slice(0, topN);
-  return ranked.map(({ chunk }) => chunk);
-}
-
 function makeSources(chunks, limit = 4) {
   return chunks.slice(0, limit).map(c => ({
     title: c.title,
@@ -210,10 +204,9 @@ Answer rules:
   } catch (err) {
     console.error('Search error:', err);
     const payload = {
-      answer: buildFastAnswer(normalizedQuery, relevant) || 'Could not generate AI answer. Here are the most relevant resources:',
+      answer: 'Could not generate AI answer. Here are the most relevant resources:',
       sources,
     };
-    setCache(cacheKey, payload);
     return res.status(200).json(payload);
   }
 };
