@@ -1,48 +1,89 @@
 """
-openmud Tool Registry
-Defines all available tools with OpenAI-compatible function schemas for tool calling.
+openmud Tool Registry — v1.0
+OpenAI-compatible function schemas for all openmud tools.
+Used for tool calling in the AI chat and as the foundation for the public API schema.
+
+Available regions: national, utah, mountain_west, texas, california, northeast
 """
 
 from typing import Any, Dict, List
+
+API_VERSION = "1.0"
+
+REGION_ENUM = [
+    "national", "utah", "mountain_west",
+    "texas", "california", "northeast",
+]
+
+REGION_DESCRIPTION = (
+    "Geographic region for rate lookup. "
+    "Available: national (default), utah, mountain_west, texas, california, northeast. "
+    "Rates reflect local market conditions including prevailing wage where applicable."
+)
 
 # Tool definitions with OpenAI function-calling schema
 TOOL_DEFINITIONS = [
     {
         "name": "calculate_material_cost",
         "description": (
-            "Calculate material cost for construction. Use for pipe, "
-            "concrete, rebar. Returns unit cost, total, and waste factor."
+            "Calculate material cost for construction. Use for pipe (pvc_c900_8, dip_8, rcp_18, etc.), "
+            "concrete (3000_psi, 4000_psi), aggregate (crushed_rock_34, base_course), "
+            "or rebar. Returns unit cost, total, and waste factor. Supports regional rates."
         ),
         "parameters": {
             "type": "object",
             "properties": {
-                "material_type": {"type": "string", "description": "pipe, concrete, or rebar"},
-                "quantity": {"type": "number", "description": "Quantity needed"},
-                "size": {"type": "string", "description": "Size: e.g. '4' for 4-inch pipe, '3000_psi' for concrete"},
+                "material_type": {
+                    "type": "string",
+                    "description": "Material category: pipe, concrete, aggregate, asphalt, or rebar",
+                },
+                "quantity": {"type": "number", "description": "Quantity in appropriate unit (LF, CY, ton)"},
+                "size": {
+                    "type": "string",
+                    "description": "Size/grade key. Pipe: '8' for 8-inch. Concrete: '4000_psi'. Rebar: '5_rebar'.",
+                },
+                "region": {"type": "string", "description": REGION_DESCRIPTION, "enum": REGION_ENUM},
             },
             "required": ["material_type", "quantity"],
         },
     },
     {
         "name": "calculate_labor_cost",
-        "description": "Calculate labor cost. Use for operator, laborer, foreman, electrician, ironworker.",
+        "description": (
+            "Calculate labor cost by type, hours, and region. "
+            "Labor types: operator, laborer, foreman, superintendent, pipe_layer, "
+            "grade_checker, traffic_control, ironworker, electrician, plumber."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
-                "labor_type": {"type": "string", "description": "operator, laborer, foreman, electrician, ironworker"},
+                "labor_type": {
+                    "type": "string",
+                    "description": "Labor classification: operator, laborer, foreman, superintendent, pipe_layer, grade_checker, traffic_control, ironworker, electrician, plumber",
+                },
                 "hours": {"type": "number", "description": "Number of hours"},
+                "region": {"type": "string", "description": REGION_DESCRIPTION, "enum": REGION_ENUM},
             },
             "required": ["labor_type", "hours"],
         },
     },
     {
         "name": "calculate_equipment_cost",
-        "description": "Calculate equipment rental cost. Use for excavator, auger, compactor.",
+        "description": (
+            "Calculate equipment rental cost by type, days, and region. "
+            "Types: excavator, excavator_20t, excavator_30t, excavator_mini, backhoe, dozer_d6, "
+            "motor_grader, wheel_loader, dump_truck, water_truck, compactor, jumping_jack, "
+            "plate_compactor, roller_sheepsfoot, dewatering_pump, generator, trench_box, auger."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
-                "equipment_type": {"type": "string", "description": "excavator, auger, compactor"},
+                "equipment_type": {
+                    "type": "string",
+                    "description": "Equipment type key (e.g. excavator_20t, dump_truck, jumping_jack)",
+                },
                 "days": {"type": "number", "description": "Number of rental days"},
+                "region": {"type": "string", "description": REGION_DESCRIPTION, "enum": REGION_ENUM},
             },
             "required": ["equipment_type", "days"],
         },
@@ -88,6 +129,7 @@ TOOL_DEFINITIONS = [
                     "description": "Optional list of {type, days}",
                 },
                 "markup": {"type": "number", "description": "Markup as decimal, e.g. 0.15 for 15%"},
+                "region": {"type": "string", "description": REGION_DESCRIPTION, "enum": REGION_ENUM},
             },
             "required": ["materials", "labor"],
         },

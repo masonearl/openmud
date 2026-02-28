@@ -447,6 +447,65 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* ─── Project tools: estimator rows ─────────────────────────── */
+.est-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 90px 20px;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: center;
+}
+
+.est-row select,
+.est-row input {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 7px 8px;
+    color: var(--text);
+    font-size: 0.8125rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.est-row select:focus,
+.est-row input:focus {
+    outline: none;
+    border-color: var(--earth);
+}
+
+/* Schedule results table */
+.sched-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    margin-top: 4px;
+}
+
+.sched-table th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.675rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+    background: rgba(255,255,255,0.02);
+}
+
+.sched-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+}
+
+.sched-table tr:last-child td { border-bottom: none; }
+.sched-table tr:hover td { background: rgba(255,255,255,0.02); }
+
 /* ─── Crew day rows ──────────────────────────────────────────── */
 .crew-row {
     display: grid;

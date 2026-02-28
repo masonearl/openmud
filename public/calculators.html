@@ -59,6 +59,11 @@
                 <option value="grade-slope">Grade &amp; Slope</option>
                 <option value="compaction">Compaction</option>
             </optgroup>
+            <optgroup label="Project Tools">
+                <option value="estimator">Project Estimator</option>
+                <option value="schedule-builder">Schedule Builder</option>
+                <option value="proposal-builder">Proposal Generator</option>
+            </optgroup>
             <optgroup label="Cost &amp; Bid">
                 <option value="markup">Markup &amp; Bid Price</option>
                 <option value="unit-price">Unit Price Builder</option>
@@ -98,6 +103,11 @@
                 <a href="#change-order" class="calc-nav-link" data-panel="change-order">Change Order</a>
                 <a href="#production-rate" class="calc-nav-link" data-panel="production-rate">Production Rate</a>
                 <a href="#crew-day" class="calc-nav-link" data-panel="crew-day">Crew Day Cost</a>
+
+                <p class="calc-sidebar-label">Project Tools</p>
+                <a href="#estimator" class="calc-nav-link" data-panel="estimator">Project Estimator</a>
+                <a href="#schedule-builder" class="calc-nav-link" data-panel="schedule-builder">Schedule Builder</a>
+                <a href="#proposal-builder" class="calc-nav-link" data-panel="proposal-builder">Proposal Generator</a>
 
                 <p class="calc-sidebar-label">Reference &amp; Conversion</p>
                 <a href="#unit-converter" class="calc-nav-link" data-panel="unit-converter">Unit Converter</a>
@@ -702,6 +712,150 @@
                 </div>
                 <div class="calc-notes">
                     Source: Chaudhry (2008), Ven Te Chow (1959), ASCE manuals of practice. Values for design use — verify with project-specific conditions.
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+            <!-- ─── PROJECT ESTIMATOR ──────────────────────────── -->
+            <section class="calc-panel" id="panel-estimator">
+                <h1 class="calc-title">Project Estimator</h1>
+                <p class="calc-desc">Full project cost estimate — materials, labor, equipment, and markup. Powered by the openmud Python estimating engine.</p>
+
+                <div class="calc-grid" style="grid-template-columns: 1fr; max-width: 720px;">
+                    <!-- Materials -->
+                    <div class="calc-inputs">
+                        <p class="form-section-label">Materials</p>
+                        <div id="est-material-rows">
+                            <div class="est-row">
+                                <select class="est-mat-type">
+                                    <option value="pipe">Pipe</option>
+                                    <option value="concrete">Concrete</option>
+                                    <option value="rebar">Rebar</option>
+                                </select>
+                                <select class="est-mat-size">
+                                    <option value="8">8" pipe ($18/LF)</option>
+                                    <option value="6">6" pipe ($12/LF)</option>
+                                    <option value="4">4" pipe ($8.50/LF)</option>
+                                </select>
+                                <input type="number" class="est-mat-qty" placeholder="Qty" value="500" min="0">
+                                <span class="crew-remove" onclick="removeEstRow(this, 'material')">×</span>
+                            </div>
+                        </div>
+                        <button class="calc-btn-secondary" onclick="addEstMaterialRow()">+ Add material</button>
+
+                        <p class="form-section-label" style="margin-top:16px">Labor</p>
+                        <div id="est-labor-rows">
+                            <div class="est-row">
+                                <select class="est-lab-type">
+                                    <option value="operator">Operator ($85/hr)</option>
+                                    <option value="laborer">Laborer ($35/hr)</option>
+                                    <option value="foreman">Foreman ($55/hr)</option>
+                                    <option value="electrician">Electrician ($65/hr)</option>
+                                    <option value="ironworker">Ironworker ($55/hr)</option>
+                                </select>
+                                <input type="number" class="est-lab-hrs" placeholder="Hours" value="80" min="0">
+                                <span class="crew-remove" onclick="removeEstRow(this, 'labor')">×</span>
+                            </div>
+                        </div>
+                        <button class="calc-btn-secondary" onclick="addEstLaborRow()">+ Add labor</button>
+
+                        <p class="form-section-label" style="margin-top:16px">Equipment</p>
+                        <div id="est-equip-rows">
+                            <div class="est-row">
+                                <select class="est-eq-type">
+                                    <option value="excavator">Excavator ($400/day)</option>
+                                    <option value="compactor">Compactor ($100/day)</option>
+                                    <option value="auger">Auger ($450/day)</option>
+                                </select>
+                                <input type="number" class="est-eq-days" placeholder="Days" value="5" min="0">
+                                <span class="crew-remove" onclick="removeEstRow(this, 'equipment')">×</span>
+                            </div>
+                        </div>
+                        <button class="calc-btn-secondary" onclick="addEstEquipRow()">+ Add equipment</button>
+
+                        <div class="input-grid" style="margin-top:16px; max-width: 480px;">
+                            <div class="form-row">
+                                <label>Region / Market</label>
+                                <select id="est-region">
+                                    <option value="national">National Average (Open Shop)</option>
+                                    <option value="utah">Utah — Wasatch Front</option>
+                                    <option value="mountain_west">Mountain West (CO, NV, AZ)</option>
+                                    <option value="texas">Texas (Houston / Dallas)</option>
+                                    <option value="california">California (Prevailing Wage)</option>
+                                    <option value="northeast">Northeast (Union, NYC/Boston)</option>
+                                </select>
+                            </div>
+                            <div class="form-row"><label>Markup / O&amp;P (%)</label><input type="number" id="est-markup" value="15" min="0" max="50" step="0.5"></div>
+                        </div>
+
+                        <button class="calc-btn" style="margin-top:12px; max-width:300px" onclick="calcProjectEstimate()">Generate Estimate</button>
+                    </div>
+
+                    <div class="calc-results" id="est-results"></div>
+                </div>
+
+                <div class="calc-notes">
+                    <strong>Rates:</strong> Based on openmud estimating database. Material costs include 10% waste. Labor rates are all-in hourly. Contribute better regional rates on GitHub.
+                </div>
+            </section>
+
+            <!-- ─── SCHEDULE BUILDER ───────────────────────────── -->
+            <section class="calc-panel" id="panel-schedule-builder">
+                <h1 class="calc-title">Schedule Builder</h1>
+                <p class="calc-desc">Generate a phase-by-phase construction schedule with start and end dates. Powered by the openmud Python schedule engine.</p>
+
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="input-grid single-col">
+                            <div class="form-row"><label>Project name</label><input type="text" id="sched-name" value="Water Main Replacement" placeholder="Project name"></div>
+                            <div class="form-row"><label>Start date</label><input type="date" id="sched-start"></div>
+                            <div class="form-row"><label>Total duration (calendar days)</label><input type="number" id="sched-duration" value="30" min="1"></div>
+                            <div class="form-row"><label>Phases (comma-separated, leave blank for defaults)</label>
+                                <input type="text" id="sched-phases" placeholder="Mobilization, Trenching, Pipe install, Backfill, Restoration">
+                            </div>
+                        </div>
+                        <button class="calc-btn" style="margin-top: 8px" onclick="buildProjectSchedule()">Build Schedule</button>
+                    </div>
+                    <div class="calc-results" id="sched-results"></div>
+                </div>
+
+                <div class="calc-notes">
+                    <strong>Defaults:</strong> If no phases entered, uses Mobilization, Trenching, Pipe install, Backfill, Restoration. Duration is split evenly across phases. Right-click the schedule table to copy or print.
+                </div>
+            </section>
+
+            <!-- ─── PROPOSAL GENERATOR ────────────────────────── -->
+            <section class="calc-panel" id="panel-proposal-builder">
+                <h1 class="calc-title">Proposal Generator</h1>
+                <p class="calc-desc">Generate a formatted proposal document ready for PDF download. Powered by the openmud Python proposal engine.</p>
+
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <div class="input-grid single-col">
+                            <div class="form-row"><label>Client / Project name</label><input type="text" id="prop-client" placeholder="City of Example, Water Dept."></div>
+                            <div class="form-row"><label>Scope of work</label><textarea id="prop-scope" rows="4" style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:0.875rem;resize:vertical;" placeholder="Furnish and install 500 LF of 8-inch PVC C900 waterline..."></textarea></div>
+                            <div class="form-row"><label>Contract total ($)</label><input type="number" id="prop-total" placeholder="0" min="0"></div>
+                            <div class="form-row"><label>Duration (days)</label><input type="number" id="prop-duration" placeholder="30" min="1"></div>
+                            <div class="form-row"><label>Assumptions (optional)</label><textarea id="prop-assumptions" rows="2" style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:0.875rem;resize:vertical;" placeholder="Work performed during normal business hours..."></textarea></div>
+                            <div class="form-row"><label>Exclusions (optional)</label><textarea id="prop-exclusions" rows="2" style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:0.875rem;resize:vertical;" placeholder="Rock excavation, permit fees, utility relocations..."></textarea></div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;">
+                            <button class="calc-btn" style="flex:1" onclick="generateProposal()">Generate Proposal</button>
+                            <button class="calc-btn" style="flex:1;background:var(--earth-dark)" onclick="downloadProposalPDF()" id="prop-download-btn" disabled>Download PDF</button>
+                        </div>
+                    </div>
+                    <div class="calc-results" id="prop-results"></div>
+                </div>
+
+                <!-- Hidden iframe for PDF rendering -->
+                <div id="prop-preview" style="display:none;margin-top:16px;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+                    <iframe id="prop-iframe" style="width:100%;height:500px;border:none;background:#fff;"></iframe>
+                </div>
+
+                <div class="calc-notes">
+                    <strong>How it works:</strong> The Python proposal engine generates styled HTML. Click Download PDF to save it as a PDF document using your browser's print dialog.
                 </div>
             </section>
 

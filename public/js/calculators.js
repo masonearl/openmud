@@ -784,6 +784,259 @@ function filterPipeTable() {
     });
 }
 
+// ─── Project Estimator ────────────────────────────────────────────────────────
+
+var MAT_SIZE_OPTIONS = {
+    pipe: [
+        { value: '8', label: '8" pipe ($18/LF)' },
+        { value: '6', label: '6" pipe ($12/LF)' },
+        { value: '4', label: '4" pipe ($8.50/LF)' },
+    ],
+    concrete: [
+        { value: '4000_psi', label: '4,000 PSI ($180/CY)' },
+        { value: '3000_psi', label: '3,000 PSI ($166/CY)' },
+    ],
+    rebar: [
+        { value: '5_rebar', label: '#5 rebar ($1.75/LF)' },
+        { value: '4_rebar', label: '#4 rebar ($1.25/LF)' },
+    ],
+};
+
+function updateMatSizes(typeSelect) {
+    var row = typeSelect.closest('.est-row');
+    var sizeSelect = row.querySelector('.est-mat-size');
+    var type = typeSelect.value;
+    var options = MAT_SIZE_OPTIONS[type] || [];
+    sizeSelect.innerHTML = options.map(function(o) {
+        return '<option value="' + o.value + '">' + o.label + '</option>';
+    }).join('');
+}
+
+function addEstMaterialRow() {
+    var row = document.createElement('div');
+    row.className = 'est-row';
+    row.innerHTML =
+        '<select class="est-mat-type" onchange="updateMatSizes(this)">' +
+        '<option value="pipe">Pipe</option>' +
+        '<option value="concrete">Concrete</option>' +
+        '<option value="rebar">Rebar</option></select>' +
+        '<select class="est-mat-size">' +
+        '<option value="8">8" pipe ($18/LF)</option>' +
+        '<option value="6">6" pipe ($12/LF)</option>' +
+        '<option value="4">4" pipe ($8.50/LF)</option></select>' +
+        '<input type="number" class="est-mat-qty" placeholder="Qty" value="100" min="0">' +
+        '<span class="crew-remove" onclick="removeEstRow(this, \'material\')">×</span>';
+    document.getElementById('est-material-rows').appendChild(row);
+}
+
+function addEstLaborRow() {
+    var row = document.createElement('div');
+    row.className = 'est-row';
+    row.innerHTML =
+        '<select class="est-lab-type">' +
+        '<option value="operator">Operator ($85/hr)</option>' +
+        '<option value="laborer">Laborer ($35/hr)</option>' +
+        '<option value="foreman">Foreman ($55/hr)</option>' +
+        '<option value="electrician">Electrician ($65/hr)</option>' +
+        '<option value="ironworker">Ironworker ($55/hr)</option></select>' +
+        '<input type="number" class="est-lab-hrs" placeholder="Hours" value="40" min="0">' +
+        '<span class="crew-remove" onclick="removeEstRow(this, \'labor\')">×</span>';
+    document.getElementById('est-labor-rows').appendChild(row);
+}
+
+function addEstEquipRow() {
+    var row = document.createElement('div');
+    row.className = 'est-row';
+    row.innerHTML =
+        '<select class="est-eq-type">' +
+        '<option value="excavator">Excavator ($400/day)</option>' +
+        '<option value="compactor">Compactor ($100/day)</option>' +
+        '<option value="auger">Auger ($450/day)</option></select>' +
+        '<input type="number" class="est-eq-days" placeholder="Days" value="3" min="0">' +
+        '<span class="crew-remove" onclick="removeEstRow(this, \'equipment\')">×</span>';
+    document.getElementById('est-equip-rows').appendChild(row);
+}
+
+function removeEstRow(el, type) {
+    var containerId = type === 'material' ? 'est-material-rows' :
+                      type === 'labor' ? 'est-labor-rows' : 'est-equip-rows';
+    var container = document.getElementById(containerId);
+    if (container.children.length > 1) el.closest('.est-row').remove();
+}
+
+async function calcProjectEstimate() {
+    var resultsEl = document.getElementById('est-results');
+    resultsEl.innerHTML = '<p style="color:var(--text-secondary);font-size:0.8125rem">Calculating via Python engine...</p>';
+
+    var materials = [];
+    document.querySelectorAll('#est-material-rows .est-row').forEach(function(row) {
+        var type = row.querySelector('.est-mat-type').value;
+        var size = row.querySelector('.est-mat-size').value;
+        var qty = parseFloat(row.querySelector('.est-mat-qty').value) || 0;
+        if (qty > 0) materials.push({ type: type, quantity: qty, size: size });
+    });
+
+    var labor = [];
+    document.querySelectorAll('#est-labor-rows .est-row').forEach(function(row) {
+        var type = row.querySelector('.est-lab-type').value;
+        var hrs = parseFloat(row.querySelector('.est-lab-hrs').value) || 0;
+        if (hrs > 0) labor.push({ type: type, hours: hrs });
+    });
+
+    var equipment = [];
+    document.querySelectorAll('#est-equip-rows .est-row').forEach(function(row) {
+        var type = row.querySelector('.est-eq-type').value;
+        var days = parseFloat(row.querySelector('.est-eq-days').value) || 0;
+        if (days > 0) equipment.push({ type: type, days: days });
+    });
+
+    var markup = (parseFloat(document.getElementById('est-markup').value) || 15) / 100;
+    var region = document.getElementById('est-region').value || 'national';
+
+    try {
+        var res = await fetch('/api/python/estimate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ materials: materials, labor: labor, equipment: equipment, markup: markup, region: region }),
+        });
+        var data = await res.json();
+        if (data.error) { resultsEl.innerHTML = '<p style="color:#f87171">' + data.error + '</p>'; return; }
+
+        var rows = '<div class="result-row"><span class="result-label">Region</span><span class="result-value" style="font-size:0.8rem">' + (data.region_label || data.region) + '</span></div>';
+        if (data.wage_type) rows += '<div class="result-row"><span class="result-label">Wage type</span><span class="result-value" style="font-size:0.8rem">' + data.wage_type.replace(/_/g, ' ') + '</span></div>';
+        if (data.materials && data.materials.breakdown.length) {
+            rows += '<div class="result-section"><div class="result-section-title">Materials</div>';
+            data.materials.breakdown.forEach(function(m) {
+                rows += '<div class="result-row"><span class="result-label">' + m.material + ' (' + m.quantity + ' ' + m.unit + ')</span><span class="result-value">$' + m.total_with_waste.toLocaleString() + '</span></div>';
+            });
+            rows += '<div class="result-row"><span class="result-label">Material subtotal</span><span class="result-value result-primary">$' + data.materials.subtotal.toLocaleString() + '</span></div></div>';
+        }
+        if (data.labor && data.labor.breakdown.length) {
+            rows += '<div class="result-section"><div class="result-section-title">Labor</div>';
+            data.labor.breakdown.forEach(function(l) {
+                rows += '<div class="result-row"><span class="result-label">' + l.labor_type + ' (' + l.hours + ' hrs @ $' + l.hourly_rate + '/hr)</span><span class="result-value">$' + l.total_cost.toLocaleString() + '</span></div>';
+            });
+            rows += '<div class="result-row"><span class="result-label">Labor subtotal</span><span class="result-value result-primary">$' + data.labor.subtotal.toLocaleString() + '</span></div></div>';
+        }
+        if (data.equipment && data.equipment.breakdown.length) {
+            rows += '<div class="result-section"><div class="result-section-title">Equipment</div>';
+            data.equipment.breakdown.forEach(function(e) {
+                rows += '<div class="result-row"><span class="result-label">' + e.equipment + ' (' + e.days + ' days @ $' + e.daily_rate + '/day)</span><span class="result-value">$' + e.total_cost.toLocaleString() + '</span></div>';
+            });
+            rows += '<div class="result-row"><span class="result-label">Equipment subtotal</span><span class="result-value result-primary">$' + data.equipment.subtotal.toLocaleString() + '</span></div></div>';
+        }
+        rows += '<div class="result-section">' +
+            '<div class="result-row"><span class="result-label">Direct cost subtotal</span><span class="result-value">$' + data.subtotal.toLocaleString() + '</span></div>' +
+            '<div class="result-row"><span class="result-label">Overhead & profit (' + data.markup_percentage + '%)</span><span class="result-value">$' + data.overhead_profit.toLocaleString() + '</span></div>' +
+            '<div class="result-row"><span class="result-label" style="font-weight:700;color:var(--text)">Total bid</span><span class="result-value result-primary" style="font-size:1.125rem">$' + data.total.toLocaleString() + '</span></div>' +
+            '</div>';
+        resultsEl.innerHTML = rows;
+
+    } catch (err) {
+        resultsEl.innerHTML = '<p style="color:#f87171;font-size:0.8125rem">API unavailable. Make sure the Python endpoint is running.</p>';
+    }
+}
+
+// ─── Schedule Builder ─────────────────────────────────────────────────────────
+
+async function buildProjectSchedule() {
+    var resultsEl = document.getElementById('sched-results');
+    resultsEl.innerHTML = '<p style="color:var(--text-secondary);font-size:0.8125rem">Building schedule via Python engine...</p>';
+
+    var name = document.getElementById('sched-name').value.trim() || 'Project';
+    var start = document.getElementById('sched-start').value;
+    var duration = parseInt(document.getElementById('sched-duration').value) || 30;
+    var phasesInput = document.getElementById('sched-phases').value.trim();
+
+    try {
+        var res = await fetch('/api/python/schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                project_name: name,
+                start_date: start || null,
+                duration_days: duration,
+                phases: phasesInput || '',
+            }),
+        });
+        var data = await res.json();
+        if (data.error) { resultsEl.innerHTML = '<p style="color:#f87171">' + data.error + '</p>'; return; }
+
+        var html = '<div class="result-section-title">' + data.project_name + ' — ' + data.duration + ' days</div>';
+        html += '<table class="sched-table"><thead><tr><th>Phase</th><th>Start</th><th>End</th><th>Days</th></tr></thead><tbody>';
+        data.phases.forEach(function(p) {
+            html += '<tr><td>' + p.phase + '</td><td>' + p.start + '</td><td>' + p.end + '</td><td>' + p.days + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        resultsEl.innerHTML = html;
+
+    } catch (err) {
+        resultsEl.innerHTML = '<p style="color:#f87171;font-size:0.8125rem">API unavailable. Make sure the Python endpoint is running.</p>';
+    }
+}
+
+// Set today as default start date
+(function setSchedDefaultDate() {
+    var el = document.getElementById('sched-start');
+    if (el) el.value = new Date().toISOString().slice(0, 10);
+})();
+
+// ─── Proposal Generator ───────────────────────────────────────────────────────
+
+var _proposalHTML = '';
+
+async function generateProposal() {
+    var resultsEl = document.getElementById('prop-results');
+    resultsEl.innerHTML = '<p style="color:var(--text-secondary);font-size:0.8125rem">Generating proposal via Python engine...</p>';
+    document.getElementById('prop-download-btn').disabled = true;
+
+    var payload = {
+        client: document.getElementById('prop-client').value,
+        scope: document.getElementById('prop-scope').value,
+        total: parseFloat(document.getElementById('prop-total').value) || 0,
+        duration: parseInt(document.getElementById('prop-duration').value) || null,
+        assumptions: document.getElementById('prop-assumptions').value,
+        exclusions: document.getElementById('prop-exclusions').value,
+    };
+
+    try {
+        var res = await fetch('/api/python/proposal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        var data = await res.json();
+        if (data.error) { resultsEl.innerHTML = '<p style="color:#f87171">' + data.error + '</p>'; return; }
+
+        _proposalHTML = data.html;
+
+        // Show preview in iframe
+        var preview = document.getElementById('prop-preview');
+        var iframe = document.getElementById('prop-iframe');
+        preview.style.display = 'block';
+        iframe.srcdoc = '<html><body style="margin:0;font-family:Georgia,serif;">' + data.html + '</body></html>';
+
+        resultsEl.innerHTML =
+            '<div class="result-row"><span class="result-label">Status</span><span class="result-value result-ok">Generated</span></div>' +
+            '<div class="result-row"><span class="result-label">Client</span><span class="result-value">' + (payload.client || '—') + '</span></div>' +
+            '<div class="result-row"><span class="result-label">Total</span><span class="result-value result-primary">$' + (payload.total || 0).toLocaleString() + '</span></div>' +
+            '<p class="result-note ok" style="margin-top:12px">Preview shown below. Click Download PDF to save.</p>';
+        document.getElementById('prop-download-btn').disabled = false;
+
+    } catch (err) {
+        resultsEl.innerHTML = '<p style="color:#f87171;font-size:0.8125rem">API unavailable. Make sure the Python endpoint is running.</p>';
+    }
+}
+
+function downloadProposalPDF() {
+    if (!_proposalHTML) return;
+    var iframe = document.getElementById('prop-iframe');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+    }
+}
+
 // ─── Hash routing on load ─────────────────────────────────────────────────────
 (function() {
     var hash = window.location.hash.replace('#', '');
