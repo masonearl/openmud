@@ -1431,6 +1431,111 @@
         "agent",
         "AI tools"
       ]
+    },
+    {
+      "id": "software-design-cad",
+      "category": "Reference",
+      "title": "Design and CAD Software \u2014 Heavy Civil and Underground Utility",
+      "content": "AutoCAD Civil 3D (Autodesk) is the industry-standard design platform for heavy civil \u2014 roads, grading, underground utilities, drainage, and corridors. Used by DOTs, engineering firms, and large contractors. Outputs DWG files, plan and profile sheets, and quantity reports. Subscription-based. Bluebeam Revu is the de facto standard for PDF markup and collaboration \u2014 estimators use it for digital takeoffs, PMs use it for RFI markups and submittals. Most plan sets are marked up in Bluebeam. OpenRoads Designer (Bentley Systems) is the Civil 3D equivalent for transportation and DOT work in states that use Bentley standards \u2014 uses DGN format. Carlson Software runs inside AutoCAD and is common for smaller contractors and surveyors doing site grading and utility work at a lower price point. Agisoft Metashape processes drone imagery into 3D models and orthomosaics for earthwork calculations, stockpile measurement, and site progress documentation.",
+      "url": "/resources.html#software-design",
+      "tags": [
+        "Civil 3D",
+        "AutoCAD",
+        "Bluebeam",
+        "Bluebeam Revu",
+        "OpenRoads",
+        "Bentley",
+        "Carlson",
+        "CAD",
+        "design software",
+        "PDF markup",
+        "takeoff",
+        "DWG"
+      ]
+    },
+    {
+      "id": "software-estimating-takeoff",
+      "category": "Reference",
+      "title": "Estimating and Takeoff Software \u2014 Heavy Civil",
+      "content": "HCSS HeavyBid is the dominant estimating platform for heavy civil and highway construction \u2014 handles bid items, crew pricing, equipment rates, subcontractor bids, and bid schedule assembly. Integrates with HeavyJob for budget-to-actual tracking. Industry standard for DOT and municipal work. Stack CT is a cloud-based takeoff and estimating platform with a strong digital plan takeoff workflow \u2014 measure linear footage, area, and item counts on uploaded PDFs. More accessible price point than HCSS. B2W Software is an integrated platform for heavy civil estimating, scheduling, and field tracking that competes with HCSS. Bid2Win is an estimating platform strong in highway, pipeline, and utility work. PlanSwift is desktop takeoff software that exports to Excel \u2014 popular with smaller contractors. Construction Takeoff is a Mac-native app for PDF measurement and markup with no subscription required.",
+      "url": "/resources.html#software-estimating",
+      "tags": [
+        "HCSS",
+        "HeavyBid",
+        "Stack CT",
+        "B2W",
+        "Bid2Win",
+        "PlanSwift",
+        "estimating",
+        "takeoff",
+        "quantity takeoff",
+        "heavy civil",
+        "bidding software"
+      ]
+    },
+    {
+      "id": "software-field-management",
+      "category": "Reference",
+      "title": "Field and Project Management Software \u2014 Heavy Civil",
+      "content": "HCSS HeavyJob is the benchmark field management platform for heavy civil \u2014 foremen enter daily production quantities, labor hours, and equipment hours from the field. Office sees real-time cost vs. budget by bid item. Integrates with HeavyBid. Procore is the dominant cloud-based construction management platform for RFIs, submittals, drawings, and daily logs \u2014 most large GCs and owners now use it. Trimble Viewpoint (Vista/Spectrum) is an ERP system for construction covering accounting, payroll, equipment, and project management. Fieldwire is a mobile field management tool good for plan management, punch lists, and task assignment \u2014 works offline. Samsara is a fleet and equipment telematics platform for GPS tracking, engine hours, fuel, driver behavior, and ELD compliance. Tenna is construction-specific equipment tracking using GPS, Bluetooth, and cellular \u2014 tracks heavy iron down to small tools.",
+      "url": "/resources.html#software-field",
+      "tags": [
+        "HCSS",
+        "HeavyJob",
+        "Procore",
+        "Viewpoint",
+        "Vista",
+        "Fieldwire",
+        "Samsara",
+        "Tenna",
+        "field management",
+        "project management",
+        "fleet tracking",
+        "telematics",
+        "daily reports"
+      ]
+    },
+    {
+      "id": "software-safety-training",
+      "category": "Reference",
+      "title": "Safety Training Software \u2014 Construction",
+      "content": "Tyfoom is a video-based micro-training platform built for construction crews. Short daily safety videos delivered to workers phones \u2014 watch, pass a quick quiz, completion is logged automatically. Available in multiple languages including Spanish. Covers OSHA topics, equipment safety, and trade-specific hazards. Used by large heavy civil contractors for OSHA documentation compliance. SafetyCulture (iAuditor) is a mobile inspection platform for custom safety checklists, JHA documentation, equipment pre-start inspections, and incident reporting with photo documentation. Predictive Solutions analyzes safety observation data to predict where incidents are likely to occur before they happen. HCSS Safety integrates with HeavyBid and HeavyJob for safety observations, near-miss reporting, and training documentation within the HCSS platform.",
+      "url": "/resources.html#software-safety",
+      "tags": [
+        "Tyfoom",
+        "iAuditor",
+        "SafetyCulture",
+        "HCSS Safety",
+        "Predictive Solutions",
+        "safety training",
+        "OSHA",
+        "toolbox talk",
+        "JHA",
+        "inspection",
+        "crew training"
+      ]
+    },
+    {
+      "id": "buildwitt-training-community",
+      "category": "Resources",
+      "title": "BuildWitt Training and Community \u2014 Heavy Civil",
+      "content": "BuildWitt Training (buildwitt.com/training) is a video training platform built specifically for heavy civil and underground construction crews. Founded by Aaron Witt. Content covers machine operation, pipe installation, safety, leadership, and business \u2014 made on real job sites by people who actually do the work. Available in English and Spanish. One of the most practical training investments a heavy civil contractor can make. BuildWitt Community (buildwitt.com/community) is an online community for owners, operators, foremen, and estimators in dirt work and heavy civil. Active discussion on equipment, business, hiring, and operations. Aaron Witt and the BuildWitt team participate directly. BuildWitt YouTube channel (youtube.com/@BuildWitt) has free content on job site footage, equipment, and culture. NCCER (nccer.org) is the primary credentialing body for construction craft training in the US \u2014 certifications are portable and often required for public works projects. AGC (agc.org) is the primary trade association for general contractors \u2014 provides training, certification programs, industry data, and legislative advocacy. APWA (apwa.net) is the American Public Works Association \u2014 the people who own and maintain the infrastructure contractors build, and the publisher of the utility color-coding standard.",
+      "url": "/resources.html#software-training",
+      "tags": [
+        "BuildWitt",
+        "Aaron Witt",
+        "BuildWitt Training",
+        "BuildWitt Community",
+        "NCCER",
+        "AGC",
+        "APWA",
+        "training",
+        "community",
+        "heavy civil",
+        "crew training",
+        "certification",
+        "machine operation"
+      ]
     }
   ]
 }
