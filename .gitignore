@@ -13,3 +13,10 @@ node_modules/
 dist/
 build/
 .pytest_cache/
+
+# Large media — store externally, not in git
+video/
+*.mp4
+*.mov
+*.avi
+*.mkv
