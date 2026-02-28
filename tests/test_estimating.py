@@ -6,7 +6,15 @@ from tools.estimating.estimating_tools import (
     calculate_labor_cost,
     calculate_equipment_cost,
     estimate_project_cost,
+    RATE_TABLES,
 )
+
+# Pull rates from the source of truth so tests never drift from the tables
+_NAT = RATE_TABLES["national"]
+OPERATOR_RATE = _NAT["labor"]["operator"]["hourly"]
+LABORER_RATE  = _NAT["labor"]["laborer"]["hourly"]
+EXCAVATOR_RATE = _NAT["equipment"]["excavator"]["daily"]
+COMPACTOR_RATE = _NAT["equipment"]["compactor"]["daily"]
 
 
 class TestMaterialCost:
@@ -31,7 +39,7 @@ class TestMaterialCost:
 class TestLaborCost:
     def test_operator_cost(self):
         result = calculate_labor_cost("operator", 8)
-        assert result["total_cost"] == pytest.approx(85.0 * 8, rel=0.001)
+        assert result["total_cost"] == pytest.approx(OPERATOR_RATE * 8, rel=0.001)
 
     def test_unknown_labor_type(self):
         result = calculate_labor_cost("astronaut", 8)
@@ -45,7 +53,7 @@ class TestLaborCost:
 class TestEquipmentCost:
     def test_excavator_cost(self):
         result = calculate_equipment_cost("excavator", 5)
-        assert result["total_cost"] == pytest.approx(400.0 * 5, rel=0.001)
+        assert result["total_cost"] == pytest.approx(EXCAVATOR_RATE * 5, rel=0.001)
 
     def test_unknown_equipment(self):
         result = calculate_equipment_cost("spaceship", 1)
