@@ -85,7 +85,7 @@ function getSentences(text, count = 1) {
 }
 
 function isNavigationQuery(query) {
-  return /(^|\s)(go to|open|show me|where is|where can i find|navigate|take me to|page)(\s|$)/i.test(query);
+  return /(^|\s)(go to|show me|where is|where can i find|navigate to|take me to)(\s|$)/i.test(query);
 }
 
 function isLookupQuery(query) {
