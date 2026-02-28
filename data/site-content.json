@@ -1316,6 +1316,63 @@
         "geotechnical",
         "borehole"
       ]
+    },
+    {
+      "id": "civil3d-dynamo-camber",
+      "category": "Tools",
+      "title": "AutoCAD Civil 3D, Dynamo, and Camber \u2014 Open Source Automation",
+      "content": "AutoCAD Civil 3D is Autodesk's industry-standard CAD platform for heavy civil design \u2014 roads, grading, utilities, and drainage. It is used by most DOTs, engineering firms, and larger contractors for design deliverables. Civil 3D uses the DWG file format. Dynamo is a visual programming environment built into Civil 3D (and Revit) that lets engineers automate repetitive tasks without writing code \u2014 corridor processing, sheet generation, alignment edits, label updates. Camber is a free, open-source Dynamo package specifically for Civil 3D at github.com/mzjensen/Camber. It extends Civil 3D with additional nodes for pipes, structures, corridors, alignments, and survey data \u2014 things Dynamo does not support natively. Useful for contractors and engineers who use Civil 3D and want to automate takeoffs, coordinate with subcontractors, or speed up plan production. MIT license. Requires Civil 3D subscription (Autodesk, not free). Alternative to Civil 3D for smaller firms: OpenRoads Designer (Bentley) or FreeCAD with the BIM workbench.",
+      "url": "/resources.html#opensource",
+      "tags": [
+        "Civil 3D",
+        "AutoCAD",
+        "Dynamo",
+        "Camber",
+        "GIS",
+        "automation",
+        "open source",
+        "heavy civil",
+        "design",
+        "CAD"
+      ]
+    },
+    {
+      "id": "qgis-civil-construction",
+      "category": "Tools",
+      "title": "QGIS for Civil Construction \u2014 Free GIS for Contractors",
+      "content": "QGIS is a free, open-source GIS (Geographic Information System) at qgis.org. It is the primary open-source alternative to Esri ArcGIS, which costs thousands per year. For heavy civil and underground utility contractors, QGIS is useful for: importing utility as-built data (shapefiles, KML, GeoJSON), overlaying survey data on aerial imagery, reviewing right-of-way and easement boundaries, analyzing corridor routes for pipeline or conduit, and creating site maps for bid packages. QGIS reads most GIS formats \u2014 Shapefile, GeoPackage, GeoJSON, KML, WMS, WFS. It imports CAD files (DXF/DWG) with the DXF import tool. State DOTs and municipalities often publish GIS data in these formats for free. QGIS can export to PDF for plan sheets. Runs on Windows, Mac, and Linux. Free with no seat limit \u2014 useful for an office with multiple estimators. The learning curve is moderate; the QGIS documentation is solid and YouTube has many tutorials.",
+      "url": "/resources.html#opensource",
+      "tags": [
+        "QGIS",
+        "GIS",
+        "mapping",
+        "right-of-way",
+        "site work",
+        "surveying",
+        "utility",
+        "free",
+        "open source",
+        "civil",
+        "ArcGIS alternative"
+      ]
+    },
+    {
+      "id": "engineering-calcs-free-tools",
+      "category": "Tools",
+      "title": "Free Engineering Calculation Tools \u2014 EngineeringPaper.xyz and Calcpad",
+      "content": "EngineeringPaper.xyz is a free, browser-based engineering calculation tool. No install required \u2014 runs in Chrome or Firefox. You can create calculation sheets with proper units (feet, inches, psi, gpm, etc.), save them to your account, and share links with PEs, inspectors, or owners. Useful for field engineers needing to document minimum slope checks, thrust block sizing, or Manning's flow calculations. Available at engineeringpaper.xyz, MIT license. Calcpad is free, open-source software for mathematical and engineering calculations at calcpad.eu. It supports custom units, symbolic math, and lets you build reusable calculation templates. Useful for estimators who want to build their own takeoff sheets or engineering formulas without Excel. Both tools are good alternatives to paid software like Mathcad or hand-calc sheets. For trench-specific calculations, openmud's built-in calculators at openmud.ai/calculators handle trench volume, pipe flow, minimum slope, thrust block sizing, compaction, and more \u2014 no account required.",
+      "url": "/resources.html#opensource",
+      "tags": [
+        "engineering calculations",
+        "EngineeringPaper",
+        "Calcpad",
+        "free tools",
+        "slope check",
+        "thrust block",
+        "Manning",
+        "estimating",
+        "calculation sheets"
+      ]
     }
   ]
 }
