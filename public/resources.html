@@ -64,6 +64,13 @@
                 <option value="ai-workflows">Workflows &amp; Prompt Templates</option>
                 <option value="ai-autonomy">Autonomy, Equipment &amp; Drones</option>
             </optgroup>
+            <optgroup label="Industry Software">
+                <option value="software-design">Design &amp; CAD</option>
+                <option value="software-estimating">Estimating &amp; Takeoff</option>
+                <option value="software-field">Field &amp; Project Management</option>
+                <option value="software-safety">Safety Training</option>
+                <option value="software-training">Training &amp; Community</option>
+            </optgroup>
             <optgroup label="Reference">
                 <option value="soil-types">Soil Classification</option>
                 <option value="color-codes">Utility Color Codes</option>
@@ -97,6 +104,13 @@
                 <a href="#ai-guide" class="res-nav-link" data-section="ai-guide">What AI Is &amp; How It Works</a>
                 <a href="#ai-workflows" class="res-nav-link" data-section="ai-workflows">Workflows &amp; Prompt Templates</a>
                 <a href="#ai-autonomy" class="res-nav-link" data-section="ai-autonomy">Autonomy, Equipment &amp; Drones</a>
+
+                <p class="res-sidebar-label">Industry Software</p>
+                <a href="#software-design" class="res-nav-link" data-section="software-design">Design &amp; CAD</a>
+                <a href="#software-estimating" class="res-nav-link" data-section="software-estimating">Estimating &amp; Takeoff</a>
+                <a href="#software-field" class="res-nav-link" data-section="software-field">Field &amp; Project Management</a>
+                <a href="#software-safety" class="res-nav-link" data-section="software-safety">Safety Training</a>
+                <a href="#software-training" class="res-nav-link" data-section="software-training">Training &amp; Community</a>
 
                 <p class="res-sidebar-label">Reference</p>
                 <a href="#soil-types" class="res-nav-link" data-section="soil-types">Soil Classification</a>
@@ -1000,6 +1014,216 @@ Output as a table with: Activity ID, Activity Name, Duration (days), Predecessor
                     <input type="text" id="glossary-search" placeholder="Search terms..." oninput="filterGlossary()" class="glossary-search">
                 </div>
                 <div class="glossary-grid" id="glossary-grid"></div>
+            </section>
+
+            <!-- Industry Software: Design & CAD -->
+            <section class="res-section" id="section-software-design">
+                <h1 class="res-title">Design &amp; CAD Software</h1>
+                <p class="res-desc">The software heavy civil engineers and contractors use to design, review, and mark up construction documents. Most of the industry runs on one of a few dominant platforms.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.autodesk.com/products/civil-3d/overview" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">AutoCAD Civil 3D</div>
+                        <div class="res-card-desc">The industry-standard design platform for heavy civil — roads, grading, underground utilities, drainage, and corridors. Produced by Autodesk. Used by virtually every DOT, engineering firm, and larger GC for design deliverables. Outputs DWG files, plan and profile sheets, quantity reports, and alignment data. Subscription-based (expensive). Most field teams receive PDFs exported from Civil 3D and never open the DWG directly.</div>
+                        <div class="res-card-tag">Autodesk · Civil design · DWG · Roads · Utilities · Subscription</div>
+                    </a>
+                    <a href="https://www.bluebeam.com" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Bluebeam Revu</div>
+                        <div class="res-card-desc">The de facto standard for PDF markup and collaboration in commercial and heavy civil construction. Estimators use it for digital takeoffs. PMs use it for RFI markups and submittals. The Studio feature lets multiple people mark up the same set simultaneously. Most plan sets, RFIs, and submittals you receive are marked up in Bluebeam. If your office doesn't have it, you're at a disadvantage in most bid environments.</div>
+                        <div class="res-card-tag">PDF markup · Takeoff · Collaboration · RFI · Submittals · Industry standard</div>
+                    </a>
+                    <a href="https://www.autodesk.com/products/autocad/overview" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">AutoCAD (base)</div>
+                        <div class="res-card-desc">The base AutoCAD product — 2D and 3D drafting without Civil 3D's civil-specific toolset. Used for as-built drawings, shop drawings, and simple site layouts. More common in smaller operations that don't need the full Civil 3D suite. Also used for custom detail sheets and utility diagrams.</div>
+                        <div class="res-card-tag">Autodesk · 2D/3D drafting · DWG · As-builts · Shop drawings</div>
+                    </a>
+                    <a href="https://www.bentley.com/software/openroads-designer/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">OpenRoads Designer (Bentley)</div>
+                        <div class="res-card-desc">Bentley Systems' equivalent to Civil 3D for transportation and civil infrastructure. Dominant in highway and DOT work in certain regions and internationally. Uses DGN file format instead of DWG. If you bid DOT work in states that use Bentley standards, you'll encounter OpenRoads files.</div>
+                        <div class="res-card-tag">Bentley · DOT · Highway · DGN · Civil design</div>
+                    </a>
+                    <a href="https://www.carlsonsw.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Carlson Software</div>
+                        <div class="res-card-desc">Civil design and survey software popular with smaller contractors and surveyors. Runs inside AutoCAD or standalone. Good for site grading, lot design, and survey data processing. More affordable than Civil 3D. Common in land development and utility work for firms that don't need the full DOT-grade Civil 3D toolset.</div>
+                        <div class="res-card-tag">Civil design · Survey · Grade · Affordable · AutoCAD-based</div>
+                    </a>
+                    <a href="https://www.agisoft.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Agisoft Metashape</div>
+                        <div class="res-card-desc">Photogrammetry software used to process drone imagery into 3D models, point clouds, and orthomosaics. Pairs with DJI or other construction drones. Outputs can be imported into Civil 3D or GIS tools for earthwork calculations, cut/fill analysis, and progress documentation. Increasingly used for stockpile measurement and site verification.</div>
+                        <div class="res-card-tag">Drone · Photogrammetry · 3D model · Earthwork · Stockpile</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>How AI fits in:</strong> AI can read exported PDFs from Civil 3D and Bluebeam — extracting quantities, stationing, pipe sizes, and elevations through OCR. openmud is building document extraction tools to pull structured data from plan sheets directly.
+                </div>
+            </section>
+
+            <!-- Industry Software: Estimating & Takeoff -->
+            <section class="res-section" id="section-software-estimating">
+                <h1 class="res-title">Estimating &amp; Takeoff Software</h1>
+                <p class="res-desc">Estimating is where heavy civil companies win or lose. The software here handles quantity takeoff from plan sheets, labor and equipment pricing, bid assembly, and subcontractor leveling.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.hcss.com/heavybid" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">HCSS HeavyBid</div>
+                        <div class="res-card-desc">The dominant estimating platform for heavy civil and highway construction. Built specifically for this market — not adapted from commercial or residential tools. Handles bid item setup, crew pricing, equipment rates, subcontractor bids, and bid schedule assembly. Integrates with HeavyJob for budget-to-actual tracking. If you're bidding DOT or municipal work over $5M consistently, most of your competitors are on HeavyBid. Industry standard. Expensive.</div>
+                        <div class="res-card-tag">HCSS · Heavy civil · DOT bids · Crew pricing · Industry standard</div>
+                    </a>
+                    <a href="https://www.stackct.com" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Stack CT</div>
+                        <div class="res-card-desc">Cloud-based takeoff and estimating platform. Strong for digital plan takeoff — measure linear footage, area, and count items directly on uploaded PDFs. Good interface for teams sharing plan sets and coordinating takeoffs across multiple estimators. More accessible price point than HCSS. Used across commercial, civil, and specialty trades. Competes directly with Bluebeam for the takeoff workflow.</div>
+                        <div class="res-card-tag">Cloud · Takeoff · PDF · Multi-user · Accessible price</div>
+                    </a>
+                    <a href="https://www.b2w-software.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">B2W Software</div>
+                        <div class="res-card-desc">Integrated platform for heavy civil estimating, scheduling, and field tracking. Competes with HCSS. Used by large civil contractors for end-to-end workflow from bid to closeout. Estimate module integrates with their scheduling and daily reporting tools. Fewer users than HCSS but strong in certain markets.</div>
+                        <div class="res-card-tag">Heavy civil · Estimating · Scheduling · Field tracking · Integrated</div>
+                    </a>
+                    <a href="https://www.bid2win.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Bid2Win</div>
+                        <div class="res-card-desc">Estimating software for heavy civil and infrastructure. Strong in highway, pipeline, and utility work. Used by mid-to-large civil contractors as an alternative to HCSS HeavyBid. Good bid item library functionality and subcontractor management. Competes on workflow customization.</div>
+                        <div class="res-card-tag">Heavy civil · Pipeline · Highway · Estimating · Subcontractor mgmt</div>
+                    </a>
+                    <a href="https://www.planswift.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">PlanSwift</div>
+                        <div class="res-card-desc">Desktop takeoff software. Widely used across trades for measuring from digital plan sets. Simpler than Stack CT, less expensive. Good for smaller operations doing their own quantity takeoff without a full estimating system. Outputs to Excel.</div>
+                        <div class="res-card-tag">Takeoff · Desktop · Excel export · Smaller contractors · Affordable</div>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/construction-takeoff/id6466373898" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Takeoff (Mac)</div>
+                        <div class="res-card-desc">Mac-native PDF editor and markup tool for construction plan takeoffs. Measure linear footage, area, and item counts directly on plan sheets. No subscription, no cloud account required. Works offline. Built for estimators who work from digital plan sets on Mac.</div>
+                        <div class="res-card-tag">macOS · PDF · Takeoff · No subscription · Offline</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Where AI is being applied:</strong> The biggest opportunity in estimating is document reading — AI that can open a set of plans, read pipe schedules and quantities, and pre-populate a bid item list. OCR + GPT-4o can do this today with the right pipeline. openmud is building toward this. For now: use AI to sense-check your math, draft your scope narratives, and write your sub bid requests.
+                </div>
+            </section>
+
+            <!-- Industry Software: Field & Project Management -->
+            <section class="res-section" id="section-software-field">
+                <h1 class="res-title">Field &amp; Project Management Software</h1>
+                <p class="res-desc">Field management tools handle daily production reporting, cost tracking, schedule, RFIs, submittals, and communication between field and office. The gap between companies that use these well and those that don't is significant.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.hcss.com/heavyjob" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">HCSS HeavyJob</div>
+                        <div class="res-card-desc">Field management built specifically for heavy civil. Foremen enter daily production quantities, labor hours, and equipment hours from the field. Office sees real-time cost vs. budget by bid item. Integrates directly with HeavyBid so your estimate becomes your budget without re-keying. The benchmark for production tracking in heavy civil. If you're doing DOT work or large utility projects and not tracking production by item, you're leaving money and information on the table.</div>
+                        <div class="res-card-tag">HCSS · Daily reports · Production tracking · Budget vs actual · Heavy civil</div>
+                    </a>
+                    <a href="https://www.procore.com" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Procore</div>
+                        <div class="res-card-desc">The dominant cloud-based construction management platform. Strong in commercial and GC work, increasingly common in heavy civil. Manages RFIs, submittals, drawings, punch lists, daily logs, and financials in one platform. Most large owners and GCs now require subs to access Procore for document management. Worth knowing even if you don't own a license — you'll likely be invited to a project.</div>
+                        <div class="res-card-tag">Cloud · RFI · Submittals · Drawings · PM · Industry standard for GCs</div>
+                    </a>
+                    <a href="https://www.trimble.com/en/products/software/trimble-viewpoint" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Trimble Viewpoint / Vista</div>
+                        <div class="res-card-desc">ERP (enterprise resource planning) platform built for construction. Handles accounting, payroll, equipment management, project management, and field reporting in one system. Common in mid-to-large civil and specialty contractors. Viewpoint Spectrum and Vista are different products under the same brand — both heavy-duty, implementation-intensive systems.</div>
+                        <div class="res-card-tag">ERP · Accounting · Payroll · Equipment · Project management</div>
+                    </a>
+                    <a href="https://www.fieldwire.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Fieldwire</div>
+                        <div class="res-card-desc">Field management tool strong in plan management, punch lists, and task assignment. Works offline on mobile — good for areas with poor cell coverage. Popular with supers and foremen who need a clean interface in the field. Competes with Procore but at a lower price point and less complexity.</div>
+                        <div class="res-card-tag">Mobile · Plans · Punch list · Tasks · Offline · Foreman-friendly</div>
+                    </a>
+                    <a href="https://www.samsara.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Samsara</div>
+                        <div class="res-card-desc">Fleet and equipment telematics platform. GPS tracking, engine hours, fuel consumption, driver behavior, and ELD compliance in one system. Used by civil contractors to manage truck fleets, track equipment location, and monitor operator performance. Real-time visibility into where your equipment is and whether it's running. Strong ROI on idle reduction and equipment utilization.</div>
+                        <div class="res-card-tag">Telematics · GPS · Fleet · Equipment · ELD · Fuel tracking</div>
+                    </a>
+                    <a href="https://www.tenna.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Tenna</div>
+                        <div class="res-card-desc">Equipment tracking built specifically for construction. Tracks everything from heavy iron to small tools and attachments. Uses GPS, Bluetooth, and cellular depending on the asset type. Connects to HCSS for equipment hour reporting. Good for contractors with large mixed fleets who need to know where every piece of equipment is and how many hours it's running.</div>
+                        <div class="res-card-tag">Equipment tracking · GPS · Small tools · HCSS integration · Construction-specific</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">How AI is changing field management</h2>
+                <ul class="res-list">
+                    <li>AI can read daily report narratives and extract production quantities — reducing manual data entry from the field</li>
+                    <li>Anomaly detection in cost-vs-budget data — AI flags when a bid item is tracking 20%+ over budget before it becomes a problem</li>
+                    <li>RFI drafting — give the AI the drawing issue and it writes the RFI. Takes 20 minutes of PM time down to 2.</li>
+                    <li>Email triage — AI reads incoming project emails, classifies them (owner directive, sub question, inspection notice), and drafts responses</li>
+                    <li>Meeting summaries — AI transcribes and summarizes OAC meetings, extracts action items and responsible parties</li>
+                </ul>
+            </section>
+
+            <!-- Industry Software: Safety Training -->
+            <section class="res-section" id="section-software-safety">
+                <h1 class="res-title">Safety Training Software</h1>
+                <p class="res-desc">Safety training is federally mandated and practically critical. The tools here handle crew training, competency documentation, incident management, and safety observation programs.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.tyfoom.com" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Tyfoom</div>
+                        <div class="res-card-desc">Video-based micro-training platform built for construction crews. Short daily safety videos (2-4 minutes) delivered to crews' phones — no classroom required. Workers watch, pass a quick quiz, and the completion is logged and documented. Covers OSHA topics, company-specific procedures, equipment safety, and trade-specific hazards. Particularly effective for non-English-speaking crews — content available in multiple languages. OSHA documentation is automatic. Used by some of the largest heavy civil contractors in the country.</div>
+                        <div class="res-card-tag">Safety training · Mobile · Video · OSHA · Multi-language · Crew-facing</div>
+                    </a>
+                    <a href="https://www.safetyculture.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">SafetyCulture (iAuditor)</div>
+                        <div class="res-card-desc">Mobile inspection and audit platform. Build custom safety inspection checklists, conduct site inspections from a phone, and automatically generate reports. Used for daily toolbox talks, job hazard analysis (JHA) documentation, equipment pre-start inspections, and incident reporting. Good integration with photo documentation — inspectors photo a hazard, it's logged with location and timestamp.</div>
+                        <div class="res-card-tag">Inspections · JHA · Toolbox talks · Mobile · Photo documentation · Reports</div>
+                    </a>
+                    <a href="https://www.predictivesolutions.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Predictive Solutions</div>
+                        <div class="res-card-desc">Safety analytics and leading indicator tracking. Analyzes observation data to predict where incidents are likely to occur before they happen. Used by large GCs and owners to move from reactive (incident investigation) to proactive (hazard prediction) safety programs. Integrates with Procore and other PM platforms.</div>
+                        <div class="res-card-tag">Analytics · Predictive · Leading indicators · Enterprise · Safety program</div>
+                    </a>
+                    <a href="https://www.hcss.com/safety" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">HCSS Safety</div>
+                        <div class="res-card-desc">Safety management module from HCSS — the same company behind HeavyBid and HeavyJob. Handles near-miss reporting, incident tracking, safety observations, and training documentation. Integrates with the rest of the HCSS platform, so safety data ties directly to project data. Logical choice for contractors already running HCSS for estimating and field tracking.</div>
+                        <div class="res-card-tag">HCSS · Incident tracking · Observations · Training docs · Integrated</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>OSHA requirement reminder:</strong> Training documentation is not optional — it is a federal record-keeping requirement under 29 CFR 1926. Software that auto-generates completion records protects you in an OSHA inspection. Keeping paper sign-in sheets in a job box is legally sufficient but practically fragile. Digital documentation survives audits better.
+                </div>
+            </section>
+
+            <!-- Industry Software: Training & Community -->
+            <section class="res-section" id="section-software-training">
+                <h1 class="res-title">Training &amp; Community</h1>
+                <p class="res-desc">The best resource in heavy civil has always been people who've done the work. These platforms make that knowledge accessible — from safety fundamentals to machine operation to business strategy.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.buildwitt.com/training" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">BuildWitt Training</div>
+                        <div class="res-card-desc">Video training platform built specifically for heavy civil and underground construction crews. Founded by Aaron Witt. Content covers machine operation, pipe installation, safety, leadership, and business. Videos are made on real job sites by people who actually do the work — not actors in a studio. Available in English and Spanish. Crews watch on their phones. Operators, laborers, and foremen all have relevant content. One of the most practical training investments a heavy civil contractor can make. Substantial library, continuously growing.</div>
+                        <div class="res-card-tag">Heavy civil · Crew training · Video · Machine operation · Spanish · Field-made</div>
+                    </a>
+                    <a href="https://www.buildwitt.com/community" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">BuildWitt Community</div>
+                        <div class="res-card-desc">Online community for people in dirt work, heavy civil, and underground construction. Owners, operators, foremen, and estimators sharing what works. Active discussion on equipment, business, hiring, and operations. Aaron Witt and the BuildWitt team are active participants. Good signal-to-noise ratio compared to general construction forums. If you're building a career or a company in heavy civil and you're not tapped into this community, you're missing real value.</div>
+                        <div class="res-card-tag">Community · Heavy civil · Dirt work · Networking · Business · Operators</div>
+                    </a>
+                    <a href="https://www.youtube.com/@BuildWitt" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BuildWitt — YouTube</div>
+                        <div class="res-card-desc">Free video content from BuildWitt on YouTube — job site footage, equipment walkthroughs, business interviews, and culture content. Good for getting a feel for the BuildWitt approach before committing to a training subscription. One of the most-watched channels in the heavy civil space.</div>
+                        <div class="res-card-tag">YouTube · Free · Heavy civil · Equipment · Culture</div>
+                    </a>
+                    <a href="https://www.nccer.org" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">NCCER — National Center for Construction Education</div>
+                        <div class="res-card-desc">The primary credentialing body for construction craft training in the US. NCCER certifications are recognized nationally and often required for public works projects and union/open-shop training programs. Covers pipeline, utility, heavy equipment, electrical, concrete, and dozens of other trades. Assessments and transcripts are portable — workers carry their record with them regardless of employer.</div>
+                        <div class="res-card-tag">Certification · Credentials · Craft training · Portable · Public works</div>
+                    </a>
+                    <a href="https://www.agc.org" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">AGC — Associated General Contractors</div>
+                        <div class="res-card-desc">The primary trade association for general contractors in the US. AGC chapters provide training, industry data, legislative advocacy, and networking. Their Constructor certification program and project management courses are industry-respected. State chapters often have connections to DOT pre-qualification and workforce development programs. Membership pays back for contractors engaged in public works.</div>
+                        <div class="res-card-tag">Trade association · Training · Certification · Advocacy · Networking · Public works</div>
+                    </a>
+                    <a href="https://www.apwa.net" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">APWA — American Public Works Association</div>
+                        <div class="res-card-desc">Association for public works professionals — the people who own and maintain the infrastructure you build. Strong resource for utility color codes, standards, and public works project procedures. APWA publishes the uniform color code standard for underground utility marking (the one on the resources page). Connecting with your local public works agencies through APWA is good for pipeline and relationship development.</div>
+                        <div class="res-card-tag">Public works · Standards · Utility colors · Networking · Owners</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>The real competitive edge in 2025-26:</strong> Companies pulling ahead in heavy civil are doing two things simultaneously — investing in their people (BuildWitt Training, NCCER, mentorship programs) and investing in their systems (HCSS, production tracking, digital takeoff). The companies standing still on both fronts are losing bids and losing people to the companies doing both.
+                </div>
             </section>
 
         </main>
