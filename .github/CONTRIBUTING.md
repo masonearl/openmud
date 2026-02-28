@@ -6,6 +6,23 @@ Thanks for wanting to help. openmud is built by construction people for construc
 
 ## Ways to contribute
 
+### You can contribute without writing code
+
+Construction domain input is a first-class contribution in this project.
+
+You can help by:
+
+- Opening a **pricing correction** issue with regional rates and context
+- Opening a **prompt feedback** issue with:
+  - exact prompt used
+  - model selected
+  - assistant output
+  - what answer would have been useful in the field
+- Opening a **feature request** based on a real workflow (RFI, CO, daily report, takeoff, etc.)
+- Testing mobile/field usability and reporting specific UI breakpoints + screenshots
+
+Use the issue templates in `.github/ISSUE_TEMPLATE` so maintainers can act quickly.
+
 ### Improve the pricing data
 
 The estimating tools use hardcoded rates in `tools/estimating/estimating_tools.py`. These are ballpark numbers and vary significantly by region, market conditions, and job type. If you know better numbers, submit a PR.
@@ -75,6 +92,8 @@ python3 -c "from estimating.estimating_tools import calculate_material_cost; pri
    - What you changed
    - Why it matters in real construction work
    - How to test it
+
+If you are not submitting code, open an issue with field context instead of a PR.
 
 ---
 

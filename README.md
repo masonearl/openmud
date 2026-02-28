@@ -182,6 +182,13 @@ Full tool reference: [tools/README.md](./tools/README.md)
 
 openmud is built by and for construction people. Every contribution matters — better pricing data, new tools, improved prompts, bug fixes.
 
+**You do not need to be a developer to help.**
+
+- Submit pricing corrections (material, labor, equipment rates) through an issue
+- Share AI prompt workflows that worked for your crew/PM/estimator use case
+- Report bad or unclear AI answers with the exact prompt and expected answer
+- Suggest tool ideas from real field workflows (change orders, RFIs, takeoff pain points)
+
 **Things we'd love help with:**
 
 - More accurate regional pricing (pipe, concrete, rebar, labor rates)
@@ -197,7 +204,7 @@ openmud is built by and for construction people. Every contribution matters — 
 3. Make your changes
 4. Open a PR — describe what you built and why it matters in the field
 
-See [CONTRIBUTING.md](./.github/.github/CONTRIBUTING.md) for full details.
+See [CONTRIBUTING.md](./.github/CONTRIBUTING.md) for full details and no-code contribution paths.
 
 ---
 

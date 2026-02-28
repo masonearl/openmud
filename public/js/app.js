@@ -1029,6 +1029,28 @@
         });
     }
 
+    (function initMobileViewportHeight() {
+        var root = document.documentElement;
+        if (!root || !root.classList.contains('has-app')) return;
+
+        var rafId = null;
+        function updateHeight() {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(function () {
+                var h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                if (h && h > 0) root.style.setProperty('--app-height', h + 'px');
+            });
+        }
+
+        updateHeight();
+        window.addEventListener('resize', updateHeight, { passive: true });
+        window.addEventListener('orientationchange', updateHeight, { passive: true });
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', updateHeight, { passive: true });
+            window.visualViewport.addEventListener('scroll', updateHeight, { passive: true });
+        }
+    })();
+
     ensureProject();
     renderProjects();
     renderMessages();

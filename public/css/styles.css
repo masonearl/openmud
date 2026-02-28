@@ -10,6 +10,7 @@
     --earth-dark: #5c4e40;
     --earth-light: #a09080;
     --earth-subtle: rgba(138, 122, 106, 0.08);
+    --app-height: 100dvh;
 }
 
 * {
@@ -54,12 +55,18 @@ body {
 html.has-app,
 body.has-app {
     overflow: hidden;
-    height: 100vh;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+body.has-app {
+    height: var(--app-height, 100dvh);
 }
 
 body.has-app .app-layout {
     flex: 1;
     min-height: 0;
+    height: 100%;
     overflow: hidden;
 }
 
@@ -829,6 +836,9 @@ body {
 
 .chat-input-form {
     flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
     padding: 12px 0 20px;
     border-top: 1px solid var(--border);
     background: var(--bg);
@@ -1321,8 +1331,52 @@ body {
     .msg { max-width: 94%; }
     .nav { gap: 4px; }
     .chat-composer-model { font-size: 0.75rem; max-width: 110px; }
-    /* Chat composer bar tighter on phone */
+    /* Chat composer bar + safe area on phone */
+    .chat-input-form {
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+        background: linear-gradient(to top, rgba(17,16,9,0.98), rgba(17,16,9,0.95));
+    }
     .chat-composer-bar { padding: 6px 8px 8px; gap: 6px; }
-    .chat-quick-actions { gap: 6px; padding: 6px 0 10px; }
-    .quick-btn { font-size: 0.75rem; padding: 5px 10px; }
+    .chat-composer-text-wrap { padding: 10px 12px 6px; }
+    .chat-composer-pill {
+        min-height: 40px;
+        padding: 7px 10px;
+    }
+    .chat-composer-icon,
+    .chat-composer-send {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+    }
+    .chat-composer-send .chat-icon,
+    .chat-composer-icon .chat-icon {
+        width: 20px;
+        height: 20px;
+    }
+    .chat-quick-actions {
+        gap: 6px;
+        padding: 6px 0 10px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .chat-quick-actions::-webkit-scrollbar { display: none; }
+    .quick-label { display: none; }
+    .quick-btn {
+        font-size: 0.75rem;
+        padding: 8px 12px;
+        white-space: nowrap;
+        min-height: 40px;
+    }
+    .btn-copy-chat {
+        min-height: 40px;
+        margin-left: 0;
+        white-space: nowrap;
+    }
+    .est-actions .btn-sm {
+        min-height: 44px;
+        width: 100%;
+        margin: 0 0 8px;
+    }
 }
