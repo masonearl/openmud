@@ -69,12 +69,20 @@ function setCache(cacheKey, data) {
 }
 
 function getSentences(text, count = 1) {
-  const sentences = String(text || '')
+  const safeText = String(text || '')
+    .replace(/openmud\.ai/gi, 'openmud_ai')
+    .replace(/github\.com/gi, 'github_com');
+  const sentences = safeText
     .replace(/\s+/g, ' ')
     .trim()
     .match(/[^.!?]+[.!?]?/g);
   if (!sentences || sentences.length === 0) return '';
-  return sentences.slice(0, count).join(' ').trim();
+  return sentences
+    .slice(0, count)
+    .join(' ')
+    .trim()
+    .replace(/openmud_ai/gi, 'openmud.ai')
+    .replace(/github_com/gi, 'github.com');
 }
 
 function isNavigationQuery(query) {

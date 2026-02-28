@@ -57,4 +57,4 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Check for syntax errors in API files
-        run: node --check api/chat.js api/schedule.js api/proposal.js api/health.js api/predict.js api/feedback.js
+        run: node --check api/chat.js api/search.js api/schedule.js api/proposal.js api/health.js api/predict.js api/feedback.js
