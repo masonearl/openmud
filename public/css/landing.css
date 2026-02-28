@@ -611,10 +611,12 @@ body {
     pointer-events: none;
 }
 
+.lp-video-bg iframe,
 .lp-video-bg video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border: none;
     display: block;
     transform: translateZ(0);
     pointer-events: none;
