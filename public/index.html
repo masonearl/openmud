@@ -51,16 +51,13 @@
         </div>
     </nav>
 
-    <!-- Hero with YouTube background -->
+    <!-- Hero background video — served from Pexels CDN, no repo storage -->
     <section class="lp-hero-video-wrap">
         <div class="lp-video-bg" aria-hidden="true">
-            <iframe id="yt-bg"
-                src="https://www.youtube.com/embed/XCMHzo3NMR4?autoplay=1&mute=1&loop=1&playlist=XCMHzo3NMR4&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&playsinline=1&vq=hd1080"
-                allow="autoplay; encrypted-media"
-                allowfullscreen
-                frameborder="0"
-                title="Construction background video">
-            </iframe>
+            <video id="bg-video" autoplay muted playsinline loop preload="auto">
+                <source src="https://videos.pexels.com/video-files/6618333/6618333-hd_1920_1080_24fps.mp4" type="video/mp4">
+                <source src="https://videos.pexels.com/video-files/6618021/6618021-hd_1920_1080_24fps.mp4" type="video/mp4">
+            </video>
         </div>
         <div class="lp-video-overlay" aria-hidden="true"></div>
 
