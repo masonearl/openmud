@@ -72,6 +72,7 @@
     var toolsDropdown = document.getElementById('tools-dropdown');
     var chatToolPanel = document.getElementById('chat-tool-panel');
     var toolPanelTitle = document.getElementById('tool-panel-title');
+    var toolPanelSubtitle = document.getElementById('tool-panel-subtitle');
     var btnCloseTool = document.getElementById('btn-close-tool');
 
     function addMessage(role, content, projectId) {
@@ -683,7 +684,11 @@
     document.querySelectorAll('.quick-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var prompt = btn.getAttribute('data-prompt');
-            if (prompt) { input.value = prompt; input.focus(); }
+            if (prompt) {
+                input.value = prompt;
+                autoGrowTextarea();
+                input.focus();
+            }
         });
     });
 
@@ -724,6 +729,12 @@
         if (name) createProject(name);
     });
 
+    function setActiveToolShortcut(tool) {
+        document.querySelectorAll('.quick-tool-btn').forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-open-tool') === tool);
+        });
+    }
+
     function openTool(tool) {
         activeTool = tool;
         toolsDropdown.hidden = true;
@@ -732,8 +743,17 @@
         var wrap = document.getElementById('tool-form-' + tool);
         if (wrap) wrap.classList.add('active');
         var titles = { estimate: 'Quick estimate', proposal: 'Proposal', schedule: 'Build schedule' };
+        var subtitles = {
+            estimate: 'Set project assumptions and run a rough order-of-magnitude estimate.',
+            proposal: 'Generate a clean proposal PDF from scope, cost, and duration.',
+            schedule: 'Build a phase schedule and export a field-ready PDF.'
+        };
         toolPanelTitle.textContent = titles[tool] || 'Tool';
+        if (toolPanelSubtitle) {
+            toolPanelSubtitle.textContent = subtitles[tool] || 'Use a workflow form, then refine in chat.';
+        }
         chatToolPanel.hidden = false;
+        setActiveToolShortcut(tool);
         if (tool === 'estimate') {
             estimateResult.hidden = true;
             estimateFeedback.hidden = true;
@@ -742,12 +762,17 @@
         if (tool === 'schedule') {
             document.getElementById('sched-start').value = new Date().toISOString().slice(0, 10);
         }
+        if (wrap) {
+            var firstField = wrap.querySelector('input, select, textarea');
+            if (firstField) firstField.focus();
+        }
     }
 
     function closeTool() {
         activeTool = null;
         chatToolPanel.hidden = true;
         document.querySelectorAll('.tool-form-wrap').forEach(function (el) { el.classList.remove('active'); });
+        setActiveToolShortcut(null);
     }
 
     btnTools.addEventListener('click', function (e) {
@@ -761,6 +786,18 @@
         item.addEventListener('click', function () {
             var tool = item.getAttribute('data-tool');
             if (tool) openTool(tool);
+        });
+    });
+
+    document.querySelectorAll('.quick-tool-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var tool = btn.getAttribute('data-open-tool');
+            if (!tool) return;
+            if (activeTool === tool && chatToolPanel.hidden === false) {
+                closeTool();
+                return;
+            }
+            openTool(tool);
         });
     });
 

@@ -71,15 +71,26 @@
         <main class="chat-main">
             <div class="chat-panel">
                 <div class="chat-quick-actions" id="chat-quick-actions">
-                    <span class="quick-label">Try:</span>
-                    <button type="button" class="quick-btn" data-prompt="Estimate 1500 LF of 8 inch sewer in clay, Salt Lake Metro">Quick bid</button>
-                    <button type="button" class="quick-btn" data-prompt="Draft a proposal for 2000 LF of 12 inch waterline in gravel">Proposal</button>
-                    <button type="button" class="quick-btn" data-prompt="How long for 1000 LF of 10 inch storm drain with a 5-person crew?">Schedule</button>
-                    <button type="button" class="btn-copy-chat" id="btn-copy-chat" title="Copy chat for debugging">Copy chat</button>
+                    <div class="quick-actions-row quick-actions-tools-row">
+                        <span class="quick-row-label">Tools</span>
+                        <button type="button" class="quick-tool-btn" data-open-tool="estimate">Quick estimate</button>
+                        <button type="button" class="quick-tool-btn" data-open-tool="proposal">Proposal builder</button>
+                        <button type="button" class="quick-tool-btn" data-open-tool="schedule">Schedule builder</button>
+                    </div>
+                    <div class="quick-actions-row quick-actions-prompts-row">
+                        <span class="quick-row-label">Prompts</span>
+                        <button type="button" class="quick-btn" data-prompt="Estimate 1500 LF of 8 inch sewer in clay, Salt Lake Metro">Estimate 1,500 LF sewer</button>
+                        <button type="button" class="quick-btn" data-prompt="Draft a proposal for 2000 LF of 12 inch waterline in gravel">Draft a proposal</button>
+                        <button type="button" class="quick-btn" data-prompt="How long for 1000 LF of 10 inch storm drain with a 5-person crew?">Crew duration check</button>
+                        <button type="button" class="btn-copy-chat" id="btn-copy-chat" title="Copy chat">Copy chat</button>
+                    </div>
                 </div>
                 <div class="chat-tool-panel" id="chat-tool-panel" hidden>
                     <div class="tool-panel-header">
-                        <h3 id="tool-panel-title">Tool</h3>
+                        <div class="tool-panel-title-wrap">
+                            <h3 id="tool-panel-title">Tool</h3>
+                            <p class="tool-panel-subtitle" id="tool-panel-subtitle">Use a workflow form, then refine in chat.</p>
+                        </div>
                         <button type="button" class="btn-close-tool" id="btn-close-tool" aria-label="Close">×</button>
                     </div>
                     <div class="tool-panel-content" id="tool-panel-content">
