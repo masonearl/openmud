@@ -68,9 +68,11 @@ function setCache(cacheKey, data) {
 }
 
 function getSentences(text, count = 1) {
+  // Protect known-safe periods (domains, decimals) before sentence splitting
   const safeText = String(text || '')
     .replace(/openmud\.ai/gi, 'openmud_ai')
-    .replace(/github\.com/gi, 'github_com');
+    .replace(/github\.com/gi, 'github_com')
+    .replace(/(\d)\.(\d)/g, '$1\x00$2');
   const sentences = safeText
     .replace(/\s+/g, ' ')
     .trim()
@@ -80,6 +82,7 @@ function getSentences(text, count = 1) {
     .slice(0, count)
     .join(' ')
     .trim()
+    .replace(/\x00/g, '.')
     .replace(/openmud_ai/gi, 'openmud.ai')
     .replace(/github_com/gi, 'github.com');
 }
@@ -215,3 +218,4 @@ Answer rules:
     return res.status(200).json(payload);
   }
 };
+
