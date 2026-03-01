@@ -129,17 +129,16 @@ function withTimeout(promise, ms) {
   ]);
 }
 
-const { checkAuth, setApiHeaders, handleOptions } = require('./_lib/auth');
-
 module.exports = async function handler(req, res) {
-  setApiHeaders(res);
-  if (handleOptions(req, res)) return;
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
-  const auth = checkAuth(req);
-  if (!auth.ok) return res.status(auth.status).json({ error: auth.message });
 
   const { query } = req.body || {};
   if (!query || typeof query !== 'string' || normalizeQuery(query).length < 2) {
