@@ -27,7 +27,7 @@ The frontend never sees or sends keys—it only sends the model name. The backen
   "temperature": 0.7,
   "max_tokens": 512,
   "use_tools": true,
-  "available_tools": ["build_schedule", "generate_proposal", "estimate_project_cost", ...]
+  "available_tools": ["build_schedule", "render_proposal_html", "estimate_project_cost", ...]
 }
 ```
 
@@ -39,11 +39,11 @@ The frontend never sees or sends keys—it only sends the model name. The backen
 
 ## Tool calling
 
-When `use_tools: true`, the backend should:
+When `use_tools: true`, OpenAI and Anthropic models run tool-calling with:
 
 1. Enable function/tool calling for the selected model
-2. Use schemas from `tools/registry.py` for build_schedule, generate_proposal, estimate_project_cost, etc.
-3. Execute Python tools when the model requests them
+2. Load schemas from `tools/registry.py` through `GET /api/python/registry`
+3. Execute estimating tools through `POST /api/python/tools`
 4. Return the tool result in the response
 
 ## Response
@@ -51,6 +51,36 @@ When `use_tools: true`, the backend should:
 ```json
 {
   "response": "Assistant message text",
-  "tools_used": ["build_schedule"]
+  "tools_used": ["build_schedule", "estimate_project_cost"]
 }
 ```
+
+## Python tool executor
+
+`POST /api/python/tools`
+
+```json
+{
+  "tool_name": "calculate_labor_cost",
+  "arguments": {
+    "labor_type": "operator",
+    "hours": 40,
+    "region": "utah"
+  }
+}
+```
+
+## Tool registry endpoint
+
+`GET /api/python/registry`
+
+Returns OpenAI-compatible function schemas from `tools/registry.py`.
+
+## Tool telemetry endpoint
+
+`GET /api/tool-metrics`
+
+Returns in-memory metrics for:
+- tool success/error rate
+- fallback rate when tools were enabled
+- tool latency and recent errors

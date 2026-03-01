@@ -211,7 +211,7 @@ See [CONTRIBUTING.md](./.github/CONTRIBUTING.md) for full details and no-code co
 ## Roadmap
 
 - [ ] User-editable rate codebooks (labor, equipment, materials)
-- [ ] Real tool calling wired to Python estimating tools
+- [x] Real tool calling wired to Python estimating tools
 - [ ] Invoice generator
 - [ ] Takeoff calculator
 - [ ] PDF upload → AI reads your specs

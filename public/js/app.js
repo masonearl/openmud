@@ -583,9 +583,8 @@
         return lines.join('\n');
     }
 
-    var TOOL_TRIGGERS = /generate|build|create|make|draft|estimate|bid|proposal|schedule/i;
     function shouldUseTools(text) {
-        return TOOL_TRIGGERS.test(text);
+        return !!(text && text.trim());
     }
 
     function doSend() {
@@ -619,7 +618,7 @@
                 temperature: 0.7,
                 max_tokens: 1024,
                 use_tools: useTools,
-                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
+                available_tools: useTools ? ['build_schedule', 'render_proposal_html', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
             };
             if (useTools && lastEstimatePayload && lastEstimateResult) {
                 payload.estimate_context = {

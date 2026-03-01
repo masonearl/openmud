@@ -8,8 +8,9 @@ The goal is an open-source agentic AI platform for heavy civil and underground u
 
 Wire the existing tool registry into the chat interface so the AI actually executes tools, not just talks about them.
 
-- [ ] Wire `tools/registry.py` schemas into `api/chat.js` (OpenAI function calling)
-- [ ] Multi-turn tool execution in chat — model calls tool, gets result, continues reasoning
+- [x] Wire `tools/registry.py` schemas into `api/chat.js` (OpenAI function calling)
+- [x] Multi-turn tool execution in chat — model calls tool, gets result, continues reasoning
+- [x] Anthropic tool execution parity (Claude models can call tools in chat)
 - [ ] User-configurable rates — let users upload their labor/equipment/material codebook
 - [ ] Proposal generator — complete and polish `api/proposal.js` to production quality
 - [ ] Change order generator — scope description + rates → formatted CO with markup
