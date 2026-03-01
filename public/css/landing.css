@@ -66,9 +66,8 @@ body {
     list-style: none;
 }
 
-.lp-nav-logo::-webkit-details-marker {
-    display: none;
-}
+.lp-nav-logo::-webkit-details-marker { display: none; }
+.lp-nav-logo::marker { display: none; }
 
 .lp-brand-menu {
     position: relative;

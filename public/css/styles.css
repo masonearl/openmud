@@ -95,12 +95,67 @@ body.has-app .app-layout {
     justify-content: space-between;
 }
 
+/* ─── Brand dropdown (inner pages) ───────────────────────── */
+.brand-menu {
+    position: relative;
+}
+
 .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     text-decoration: none;
     color: var(--text);
     font-size: 1.0625rem;
     font-weight: 600;
     letter-spacing: -0.02em;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+/* Hide native <details> disclosure triangle in all browsers */
+.logo::-webkit-details-marker { display: none; }
+.logo::marker { display: none; }
+
+.brand-caret {
+    font-size: 0.625rem;
+    opacity: 0.7;
+    transition: transform 0.15s ease;
+}
+
+.brand-menu[open] .brand-caret {
+    transform: rotate(180deg);
+}
+
+.brand-menu-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: min(280px, 84vw);
+    padding: 6px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+    display: grid;
+    gap: 1px;
+    z-index: 500;
+}
+
+.brand-menu-link {
+    display: block;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    padding: 8px 10px;
+    border-radius: 6px;
+    transition: color 0.12s, background 0.12s;
+}
+
+.brand-menu-link:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .nav {
