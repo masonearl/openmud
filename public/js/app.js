@@ -70,7 +70,7 @@
 
     var btnTools = document.getElementById('btn-tools');
     var toolsDropdown = document.getElementById('tools-dropdown');
-    var chatToolPanel = document.getElementById('chat-tool-panel');
+    var chatPanel = document.querySelector('.chat-panel');
     var toolPanelTitle = document.getElementById('tool-panel-title');
     var btnCloseTool = document.getElementById('btn-close-tool');
     var sidebarToolButtons = document.querySelectorAll('[data-sidebar-tool]');
@@ -749,7 +749,7 @@
         if (wrap) wrap.classList.add('active');
         var titles = { estimate: 'Quick estimate', proposal: 'Proposal', schedule: 'Build schedule' };
         toolPanelTitle.textContent = titles[tool] || 'Tool';
-        chatToolPanel.hidden = false;
+        if (chatPanel) chatPanel.classList.add('tools-open');
         if (tool === 'estimate') {
             estimateResult.hidden = true;
             estimateFeedback.hidden = true;
@@ -764,7 +764,7 @@
 
     function closeTool() {
         activeTool = null;
-        chatToolPanel.hidden = true;
+        if (chatPanel) chatPanel.classList.remove('tools-open');
         document.querySelectorAll('.tool-form-wrap').forEach(function (el) { el.classList.remove('active'); });
         updateToolSelectionUI();
         setToolParam(null);
@@ -780,14 +780,24 @@
     document.querySelectorAll('.dropdown-item').forEach(function (item) {
         item.addEventListener('click', function () {
             var tool = item.getAttribute('data-tool');
-            if (tool) openTool(tool);
+            if (!tool) return;
+            if (tool === activeTool && chatPanel && chatPanel.classList.contains('tools-open')) {
+                closeTool();
+                return;
+            }
+            openTool(tool);
         });
     });
 
     sidebarToolButtons.forEach(function (item) {
         item.addEventListener('click', function () {
             var tool = item.getAttribute('data-sidebar-tool');
-            if (tool) openTool(tool);
+            if (!tool) return;
+            if (tool === activeTool && chatPanel && chatPanel.classList.contains('tools-open')) {
+                closeTool();
+                return;
+            }
+            openTool(tool);
         });
     });
 

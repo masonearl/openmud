@@ -171,16 +171,46 @@ body.has-app .app-layout {
 }
 
 /* Inline tool panel in chat */
-.chat-tool-panel {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 12px;
-    background: var(--bg-alt);
-    overflow: hidden;
+.chat-workspace {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: 12px;
+    padding-top: 12px;
 }
 
-.chat-tool-panel[hidden] {
-    display: none !important;
+.chat-conversation {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-tool-panel {
+    flex: 0 0 0;
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
+    border: 0 solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-alt);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.22s ease, opacity 0.18s ease, transform 0.22s ease, border-width 0.22s ease;
+}
+
+.chat-panel.tools-open .chat-tool-panel {
+    flex-basis: min(420px, 40%);
+    width: min(420px, 40%);
+    min-width: 320px;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    border-width: 1px;
 }
 
 .tool-panel-header {
@@ -213,7 +243,9 @@ body.has-app .app-layout {
 
 .tool-panel-content {
     padding: 16px;
-    max-height: 400px;
+    min-height: 0;
+    max-height: none;
+    flex: 1;
     overflow-y: auto;
 }
 
@@ -1364,6 +1396,10 @@ body {
     .sidebar-resize-handle { display: none; }
     .projects-header h3,
     .documents-header h3 { font-size: 0.625rem; }
+    .chat-panel.tools-open .chat-tool-panel {
+        width: min(360px, 48%);
+        min-width: 260px;
+    }
 }
 
 @media (max-width: 600px) {
@@ -1406,6 +1442,21 @@ body {
         scrollbar-width: none;
     }
     .chat-quick-actions::-webkit-scrollbar { display: none; }
+    .chat-workspace {
+        flex-direction: column;
+        gap: 8px;
+        padding-top: 8px;
+    }
+    .chat-tool-panel {
+        width: 100%;
+        transform: translateY(-6px);
+    }
+    .chat-panel.tools-open .chat-tool-panel {
+        width: 100%;
+        min-width: 0;
+        flex-basis: auto;
+        transform: translateY(0);
+    }
     .quick-label { display: none; }
     .quick-btn {
         font-size: 0.75rem;
