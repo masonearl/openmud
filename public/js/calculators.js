@@ -25,7 +25,13 @@ function showPanel(id) {
     if (sel) sel.value = id;
     var main = document.querySelector('.calc-main');
     if (main) main.scrollTop = 0;
-    window.location.hash = id;
+    if (window.location.hash !== '#' + id) window.location.hash = id;
+}
+
+function showPanelFromHash() {
+    var hash = decodeURIComponent(window.location.hash || '').replace(/^#/, '').trim();
+    if (!hash) return;
+    if (document.getElementById('panel-' + hash)) showPanel(hash);
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1037,11 +1043,15 @@ function downloadProposalPDF() {
     }
 }
 
-// ─── Hash routing on load ─────────────────────────────────────────────────────
-(function() {
-    var hash = window.location.hash.replace('#', '');
-    if (hash && document.getElementById('panel-' + hash)) showPanel(hash);
-})();
+// ─── Hash routing on load and change ─────────────────────────────────────────
+window.addEventListener('hashchange', showPanelFromHash);
+window.addEventListener('DOMContentLoaded', function() {
+    // Defer so layout is ready before panel swap.
+    setTimeout(showPanelFromHash, 0);
+    setTimeout(showPanelFromHash, 100);
+});
+window.addEventListener('load', showPanelFromHash);
+window.addEventListener('pageshow', showPanelFromHash);
 
 // Init data-dependent UI (must run after ucUnits and pipeData are defined)
 updateUCUnits();
