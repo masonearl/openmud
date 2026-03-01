@@ -187,13 +187,45 @@
 .ai-prompt-label {
     background: rgba(138, 122, 106, 0.1);
     border-bottom: 1px solid rgba(138, 122, 106, 0.2);
-    padding: 7px 14px;
+    padding: 7px 10px 7px 14px;
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--earth-light);
     font-family: 'Inter', system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.ai-prompt-copy {
+    border: 1px solid rgba(138, 122, 106, 0.35);
+    background: rgba(138, 122, 106, 0.18);
+    color: var(--earth-light);
+    border-radius: 6px;
+    padding: 5px 9px;
+    font-family: inherit;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.ai-prompt-copy:hover {
+    background: rgba(138, 122, 106, 0.3);
+    border-color: rgba(138, 122, 106, 0.55);
+    color: var(--text);
+}
+
+.ai-prompt-copy.is-copied {
+    color: #c6f6d5;
+    border-color: rgba(134, 239, 172, 0.5);
+    background: rgba(134, 239, 172, 0.16);
 }
 
 .ai-prompt-code {

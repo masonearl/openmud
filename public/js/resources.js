@@ -12,6 +12,7 @@
     if (hash && document.getElementById('section-' + hash)) {
         showSection(hash);
     }
+    initPromptCopyButtons();
 })();
 
 function showSection(id) {
@@ -27,6 +28,65 @@ function showSection(id) {
     var main = document.querySelector('.res-main');
     if (main) main.scrollTop = 0;
     window.location.hash = id;
+}
+
+function initPromptCopyButtons() {
+    document.querySelectorAll('.ai-prompt-block').forEach(function (block, index) {
+        var label = block.querySelector('.ai-prompt-label');
+        var code = block.querySelector('.ai-prompt-code');
+        if (!label || !code || label.querySelector('.ai-prompt-copy')) return;
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ai-prompt-copy';
+        btn.textContent = 'Copy';
+        btn.setAttribute('aria-label', 'Copy prompt template ' + (index + 1));
+
+        btn.addEventListener('click', function () {
+            var text = code.textContent || '';
+            copyTextToClipboard(text).then(function () {
+                btn.textContent = 'Copied';
+                btn.classList.add('is-copied');
+                setTimeout(function () {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('is-copied');
+                }, 1300);
+            }).catch(function () {
+                btn.textContent = 'Copy failed';
+                setTimeout(function () {
+                    btn.textContent = 'Copy';
+                }, 1300);
+            });
+        });
+
+        label.appendChild(btn);
+    });
+}
+
+function copyTextToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+    }
+
+    return new Promise(function (resolve, reject) {
+        var temp = document.createElement('textarea');
+        temp.value = text;
+        temp.setAttribute('readonly', '');
+        temp.style.position = 'absolute';
+        temp.style.left = '-9999px';
+        document.body.appendChild(temp);
+        temp.select();
+        temp.setSelectionRange(0, temp.value.length);
+        var ok = false;
+        try {
+            ok = document.execCommand('copy');
+        } catch (err) {
+            ok = false;
+        }
+        document.body.removeChild(temp);
+        if (ok) resolve();
+        else reject(new Error('copy failed'));
+    });
 }
 
 /* Glossary */

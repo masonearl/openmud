@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#16181b">
+    <meta name="theme-color" content="#15120f">
     
     
     
@@ -27,17 +27,24 @@
 <body>
     <header class="header">
         <div class="header-inner">
-            <a href="/" class="logo">openmud</a>
+            <details class="brand-menu">
+                <summary class="logo">openmud <span class="brand-caret">▾</span></summary>
+                <div class="brand-menu-panel">
+                    <a href="/" class="brand-menu-link">Homepage</a>
+                    <a href="/about.html" class="brand-menu-link">About</a>
+                    <a href="/chat.html" class="brand-menu-link">AI Chat</a>
+                    <a href="/calculators.html" class="brand-menu-link">Calculators</a>
+                    <a href="/resources.html" class="brand-menu-link">Resources</a>
+                    <a href="/innovators.html" class="brand-menu-link">Innovators</a>
+                    <a href="/companies.html" class="brand-menu-link">Companies</a>
+                    <a href="/documentation.html" class="brand-menu-link">Documentation</a>
+                    <a href="https://discord.gg/qszzMjxD3" target="_blank" rel="noopener" class="brand-menu-link">Discord</a>
+                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="brand-menu-link">GitHub</a>
+                    <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai" class="brand-menu-link">Contact</a>
+                </div>
+            </details>
             <nav class="nav">
-                <a href="/about.html">About</a>
-                <a href="/chat.html">AI Chat</a>
-                <a href="/calculators.html">Calculators</a>
-                <a href="/resources.html" style="color:var(--text)">Resources</a>
-                <a href="/innovators.html#industry-icons">Innovators</a>
-                <a href="/companies.html">Companies</a>
-                <a href="/documentation.html">Documentation</a>
-                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
-                <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai">Contact</a>
+                <a href="/chat.html" class="nav-cta">Try it free →</a>
             </nav>
         </div>
     </header>
@@ -727,15 +734,25 @@
                     <table class="res-table">
                         <thead><tr><th>Tool</th><th>Made By</th><th>Best For in Construction</th><th>Access</th></tr></thead>
                         <tbody>
-                            <tr><td><strong>ChatGPT (GPT-4o)</strong></td><td>OpenAI</td><td>General-purpose: writing, summarizing, estimating math checks, code, image analysis. The most widely adopted.</td><td>chatgpt.com — free tier available</td></tr>
-                            <tr><td><strong>Claude (Sonnet/Opus)</strong></td><td>Anthropic</td><td>Long documents, nuanced writing, careful reasoning. Excellent for spec review and RFI drafting. Larger context window.</td><td>claude.ai — free tier available</td></tr>
-                            <tr><td><strong>Gemini (2.0 Flash/Pro)</strong></td><td>Google</td><td>Google Workspace integration — Gmail, Docs, Sheets. Summarizing email threads, drafting in Docs, building formulas.</td><td>gemini.google.com — included with Workspace</td></tr>
-                            <tr><td><strong>Copilot</strong></td><td>Microsoft</td><td>Embedded in Excel, Word, Outlook, Teams. Summarizes meetings, drafts emails from your Outlook, builds spreadsheet formulas.</td><td>Microsoft 365 subscription</td></tr>
-                            <tr><td><strong>openmud / mud1</strong></td><td>Open source</td><td>Construction-specific: trench calcs, pipe sizing, OSHA reference, scheduling, proposals. Tuned for heavy civil and utility work.</td><td>openmud.ai — free, MIT license</td></tr>
-                            <tr><td><strong>Local models (Ollama)</strong></td><td>Community</td><td>Privacy-sensitive work: confidential bid data, personnel info, proprietary methods. Runs on your laptop, no data leaves your machine.</td><td>ollama.ai — free, open source</td></tr>
+                            <tr><td><strong>ChatGPT (GPT-5.3)</strong></td><td>OpenAI</td><td>Fast drafting, bid-language cleanup, image/spec interpretation, and day-to-day PM writing. Best "default" model for mixed office/field work.</td><td><a href="https://chatgpt.com" target="_blank" rel="noopener" class="link">chatgpt.com</a> (free tier + paid plans)</td></tr>
+                            <tr><td><strong>OpenAI Codex</strong></td><td>OpenAI</td><td>Code and workflow automation: script generation, repo changes, test fixes, and tool orchestration. Best when you want AI to execute technical tasks end-to-end.</td><td><a href="https://openai.com/codex/" target="_blank" rel="noopener" class="link">openai.com/codex</a> · <a href="https://platform.openai.com/signup" target="_blank" rel="noopener" class="link">API signup</a></td></tr>
+                            <tr><td><strong>Claude (Sonnet 4.6 / Opus 4.6)</strong></td><td>Anthropic</td><td>Long subcontracts, spec books, RFI narratives, and nuanced owner communication. Sonnet for speed, Opus for highest-quality deep reasoning.</td><td><a href="https://claude.ai" target="_blank" rel="noopener" class="link">claude.ai</a> · <a href="https://console.anthropic.com/" target="_blank" rel="noopener" class="link">Anthropic Console</a></td></tr>
+                            <tr><td><strong>Gemini (2.0 Flash/Pro)</strong></td><td>Google</td><td>Google Workspace integration: Gmail triage, Docs drafting, Sheets formulas, and meeting recap workflows.</td><td><a href="https://gemini.google.com" target="_blank" rel="noopener" class="link">gemini.google.com</a></td></tr>
+                            <tr><td><strong>Copilot</strong></td><td>Microsoft</td><td>Embedded in Excel, Word, Outlook, and Teams. Best for organizations already operating in Microsoft 365.</td><td><a href="https://copilot.microsoft.com/" target="_blank" rel="noopener" class="link">copilot.microsoft.com</a></td></tr>
+                            <tr><td><strong>openmud / mud1</strong></td><td>Open source</td><td>Construction-specific calculations and workflows: trench calcs, pipe sizing, OSHA references, estimating, scheduling, and proposal output.</td><td><a href="https://openmud.ai/chat.html" target="_blank" rel="noopener" class="link">openmud.ai/chat</a> · <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="link">GitHub</a></td></tr>
+                            <tr><td><strong>Local models (Ollama)</strong></td><td>Community</td><td>Privacy-sensitive projects where data cannot leave your machine: confidential bids, payroll-adjacent files, internal pricing sheets.</td><td><a href="https://ollama.com" target="_blank" rel="noopener" class="link">ollama.com</a></td></tr>
                         </tbody>
                     </table>
                 </div>
+
+                <h2 class="res-h2">How to Use These Tools (Quick Start)</h2>
+                <ul class="res-list">
+                    <li><strong>ChatGPT (GPT-5.3):</strong> Start with scoped prompts: project type, location, crew, constraints, requested output format.</li>
+                    <li><strong>Codex:</strong> Use it for implementation tasks: "change these files, run tests, and summarize deltas."</li>
+                    <li><strong>Claude Sonnet/Opus:</strong> Paste long specs/contracts and request: risk list, missing scope, and explicit action items.</li>
+                    <li><strong>Gemini/Copilot:</strong> Use when the work already lives in Gmail/Docs/Sheets or Outlook/Excel/Word.</li>
+                    <li><strong>openmud:</strong> Use for heavy civil context and estimator workflows before sending client-facing docs.</li>
+                </ul>
 
                 <h2 class="res-h2">Where the Industry Is Right Now</h2>
                 <ul class="res-list">
@@ -1233,7 +1250,7 @@ Output as a table with: Activity ID, Activity Name, Duration (days), Predecessor
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; <span id="year"></span> openmud · <a href="https://github.com/masonearl/openmud" class="link" target="_blank" rel="noopener">Open source on GitHub</a> · <a href="/" class="link">AI chat →</a></p>
+            <p>&copy; <span id="year"></span> openmud · <a href="https://github.com/masonearl/openmud" class="link" target="_blank" rel="noopener">Open source on GitHub</a> · <a href="/chat.html" class="link">AI chat →</a></p>
         </div>
     </footer>
 

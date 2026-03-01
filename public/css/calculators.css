@@ -1,9 +1,9 @@
 /* Calculators page — redesigned layout */
 :root {
-    --earth: #9aa3ad;
-    --earth-dark: #7f8892;
-    --earth-light: #c0c7cf;
-    --earth-subtle: rgba(154, 163, 173, 0.11);
+    --earth: #bb9871;
+    --earth-dark: #8f7457;
+    --earth-light: #d3b48f;
+    --earth-subtle: rgba(187, 152, 113, 0.15);
 }
 
 /* ─── Page layout ───────────────────────────────────────────── */
@@ -60,7 +60,7 @@
 
 .calc-nav-link.active {
     color: var(--text);
-    background: rgba(255,255,255,0.09);
+    background: var(--earth-subtle);
     font-weight: 500;
 }
 
