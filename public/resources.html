@@ -81,6 +81,12 @@
                 <option value="software-safety">Safety Training</option>
                 <option value="software-training">Training &amp; Community</option>
             </optgroup>
+            <optgroup label="Software Dev Basics">
+                <option value="dev-concepts">Core Concepts</option>
+                <option value="dev-stack">Frontend / Backend / DB</option>
+                <option value="dev-apis">APIs, SDKs &amp; Webhooks</option>
+                <option value="dev-contech">Dev Concepts for Contech</option>
+            </optgroup>
             <optgroup label="Reference">
                 <option value="soil-types">Soil Classification</option>
                 <option value="color-codes">Utility Color Codes</option>
@@ -122,6 +128,12 @@
                 <a href="#software-architecture" class="res-nav-link" data-section="software-architecture">Software Architecture Deep Dive</a>
                 <a href="#software-safety" class="res-nav-link" data-section="software-safety">Safety Training</a>
                 <a href="#software-training" class="res-nav-link" data-section="software-training">Training &amp; Community</a>
+
+                <p class="res-sidebar-label">Software Dev Basics</p>
+                <a href="#dev-concepts" class="res-nav-link" data-section="dev-concepts">Core Concepts</a>
+                <a href="#dev-stack" class="res-nav-link" data-section="dev-stack">Frontend / Backend / DB</a>
+                <a href="#dev-apis" class="res-nav-link" data-section="dev-apis">APIs, SDKs &amp; Webhooks</a>
+                <a href="#dev-contech" class="res-nav-link" data-section="dev-contech">Dev Concepts for Contech</a>
 
                 <p class="res-sidebar-label">Reference</p>
                 <a href="#soil-types" class="res-nav-link" data-section="soil-types">Soil Classification</a>
@@ -1537,6 +1549,370 @@ Critical control point: one canonical dictionary for bid item IDs, cost codes, a
 
                 <div class="res-callout">
                     <strong>The real competitive edge in 2025-26:</strong> Companies pulling ahead in heavy civil are doing two things simultaneously — investing in their people (BuildWitt Training, NCCER, mentorship programs) and investing in their systems (HCSS, production tracking, digital takeoff). The companies standing still on both fronts are losing bids and losing people to the companies doing both.
+                </div>
+            </section>
+
+            <!-- ─── Software Dev Basics: Core Concepts ────────────────── -->
+            <section class="res-section" id="section-dev-concepts">
+                <h1 class="res-title">Software Development — Core Concepts</h1>
+                <p class="res-desc">You don't need to code to work with software developers, buy software, or evaluate contech products. But understanding the vocabulary changes every conversation. These are the essential concepts.</p>
+
+                <div class="res-callout">
+                    <strong>Why this matters in construction:</strong> Software is eating the industry. Estimating, scheduling, field reporting, drone data, machine control, and now AI — all of it runs on the same underlying concepts. Contractors who understand the vocabulary negotiate better contracts, ask better questions, and avoid expensive integration mistakes.
+                </div>
+
+                <h2 class="res-h2">The Essential Vocabulary</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Term</th><th>Plain English</th><th>Construction Example</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Algorithm</strong></td><td>A step-by-step set of rules a computer follows to solve a problem</td><td>Manning's equation solved by your pipe flow calculator — same inputs, same output, every time</td></tr>
+                            <tr><td><strong>API</strong></td><td>Application Programming Interface — a structured way for two software programs to talk to each other</td><td>Procore sending project data to your accounting software without you exporting a spreadsheet</td></tr>
+                            <tr><td><strong>SDK</strong></td><td>Software Development Kit — a toolkit that lets developers build on top of an existing platform</td><td>Trimble's SDK lets developers write custom apps that use Trimble's GPS data and coordinate systems</td></tr>
+                            <tr><td><strong>Database (DB)</strong></td><td>Organized storage for structured data — think of it as a spreadsheet that millions of rows can query instantly</td><td>HCSS stores every time entry, every piece of equipment, every job — queried in real time by reports</td></tr>
+                            <tr><td><strong>Frontend</strong></td><td>The part of software you see and click — the UI</td><td>The web page in your browser when you open Procore or openmud.ai</td></tr>
+                            <tr><td><strong>Backend</strong></td><td>The server-side code that processes data, runs logic, and communicates with the database</td><td>When you hit "Submit" on an RFI, the backend validates it, saves it, notifies the engineer, and logs the timestamp</td></tr>
+                            <tr><td><strong>Server</strong></td><td>A computer (or virtual computer) that runs software and serves data to other computers</td><td>When you open HCSS in the field, your phone talks to HCSS's servers to load your jobs</td></tr>
+                            <tr><td><strong>Cloud</strong></td><td>Someone else's servers, rented by the hour — no hardware to own or maintain</td><td>AWS, Google Cloud, and Azure host most construction software. "Cloud-based" = data lives on the internet, not your office server</td></tr>
+                            <tr><td><strong>Integration</strong></td><td>Connecting two software systems so they share data automatically</td><td>Your takeoff software pushing quantities into your estimating software without a manual export</td></tr>
+                            <tr><td><strong>Webhook</strong></td><td>An automatic notification from one system to another when something happens</td><td>Procore sending a webhook to your Slack channel whenever a submittal is approved</td></tr>
+                            <tr><td><strong>Authentication / Auth</strong></td><td>Verifying who you are before letting you in</td><td>Your username + password, or SSO ("Sign in with Google")</td></tr>
+                            <tr><td><strong>Permission / Role</strong></td><td>Rules about what each user is allowed to do</td><td>Field crews can log time but can't see financials — different roles, different access</td></tr>
+                            <tr><td><strong>Version Control</strong></td><td>Tracking every change to code over time, so you can see what changed and revert if needed</td><td>Git — the system that runs GitHub. Every change to openmud's code is tracked commit by commit</td></tr>
+                            <tr><td><strong>Open Source</strong></td><td>Software whose code is publicly available — anyone can read it, use it, and contribute to it</td><td>openmud is MIT-licensed open source. The Python tools, API, and frontend are all public</td></tr>
+                            <tr><td><strong>SaaS</strong></td><td>Software as a Service — you pay a subscription, the vendor runs everything</td><td>Procore, HCSS, Autodesk Construction Cloud — you never install anything, just log in via browser</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">How Software Gets Built</h2>
+                <p class="res-text">Understanding the development process helps you set realistic timelines and know when a vendor's promise is believable.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Phase</th><th>What happens</th><th>Who's involved</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Requirements</strong></td><td>Define what the software needs to do in plain language</td><td>You, your team, and a product manager or developer</td></tr>
+                            <tr><td><strong>Design / Architecture</strong></td><td>How will the system be structured? What database? What APIs?</td><td>Senior developers, architects</td></tr>
+                            <tr><td><strong>Development</strong></td><td>Writing the actual code</td><td>Developers (frontend, backend, or full-stack)</td></tr>
+                            <tr><td><strong>Testing / QA</strong></td><td>Does it work? Does it break? Edge cases?</td><td>QA engineers, automated test suites</td></tr>
+                            <tr><td><strong>Deployment</strong></td><td>Putting the code on a server where users can access it</td><td>DevOps engineers, CI/CD pipelines</td></tr>
+                            <tr><td><strong>Maintenance</strong></td><td>Bug fixes, performance improvements, new features</td><td>Ongoing — never really "done"</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://developer.mozilla.org/en-US/docs/Learn" target="_blank" rel="noopener" class="res-ext-link">MDN Web Docs — Free web dev learning ↗</a>
+                    <a href="https://www.freecodecamp.org" target="_blank" rel="noopener" class="res-ext-link">freeCodeCamp — Free coding curriculum ↗</a>
+                    <a href="https://roadmap.sh" target="_blank" rel="noopener" class="res-ext-link">roadmap.sh — Visual dev career paths ↗</a>
+                </div>
+            </section>
+
+            <!-- ─── Software Dev Basics: Frontend / Backend / DB ──────── -->
+            <section class="res-section" id="section-dev-stack">
+                <h1 class="res-title">Frontend, Backend &amp; Database — The Three-Layer Stack</h1>
+                <p class="res-desc">Every software application — from Procore to openmud — is built on three layers. Understanding how they relate to each other changes how you evaluate software, plan integrations, and talk to developers.</p>
+
+                <h2 class="res-h2">The Three Layers</h2>
+                <div class="res-arch-diagram" style="font-family:'Inter',monospace;margin:20px 0;">
+<pre style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;color:var(--text);font-size:0.8125rem;line-height:1.8;">
+  ┌─────────────────────────────────────────────────────┐
+  │                  FRONTEND (Client)                  │
+  │         HTML · CSS · JavaScript · React             │
+  │   What the user sees and clicks in their browser    │
+  │   or mobile app. Runs on the user's device.         │
+  └───────────────────────┬─────────────────────────────┘
+                          │  HTTP Requests (API calls)
+                          │
+  ┌───────────────────────▼─────────────────────────────┐
+  │                   BACKEND (Server)                  │
+  │         Node.js · Python · Java · Go · C#           │
+  │   Business logic, data processing, authentication.  │
+  │   Runs on servers (usually in the cloud).           │
+  └───────────────────────┬─────────────────────────────┘
+                          │  Database Queries (SQL / ORM)
+                          │
+  ┌───────────────────────▼─────────────────────────────┐
+  │                  DATABASE (Storage)                 │
+  │      PostgreSQL · MySQL · MongoDB · Redis           │
+  │   Persistent storage for all data. The source of    │
+  │   truth. Lives on secure servers, backed up.        │
+  └─────────────────────────────────────────────────────┘</pre>
+                </div>
+
+                <h2 class="res-h2">Each Layer in Detail</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Layer</th><th>What it does</th><th>Common tools</th><th>Construction analogy</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Frontend</strong></td>
+                                <td>Renders UI. Captures user input. Makes API calls to the backend. Handles display logic.</td>
+                                <td>HTML, CSS, JavaScript, React, Vue, mobile apps (iOS/Android)</td>
+                                <td>The field office — where the crew interacts with the project. A nice layout and clear labels matter, but the foreman doesn't build the pipe from the office.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Backend</strong></td>
+                                <td>Processes requests. Runs business rules. Talks to databases and third-party services. Sends responses back to frontend.</td>
+                                <td>Node.js, Python (Django/FastAPI), Java, Go, Ruby on Rails, C# (.NET)</td>
+                                <td>The project manager's office — receives field data, applies the rules, coordinates with accounting, sends back the answers.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Database</strong></td>
+                                <td>Stores and retrieves structured data. Handles relationships between records. Ensures consistency.</td>
+                                <td>PostgreSQL, MySQL, SQLite, MongoDB, Redis, DynamoDB</td>
+                                <td>The job cost ledger and document archive — every transaction, every record, organized and retrievable. The source of truth.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Types of Databases</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Type</th><th>How it stores data</th><th>Best for</th><th>Examples</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Relational (SQL)</strong></td><td>Tables with rows and columns, linked by relationships (like spreadsheets that reference each other)</td><td>Structured business data: jobs, employees, equipment, costs</td><td>PostgreSQL, MySQL, SQL Server (used by HCSS, most ERP systems)</td></tr>
+                            <tr><td><strong>Document (NoSQL)</strong></td><td>Flexible JSON-like documents — each record can have different fields</td><td>Variable-structure data, content, logs</td><td>MongoDB, Firestore (used by many SaaS startups)</td></tr>
+                            <tr><td><strong>Key-Value Store</strong></td><td>Simple lookup: key → value. Extremely fast reads.</td><td>Caching, sessions, real-time data</td><td>Redis, DynamoDB (used for speed-critical lookups)</td></tr>
+                            <tr><td><strong>Time-Series</strong></td><td>Optimized for data that changes over time (timestamps are a first-class concept)</td><td>Equipment telemetry, sensor data, GPS tracks</td><td>InfluxDB, TimescaleDB (used by fleet/GPS systems)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Infrastructure Terms</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Term</th><th>What it means</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Server</strong></td><td>A computer that runs software and responds to requests. Physical (in a data center) or virtual (cloud).</td></tr>
+                            <tr><td><strong>Cloud Provider</strong></td><td>AWS (Amazon), Google Cloud (GCP), Microsoft Azure — they rent compute, storage, and databases by the hour</td></tr>
+                            <tr><td><strong>CDN</strong></td><td>Content Delivery Network — copies of your files distributed geographically so users get fast load times wherever they are. openmud uses Vercel's CDN.</td></tr>
+                            <tr><td><strong>Serverless</strong></td><td>Backend functions that run on demand — you don't manage servers, you just write code. openmud's API runs serverless on Vercel.</td></tr>
+                            <tr><td><strong>Container / Docker</strong></td><td>A packaged, self-contained environment for running software — same behavior on any machine or server</td></tr>
+                            <tr><td><strong>CI/CD</strong></td><td>Continuous Integration / Continuous Deployment — automated testing and deployment pipeline. Every push to GitHub runs tests and deploys openmud automatically.</td></tr>
+                            <tr><td><strong>Latency</strong></td><td>The time it takes for a request to travel from client to server and back. Measured in milliseconds. Matters for field apps on slow connections.</td></tr>
+                            <tr><td><strong>Uptime / SLA</strong></td><td>What percentage of time the system is available. 99.9% uptime = 8.7 hours of downtime per year. Critical for safety-of-work systems.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://aws.amazon.com/what-is/full-stack/" target="_blank" rel="noopener" class="res-ext-link">AWS — What is full-stack development? ↗</a>
+                    <a href="https://www.postgresql.org/about/" target="_blank" rel="noopener" class="res-ext-link">PostgreSQL — the most used open-source relational DB ↗</a>
+                    <a href="https://vercel.com/docs" target="_blank" rel="noopener" class="res-ext-link">Vercel Docs — how openmud's infrastructure works ↗</a>
+                </div>
+            </section>
+
+            <!-- ─── Software Dev Basics: APIs, SDKs & Webhooks ────────── -->
+            <section class="res-section" id="section-dev-apis">
+                <h1 class="res-title">APIs, SDKs &amp; Webhooks</h1>
+                <p class="res-desc">These three concepts are the backbone of software integration — how systems talk to each other. In construction, this is how your estimating software feeds your accounting system, how your GPS data gets into your project management platform, and how openmud's tools work.</p>
+
+                <div class="res-callout">
+                    <strong>The integration problem in construction:</strong> The average mid-size contractor uses 8-12 different software platforms. Each one stores data in its own silo. APIs, SDKs, and webhooks are the plumbing that connects them — or should.
+                </div>
+
+                <h2 class="res-h2">API — Application Programming Interface</h2>
+                <p class="res-text">An API is a defined contract between two software systems: "Send me a request in this format, and I'll send back a response in this format." Think of it as a menu at a restaurant — you order from a fixed menu, and the kitchen (the server) prepares exactly what you ordered.</p>
+                <div class="res-arch-diagram" style="font-family:'Inter',monospace;margin:16px 0;">
+<pre style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;color:var(--text);font-size:0.8125rem;line-height:1.8;">
+  Your App                  openmud API              Python Engine
+  ─────────────────         ─────────────────        ─────────────
+  POST /api/python/estimate ──────────────────────►  estimate_project_cost()
+  { "materials": [...],                              RATE_TABLES["utah"]
+    "labor": [...],                                  calculate labor...
+    "region": "utah" }                               calculate materials...
+                            ◄──────────────────────  return totals
+  ◄── Response:
+  { "total": 94500,
+    "region_label": "Utah",
+    "breakdown": {...} }</pre>
+                </div>
+
+                <h2 class="res-h2">REST vs GraphQL — Two API Styles</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Style</th><th>How it works</th><th>Strengths</th><th>Used by</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>REST</strong></td>
+                                <td>URLs map to resources (GET /jobs, POST /estimates). HTTP verbs define the action (GET=read, POST=create, PUT=update, DELETE=remove).</td>
+                                <td>Simple, widely understood, easy to test in a browser or curl</td>
+                                <td>Procore, HCSS, openmud, most construction software APIs</td>
+                            </tr>
+                            <tr>
+                                <td><strong>GraphQL</strong></td>
+                                <td>One endpoint, client specifies exactly what data it needs in a query language</td>
+                                <td>Efficient for complex data needs, reduces over-fetching</td>
+                                <td>GitHub, Shopify, some modern SaaS platforms</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">HTTP Methods — The Verbs</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Method</th><th>Purpose</th><th>Construction example</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>GET</strong></td><td>Read / retrieve data</td><td>Fetching a list of open RFIs from Procore</td></tr>
+                            <tr><td><strong>POST</strong></td><td>Create a new record or submit data</td><td>Submitting a new daily report</td></tr>
+                            <tr><td><strong>PUT / PATCH</strong></td><td>Update an existing record</td><td>Updating the status of a submittal from "In Review" to "Approved"</td></tr>
+                            <tr><td><strong>DELETE</strong></td><td>Remove a record</td><td>Deleting a draft change order before it's sent</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">SDK — Software Development Kit</h2>
+                <p class="res-text">An SDK is a package of pre-built code, tools, and documentation that lets developers build applications on top of a platform faster. Instead of figuring out how to call an API from scratch, the SDK gives you pre-built functions in your language of choice.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>SDK</th><th>What it gives you</th><th>Used by</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Procore SDK</strong></td><td>Pre-built functions for creating projects, uploading drawings, managing submittals — without writing raw API calls</td><td>Developers building Procore integrations</td></tr>
+                            <tr><td><strong>Trimble SDK</strong></td><td>Access to Trimble's positioning data, coordinate systems, and survey instruments from custom applications</td><td>Field data collection apps, machine control integrations</td></tr>
+                            <tr><td><strong>DJI SDK</strong></td><td>Control DJI drones programmatically — flight paths, camera, telemetry — from a custom app</td><td>Construction site monitoring, inspection automation</td></tr>
+                            <tr><td><strong>OpenAI SDK</strong></td><td>Call GPT-4o, embeddings, and other AI models from Python or JavaScript without writing raw HTTP requests</td><td>openmud's chat API uses the OpenAI Python and Node.js SDKs</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Webhooks — Push vs Pull</h2>
+                <p class="res-text">APIs are <em>pull</em>: your system asks another system for data. Webhooks are <em>push</em>: the other system notifies yours the moment something happens.</p>
+                <div class="res-arch-diagram" style="font-family:'Inter',monospace;margin:16px 0;">
+<pre style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;color:var(--text);font-size:0.8125rem;line-height:1.8;">
+  Pull (API polling — inefficient):
+  Your App ──► Procore API: "Any new approvals?" ──► "No."  (every 5 min)
+  Your App ──► Procore API: "Any new approvals?" ──► "No."
+  Your App ──► Procore API: "Any new approvals?" ──► "Yes, 1 approval."
+
+  Push (Webhook — efficient):
+  Procore: "A submittal was just approved."
+  ──────────────────────────────────────────────► Your App receives event instantly
+                                                  Your App updates automatically</pre>
+                </div>
+
+                <h2 class="res-h2">API Authentication Methods</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Method</th><th>How it works</th><th>Where you see it</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>API Key</strong></td><td>A secret string passed in the request header. Simple. Good for server-to-server calls.</td><td>OpenAI API key, openmud's OPENMUD_API_KEY, most simple SaaS APIs</td></tr>
+                            <tr><td><strong>OAuth 2.0</strong></td><td>"Sign in with Google/GitHub" — your app gets a token after the user authorizes it. Token expires and refreshes.</td><td>Procore OAuth, Google, GitHub, Autodesk Platform Services</td></tr>
+                            <tr><td><strong>JWT</strong></td><td>JSON Web Token — a signed, self-contained token that carries user identity. The server doesn't need to look up every request.</td><td>Most modern web apps after login</td></tr>
+                            <tr><td><strong>Basic Auth</strong></td><td>Username + password encoded in the header. Simple but less secure unless combined with HTTPS.</td><td>Some older APIs, internal tools</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.postman.com/learning-center/what-is-an-api/" target="_blank" rel="noopener" class="res-ext-link">Postman — What is an API? ↗</a>
+                    <a href="https://developers.procore.com/documentation/introduction" target="_blank" rel="noopener" class="res-ext-link">Procore Developer Documentation ↗</a>
+                    <a href="https://platform.autodesk.com" target="_blank" rel="noopener" class="res-ext-link">Autodesk Platform Services (APS) ↗</a>
+                    <a href="https://developer.trimble.com" target="_blank" rel="noopener" class="res-ext-link">Trimble Developer Portal ↗</a>
+                    <a href="https://platform.openai.com/docs" target="_blank" rel="noopener" class="res-ext-link">OpenAI API Documentation ↗</a>
+                </div>
+            </section>
+
+            <!-- ─── Software Dev Basics: Dev Concepts for Contech ─────── -->
+            <section class="res-section" id="section-dev-contech">
+                <h1 class="res-title">Software Dev Concepts Applied to Contech</h1>
+                <p class="res-desc">How the core development concepts apply specifically to construction technology — evaluating software, building integrations, and understanding what vendors are actually selling you.</p>
+
+                <h2 class="res-h2">The openmud Stack — A Real Example</h2>
+                <p class="res-text">openmud is a working example of a full software stack built for construction. Everything here applies to any construction software you evaluate or build.</p>
+                <div class="res-arch-diagram" style="font-family:'Inter',monospace;margin:16px 0;">
+<pre style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;color:var(--text);font-size:0.8125rem;line-height:1.8;">
+  openmud Full Stack (open source — all of this is in GitHub)
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │  FRONTEND  (public/)                                         │
+  │  HTML + CSS + Vanilla JavaScript                             │
+  │  Runs in your browser — no framework, no build step          │
+  │  Chat UI · Calculators · Resources · Search                  │
+  └────────────────────────────┬─────────────────────────────────┘
+                               │ fetch('/api/...')
+  ┌────────────────────────────▼─────────────────────────────────┐
+  │  BACKEND  (api/)                                             │
+  │  Node.js serverless functions on Vercel                      │
+  │  /api/chat.js     — OpenAI + Anthropic routing               │
+  │  /api/search.js   — RAG search with caching                  │
+  │  /api/python/estimate.py — Python estimating engine          │
+  │  /api/python/schedule.py — Python schedule builder           │
+  └────────────────────────────┬─────────────────────────────────┘
+                               │ calls Python tools
+  ┌────────────────────────────▼─────────────────────────────────┐
+  │  PYTHON ENGINE  (tools/)                                     │
+  │  Pure Python — no web framework                              │
+  │  estimating_tools.py — regional rate tables                  │
+  │  schedule_tools.py   — phase date calculation                │
+  │  proposal_tools.py   — HTML generation                       │
+  │  hydraulics.py       — Manning's equation                    │
+  └────────────────────────────┬─────────────────────────────────┘
+                               │ reads
+  ┌────────────────────────────▼─────────────────────────────────┐
+  │  DATA  (data/)                                               │
+  │  site-content.json — RAG knowledge base (75+ chunks)         │
+  │  RATE_TABLES dict  — 6 regional rate sets in Python          │
+  │  No database — static JSON + in-memory Python dicts          │
+  └──────────────────────────────────────────────────────────────┘</pre>
+                </div>
+
+                <h2 class="res-h2">Questions to Ask When Evaluating Contech Software</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Question</th><th>What it reveals</th><th>Red flags</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>"Do you have a public API?"</strong></td><td>Whether you can get your data out and connect other systems</td><td>"We're working on it" after 3+ years. "API access is Enterprise tier only."</td></tr>
+                            <tr><td><strong>"What's your data export format?"</strong></td><td>Whether you own your data or are locked in</td><td>No CSV/JSON export. "Contact support to export." Proprietary formats only.</td></tr>
+                            <tr><td><strong>"What does your uptime SLA look like?"</strong></td><td>Reliability guarantee and what happens when it goes down</td><td>No SLA. "We try our best." SLA below 99.5% for production systems.</td></tr>
+                            <tr><td><strong>"Where is my data stored?"</strong></td><td>Data sovereignty, security, compliance</td><td>Vague answers. "Overseas." No SOC 2 or ISO certification for enterprise software.</td></tr>
+                            <tr><td><strong>"What's your webhook or event notification system?"</strong></td><td>Real-time integration capability</td><td>No webhooks — means polling only, which means delayed data and brittle integrations.</td></tr>
+                            <tr><td><strong>"Is there a sandbox / test environment?"</strong></td><td>Whether you can test integrations without affecting live data</td><td>No sandbox — you have to test in production, which is a serious risk.</td></tr>
+                            <tr><td><strong>"What does a typical integration take in developer hours?"</strong></td><td>Real integration cost vs. vendor marketing claims</td><td>"It's plug and play!" (it never is). No integration documentation.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Common Integration Patterns in Construction</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Pattern</th><th>How it works</th><th>Example</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Bidirectional Sync</strong></td><td>Data flows both ways — changes in system A appear in system B, and vice versa</td><td>Procore project data syncing with Viewpoint Vista accounting</td></tr>
+                            <tr><td><strong>One-Way Push</strong></td><td>Source system pushes data to destination on a trigger or schedule</td><td>HCSS field logs pushing to payroll at end of day</td></tr>
+                            <tr><td><strong>ETL Pipeline</strong></td><td>Extract-Transform-Load — data is pulled from source, cleaned/transformed, and loaded into destination</td><td>GPS fleet data → cleaned → loaded into job cost reports</td></tr>
+                            <tr><td><strong>Event-Driven</strong></td><td>An event in one system triggers immediate action in another via webhook</td><td>Submittal approved in Procore → document auto-filed in SharePoint → team notified in Teams</td></tr>
+                            <tr><td><strong>API Aggregator</strong></td><td>A middleware layer that connects multiple systems through one integration point</td><td>Zapier, Make (Integromat), or a custom middleware that sits between your ERP and field apps</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Key Roles — Who Does What</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Role</th><th>What they build</th><th>What to ask them</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Frontend Developer</strong></td><td>UI — what users see and interact with. Web pages, mobile screens.</td><td>"How will the field crew interact with this on a tablet in the sun?"</td></tr>
+                            <tr><td><strong>Backend Developer</strong></td><td>Server logic, data processing, API endpoints, integrations with third parties.</td><td>"How does the data get from the field to the report?"</td></tr>
+                            <tr><td><strong>Full-Stack Developer</strong></td><td>Both frontend and backend — can build an entire feature end to end.</td><td>Good for small teams and prototypes. Specialists are faster at scale.</td></tr>
+                            <tr><td><strong>DevOps / SRE</strong></td><td>Infrastructure, deployment pipelines, uptime, monitoring. Makes sure it doesn't fall over.</td><td>"What's your on-call rotation when the system goes down at 5am on a Monday?"</td></tr>
+                            <tr><td><strong>Data Engineer</strong></td><td>Pipelines that move and transform data between systems. ETL, warehouses, reporting.</td><td>"Can I get a weekly production vs. budget report automatically?"</td></tr>
+                            <tr><td><strong>Product Manager</strong></td><td>Defines what gets built and why. The bridge between users (you) and developers.</td><td>"What's on the roadmap? How do you prioritize feature requests?"</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-callout">
+                    <strong>The contractor's advantage:</strong> You know what the field actually needs. Most software developers building construction tools have never run a crew, never bid a public works project, and never stood at the bottom of a trench at 6am trying to figure out if the grade is right. When you can describe your workflow in detail — inputs, outputs, edge cases — you become the most valuable person in any software conversation.
+                </div>
+
+                <div class="res-links">
+                    <a href="https://developers.procore.com" target="_blank" rel="noopener" class="res-ext-link">Procore Developer Portal ↗</a>
+                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="res-ext-link">openmud on GitHub — read the actual code ↗</a>
+                    <a href="https://www.constructconnect.com/blog/construction-technology" target="_blank" rel="noopener" class="res-ext-link">ConstructConnect Contech Coverage ↗</a>
+                    <a href="https://zapier.com/learn/apis/chapter-1-introduction-to-apis/" target="_blank" rel="noopener" class="res-ext-link">Zapier's Plain-English API Guide ↗</a>
                 </div>
             </section>
 
