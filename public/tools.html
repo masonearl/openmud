@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#15120f">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools - openmud</title>
+    <meta name="description" content="Free construction tools from openmud and related projects: AI chat, estimators, proposal and schedule builders, and field apps.">
+    <link rel="stylesheet" href="css/landing.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .tools-wrap {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 24px 72px;
+        }
+
+        .tools-group {
+            margin-top: 28px;
+        }
+
+        .tools-group-title {
+            margin: 0 0 14px;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            font-weight: 700;
+        }
+
+        .tool-row {
+            display: grid;
+            grid-template-columns: minmax(220px, 320px) 1fr auto;
+            gap: 14px;
+            align-items: center;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 10px;
+        }
+
+        .tool-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .tool-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .tool-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .tool-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            .tool-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo">openmud <span class="lp-nav-caret">▾</span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/about.html">About</a>
+                <a href="/tools.html">Tools</a>
+                <a href="/chat.html">AI Chat</a>
+                <a href="/calculators.html">Calculators</a>
+                <a href="/resources.html">Resources</a>
+                <a href="/innovators.html">Innovators</a>
+                <a href="/companies.html">Companies</a>
+                <a href="/documentation.html">Documentation</a>
+                <a href="https://discord.gg/qszzMjxD3" target="_blank" rel="noopener">Discord</a>
+                <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
+                <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai">Contact</a>
+            </div>
+        </details>
+    </nav>
+
+    <section class="lp-hero" style="padding-bottom: 30px;">
+        <p class="lp-section-label" style="margin-bottom: 16px;">Tools</p>
+        <h1 class="lp-hero-title" style="font-size: clamp(2rem, 5vw, 3.2rem);">
+            Free construction tools,<br><em>all in one place.</em>
+        </h1>
+        <p class="lp-hero-sub">
+            This page is the tool hub. We are consolidating useful construction tools from openmud and related projects into one interface.
+        </p>
+    </section>
+
+    <div class="tools-wrap">
+        <div class="tools-group">
+            <h2 class="tools-group-title">Openmud Core Tools</h2>
+
+            <div class="tool-row">
+                <div class="tool-name">AI Chat</div>
+                <div class="tool-desc">Construction-focused chat for estimating, schedule planning, proposals, and field problem solving.</div>
+                <a class="tool-link" href="/chat.html">Open tool →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">Project Estimator</div>
+                <div class="tool-desc">Browser estimator with regional rate tables for labor, equipment, and materials.</div>
+                <a class="tool-link" href="/calculators.html#estimator">Open tool →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">Proposal Generator</div>
+                <div class="tool-desc">Create proposal drafts and client-ready output based on project scope and pricing.</div>
+                <a class="tool-link" href="/calculators.html#proposal-builder">Open tool →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">Schedule Builder</div>
+                <div class="tool-desc">Generate a practical construction schedule from scope, duration, and sequence inputs.</div>
+                <a class="tool-link" href="/calculators.html#schedule-builder">Open tool →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">Construction Calculators</div>
+                <div class="tool-desc">Takeoff, pipe flow, trench safety, markup, change order, and production calculators.</div>
+                <a class="tool-link" href="/calculators.html">Open tool →</a>
+            </div>
+        </div>
+
+        <div class="tools-group">
+            <h2 class="tools-group-title">Imported From MasonEarl.com (Useful for Construction)</h2>
+
+            <div class="tool-row">
+                <div class="tool-name">Quick Bid Estimator</div>
+                <div class="tool-desc">Detailed estimating workflow from the mason earl tools set. Useful for utility and civil bid buildout.</div>
+                <a class="tool-link" href="https://masonearl.com/pages/tools/quick-bid/" target="_blank" rel="noopener">Open tool →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">Proposal Generator (Legacy)</div>
+                <div class="tool-desc">Standalone proposal builder from mason earl. Good for document formatting and export workflows.</div>
+                <a class="tool-link" href="https://masonearl.com/pages/tools/proposal-generator.html" target="_blank" rel="noopener">Open tool →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">ConTech Assistant (Legacy)</div>
+                <div class="tool-desc">Earlier construction assistant interface that informed the openmud tool direction.</div>
+                <a class="tool-link" href="https://masonearl.com/pages/contech1.html" target="_blank" rel="noopener">Open tool →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">Article Reader</div>
+                <div class="tool-desc">Read specs, scopes, and long construction documents out loud for faster review.</div>
+                <a class="tool-link" href="https://masonearl.com/pages/tools/article-reader.html" target="_blank" rel="noopener">Open tool →</a>
+            </div>
+        </div>
+
+        <div class="tools-group">
+            <h2 class="tools-group-title">Field Apps</h2>
+
+            <div class="tool-row">
+                <div class="tool-name">Swift Stakes</div>
+                <div class="tool-desc">811 / Blue Stakes ticket workflow for Utah and surrounding states.</div>
+                <a class="tool-link" href="https://apps.apple.com/us/app/swift-stakes-blue-stakes-utah/id6737917498" target="_blank" rel="noopener">Open app →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">Construction Takeoff</div>
+                <div class="tool-desc">Plan takeoff and PDF markup app for quantities and measurement workflows.</div>
+                <a class="tool-link" href="https://apps.apple.com/us/app/construction-takeoff/id6466373898" target="_blank" rel="noopener">Open app →</a>
+            </div>
+
+            <div class="tool-row">
+                <div class="tool-name">Construction Docs Pro</div>
+                <div class="tool-desc">Estimate and bid document generation workflow for proposals and tracking.</div>
+                <a class="tool-link" href="https://apps.apple.com/us/app/construction-docs-pro/id6736613259" target="_blank" rel="noopener">Open app →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
