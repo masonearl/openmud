@@ -19,12 +19,12 @@ function buildProposal(params) {
 
   let assumptionsBlock = '';
   if (assumptions && assumptions.trim()) {
-    assumptionsBlock = `<h2 style='font-size:1.1rem;margin:24px 0 8px;'>Assumptions</h2><p style='margin:0;line-height:1.6;'>${assumptions.trim().replace(/\n/g, '<br>')}</p>`;
+    assumptionsBlock = `<h2 style='font-size:1.1rem;margin:24px 0 8px;color:#111;'>Assumptions</h2><p style='margin:0;line-height:1.6;color:#111;'>${assumptions.trim().replace(/\n/g, '<br>')}</p>`;
   }
 
   let exclusionsBlock = '';
   if (exclusions && exclusions.trim()) {
-    exclusionsBlock = `<h2 style='font-size:1.1rem;margin:24px 0 8px;'>Exclusions</h2><p style='margin:0;line-height:1.6;'>${exclusions.trim().replace(/\n/g, '<br>')}</p>`;
+    exclusionsBlock = `<h2 style='font-size:1.1rem;margin:24px 0 8px;color:#111;'>Exclusions</h2><p style='margin:0;line-height:1.6;color:#111;'>${exclusions.trim().replace(/\n/g, '<br>')}</p>`;
   }
 
   let bidItemsBlock = '';
@@ -34,20 +34,20 @@ function buildProposal(params) {
       .map((item) => {
         const desc = (item.description || '').trim() || '—';
         const amt = item.amount != null ? `$${Math.round(item.amount).toLocaleString()}` : '—';
-        return `<tr><td style='padding:8px 12px;border-bottom:1px solid #ddd;'>${desc}</td><td style='padding:8px 12px;border-bottom:1px solid #ddd;text-align:right;'>${amt}</td></tr>`;
+        return `<tr><td style='padding:8px 12px;border-bottom:1px solid #ddd;color:#111;'>${desc}</td><td style='padding:8px 12px;border-bottom:1px solid #ddd;text-align:right;color:#111;'>${amt}</td></tr>`;
       })
       .join('');
-    bidItemsBlock = `<h2 style='font-size:1.1rem;margin:24px 0 8px;'>Bid Items</h2><table style='width:100%;border-collapse:collapse;'><thead><tr style='background:#f0f0f0;'><th style='padding:8px 12px;text-align:left;'>Item</th><th style='padding:8px 12px;text-align:right;'>Amount</th></tr></thead><tbody>${rows}</tbody></table><p style='margin:12px 0 0;font-size:1.1rem;font-weight:700;'>Total: ${totalStr}</p>`;
+    bidItemsBlock = `<h2 style='font-size:1.1rem;margin:24px 0 8px;color:#111;'>Bid Items</h2><table style='width:100%;border-collapse:collapse;color:#111;'><thead><tr style='background:#f0f0f0;'><th style='padding:8px 12px;text-align:left;color:#111;'>Item</th><th style='padding:8px 12px;text-align:right;color:#111;'>Amount</th></tr></thead><tbody>${rows}</tbody></table><p style='margin:12px 0 0;font-size:1.1rem;font-weight:700;color:#111;'>Total: ${totalStr}</p>`;
   }
 
-  const pricingBlock = bidItemsBlock || `<p style='margin:0;font-size:1.25rem;font-weight:700;'>${totalStr}</p>${durationStr}`;
+  const pricingBlock = bidItemsBlock || `<p style='margin:0;font-size:1.25rem;font-weight:700;color:#111;'>${totalStr}</p>${durationStr}`;
 
-  const html = `<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;">
-<h1 style='margin:0 0 8px;'>Proposal</h1>
+  const html = `<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;background:#fff;color:#111;">
+<h1 style='margin:0 0 8px;color:#111;'>Proposal</h1>
 <p style='color:#666;margin:0 0 24px;'>${client}</p>
-<h2 style='font-size:1.1rem;margin:24px 0 8px;'>Scope</h2>
-<p style='margin:0;line-height:1.6;'>${(scope || '—').replace(/\n/g, '<br>')}</p>
-<h2 style='font-size:1.1rem;margin:24px 0 8px;'>Pricing</h2>
+<h2 style='font-size:1.1rem;margin:24px 0 8px;color:#111;'>Scope</h2>
+<p style='margin:0;line-height:1.6;color:#111;'>${(scope || '—').replace(/\n/g, '<br>')}</p>
+<h2 style='font-size:1.1rem;margin:24px 0 8px;color:#111;'>Pricing</h2>
 ${pricingBlock}
 ${!bidItemsBlock ? durationStr : ''}
 ${assumptionsBlock}
