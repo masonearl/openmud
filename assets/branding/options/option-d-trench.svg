@@ -1,0 +1,7 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="openmud logo option D">
+  <rect x="24" y="24" width="464" height="464" rx="96" fill="#15120F"/>
+  <rect x="106" y="158" width="300" height="28" rx="14" fill="#EEE5D8"/>
+  <path fill="#EEE5D8" d="M214 186h84v154c0 15-6 29-17 39l-25 24-25-24c-11-10-17-24-17-39V186z"/>
+  <circle cx="256" cy="284" r="42" fill="#15120F" stroke="#EEE5D8" stroke-width="20"/>
+  <circle cx="256" cy="256" r="214" fill="none" stroke="#B99770" stroke-opacity="0.2" stroke-width="4"/>
+</svg>
