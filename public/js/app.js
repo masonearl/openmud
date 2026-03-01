@@ -109,9 +109,11 @@
         var text = (content || '').trim();
         var scheduleMatch = text.match(/\[OPENMUD_SCHEDULE\]([\s\S]*?)\[\/OPENMUD_SCHEDULE\]/);
         var proposalMatch = text.match(/\[OPENMUD_PROPOSAL\]([\s\S]*?)\[\/OPENMUD_PROPOSAL\]/);
+        var workflowMatch = text.match(/\[OPENMUD_WORKFLOW\]([\s\S]*?)\[\/OPENMUD_WORKFLOW\]/);
         var displayText = text;
         var scheduleData = null;
         var proposalData = null;
+        var workflowData = null;
         if (scheduleMatch) {
             displayText = displayText.replace(/\[OPENMUD_SCHEDULE\][\s\S]*?\[\/OPENMUD_SCHEDULE\]/, '').trim();
             try {
@@ -124,10 +126,18 @@
                 proposalData = JSON.parse(proposalMatch[1].trim());
             } catch (e) { /* ignore */ }
         }
+        if (workflowMatch) {
+            displayText = displayText.replace(/\[OPENMUD_WORKFLOW\][\s\S]*?\[\/OPENMUD_WORKFLOW\]/, '').trim();
+            try {
+                workflowData = JSON.parse(workflowMatch[1].trim());
+            } catch (e) { /* ignore */ }
+        }
         displayText = sanitizeResponse(displayText);
-        var p = document.createElement('p');
-        p.textContent = displayText;
-        wrap.appendChild(p);
+        if (displayText) {
+            var p = document.createElement('p');
+            p.textContent = displayText;
+            wrap.appendChild(p);
+        }
         if (scheduleData && scheduleData.project && scheduleData.phases && Array.isArray(scheduleData.phases)) {
             var card = document.createElement('div');
             card.className = 'msg-schedule-card';
@@ -280,6 +290,64 @@
             }).catch(function () {
                 propCard.innerHTML = '<div class="msg-schedule-error">Could not load proposal.</div>';
             });
+        }
+        if (workflowData && workflowData.workflow === 'project_intake') {
+            var wfCard = document.createElement('div');
+            wfCard.className = 'msg-workflow-card';
+
+            var wfTitle = document.createElement('h4');
+            wfTitle.className = 'msg-workflow-title';
+            wfTitle.textContent = 'Workflow intake';
+            wfCard.appendChild(wfTitle);
+
+            var sourceText = workflowData.source || 'unknown';
+            var projectText = workflowData.project || 'Current project';
+            var wfMeta = document.createElement('p');
+            wfMeta.className = 'msg-workflow-meta';
+            wfMeta.textContent = 'Project: ' + projectText + ' | Source: ' + sourceText;
+            wfCard.appendChild(wfMeta);
+
+            if (Array.isArray(workflowData.steps) && workflowData.steps.length > 0) {
+                var wfSteps = document.createElement('ol');
+                wfSteps.className = 'msg-workflow-steps';
+                workflowData.steps.forEach(function (step) {
+                    var li = document.createElement('li');
+                    li.textContent = step;
+                    wfSteps.appendChild(li);
+                });
+                wfCard.appendChild(wfSteps);
+            }
+
+            var wfActions = document.createElement('div');
+            wfActions.className = 'msg-workflow-actions';
+            var uploadBtn = document.createElement('button');
+            uploadBtn.type = 'button';
+            uploadBtn.className = 'btn-secondary btn-sm';
+            uploadBtn.textContent = 'Upload document';
+            uploadBtn.addEventListener('click', function () {
+                var uploader = document.getElementById('chat-doc-upload');
+                if (uploader) uploader.click();
+            });
+            wfActions.appendChild(uploadBtn);
+
+            var estimateBtn = document.createElement('button');
+            estimateBtn.type = 'button';
+            estimateBtn.className = 'btn-secondary btn-sm';
+            estimateBtn.textContent = 'Open estimate tool';
+            estimateBtn.addEventListener('click', function () {
+                openTool('estimate');
+            });
+            wfActions.appendChild(estimateBtn);
+            wfCard.appendChild(wfActions);
+
+            if (workflowData.connectors_available === false) {
+                var wfNote = document.createElement('p');
+                wfNote.className = 'msg-workflow-note';
+                wfNote.textContent = 'Direct inbox/cloud connectors are not live yet. Upload the file here or paste the email text and I will process it for this project.';
+                wfCard.appendChild(wfNote);
+            }
+
+            wrap.appendChild(wfCard);
         }
     }
 

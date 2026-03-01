@@ -6,6 +6,11 @@ const telemetry = require('./_lib/toolTelemetry');
 
 const OUTPUT_RULES = `
 Output format: Plain text only. No markdown (no **, ##, ###). No LaTeX or math blocks (no \\[, \\], $$). Be concise. Short sentences. Get to the point. Use simple bullets with - if needed.`;
+const WORKFLOW_RULES = `
+Workflow intake:
+- If user asks to find project info in email/files or extract from a document, switch to workflow-intake behavior.
+- Ask only for missing essentials: project name, source (email/files/document), and target output.
+- If direct connectors are unavailable, state that clearly and ask for uploaded files or pasted email thread text.`;
 
 /** Model-specific system prompts: purpose + when to use which tools */
 const SYSTEM_PROMPTS = {
@@ -86,6 +91,7 @@ const OPENAI_MODELS = {
 const SCHEDULE_INTENT = /generate\s+(a\s+)?schedule|create\s+(a\s+)?schedule|build\s+(a\s+)?schedule|help\s+me\s+generate\s+(a\s+)?schedule|make\s+(a\s+)?schedule|schedule\s+for|need\s+(a\s+)?schedule|want\s+(a\s+)?schedule|get\s+(a\s+)?schedule|turn\s+(it\s+)?into\s+(a\s+)?pdf|turn\s+this\s+into\s+(a\s+)?pdf|download\s+(the\s+)?pdf|make\s+(a\s+)?pdf|create\s+(a\s+)?pdf/i;
 
 const PROPOSAL_INTENT = /generate\s+(a\s+)?proposal|create\s+(a\s+)?proposal|build\s+(a\s+)?proposal|draft\s+(a\s+)?proposal|make\s+(a\s+)?proposal|proposal\s+for|need\s+(a\s+)?proposal|want\s+(a\s+)?proposal|get\s+(a\s+)?proposal|turn\s+(it\s+)?into\s+(a\s+)?proposal|proposal\s+pdf/i;
+const WORKFLOW_INTENT = /\b(find|search|pull|grab|locate|extract|read|parse)\b[\s\S]{0,80}\b(email|inbox|mail|file|files|folder|drive|document|pdf|attachment)\b|\bfrom\s+this\s+(document|pdf|file)\b/i;
 
 const PROJECT_TYPE_LABELS = {
   waterline: 'waterline',
@@ -102,7 +108,8 @@ const toolSchemaCache = {
 };
 
 function getSystemPrompt(model) {
-  return SYSTEM_PROMPTS[model] || SYSTEM_PROMPTS['gpt-4o-mini'];
+  const base = SYSTEM_PROMPTS[model] || SYSTEM_PROMPTS['gpt-4o-mini'];
+  return `${base}\n\n${WORKFLOW_RULES}`;
 }
 
 function buildProposalFromEstimate(estimateContext) {
@@ -145,6 +152,89 @@ function ensureProposalBlock(responseText, userMsg, useTools, estimateContext) {
     console.error('Proposal injection error:', e);
     return responseText;
   }
+}
+
+function inferWorkflowSource(userMsg) {
+  const msg = String(userMsg || '').toLowerCase();
+  if (/\b(email|inbox|mail)\b/.test(msg)) return 'email';
+  if (/\b(file|files|folder|drive)\b/.test(msg)) return 'files';
+  if (/\b(document|pdf|attachment|extract|parse)\b/.test(msg)) return 'document';
+  return 'unknown';
+}
+
+function extractProjectHint(userMsg, messages) {
+  const text = String(userMsg || '');
+  const patterns = [
+    /\bproject\s*[:\-]\s*([a-z0-9][a-z0-9 &/_-]{2,80})/i,
+    /\bfor\s+(?:the\s+)?project\s+([a-z0-9][a-z0-9 &/_-]{2,80})/i,
+    /\bfor\s+([a-z0-9][a-z0-9 &/_-]{2,80})\s*(?:project)?$/i,
+  ];
+  for (const re of patterns) {
+    const match = text.match(re);
+    if (match && match[1]) return match[1].trim();
+  }
+
+  if (Array.isArray(messages)) {
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      const m = messages[i];
+      if (!m || m.role !== 'user') continue;
+      const candidate = String(m.content || '');
+      const pm = candidate.match(/\bproject\s*[:\-]\s*([a-z0-9][a-z0-9 &/_-]{2,80})/i);
+      if (pm && pm[1]) return pm[1].trim();
+    }
+  }
+
+  return 'Current project';
+}
+
+function buildWorkflowSteps(source, userMsg) {
+  const wantsExtract = /\bextract|parse|read\b/i.test(String(userMsg || ''));
+  if (source === 'email') {
+    return [
+      'Confirm the exact project name and date range.',
+      'Collect matching email thread text or upload an exported email/PDF.',
+      'Extract key fields (scope, quantities, dates, vendors, totals) and map to the project.',
+      'Draft the next deliverable (proposal, schedule, or summary) from extracted data.',
+    ];
+  }
+  if (source === 'files') {
+    return [
+      'Confirm project name and target folder/file names.',
+      'Upload the source files in this chat workspace.',
+      wantsExtract
+        ? 'Extract line items, scope, and dates from uploaded files.'
+        : 'Index file names and summarize relevant project docs.',
+      'Generate the requested output from extracted project data.',
+    ];
+  }
+  return [
+    'Confirm project name and document type.',
+    'Upload the document here for project-level processing.',
+    wantsExtract
+      ? 'Extract the requested fields from the document.'
+      : 'Classify and summarize the document for the project record.',
+    'Generate the next artifact (proposal, schedule, or response draft).',
+  ];
+}
+
+function ensureWorkflowBlock(responseText, userMsg, useTools, messages) {
+  if (!useTools || !WORKFLOW_INTENT.test(userMsg || '')) return responseText;
+  if (/\[OPENMUD_WORKFLOW\]/.test(responseText || '')) return responseText;
+
+  const source = inferWorkflowSource(userMsg);
+  const project = extractProjectHint(userMsg, messages);
+  const steps = buildWorkflowSteps(source, userMsg);
+  const block = `[OPENMUD_WORKFLOW]${JSON.stringify({
+    workflow: 'project_intake',
+    source,
+    project,
+    steps,
+    requires_upload: source !== 'email' || /\battachment|pdf|document|file\b/i.test(String(userMsg || '')),
+    connectors_available: false,
+  })}[/OPENMUD_WORKFLOW]`;
+
+  const trimmed = (responseText || '').trim();
+  return trimmed ? `${trimmed}\n\n${block}` : block;
 }
 
 function extractPhasesFromText(text) {
@@ -599,6 +689,7 @@ module.exports = async function handler(req, res) {
           const lastUser = chatMessages.filter((m) => m.role === 'user').pop();
           let text = ensureScheduleBlock(generated.text, lastUser?.content, use_tools, messages);
           text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
+          text = ensureWorkflowBlock(text, lastUser?.content, use_tools, messages);
 
           const uniqueTools = [...new Set(generated.toolsUsed.filter(Boolean))];
           telemetry.recordChatRun({
@@ -650,6 +741,7 @@ module.exports = async function handler(req, res) {
     const lastUser = messages.filter((m) => m.role === 'user').pop();
     let text = ensureScheduleBlock(generated.text, lastUser?.content, use_tools, messages);
     text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
+    text = ensureWorkflowBlock(text, lastUser?.content, use_tools, messages);
 
     const uniqueTools = [...new Set(generated.toolsUsed.filter(Boolean))];
     telemetry.recordChatRun({
