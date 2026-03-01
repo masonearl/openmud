@@ -86,6 +86,7 @@ const OPENAI_MODELS = {
   'gpt-3.5-turbo': 'gpt-3.5-turbo',
 };
 const ALLOWED_MODELS = new Set([
+  'mud1',
   'gpt-4o-mini',
   'gpt-3.5-turbo',
   'claude-haiku-4-5-20251001',

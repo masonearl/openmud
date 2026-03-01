@@ -165,6 +165,10 @@
                                     </button>
                                     <div class="model-dropdown" id="model-dropdown" role="listbox" hidden>
                                         <div class="model-dropdown-group">
+                                            <div class="model-dropdown-label">openmud</div>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="mud1">mud1</button>
+                                        </div>
+                                        <div class="model-dropdown-group">
                                             <div class="model-dropdown-label">OpenAI</div>
                                             <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o-mini">GPT-4o mini</button>
                                             <button type="button" class="model-dropdown-item" role="option" data-value="gpt-3.5-turbo">GPT-3.5 Turbo</button>
@@ -175,6 +179,7 @@
                                         </div>
                                     </div>
                                     <select id="model-select" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
+                                        <option value="mud1">mud1</option>
                                         <option value="gpt-4o-mini" selected>GPT-4o mini</option>
                                         <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                                         <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
