@@ -399,6 +399,17 @@ body {
     gap: 8px;
 }
 
+.lp-stat-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.lp-stat-link:hover {
+    background: var(--bg-card-hover);
+}
+
 .lp-stat-num {
     font-size: 2.25rem;
     font-weight: 800;
@@ -411,6 +422,14 @@ body {
     font-size: 0.8125rem;
     color: var(--text-secondary);
     line-height: 1.4;
+}
+
+.lp-stat-cta {
+    margin-top: auto;
+    padding-top: 8px;
+    font-size: 0.75rem;
+    color: var(--earth-light);
+    letter-spacing: 0.02em;
 }
 
 /* ─── Calculator showcase ──────────────────────────────────── */
