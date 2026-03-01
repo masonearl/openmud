@@ -6,7 +6,9 @@
     var STORAGE_ACTIVE = 'rockmud_activeProject';
     var STORAGE_MESSAGES = 'rockmud_messages';
     var STORAGE_MODEL = 'rockmud_model';
+    var STORAGE_CHAT_MODE = 'rockmud_chat_mode';
     var STORAGE_SIDEBAR_WIDTH = 'rockmud_sidebarWidth';
+    var DEFAULT_MODEL = 'gpt-4o-mini';
 
     var WELCOME_MSG = "Hi, I'm the openmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
 
@@ -574,8 +576,9 @@
         var msgs = activeProjectId ? getMessages(activeProjectId) : [];
         if (msgs.length === 0) return '';
         var modelSelect = document.getElementById('model-select');
-        var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
-        var lines = ['Model: ' + model, 'Project: ' + (activeProjectId || '—'), ''];
+        var model = modelSelect ? modelSelect.value : DEFAULT_MODEL;
+        var mode = localStorage.getItem(STORAGE_CHAT_MODE) === 'ask' ? 'ask' : 'agent';
+        var lines = ['Mode: ' + mode, 'Model: ' + model, 'Project: ' + (activeProjectId || '—'), ''];
         msgs.forEach(function (m) {
             lines.push((m.role === 'user' ? 'User' : 'Assistant') + ':');
             lines.push(m.content);
@@ -610,13 +613,15 @@
                 history[history.length - 1].content = history[history.length - 1].content + docCtx;
             }
             var modelSelect = document.getElementById('model-select');
-            var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
+            var model = modelSelect ? modelSelect.value : DEFAULT_MODEL;
+            var mode = localStorage.getItem(STORAGE_CHAT_MODE) === 'ask' ? 'ask' : 'agent';
             if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
 
-            var useTools = shouldUseTools(text);
+            var useTools = mode === 'agent' && shouldUseTools(text);
             var payload = {
                 messages: history,
                 model: model,
+                chat_mode: mode,
                 temperature: 0.7,
                 max_tokens: 1024,
                 use_tools: useTools,
@@ -730,15 +735,18 @@
     });
 
     function setActiveToolShortcut(tool) {
-        document.querySelectorAll('.quick-tool-btn').forEach(function (btn) {
-            btn.classList.toggle('active', btn.getAttribute('data-open-tool') === tool);
+        document.querySelectorAll('[data-open-tool]').forEach(function (btn) {
+            var isActive = btn.getAttribute('data-open-tool') === tool;
+            if (btn.classList.contains('quick-tool-btn') || btn.classList.contains('chat-header-tool')) {
+                btn.classList.toggle('active', isActive);
+            }
         });
     }
 
     function openTool(tool) {
         activeTool = tool;
-        toolsDropdown.hidden = true;
-        btnTools.setAttribute('aria-expanded', 'false');
+        if (toolsDropdown) toolsDropdown.hidden = true;
+        if (btnTools) btnTools.setAttribute('aria-expanded', 'false');
         document.querySelectorAll('.tool-form-wrap').forEach(function (el) { el.classList.remove('active'); });
         var wrap = document.getElementById('tool-form-' + tool);
         if (wrap) wrap.classList.add('active');
@@ -775,12 +783,14 @@
         setActiveToolShortcut(null);
     }
 
-    btnTools.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var isOpen = toolsDropdown.hidden === false;
-        toolsDropdown.hidden = isOpen;
-        btnTools.setAttribute('aria-expanded', String(!isOpen));
-    });
+    if (btnTools && toolsDropdown) {
+        btnTools.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = toolsDropdown.hidden === false;
+            toolsDropdown.hidden = isOpen;
+            btnTools.setAttribute('aria-expanded', String(!isOpen));
+        });
+    }
 
     document.querySelectorAll('.dropdown-item').forEach(function (item) {
         item.addEventListener('click', function () {
@@ -789,7 +799,7 @@
         });
     });
 
-    document.querySelectorAll('.quick-tool-btn').forEach(function (btn) {
+    document.querySelectorAll('[data-open-tool]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var tool = btn.getAttribute('data-open-tool');
             if (!tool) return;
@@ -803,10 +813,10 @@
 
     btnCloseTool.addEventListener('click', closeTool);
 
-    toolsDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+    if (toolsDropdown) toolsDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
     document.addEventListener('click', function () {
-        toolsDropdown.hidden = true;
-        btnTools.setAttribute('aria-expanded', 'false');
+        if (toolsDropdown) toolsDropdown.hidden = true;
+        if (btnTools) btnTools.setAttribute('aria-expanded', 'false');
     });
 
     function getEstimatePayload() {
@@ -1020,9 +1030,56 @@
     var modelTrigger = document.getElementById('model-select-trigger');
     var modelDropdown = document.getElementById('model-dropdown');
     var modelLabel = document.getElementById('model-select-label');
+    var modeTrigger = document.getElementById('agent-dropdown');
+    var modeDropdown = document.getElementById('mode-dropdown');
+    var modeLabel = document.getElementById('agent-mode-label');
+
+    function closeModelDropdown() {
+        if (modelDropdown) modelDropdown.hidden = true;
+        if (modelTrigger) modelTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function closeModeDropdown() {
+        if (modeDropdown) modeDropdown.hidden = true;
+        if (modeTrigger) modeTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    if (modeTrigger && modeDropdown && modeLabel) {
+        var savedMode = localStorage.getItem(STORAGE_CHAT_MODE);
+        var activeMode = savedMode === 'ask' ? 'ask' : 'agent';
+        function updateModeLabel() {
+            modeLabel.textContent = activeMode === 'ask' ? 'Ask' : 'Agent';
+            modeDropdown.querySelectorAll('.mode-dropdown-item').forEach(function (btn) {
+                btn.setAttribute('aria-selected', btn.getAttribute('data-value') === activeMode ? 'true' : 'false');
+            });
+        }
+        updateModeLabel();
+        modeTrigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closeModelDropdown();
+            var open = !modeDropdown.hidden;
+            modeDropdown.hidden = open;
+            modeTrigger.setAttribute('aria-expanded', String(!open));
+        });
+        modeDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+        modeDropdown.querySelectorAll('.mode-dropdown-item').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                activeMode = btn.getAttribute('data-value') === 'ask' ? 'ask' : 'agent';
+                localStorage.setItem(STORAGE_CHAT_MODE, activeMode);
+                updateModeLabel();
+                closeModeDropdown();
+            });
+        });
+    }
+
     if (modelSelect && modelTrigger && modelDropdown && modelLabel) {
         var saved = localStorage.getItem(STORAGE_MODEL);
-        if (saved && modelSelect.querySelector('option[value="' + saved + '"]')) modelSelect.value = saved;
+        if (saved && modelSelect.querySelector('option[value="' + saved + '"]')) {
+            modelSelect.value = saved;
+        } else {
+            modelSelect.value = DEFAULT_MODEL;
+            localStorage.setItem(STORAGE_MODEL, DEFAULT_MODEL);
+        }
         function updateModelLabel() {
             var opt = modelSelect.querySelector('option[value="' + modelSelect.value + '"]');
             modelLabel.textContent = opt ? opt.textContent : modelSelect.value;
@@ -1033,6 +1090,7 @@
         updateModelLabel();
         modelTrigger.addEventListener('click', function (e) {
             e.stopPropagation();
+            closeModeDropdown();
             var open = !modelDropdown.hidden;
             modelDropdown.hidden = open;
             modelTrigger.setAttribute('aria-expanded', String(!open));
@@ -1043,17 +1101,20 @@
                 modelSelect.value = btn.getAttribute('data-value');
                 localStorage.setItem(STORAGE_MODEL, modelSelect.value);
                 updateModelLabel();
-                modelDropdown.hidden = true;
-                modelTrigger.setAttribute('aria-expanded', 'false');
+                closeModelDropdown();
             });
         });
         document.addEventListener('click', function () {
-            modelDropdown.hidden = true;
-            modelTrigger.setAttribute('aria-expanded', 'false');
+            closeModelDropdown();
+            closeModeDropdown();
         });
     } else if (modelSelect) {
         var saved = localStorage.getItem(STORAGE_MODEL);
-        if (saved) modelSelect.value = saved;
+        if (saved && modelSelect.querySelector('option[value="' + saved + '"]')) {
+            modelSelect.value = saved;
+        } else {
+            modelSelect.value = DEFAULT_MODEL;
+        }
         modelSelect.addEventListener('change', function () { localStorage.setItem(STORAGE_MODEL, modelSelect.value); });
     }
 

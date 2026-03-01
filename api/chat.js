@@ -83,10 +83,13 @@ const ANTHROPIC_MODELS = {
 
 const OPENAI_MODELS = {
   'gpt-4o-mini': 'gpt-4o-mini',
-  'gpt-4o': 'gpt-4o',
-  'gpt-4-turbo': 'gpt-4-turbo',
   'gpt-3.5-turbo': 'gpt-3.5-turbo',
 };
+const ALLOWED_MODELS = new Set([
+  'gpt-4o-mini',
+  'gpt-3.5-turbo',
+  'claude-haiku-4-5-20251001',
+]);
 
 const SCHEDULE_INTENT = /generate\s+(a\s+)?schedule|create\s+(a\s+)?schedule|build\s+(a\s+)?schedule|help\s+me\s+generate\s+(a\s+)?schedule|make\s+(a\s+)?schedule|schedule\s+for|need\s+(a\s+)?schedule|want\s+(a\s+)?schedule|get\s+(a\s+)?schedule|turn\s+(it\s+)?into\s+(a\s+)?pdf|turn\s+this\s+into\s+(a\s+)?pdf|download\s+(the\s+)?pdf|make\s+(a\s+)?pdf|create\s+(a\s+)?pdf/i;
 
@@ -107,9 +110,12 @@ const toolSchemaCache = {
   tools: [],
 };
 
-function getSystemPrompt(model) {
+function getSystemPrompt(model, chatMode = 'agent') {
   const base = SYSTEM_PROMPTS[model] || SYSTEM_PROMPTS['gpt-4o-mini'];
-  return `${base}\n\n${WORKFLOW_RULES}`;
+  const modeRules = chatMode === 'ask'
+    ? 'Mode: Ask. Give direct answers only. Do not run tools unless the user explicitly asks you to generate a proposal, schedule, or estimate.'
+    : 'Mode: Agent. You may proactively use tools when they improve the result.';
+  return `${base}\n\n${WORKFLOW_RULES}\n\n${modeRules}`;
 }
 
 function buildProposalFromEstimate(estimateContext) {
@@ -632,6 +638,7 @@ module.exports = async function handler(req, res) {
     const {
       messages,
       model = 'gpt-4o-mini',
+      chat_mode = 'agent',
       temperature = 0.7,
       max_tokens = 1024,
       use_tools = false,
@@ -643,12 +650,16 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'messages array required', response: null });
     }
 
-    const registryTools = use_tools ? await loadToolSchemas(req) : [];
-    const selectedOpenAITools = filterToolsByAvailability(registryTools, use_tools, available_tools);
+    const selectedMode = chat_mode === 'ask' ? 'ask' : 'agent';
+    const selectedModel = ALLOWED_MODELS.has(model) ? model : 'gpt-4o-mini';
+    const toolsEnabled = selectedMode === 'agent' && use_tools;
+
+    const registryTools = toolsEnabled ? await loadToolSchemas(req) : [];
+    const selectedOpenAITools = filterToolsByAvailability(registryTools, toolsEnabled, available_tools);
     const selectedAnthropicTools = toAnthropicTools(selectedOpenAITools);
 
-    const isAnthropic = model.startsWith('claude-');
-    const isMud1 = model === 'mud1';
+    const isAnthropic = selectedModel.startsWith('claude-');
+    const isMud1 = selectedModel === 'mud1';
 
     if (isAnthropic) {
       const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -670,9 +681,9 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'Last message must be from user', response: null });
       }
 
-      const systemPrompt = getSystemPrompt(model);
+      const systemPrompt = getSystemPrompt(selectedModel, selectedMode);
       const system = systemContent ? `${systemPrompt}\n\n${systemContent}` : systemPrompt;
-      const modelIds = ANTHROPIC_MODELS[model] || [model];
+      const modelIds = ANTHROPIC_MODELS[selectedModel] || [selectedModel];
       let lastErr;
 
       for (const tryModel of modelIds) {
@@ -687,18 +698,18 @@ module.exports = async function handler(req, res) {
           });
 
           const lastUser = chatMessages.filter((m) => m.role === 'user').pop();
-          let text = ensureScheduleBlock(generated.text, lastUser?.content, use_tools, messages);
-          text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
-          text = ensureWorkflowBlock(text, lastUser?.content, use_tools, messages);
+          let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages);
+          text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context);
+          text = ensureWorkflowBlock(text, lastUser?.content, toolsEnabled, messages);
 
           const uniqueTools = [...new Set(generated.toolsUsed.filter(Boolean))];
           telemetry.recordChatRun({
             provider: 'anthropic',
             model: tryModel,
-            tools_enabled: use_tools,
+            tools_enabled: toolsEnabled,
             tool_calls: uniqueTools.length,
             tool_errors: generated.hadToolError ? 1 : 0,
-            fallback_without_tools: use_tools && uniqueTools.length === 0,
+            fallback_without_tools: toolsEnabled && uniqueTools.length === 0,
           });
 
           return res.status(200).json({ response: text, tools_used: uniqueTools });
@@ -714,7 +725,7 @@ module.exports = async function handler(req, res) {
       throw lastErr;
     }
 
-    const effectiveModel = isMud1 ? 'gpt-4o-mini' : (OPENAI_MODELS[model] || model);
+    const effectiveModel = isMud1 ? 'gpt-4o-mini' : (OPENAI_MODELS[selectedModel] || selectedModel);
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({
@@ -724,7 +735,7 @@ module.exports = async function handler(req, res) {
     }
 
     const openai = new OpenAI({ apiKey });
-    const systemPrompt = getSystemPrompt(model);
+    const systemPrompt = getSystemPrompt(selectedModel, selectedMode);
     const hasSystem = messages[0]?.role === 'system';
     const apiMessages = hasSystem
       ? [{ role: 'system', content: `${systemPrompt}\n\n${messages[0].content}` }, ...messages.slice(1)]
@@ -739,18 +750,18 @@ module.exports = async function handler(req, res) {
     });
 
     const lastUser = messages.filter((m) => m.role === 'user').pop();
-    let text = ensureScheduleBlock(generated.text, lastUser?.content, use_tools, messages);
-    text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
-    text = ensureWorkflowBlock(text, lastUser?.content, use_tools, messages);
+    let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages);
+    text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context);
+    text = ensureWorkflowBlock(text, lastUser?.content, toolsEnabled, messages);
 
     const uniqueTools = [...new Set(generated.toolsUsed.filter(Boolean))];
     telemetry.recordChatRun({
       provider: 'openai',
       model: effectiveModel,
-      tools_enabled: use_tools,
+      tools_enabled: toolsEnabled,
       tool_calls: uniqueTools.length,
       tool_errors: generated.hadToolError ? 1 : 0,
-      fallback_without_tools: use_tools && uniqueTools.length === 0,
+      fallback_without_tools: toolsEnabled && uniqueTools.length === 0,
     });
 
     return res.status(200).json({ response: text, tools_used: uniqueTools });
