@@ -45,8 +45,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 20px;
-    min-height: 52px;
+    padding: 8px 20px;
+    min-height: 44px;
     background: rgba(21, 18, 15, 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -641,7 +641,7 @@ body {
     .lp-audience { grid-template-columns: 1fr; }
     .lp-footer { grid-template-columns: 1fr; }
     .lp-footer-links { grid-template-columns: repeat(2, 1fr); gap: 8px 24px; }
-    .lp-nav { padding: 0 16px; }
+    .lp-nav { padding: 0 14px; min-height: 42px; }
     .lp-brand-menu-panel { width: min(280px, calc(100vw - 28px)); }
 }
 
