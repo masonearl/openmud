@@ -1,9 +1,9 @@
 /* Calculators page — redesigned layout */
 :root {
-    --earth: #8a7a6a;
-    --earth-dark: #5c4e40;
-    --earth-light: #a09080;
-    --earth-subtle: rgba(138, 122, 106, 0.07);
+    --earth: #9aa3ad;
+    --earth-dark: #7f8892;
+    --earth-light: #c0c7cf;
+    --earth-subtle: rgba(154, 163, 173, 0.11);
 }
 
 /* ─── Page layout ───────────────────────────────────────────── */
