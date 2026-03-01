@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0d0b09">
+    <meta name="theme-color" content="#16181b">
     
     
     
@@ -197,6 +197,62 @@
             flex-wrap: wrap;
         }
 
+        .inv-link-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .inv-link {
+            font-size: 0.75rem;
+            color: var(--earth-light);
+            text-decoration: none;
+            border: 1px solid var(--border-light);
+            border-radius: 999px;
+            padding: 3px 10px;
+        }
+
+        .inv-link:hover {
+            color: var(--text);
+            border-color: var(--earth);
+        }
+
+        .inv-history {
+            display: grid;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .inv-milestone {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+
+        .inv-milestone-era {
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--earth);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .inv-milestone-title {
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .inv-milestone-desc {
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
         @media (max-width: 640px) {
             .inv-grid { grid-template-columns: 1fr; }
             .inv-video-grid { grid-template-columns: 1fr; }
@@ -213,7 +269,7 @@
             <a href="/chat.html">AI Chat</a>
             <a href="/calculators.html">Calculators</a>
             <a href="/resources.html">Resources</a>
-            <a href="/innovators.html" style="color:var(--text)">Innovators</a>
+            <a href="/innovators.html#industry-icons" style="color:var(--text)">Innovators</a>
             <a href="/companies.html">Companies</a>
             <a href="/documentation.html">Documentation</a>
             <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a>
@@ -232,7 +288,119 @@
         </p>
         <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:8px;">
             <a href="https://github.com/masonearl/openmud/discussions" target="_blank" rel="noopener" class="lp-btn-primary">Join the discussion →</a>
-            <a href="#topics" class="lp-btn-secondary">Browse topics</a>
+            <a href="#industry-icons" class="lp-btn-secondary">Browse industry icons</a>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Industry Icons -->
+    <section class="lp-section" id="industry-icons">
+        <p class="lp-section-label">Industry icons</p>
+        <h2 class="lp-section-title">People who changed how we build.</h2>
+        <p style="color: var(--text-secondary); font-size:0.9375rem; margin-top:12px; max-width:660px;">
+            This is the path from foundational civil engineering to modern infrastructure delivery. Each profile includes a reference page and a quick video search link.
+        </p>
+
+        <div class="inv-grid">
+            <div class="inv-card">
+                <div class="inv-card-tag">Foundations</div>
+                <div class="inv-card-title">John Smeaton</div>
+                <div class="inv-card-desc">Often called the first civil engineer. Advanced hydraulic cement use and lighthouse construction that influenced modern marine and public works design.</div>
+                <div class="inv-link-row">
+                    <a class="inv-link" href="https://en.wikipedia.org/wiki/John_Smeaton" target="_blank" rel="noopener">Profile</a>
+                    <a class="inv-link" href="https://www.youtube.com/results?search_query=John+Smeaton+civil+engineering" target="_blank" rel="noopener">Videos</a>
+                </div>
+            </div>
+            <div class="inv-card">
+                <div class="inv-card-tag">Rail and tunneling</div>
+                <div class="inv-card-title">Isambard Kingdom Brunel</div>
+                <div class="inv-card-desc">Set a new standard for rail systems, bridges, and tunnels, showing how integrated design and execution can scale national infrastructure quickly.</div>
+                <div class="inv-link-row">
+                    <a class="inv-link" href="https://en.wikipedia.org/wiki/Isambard_Kingdom_Brunel" target="_blank" rel="noopener">Profile</a>
+                    <a class="inv-link" href="https://www.youtube.com/results?search_query=Isambard+Kingdom+Brunel+documentary" target="_blank" rel="noopener">Videos</a>
+                </div>
+            </div>
+            <div class="inv-card">
+                <div class="inv-card-tag">Urban utilities</div>
+                <div class="inv-card-title">Joseph Bazalgette</div>
+                <div class="inv-card-desc">Engineered London sewer networks that redefined public health and city utility planning. A blueprint for modern underground infrastructure resilience.</div>
+                <div class="inv-link-row">
+                    <a class="inv-link" href="https://en.wikipedia.org/wiki/Joseph_Bazalgette" target="_blank" rel="noopener">Profile</a>
+                    <a class="inv-link" href="https://www.youtube.com/results?search_query=Joseph+Bazalgette+sewer+history" target="_blank" rel="noopener">Videos</a>
+                </div>
+            </div>
+            <div class="inv-card">
+                <div class="inv-card-tag">High-rise systems</div>
+                <div class="inv-card-title">Fazlur Rahman Khan</div>
+                <div class="inv-card-desc">Developed tube structural systems that unlocked modern skyscraper efficiency and changed the economics of vertical urban development worldwide.</div>
+                <div class="inv-link-row">
+                    <a class="inv-link" href="https://en.wikipedia.org/wiki/Fazlur_Rahman_Khan" target="_blank" rel="noopener">Profile</a>
+                    <a class="inv-link" href="https://www.youtube.com/results?search_query=Fazlur+Khan+structural+engineering" target="_blank" rel="noopener">Videos</a>
+                </div>
+            </div>
+            <div class="inv-card">
+                <div class="inv-card-tag">Bridge delivery</div>
+                <div class="inv-card-title">Emily Warren Roebling</div>
+                <div class="inv-card-desc">Critical leader in delivering the Brooklyn Bridge. Her field coordination and technical communication remain a model for project execution under pressure.</div>
+                <div class="inv-link-row">
+                    <a class="inv-link" href="https://en.wikipedia.org/wiki/Emily_Warren_Roebling" target="_blank" rel="noopener">Profile</a>
+                    <a class="inv-link" href="https://www.youtube.com/results?search_query=Emily+Warren+Roebling+Brooklyn+Bridge" target="_blank" rel="noopener">Videos</a>
+                </div>
+            </div>
+            <div class="inv-card">
+                <div class="inv-card-tag">Mega bridge era</div>
+                <div class="inv-card-title">Othmar Ammann</div>
+                <div class="inv-card-desc">Delivered multiple long-span bridges in New York, proving how standardization, staged construction, and financing alignment can accelerate major programs.</div>
+                <div class="inv-link-row">
+                    <a class="inv-link" href="https://en.wikipedia.org/wiki/Othmar_Ammann" target="_blank" rel="noopener">Profile</a>
+                    <a class="inv-link" href="https://www.youtube.com/results?search_query=Othmar+Ammann+bridges" target="_blank" rel="noopener">Videos</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="lp-divider">
+
+    <!-- Construction Timeline -->
+    <section class="lp-section" id="industry-history">
+        <p class="lp-section-label">History to now</p>
+        <h2 class="lp-section-title">How construction reached the data center era.</h2>
+        <p style="color: var(--text-secondary); font-size:0.9375rem; margin-top:12px; max-width:700px;">
+            The current data center and tech infrastructure boom did not appear overnight. It came from two centuries of advances in materials, utilities, logistics, controls, and project delivery.
+        </p>
+
+        <div class="inv-history">
+            <div class="inv-milestone">
+                <div class="inv-milestone-era">1800s</div>
+                <div class="inv-milestone-title">Rail, canals, steel, and sanitation networks</div>
+                <div class="inv-milestone-desc">National rail corridors, municipal water and sewer systems, and structural steel framed the first modern infrastructure wave and created repeatable public works methods.</div>
+            </div>
+            <div class="inv-milestone">
+                <div class="inv-milestone-era">1900-1960</div>
+                <div class="inv-milestone-title">Concrete scale-up, highways, and power grids</div>
+                <div class="inv-milestone-desc">Reinforced concrete, interstate highways, dams, and transmission buildout created the backbone for industrial growth and large-scale suburban expansion.</div>
+            </div>
+            <div class="inv-milestone">
+                <div class="inv-milestone-era">1960-2000</div>
+                <div class="inv-milestone-title">Global logistics and digital controls</div>
+                <div class="inv-milestone-desc">Containerized shipping, advanced earthmoving fleets, and early digital controls compressed cost and time while increasing cross-border material and equipment flow.</div>
+            </div>
+            <div class="inv-milestone">
+                <div class="inv-milestone-era">2000-2020</div>
+                <div class="inv-milestone-title">BIM, GPS machine control, drones, and cloud platforms</div>
+                <div class="inv-milestone-desc">Model-based coordination, drone mapping, and cloud PM stacks shifted teams from static documents to live field data and tighter production feedback loops.</div>
+            </div>
+            <div class="inv-milestone">
+                <div class="inv-milestone-era">Now</div>
+                <div class="inv-milestone-title">Hyperscale data centers and AI infrastructure</div>
+                <div class="inv-milestone-desc">Data center programs are driving demand for power delivery, substations, cooling systems, fiber, utility relocations, and fast-track construction packages. Heavy civil and utility contractors are now core to digital infrastructure rollout.</div>
+            </div>
+            <div class="inv-milestone">
+                <div class="inv-milestone-era">Next</div>
+                <div class="inv-milestone-title">Autonomous field operations with AI copilots</div>
+                <div class="inv-milestone-desc">The next step is agentic workflows: document extraction to scope, scope to schedule, schedule to production tracking, with machine control and field telemetry closing the loop daily.</div>
+            </div>
         </div>
     </section>
 
