@@ -1016,7 +1016,7 @@ body {
     background: #1a1a1a;
     border: 1px solid #2d2d2d;
     border-radius: 10px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .chat-composer:focus-within {
@@ -1059,13 +1059,17 @@ body {
     gap: 12px;
     padding: 6px 10px 8px;
     border-top: 1px solid #252525;
+    min-width: 0;
+    overflow: visible;
 }
 
 .chat-composer-left {
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
+    overflow: visible;
 }
 
 .chat-composer-pill {
@@ -1108,19 +1112,16 @@ body {
 }
 
 .model-dropdown {
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    margin-bottom: 4px;
+    position: fixed;
     min-width: 180px;
-    max-height: none;
+    max-height: 240px;
     background: var(--bg-alt);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 6px 0;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
-    z-index: 60;
-    overflow-y: visible;
+    padding: 4px 0;
+    box-shadow: 0 -4px 14px rgba(0,0,0,0.35);
+    z-index: 9000;
+    overflow-y: auto;
 }
 
 .model-dropdown[hidden] {

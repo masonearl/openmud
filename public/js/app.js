@@ -6,6 +6,7 @@
     var STORAGE_ACTIVE = 'rockmud_activeProject';
     var STORAGE_MESSAGES = 'rockmud_messages';
     var STORAGE_MODEL = 'rockmud_model';
+    var STORAGE_AGENT_MODE = 'rockmud_agentMode';
     var STORAGE_SIDEBAR_WIDTH = 'rockmud_sidebarWidth';
 
     var WELCOME_MSG = "Hi, I'm the openmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
@@ -642,8 +643,10 @@
         var msgs = activeProjectId ? getMessages(activeProjectId) : [];
         if (msgs.length === 0) return '';
         var modelSelect = document.getElementById('model-select');
+        var modeSelect = document.getElementById('agent-mode-select');
+        var mode = modeSelect ? modeSelect.value : 'agent';
         var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
-        var lines = ['Model: ' + model, 'Project: ' + (activeProjectId || '—'), ''];
+        var lines = ['Mode: ' + mode, 'Model: ' + model, 'Project: ' + (activeProjectId || '—'), ''];
         msgs.forEach(function (m) {
             lines.push((m.role === 'user' ? 'User' : 'Assistant') + ':');
             lines.push(m.content);
@@ -652,8 +655,14 @@
         return lines.join('\n');
     }
 
+    function getAgentMode() {
+        var modeSelect = document.getElementById('agent-mode-select');
+        var mode = modeSelect ? modeSelect.value : (localStorage.getItem(STORAGE_AGENT_MODE) || 'agent');
+        return mode === 'ask' ? 'ask' : 'agent';
+    }
+
     function shouldUseTools(text) {
-        return !!(text && text.trim());
+        return !!(text && text.trim()) && getAgentMode() === 'agent';
     }
 
     function doSend() {
@@ -686,6 +695,7 @@
                 model: model,
                 temperature: 0.7,
                 max_tokens: 1024,
+                agent_mode: getAgentMode(),
                 use_tools: useTools,
                 available_tools: useTools ? ['build_schedule', 'render_proposal_html', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
             };
@@ -1084,6 +1094,33 @@
         }
     });
 
+    function positionDropdownAbove(dropdown, trigger) {
+        if (!dropdown || !trigger) return;
+        var r = trigger.getBoundingClientRect();
+        dropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - dropdown.offsetWidth - 8)) + 'px';
+        dropdown.style.top = '0px';
+        dropdown.style.visibility = 'hidden';
+        dropdown.hidden = false;
+        var dh = dropdown.offsetHeight;
+        dropdown.hidden = true;
+        dropdown.style.visibility = '';
+        var topPos = r.top - dh - 6;
+        if (topPos < 8) topPos = r.bottom + 6;
+        dropdown.style.top = topPos + 'px';
+        dropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - dropdown.offsetWidth - 8)) + 'px';
+    }
+
+    function closeAllComposerDropdowns() {
+        var el = document.getElementById('model-dropdown');
+        if (el) el.hidden = true;
+        el = document.getElementById('model-select-trigger');
+        if (el) el.setAttribute('aria-expanded', 'false');
+        el = document.getElementById('agent-mode-dropdown');
+        if (el) el.hidden = true;
+        el = document.getElementById('agent-mode-trigger');
+        if (el) el.setAttribute('aria-expanded', 'false');
+    }
+
     var modelSelect = document.getElementById('model-select');
     var modelTrigger = document.getElementById('model-select-trigger');
     var modelDropdown = document.getElementById('model-dropdown');
@@ -1102,8 +1139,12 @@
         modelTrigger.addEventListener('click', function (e) {
             e.stopPropagation();
             var open = !modelDropdown.hidden;
-            modelDropdown.hidden = open;
-            modelTrigger.setAttribute('aria-expanded', String(!open));
+            closeAllComposerDropdowns();
+            if (!open) {
+                positionDropdownAbove(modelDropdown, modelTrigger);
+                modelDropdown.hidden = false;
+                modelTrigger.setAttribute('aria-expanded', 'true');
+            }
         });
         modelDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
         modelDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
@@ -1115,14 +1156,48 @@
                 modelTrigger.setAttribute('aria-expanded', 'false');
             });
         });
-        document.addEventListener('click', function () {
-            modelDropdown.hidden = true;
-            modelTrigger.setAttribute('aria-expanded', 'false');
-        });
+        document.addEventListener('click', function () { closeAllComposerDropdowns(); });
     } else if (modelSelect) {
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved) modelSelect.value = saved;
         modelSelect.addEventListener('change', function () { localStorage.setItem(STORAGE_MODEL, modelSelect.value); });
+    }
+
+    var agentModeSelect = document.getElementById('agent-mode-select');
+    var agentModeTrigger = document.getElementById('agent-mode-trigger');
+    var agentModeDropdown = document.getElementById('agent-mode-dropdown');
+    var agentModeLabel = document.getElementById('agent-mode-label');
+    if (agentModeSelect && agentModeTrigger && agentModeDropdown && agentModeLabel) {
+        var savedMode = localStorage.getItem(STORAGE_AGENT_MODE) || 'agent';
+        if (savedMode === 'ask' || savedMode === 'agent') agentModeSelect.value = savedMode;
+        function updateAgentModeLabel() {
+            agentModeLabel.textContent = agentModeSelect.value === 'ask' ? 'Ask' : 'Agent';
+            agentModeDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
+                btn.setAttribute('aria-selected', btn.getAttribute('data-value') === agentModeSelect.value ? 'true' : 'false');
+            });
+        }
+        updateAgentModeLabel();
+        agentModeTrigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var open = !agentModeDropdown.hidden;
+            closeAllComposerDropdowns();
+            if (!open) {
+                positionDropdownAbove(agentModeDropdown, agentModeTrigger);
+                agentModeDropdown.hidden = false;
+                agentModeTrigger.setAttribute('aria-expanded', 'true');
+            }
+        });
+        agentModeDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+        agentModeDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                agentModeSelect.value = btn.getAttribute('data-value');
+                localStorage.setItem(STORAGE_AGENT_MODE, agentModeSelect.value);
+                updateAgentModeLabel();
+                agentModeDropdown.hidden = true;
+                agentModeTrigger.setAttribute('aria-expanded', 'false');
+            });
+        });
+        document.addEventListener('click', function () { closeAllComposerDropdowns(); });
     }
 
     var btnRefreshChat = document.getElementById('btn-refresh-chat');
