@@ -95,6 +95,15 @@ body.has-app .app-layout {
     justify-content: space-between;
 }
 
+/* Match chat header brand position to landing nav */
+body.has-app .header {
+    padding: 8px 0;
+}
+
+body.has-app .header-inner {
+    min-height: 44px;
+}
+
 /* ─── Brand dropdown (inner pages) ───────────────────────── */
 .brand-menu {
     position: relative;

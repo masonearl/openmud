@@ -49,10 +49,12 @@
     <div class="res-layout">
         <aside class="res-sidebar">
             <div class="res-sidebar-inner">
-                <p class="res-sidebar-label">By Region</p>
-                <a href="#utah" class="res-nav-link active" data-section="utah">Utah Contractors</a>
+                <p class="res-sidebar-label">Coverage</p>
+                <a href="#north-america" class="res-nav-link active" data-section="north-america">North America Leaders</a>
+                <a href="#united-states" class="res-nav-link" data-section="united-states">United States Leaders</a>
+                <a href="#state-leaders" class="res-nav-link" data-section="state-leaders">State Leaders (launch set)</a>
+                <a href="#utah" class="res-nav-link" data-section="utah">Utah Contractors</a>
                 <a href="#mountain-west" class="res-nav-link" data-section="mountain-west">Mountain West</a>
-                <a href="#national" class="res-nav-link" data-section="national">ENR Top 25 National</a>
 
                 <p class="res-sidebar-label">By Type</p>
                 <a href="#esop" class="res-nav-link" data-section="esop">ESOP / Employee-Owned</a>
@@ -68,10 +70,37 @@
 
         <main class="res-main">
 
+            <!-- North America -->
+            <section class="res-section active" id="section-north-america">
+                <h1 class="res-title">Largest Construction Companies in North America</h1>
+                <p class="res-desc">Table-first directory for major contractors operating in the United States and Canada. Cells link to company sites, SEC pages, investor reports, or ENR references so you can trace where each data point came from.</p>
+                <input class="company-search" data-grid="na-grid" type="search" placeholder="Search company, state, focus, ownership, revenue">
+                <div class="company-grid" id="na-grid"></div>
+            </section>
+
+            <!-- United States -->
+            <section class="res-section" id="section-united-states">
+                <h1 class="res-title">Largest U.S. Construction Companies</h1>
+                <p class="res-desc">Top U.S. contractors by scale across heavy civil, utility infrastructure, and large general contracting. This is the fastest list for names like Quanta, Primoris, Kiewit, Turner, and Fluor.</p>
+                <input class="company-search" data-grid="us-grid" type="search" placeholder="Search U.S. companies">
+                <div class="company-grid" id="us-grid"></div>
+            </section>
+
+            <!-- State leaders -->
+            <section class="res-section" id="section-state-leaders">
+                <h1 class="res-title">Largest Contractors by State (Launch Set)</h1>
+                <p class="res-desc">State-level table built for quick discovery. This first pass covers priority states and will expand to all 50 with tighter source validation in the next dataset sweep.</p>
+                <input class="company-search" data-grid="state-grid" type="search" placeholder="Search by state, company, or specialty">
+                <div class="company-grid" id="state-grid"></div>
+                <div class="res-callout">
+                    <strong>Next data pass:</strong> expanding this table to all 50 states with verifiable source links for each entry.
+                </div>
+            </section>
+
             <!-- Utah -->
-            <section class="res-section active" id="section-utah">
+            <section class="res-section" id="section-utah">
                 <h1 class="res-title">Utah Construction Companies</h1>
-                <p class="res-desc">Major construction contractors based in or operating heavily in Utah. Data sourced from ENR, company websites, and public filings. Revenue figures are approximate and may be dated — treat as order-of-magnitude.</p>
+                <p class="res-desc">Utah-focused list includes Jacobsen, Big-D, Ralph L. Wadsworth, Wadsworth Brothers, and other major contractors active in the state. Use filters and search to narrow by heavy civil, underground, or GC.</p>
 
                 <div class="company-filter-row">
                     <button class="co-filter active" onclick="filterCompanies('utah', 'all', this)">All</button>
@@ -80,6 +109,7 @@
                     <button class="co-filter" onclick="filterCompanies('utah', 'gc', this)">General Contractor</button>
                 </div>
 
+                <input class="company-search" data-grid="utah-grid" type="search" placeholder="Search Utah companies">
                 <div class="company-grid" id="utah-grid"></div>
 
                 <div class="res-callout" style="margin-top:32px">
@@ -90,27 +120,16 @@
             <!-- Mountain West -->
             <section class="res-section" id="section-mountain-west">
                 <h1 class="res-title">Mountain West Contractors</h1>
-                <p class="res-desc">Major contractors operating across Utah, Colorado, Nevada, Arizona, Idaho, and the broader Mountain West region.</p>
+                <p class="res-desc">Major contractors operating across Utah, Colorado, Nevada, Arizona, Idaho, and nearby states. Includes heavy civil and underground leaders with linked source data.</p>
+                <input class="company-search" data-grid="mw-grid" type="search" placeholder="Search Mountain West companies">
                 <div class="company-grid" id="mw-grid"></div>
-            </section>
-
-            <!-- National ENR -->
-            <section class="res-section" id="section-national">
-                <h1 class="res-title">ENR Top 25 National Contractors</h1>
-                <p class="res-desc">The 25 largest U.S. contractors by revenue per ENR 2025 Top 400 list. Combined, the Top 400 reported $600 billion in 2024 revenue. Source: <a href="https://www.enr.com/toplists/2025-Top-400-Contractors-1-preview" target="_blank" rel="noopener" class="link">ENR 2025 Top 400 ↗</a></p>
-
-                <div class="res-callout">
-                    <strong>2024 market growth:</strong> Sewer/waste +23.7% · Power +18.9% · Transportation +11.4% · Telecom +59.7%. Total Top 400 revenue up 7.9% YoY. Source: ENR 2025.
-                </div>
-
-                <div class="company-grid" id="national-grid"></div>
             </section>
 
             <!-- ESOP -->
             <section class="res-section" id="section-esop">
                 <h1 class="res-title">ESOP & Employee-Owned Contractors</h1>
                 <p class="res-desc">Employee Stock Ownership Plan (ESOP) companies are 100% or majority employee-owned. In heavy civil, ESOP companies often have stronger culture, lower turnover, and competitive compensation. See <a href="#what-is-esop" class="link" onclick="showSection('what-is-esop')">What is an ESOP?</a> for more.</p>
-
+                <input class="company-search" data-grid="esop-grid" type="search" placeholder="Search ESOP and employee-owned companies">
                 <div class="company-grid" id="esop-grid"></div>
 
                 <div class="res-callout" style="margin-top:32px">
@@ -122,7 +141,7 @@
             <section class="res-section" id="section-public">
                 <h1 class="res-title">Publicly Traded Construction Companies</h1>
                 <p class="res-desc">Construction companies with publicly traded stock. Financial data is publicly available via SEC filings. These are the companies you can invest in, and whose financials give a window into industry health.</p>
-
+                <input class="company-search" data-grid="public-grid" type="search" placeholder="Search public companies and tickers">
                 <div class="company-grid" id="public-grid"></div>
 
                 <h2 class="res-h2" style="margin-top:40px">Where to find their financials</h2>
@@ -137,6 +156,7 @@
             <section class="res-section" id="section-underground">
                 <h1 class="res-title">Underground Utility Specialty Contractors</h1>
                 <p class="res-desc">Companies that specialize in or are major players in underground utility construction — waterline, sewer, storm drain, gas, and electrical distribution.</p>
+                <input class="company-search" data-grid="underground-grid" type="search" placeholder="Search underground specialty companies">
                 <div class="company-grid" id="underground-grid"></div>
             </section>
 

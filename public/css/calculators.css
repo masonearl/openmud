@@ -8,20 +8,24 @@
 
 /* ─── Page layout ───────────────────────────────────────────── */
 .calc-layout {
-    display: flex;
+    display: grid;
+    grid-template-columns: 188px minmax(0, 1fr);
     flex: 1;
     min-height: calc(100vh - 52px - 52px);
+    align-items: start;
+    width: 100%;
 }
 
 /* ─── Sidebar ───────────────────────────────────────────────── */
 .calc-sidebar {
-    flex: 0 0 188px;
+    grid-column: 1;
     background: var(--bg-alt);
     border-right: 1px solid var(--border);
     overflow-y: auto;
     position: sticky;
     top: 0;
     height: calc(100vh - 52px);
+    z-index: 2;
 }
 
 .calc-sidebar-inner {
@@ -66,16 +70,22 @@
 
 /* ─── Main area ─────────────────────────────────────────────── */
 .calc-main {
-    flex: 1;
+    grid-column: 2;
+    width: 100%;
+    max-width: none;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0 0 80px;
     min-width: 0;
+    position: relative;
+    z-index: 1;
 }
 
 /* ─── Panel ─────────────────────────────────────────────────── */
 .calc-panel {
     display: none;
     padding: 28px 32px;
+    width: 100%;
     max-width: 960px;
 }
 
@@ -589,8 +599,10 @@
 }
 
 @media (max-width: 768px) {
+    .calc-layout { grid-template-columns: 1fr; }
     .calc-sidebar { display: none; }
     .calc-mobile-nav { display: block; }
+    .calc-main { grid-column: 1; }
     .calc-panel { padding: 14px 16px; }
     .calc-title { font-size: 1.125rem; }
 }
