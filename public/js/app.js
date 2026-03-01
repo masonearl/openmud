@@ -6,7 +6,6 @@
     var STORAGE_ACTIVE = 'rockmud_activeProject';
     var STORAGE_MESSAGES = 'rockmud_messages';
     var STORAGE_MODEL = 'rockmud_model';
-    var STORAGE_AGENT_MODE = 'rockmud_agentMode';
     var STORAGE_SIDEBAR_WIDTH = 'rockmud_sidebarWidth';
 
     var WELCOME_MSG = "Hi, I'm the openmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
@@ -71,10 +70,10 @@
 
     var btnTools = document.getElementById('btn-tools');
     var toolsDropdown = document.getElementById('tools-dropdown');
-    var chatPanel = document.querySelector('.chat-panel');
+    var chatToolPanel = document.getElementById('chat-tool-panel');
     var toolPanelTitle = document.getElementById('tool-panel-title');
+    var toolPanelSubtitle = document.getElementById('tool-panel-subtitle');
     var btnCloseTool = document.getElementById('btn-close-tool');
-    var sidebarToolButtons = document.querySelectorAll('[data-sidebar-tool]');
 
     function addMessage(role, content, projectId) {
         projectId = projectId || activeProjectId;
@@ -106,30 +105,13 @@
         return s;
     }
 
-    function normalizePdfForExport(rootEl) {
-        if (!rootEl) return;
-        rootEl.style.background = '#ffffff';
-        rootEl.style.color = '#111111';
-        rootEl.querySelectorAll('h1,h2,h3,h4,p,span,div,td,th,li').forEach(function (el) {
-            el.style.color = '#111111';
-        });
-        rootEl.querySelectorAll('thead tr').forEach(function (el) {
-            if (!el.style.background) el.style.background = '#f0f0f0';
-        });
-        rootEl.querySelectorAll('th,td').forEach(function (el) {
-            el.style.borderColor = '#dddddd';
-        });
-    }
-
     function renderMessageContent(content, wrap) {
         var text = (content || '').trim();
         var scheduleMatch = text.match(/\[OPENMUD_SCHEDULE\]([\s\S]*?)\[\/OPENMUD_SCHEDULE\]/);
         var proposalMatch = text.match(/\[OPENMUD_PROPOSAL\]([\s\S]*?)\[\/OPENMUD_PROPOSAL\]/);
-        var workflowMatch = text.match(/\[OPENMUD_WORKFLOW\]([\s\S]*?)\[\/OPENMUD_WORKFLOW\]/);
         var displayText = text;
         var scheduleData = null;
         var proposalData = null;
-        var workflowData = null;
         if (scheduleMatch) {
             displayText = displayText.replace(/\[OPENMUD_SCHEDULE\][\s\S]*?\[\/OPENMUD_SCHEDULE\]/, '').trim();
             try {
@@ -142,18 +124,10 @@
                 proposalData = JSON.parse(proposalMatch[1].trim());
             } catch (e) { /* ignore */ }
         }
-        if (workflowMatch) {
-            displayText = displayText.replace(/\[OPENMUD_WORKFLOW\][\s\S]*?\[\/OPENMUD_WORKFLOW\]/, '').trim();
-            try {
-                workflowData = JSON.parse(workflowMatch[1].trim());
-            } catch (e) { /* ignore */ }
-        }
         displayText = sanitizeResponse(displayText);
-        if (displayText) {
-            var p = document.createElement('p');
-            p.textContent = displayText;
-            wrap.appendChild(p);
-        }
+        var p = document.createElement('p');
+        p.textContent = displayText;
+        wrap.appendChild(p);
         if (scheduleData && scheduleData.project && scheduleData.phases && Array.isArray(scheduleData.phases)) {
             var card = document.createElement('div');
             card.className = 'msg-schedule-card';
@@ -220,7 +194,6 @@
                     el.style.background = '#fff';
                     el.style.color = '#111';
                     document.body.appendChild(el);
-                    normalizePdfForExport(el.firstElementChild);
                     if (typeof html2pdf !== 'undefined') {
                         html2pdf().set({ filename: 'schedule-' + (data.project_name || 'project').replace(/\s+/g, '-').slice(0, 20) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
                             document.body.removeChild(el);
@@ -286,7 +259,6 @@
                         el.style.background = '#fff';
                         el.style.color = '#111';
                         document.body.appendChild(el);
-                        normalizePdfForExport(el.firstElementChild);
                         if (typeof html2pdf !== 'undefined') {
                             html2pdf().set({ filename: 'proposal-' + (data.client || 'project').replace(/\s+/g, '-').slice(0, 30) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
                                 document.body.removeChild(el);
@@ -308,64 +280,6 @@
             }).catch(function () {
                 propCard.innerHTML = '<div class="msg-schedule-error">Could not load proposal.</div>';
             });
-        }
-        if (workflowData && workflowData.workflow === 'project_intake') {
-            var wfCard = document.createElement('div');
-            wfCard.className = 'msg-workflow-card';
-
-            var wfTitle = document.createElement('h4');
-            wfTitle.className = 'msg-workflow-title';
-            wfTitle.textContent = 'Workflow intake';
-            wfCard.appendChild(wfTitle);
-
-            var sourceText = workflowData.source || 'unknown';
-            var projectText = workflowData.project || 'Current project';
-            var wfMeta = document.createElement('p');
-            wfMeta.className = 'msg-workflow-meta';
-            wfMeta.textContent = 'Project: ' + projectText + ' | Source: ' + sourceText;
-            wfCard.appendChild(wfMeta);
-
-            if (Array.isArray(workflowData.steps) && workflowData.steps.length > 0) {
-                var wfSteps = document.createElement('ol');
-                wfSteps.className = 'msg-workflow-steps';
-                workflowData.steps.forEach(function (step) {
-                    var li = document.createElement('li');
-                    li.textContent = step;
-                    wfSteps.appendChild(li);
-                });
-                wfCard.appendChild(wfSteps);
-            }
-
-            var wfActions = document.createElement('div');
-            wfActions.className = 'msg-workflow-actions';
-            var uploadBtn = document.createElement('button');
-            uploadBtn.type = 'button';
-            uploadBtn.className = 'btn-secondary btn-sm';
-            uploadBtn.textContent = 'Upload document';
-            uploadBtn.addEventListener('click', function () {
-                var uploader = document.getElementById('chat-doc-upload');
-                if (uploader) uploader.click();
-            });
-            wfActions.appendChild(uploadBtn);
-
-            var estimateBtn = document.createElement('button');
-            estimateBtn.type = 'button';
-            estimateBtn.className = 'btn-secondary btn-sm';
-            estimateBtn.textContent = 'Open estimate tool';
-            estimateBtn.addEventListener('click', function () {
-                openTool('estimate');
-            });
-            wfActions.appendChild(estimateBtn);
-            wfCard.appendChild(wfActions);
-
-            if (workflowData.connectors_available === false) {
-                var wfNote = document.createElement('p');
-                wfNote.className = 'msg-workflow-note';
-                wfNote.textContent = 'Direct inbox/cloud connectors are not live yet. Upload the file here or paste the email text and I will process it for this project.';
-                wfCard.appendChild(wfNote);
-            }
-
-            wrap.appendChild(wfCard);
         }
     }
 
@@ -660,10 +574,8 @@
         var msgs = activeProjectId ? getMessages(activeProjectId) : [];
         if (msgs.length === 0) return '';
         var modelSelect = document.getElementById('model-select');
-        var modeSelect = document.getElementById('agent-mode-select');
-        var mode = modeSelect ? modeSelect.value : 'agent';
         var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
-        var lines = ['Mode: ' + mode, 'Model: ' + model, 'Project: ' + (activeProjectId || '—'), ''];
+        var lines = ['Model: ' + model, 'Project: ' + (activeProjectId || '—'), ''];
         msgs.forEach(function (m) {
             lines.push((m.role === 'user' ? 'User' : 'Assistant') + ':');
             lines.push(m.content);
@@ -672,14 +584,9 @@
         return lines.join('\n');
     }
 
-    function getAgentMode() {
-        var modeSelect = document.getElementById('agent-mode-select');
-        var mode = modeSelect ? modeSelect.value : (localStorage.getItem(STORAGE_AGENT_MODE) || 'agent');
-        return mode === 'ask' ? 'ask' : 'agent';
-    }
-
+    var TOOL_TRIGGERS = /generate|build|create|make|draft|estimate|bid|proposal|schedule/i;
     function shouldUseTools(text) {
-        return !!(text && text.trim()) && getAgentMode() === 'agent';
+        return TOOL_TRIGGERS.test(text);
     }
 
     function doSend() {
@@ -712,9 +619,8 @@
                 model: model,
                 temperature: 0.7,
                 max_tokens: 1024,
-                agent_mode: getAgentMode(),
                 use_tools: useTools,
-                available_tools: useTools ? ['build_schedule', 'render_proposal_html', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
+                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
             };
             if (useTools && lastEstimatePayload && lastEstimateResult) {
                 payload.estimate_context = {
@@ -778,7 +684,11 @@
     document.querySelectorAll('.quick-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var prompt = btn.getAttribute('data-prompt');
-            if (prompt) { input.value = prompt; input.focus(); }
+            if (prompt) {
+                input.value = prompt;
+                autoGrowTextarea();
+                input.focus();
+            }
         });
     });
 
@@ -819,19 +729,9 @@
         if (name) createProject(name);
     });
 
-    function setToolParam(tool) {
-        if (!window.history || !window.history.replaceState) return;
-        var url = new URL(window.location.href);
-        if (tool) url.searchParams.set('tool', tool);
-        else url.searchParams.delete('tool');
-        window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + (url.hash ? url.hash : ''));
-    }
-
-    function updateToolSelectionUI() {
-        sidebarToolButtons.forEach(function (btn) {
-            var isActive = btn.getAttribute('data-sidebar-tool') === activeTool;
-            btn.classList.toggle('active', isActive);
-            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    function setActiveToolShortcut(tool) {
+        document.querySelectorAll('.quick-tool-btn').forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-open-tool') === tool);
         });
     }
 
@@ -843,8 +743,17 @@
         var wrap = document.getElementById('tool-form-' + tool);
         if (wrap) wrap.classList.add('active');
         var titles = { estimate: 'Quick estimate', proposal: 'Proposal', schedule: 'Build schedule' };
+        var subtitles = {
+            estimate: 'Set project assumptions and run a rough order-of-magnitude estimate.',
+            proposal: 'Generate a clean proposal PDF from scope, cost, and duration.',
+            schedule: 'Build a phase schedule and export a field-ready PDF.'
+        };
         toolPanelTitle.textContent = titles[tool] || 'Tool';
-        if (chatPanel) chatPanel.classList.add('tools-open');
+        if (toolPanelSubtitle) {
+            toolPanelSubtitle.textContent = subtitles[tool] || 'Use a workflow form, then refine in chat.';
+        }
+        chatToolPanel.hidden = false;
+        setActiveToolShortcut(tool);
         if (tool === 'estimate') {
             estimateResult.hidden = true;
             estimateFeedback.hidden = true;
@@ -853,16 +762,17 @@
         if (tool === 'schedule') {
             document.getElementById('sched-start').value = new Date().toISOString().slice(0, 10);
         }
-        updateToolSelectionUI();
-        setToolParam(tool);
+        if (wrap) {
+            var firstField = wrap.querySelector('input, select, textarea');
+            if (firstField) firstField.focus();
+        }
     }
 
     function closeTool() {
         activeTool = null;
-        if (chatPanel) chatPanel.classList.remove('tools-open');
+        chatToolPanel.hidden = true;
         document.querySelectorAll('.tool-form-wrap').forEach(function (el) { el.classList.remove('active'); });
-        updateToolSelectionUI();
-        setToolParam(null);
+        setActiveToolShortcut(null);
     }
 
     btnTools.addEventListener('click', function (e) {
@@ -875,20 +785,15 @@
     document.querySelectorAll('.dropdown-item').forEach(function (item) {
         item.addEventListener('click', function () {
             var tool = item.getAttribute('data-tool');
-            if (!tool) return;
-            if (tool === activeTool && chatPanel && chatPanel.classList.contains('tools-open')) {
-                closeTool();
-                return;
-            }
-            openTool(tool);
+            if (tool) openTool(tool);
         });
     });
 
-    sidebarToolButtons.forEach(function (item) {
-        item.addEventListener('click', function () {
-            var tool = item.getAttribute('data-sidebar-tool');
+    document.querySelectorAll('.quick-tool-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var tool = btn.getAttribute('data-open-tool');
             if (!tool) return;
-            if (tool === activeTool && chatPanel && chatPanel.classList.contains('tools-open')) {
+            if (activeTool === tool && chatToolPanel.hidden === false) {
                 closeTool();
                 return;
             }
@@ -1034,16 +939,16 @@
         var duration = document.getElementById('prop-duration').value;
         var assumptions = document.getElementById('prop-assumptions').value.trim();
         var exclusions = document.getElementById('prop-exclusions').value.trim();
-        var html = '<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;background:#fff;color:#111;">' +
-            '<h1 style="margin:0 0 8px;color:#111;">Proposal</h1>' +
+        var html = '<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;">' +
+            '<h1 style="margin:0 0 8px;">Proposal</h1>' +
             '<p style="color:#666;margin:0 0 24px;">' + client + '</p>' +
-            '<h2 style="font-size:1.1rem;margin:24px 0 8px;color:#111;">Scope</h2>' +
-            '<p style="margin:0;line-height:1.6;color:#111;">' + (scope || '—').replace(/\n/g, '<br>') + '</p>' +
-            '<h2 style="font-size:1.1rem;margin:24px 0 8px;color:#111;">Pricing</h2>' +
-            '<p style="margin:0;font-size:1.25rem;font-weight:700;color:#111;">' + (total ? '$' + parseInt(total, 10).toLocaleString() : '—') + '</p>' +
-            (duration ? '<p style="margin:8px 0 0;color:#111;">Duration: ' + duration + ' days</p>' : '') +
-            (assumptions ? '<h2 style="font-size:1.1rem;margin:24px 0 8px;color:#111;">Assumptions</h2><p style="margin:0;line-height:1.6;color:#111;">' + assumptions.replace(/\n/g, '<br>') + '</p>' : '') +
-            (exclusions ? '<h2 style="font-size:1.1rem;margin:24px 0 8px;color:#111;">Exclusions</h2><p style="margin:0;line-height:1.6;color:#111;">' + exclusions.replace(/\n/g, '<br>') + '</p>' : '') +
+            '<h2 style="font-size:1.1rem;margin:24px 0 8px;">Scope</h2>' +
+            '<p style="margin:0;line-height:1.6;">' + (scope || '—').replace(/\n/g, '<br>') + '</p>' +
+            '<h2 style="font-size:1.1rem;margin:24px 0 8px;">Pricing</h2>' +
+            '<p style="margin:0;font-size:1.25rem;font-weight:700;">' + (total ? '$' + parseInt(total, 10).toLocaleString() : '—') + '</p>' +
+            (duration ? '<p style="margin:8px 0 0;">Duration: ' + duration + ' days</p>' : '') +
+            (assumptions ? '<h2 style="font-size:1.1rem;margin:24px 0 8px;">Assumptions</h2><p style="margin:0;line-height:1.6;">' + assumptions.replace(/\n/g, '<br>') + '</p>' : '') +
+            (exclusions ? '<h2 style="font-size:1.1rem;margin:24px 0 8px;">Exclusions</h2><p style="margin:0;line-height:1.6;">' + exclusions.replace(/\n/g, '<br>') + '</p>' : '') +
             '<p style="margin:32px 0 0;font-size:0.875rem;color:#666;">Generated by openmud · openmud.ai</p></div>';
         var el = document.createElement('div');
         el.innerHTML = html;
@@ -1052,7 +957,6 @@
         el.style.background = '#fff';
         el.style.color = '#111';
         document.body.appendChild(el);
-        normalizePdfForExport(el.firstElementChild);
         if (typeof html2pdf !== 'undefined') {
             html2pdf().set({ filename: 'proposal-' + (client || 'project').replace(/\s+/g, '-').slice(0, 30) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
                 document.body.removeChild(el);
@@ -1083,13 +987,13 @@
             rows.push({ phase: phases[i], start: d.toLocaleDateString(), end: end.toLocaleDateString(), days: phaseDays });
             d.setDate(d.getDate() + phaseDays);
         }
-        var table = '<table style="width:100%;border-collapse:collapse;color:#111;"><tr style="background:#f0f0f0;"><th style="padding:10px;text-align:left;color:#111;">Phase</th><th style="color:#111;">Start</th><th style="color:#111;">End</th><th style="color:#111;">Days</th></tr>';
+        var table = '<table style="width:100%;border-collapse:collapse;"><tr style="background:#f0f0f0;"><th style="padding:10px;text-align:left;">Phase</th><th>Start</th><th>End</th><th>Days</th></tr>';
         rows.forEach(function (r) {
-            table += '<tr><td style="padding:10px;border-bottom:1px solid #ddd;color:#111;">' + r.phase + '</td><td style="padding:10px;border-bottom:1px solid #ddd;color:#111;">' + r.start + '</td><td style="padding:10px;border-bottom:1px solid #ddd;color:#111;">' + r.end + '</td><td style="padding:10px;border-bottom:1px solid #ddd;color:#111;">' + r.days + '</td></tr>';
+            table += '<tr><td style="padding:10px;border-bottom:1px solid #ddd;">' + r.phase + '</td><td style="padding:10px;border-bottom:1px solid #ddd;">' + r.start + '</td><td style="padding:10px;border-bottom:1px solid #ddd;">' + r.end + '</td><td style="padding:10px;border-bottom:1px solid #ddd;">' + r.days + '</td></tr>';
         });
         table += '</table>';
-        var html = '<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;background:#fff;color:#111;">' +
-            '<h1 style="margin:0 0 8px;color:#111;">Schedule</h1>' +
+        var html = '<div class="pdf-doc" style="font-family:Merriweather,Georgia,serif;padding:40px;max-width:700px;margin:0 auto;">' +
+            '<h1 style="margin:0 0 8px;">Schedule</h1>' +
             '<p style="color:#666;margin:0 0 24px;">' + project + ' · ' + duration + ' days</p>' +
             table +
             '<p style="margin:24px 0 0;font-size:0.875rem;color:#666;">Generated by openmud · openmud.ai</p></div>';
@@ -1100,7 +1004,6 @@
         el.style.background = '#fff';
         el.style.color = '#111';
         document.body.appendChild(el);
-        normalizePdfForExport(el.firstElementChild);
         if (typeof html2pdf !== 'undefined') {
             html2pdf().set({ filename: 'schedule-' + project.replace(/\s+/g, '-').slice(0, 20) + '.pdf', margin: 15 }).from(el.firstElementChild).save().then(function () {
                 document.body.removeChild(el);
@@ -1112,33 +1015,6 @@
             document.body.removeChild(el);
         }
     });
-
-    function positionDropdownAbove(dropdown, trigger) {
-        if (!dropdown || !trigger) return;
-        var r = trigger.getBoundingClientRect();
-        dropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - dropdown.offsetWidth - 8)) + 'px';
-        dropdown.style.top = '0px';
-        dropdown.style.visibility = 'hidden';
-        dropdown.hidden = false;
-        var dh = dropdown.offsetHeight;
-        dropdown.hidden = true;
-        dropdown.style.visibility = '';
-        var topPos = r.top - dh - 6;
-        if (topPos < 8) topPos = r.bottom + 6;
-        dropdown.style.top = topPos + 'px';
-        dropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - dropdown.offsetWidth - 8)) + 'px';
-    }
-
-    function closeAllComposerDropdowns() {
-        var el = document.getElementById('model-dropdown');
-        if (el) el.hidden = true;
-        el = document.getElementById('model-select-trigger');
-        if (el) el.setAttribute('aria-expanded', 'false');
-        el = document.getElementById('agent-mode-dropdown');
-        if (el) el.hidden = true;
-        el = document.getElementById('agent-mode-trigger');
-        if (el) el.setAttribute('aria-expanded', 'false');
-    }
 
     var modelSelect = document.getElementById('model-select');
     var modelTrigger = document.getElementById('model-select-trigger');
@@ -1158,12 +1034,8 @@
         modelTrigger.addEventListener('click', function (e) {
             e.stopPropagation();
             var open = !modelDropdown.hidden;
-            closeAllComposerDropdowns();
-            if (!open) {
-                positionDropdownAbove(modelDropdown, modelTrigger);
-                modelDropdown.hidden = false;
-                modelTrigger.setAttribute('aria-expanded', 'true');
-            }
+            modelDropdown.hidden = open;
+            modelTrigger.setAttribute('aria-expanded', String(!open));
         });
         modelDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
         modelDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
@@ -1175,48 +1047,14 @@
                 modelTrigger.setAttribute('aria-expanded', 'false');
             });
         });
-        document.addEventListener('click', function () { closeAllComposerDropdowns(); });
+        document.addEventListener('click', function () {
+            modelDropdown.hidden = true;
+            modelTrigger.setAttribute('aria-expanded', 'false');
+        });
     } else if (modelSelect) {
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved) modelSelect.value = saved;
         modelSelect.addEventListener('change', function () { localStorage.setItem(STORAGE_MODEL, modelSelect.value); });
-    }
-
-    var agentModeSelect = document.getElementById('agent-mode-select');
-    var agentModeTrigger = document.getElementById('agent-mode-trigger');
-    var agentModeDropdown = document.getElementById('agent-mode-dropdown');
-    var agentModeLabel = document.getElementById('agent-mode-label');
-    if (agentModeSelect && agentModeTrigger && agentModeDropdown && agentModeLabel) {
-        var savedMode = localStorage.getItem(STORAGE_AGENT_MODE) || 'agent';
-        if (savedMode === 'ask' || savedMode === 'agent') agentModeSelect.value = savedMode;
-        function updateAgentModeLabel() {
-            agentModeLabel.textContent = agentModeSelect.value === 'ask' ? 'Ask' : 'Agent';
-            agentModeDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
-                btn.setAttribute('aria-selected', btn.getAttribute('data-value') === agentModeSelect.value ? 'true' : 'false');
-            });
-        }
-        updateAgentModeLabel();
-        agentModeTrigger.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var open = !agentModeDropdown.hidden;
-            closeAllComposerDropdowns();
-            if (!open) {
-                positionDropdownAbove(agentModeDropdown, agentModeTrigger);
-                agentModeDropdown.hidden = false;
-                agentModeTrigger.setAttribute('aria-expanded', 'true');
-            }
-        });
-        agentModeDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
-        agentModeDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                agentModeSelect.value = btn.getAttribute('data-value');
-                localStorage.setItem(STORAGE_AGENT_MODE, agentModeSelect.value);
-                updateAgentModeLabel();
-                agentModeDropdown.hidden = true;
-                agentModeTrigger.setAttribute('aria-expanded', 'false');
-            });
-        });
-        document.addEventListener('click', function () { closeAllComposerDropdowns(); });
     }
 
     var btnRefreshChat = document.getElementById('btn-refresh-chat');
@@ -1247,16 +1085,6 @@
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', updateHeight, { passive: true });
             window.visualViewport.addEventListener('scroll', updateHeight, { passive: true });
-        }
-    })();
-
-    (function initToolRoute() {
-        var url = new URL(window.location.href);
-        var tool = (url.searchParams.get('tool') || '').toLowerCase();
-        if (tool === 'estimate' || tool === 'proposal' || tool === 'schedule') {
-            openTool(tool);
-        } else {
-            updateToolSelectionUI();
         }
     })();
 

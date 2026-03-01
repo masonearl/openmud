@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#15120f">
+    <meta name="theme-color" content="#0d0b09">
     
     
     
@@ -27,23 +27,14 @@
 <body class="has-app">
     <header class="header">
         <div class="header-inner">
-            <details class="brand-menu">
-                <summary class="logo">openmud <span class="brand-caret">▾</span></summary>
-                <div class="brand-menu-panel">
-                    <a href="/" class="brand-menu-link">Homepage</a>
-                    <a href="/about.html" class="brand-menu-link">About</a>
-                    <a href="/chat.html" class="brand-menu-link">AI Chat</a>
-                    <a href="/calculators.html" class="brand-menu-link">Calculators</a>
-                    <a href="/resources.html" class="brand-menu-link">Resources</a>
-                    <a href="/innovators.html" class="brand-menu-link">Innovators</a>
-                    <a href="/companies.html" class="brand-menu-link">Companies</a>
-                    <a href="/documentation.html" class="brand-menu-link">Documentation</a>
-                    <a href="https://discord.gg/qszzMjxD3" target="_blank" rel="noopener" class="brand-menu-link">Discord</a>
-                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="brand-menu-link">GitHub</a>
-                    <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A" class="brand-menu-link">Contact</a>
-                </div>
-            </details>
+            <a href="/" class="logo">openmud</a>
             <nav class="nav">
+                <a href="/about.html">About</a>
+                <a href="/calculators.html">Calculators</a>
+                <a href="/resources.html">Resources</a>
+                <a href="/innovators.html">Innovators</a>
+                <a href="/companies.html">Companies</a>
+                <a href="/documentation.html">Documentation</a>
                 <div class="nav-dropdown">
                     <button type="button" class="btn-text" id="btn-tools" aria-haspopup="true" aria-expanded="false">Tools ▾</button>
                     <div class="dropdown-menu" id="tools-dropdown" hidden>
@@ -52,7 +43,7 @@
                         <button type="button" class="dropdown-item" data-tool="schedule">Schedule</button>
                     </div>
                 </div>
-                <a href="/chat.html" class="nav-cta">Try it free →</a>
+                <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A">Contact</a>
             </nav>
         </div>
     </header>
@@ -64,16 +55,6 @@
                 <button type="button" class="btn-new-project" id="btn-new-project" title="New project">+ New</button>
             </div>
             <ul class="projects-list" id="projects-list"></ul>
-            <div class="tools-section" id="tools-section">
-                <div class="tools-header">
-                    <h3>Tools</h3>
-                </div>
-                <div class="tools-list">
-                    <button type="button" class="tool-item" data-sidebar-tool="estimate">Quick estimate</button>
-                    <button type="button" class="tool-item" data-sidebar-tool="proposal">Proposal</button>
-                    <button type="button" class="tool-item" data-sidebar-tool="schedule">Schedule</button>
-                </div>
-            </div>
             <div class="documents-section" id="documents-section">
                 <div class="documents-header">
                     <h3>Documents</h3>
@@ -90,123 +71,143 @@
         <main class="chat-main">
             <div class="chat-panel">
                 <div class="chat-quick-actions" id="chat-quick-actions">
-                    <span class="quick-label">Try:</span>
-                    <button type="button" class="quick-btn" data-prompt="Estimate 1500 LF of 8 inch sewer in clay, Salt Lake Metro">Quick bid</button>
-                    <button type="button" class="quick-btn" data-prompt="Draft a proposal for 2000 LF of 12 inch waterline in gravel">Proposal</button>
-                    <button type="button" class="quick-btn" data-prompt="How long for 1000 LF of 10 inch storm drain with a 5-person crew?">Schedule</button>
-                    <button type="button" class="btn-copy-chat" id="btn-copy-chat" title="Copy chat for debugging">Copy chat</button>
+                    <div class="quick-actions-row quick-actions-tools-row">
+                        <span class="quick-row-label">Tools</span>
+                        <button type="button" class="quick-tool-btn" data-open-tool="estimate">Quick estimate</button>
+                        <button type="button" class="quick-tool-btn" data-open-tool="proposal">Proposal builder</button>
+                        <button type="button" class="quick-tool-btn" data-open-tool="schedule">Schedule builder</button>
+                    </div>
+                    <div class="quick-actions-row quick-actions-prompts-row">
+                        <span class="quick-row-label">Prompts</span>
+                        <button type="button" class="quick-btn" data-prompt="Estimate 1500 LF of 8 inch sewer in clay, Salt Lake Metro">Estimate 1,500 LF sewer</button>
+                        <button type="button" class="quick-btn" data-prompt="Draft a proposal for 2000 LF of 12 inch waterline in gravel">Draft a proposal</button>
+                        <button type="button" class="quick-btn" data-prompt="How long for 1000 LF of 10 inch storm drain with a 5-person crew?">Crew duration check</button>
+                        <button type="button" class="btn-copy-chat" id="btn-copy-chat" title="Copy chat">Copy chat</button>
+                    </div>
                 </div>
-                <div class="chat-workspace" id="chat-workspace">
-                    <div class="chat-tool-panel" id="chat-tool-panel">
-                        <div class="tool-panel-header">
+                <div class="chat-tool-panel" id="chat-tool-panel" hidden>
+                    <div class="tool-panel-header">
+                        <div class="tool-panel-title-wrap">
                             <h3 id="tool-panel-title">Tool</h3>
-                            <button type="button" class="btn-close-tool" id="btn-close-tool" aria-label="Close">×</button>
+                            <p class="tool-panel-subtitle" id="tool-panel-subtitle">Use a workflow form, then refine in chat.</p>
                         </div>
-                        <div class="tool-panel-content" id="tool-panel-content">
-                            <div id="tool-form-estimate" class="tool-form-wrap">
-                                <form id="form-estimate">
-                                    <div class="form-row"><label>Project type</label><select id="est-project-type" required><option value="waterline">Waterline</option><option value="sewer">Sewer</option><option value="storm_drain">Storm drain</option><option value="gas">Gas</option><option value="electrical">Electrical</option></select></div>
-                                    <div class="form-row"><label>Linear feet</label><input type="number" id="est-linear-feet" value="1500" min="1" required></div>
-                                    <div class="form-row"><label>Pipe diameter (in)</label><input type="number" id="est-pipe-diameter" value="8" min="1" required></div>
-                                    <div class="form-row"><label>Trench depth (ft)</label><input type="number" id="est-trench-depth" value="4.5" min="0" step="0.1" required></div>
-                                    <div class="form-row"><label>Soil type</label><select id="est-soil-type"><option value="sand">Sand</option><option value="clay" selected>Clay</option><option value="gravel">Gravel</option><option value="rock">Rock</option></select></div>
-                                    <div class="form-row"><label>Location</label><select id="est-location"><option value="salt_lake_metro" selected>Salt Lake Metro</option><option value="utah_county">Utah County</option><option value="davis_weber">Davis/Weber</option><option value="rural_utah">Rural Utah</option><option value="mountain_areas">Mountain areas</option></select></div>
-                                    <div class="form-row"><label>Crew size</label><input type="number" id="est-crew-size" value="5" min="1" max="20"></div>
-                                    <div class="form-row"><label>Season</label><select id="est-season"><option value="winter">Winter</option><option value="spring">Spring</option><option value="summer" selected>Summer</option><option value="fall">Fall</option></select></div>
-                                    <div class="form-row"><label>Pipe material</label><select id="est-pipe-material"><option value="PVC C900" selected>PVC C900</option><option value="HDPE">HDPE</option><option value="DIP">DIP</option><option value="PVC SDR 35">PVC SDR 35</option><option value="RCP">RCP</option><option value="PE">PE</option><option value="Steel">Steel</option><option value="PVC Conduit">PVC Conduit</option></select></div>
-                                    <div class="form-row form-row-inline"><label><input type="checkbox" id="est-dewatering"> Dewatering</label></div>
-                                    <div class="form-row form-row-inline"><label><input type="checkbox" id="est-rock"> Rock excavation</label></div>
-                                    <div class="form-row"><label>Fittings</label><input type="number" id="est-fittings" value="0" min="0"></div>
-                                    <div class="form-row"><label>Road crossings</label><input type="number" id="est-road-crossings" value="0" min="0"></div>
-                                    <div class="modal-actions"><button type="submit" class="btn-primary" id="btn-run-estimate">Run estimate</button></div>
-                                </form>
-                                <div id="estimate-result" class="estimate-result" hidden></div>
-                                <div id="estimate-feedback" class="estimate-feedback" hidden><h4>Submit actual cost (optional)</h4><form id="form-feedback"><input type="number" id="input-actual-cost" placeholder="Actual cost ($)" min="0" step="1000"><button type="submit" class="btn-primary">Submit feedback</button></form></div>
-                            </div>
-                            <div id="tool-form-proposal" class="tool-form-wrap">
-                                <form id="form-proposal">
-                                    <div class="form-row"><label>Client / project name</label><input type="text" id="prop-client" placeholder="e.g. City of Salt Lake - Main St" required></div>
-                                    <div class="form-row"><label>Scope summary</label><textarea id="prop-scope" rows="3" placeholder="e.g. 1,500 LF of 8&quot; sewer, clay soil, 4.5 ft depth"></textarea></div>
-                                    <div class="form-row"><label>Total bid ($)</label><input type="number" id="prop-total" placeholder="From estimate or enter manually" min="0" step="1000"></div>
-                                    <div class="form-row"><label>Duration (days)</label><input type="number" id="prop-duration" placeholder="From estimate" min="1"></div>
-                                    <div class="form-row"><label>Assumptions</label><textarea id="prop-assumptions" rows="2" placeholder="e.g. Existing utilities to be located by others"></textarea></div>
-                                    <div class="form-row"><label>Exclusions</label><textarea id="prop-exclusions" rows="2" placeholder="e.g. Traffic control by owner"></textarea></div>
-                                    <div class="modal-actions"><button type="submit" class="btn-primary">Generate & download PDF</button></div>
-                                </form>
-                            </div>
-                            <div id="tool-form-schedule" class="tool-form-wrap">
-                                <form id="form-schedule">
-                                    <div class="form-row"><label>Project name</label><input type="text" id="sched-project" placeholder="Project name"></div>
-                                    <div class="form-row"><label>Start date</label><input type="date" id="sched-start"></div>
-                                    <div class="form-row"><label>Duration (days)</label><input type="number" id="sched-duration" value="14" min="1" required></div>
-                                    <div class="form-row"><label>Phases (comma-separated)</label><input type="text" id="sched-phases" value="Mobilization, Trenching, Pipe install, Backfill, Restoration" placeholder="Mobilization, Trenching, Pipe, Backfill, Restoration"></div>
-                                    <div class="modal-actions"><button type="submit" class="btn-primary">Generate & download PDF</button></div>
-                                </form>
-                                <div id="schedule-preview" class="schedule-preview" hidden></div>
-                            </div>
-                        </div>
+                        <button type="button" class="btn-close-tool" id="btn-close-tool" aria-label="Close">×</button>
                     </div>
-                    <div class="chat-conversation">
-                        <div class="chat-messages" id="chat-messages">
-                            <div class="chat-messages-inner" id="chat-messages-inner"></div>
-                            <div class="msg msg-assistant chat-loading-indicator" id="chat-loading-indicator" hidden aria-live="polite">
-                                <div class="msg-content msg-loading-bubbles">
-                                    <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
-                                </div>
-                            </div>
+                    <div class="tool-panel-content" id="tool-panel-content">
+                        <div id="tool-form-estimate" class="tool-form-wrap">
+                            <form id="form-estimate">
+                                <div class="form-row"><label>Project type</label><select id="est-project-type" required><option value="waterline">Waterline</option><option value="sewer">Sewer</option><option value="storm_drain">Storm drain</option><option value="gas">Gas</option><option value="electrical">Electrical</option></select></div>
+                                <div class="form-row"><label>Linear feet</label><input type="number" id="est-linear-feet" value="1500" min="1" required></div>
+                                <div class="form-row"><label>Pipe diameter (in)</label><input type="number" id="est-pipe-diameter" value="8" min="1" required></div>
+                                <div class="form-row"><label>Trench depth (ft)</label><input type="number" id="est-trench-depth" value="4.5" min="0" step="0.1" required></div>
+                                <div class="form-row"><label>Soil type</label><select id="est-soil-type"><option value="sand">Sand</option><option value="clay" selected>Clay</option><option value="gravel">Gravel</option><option value="rock">Rock</option></select></div>
+                                <div class="form-row"><label>Location</label><select id="est-location"><option value="salt_lake_metro" selected>Salt Lake Metro</option><option value="utah_county">Utah County</option><option value="davis_weber">Davis/Weber</option><option value="rural_utah">Rural Utah</option><option value="mountain_areas">Mountain areas</option></select></div>
+                                <div class="form-row"><label>Crew size</label><input type="number" id="est-crew-size" value="5" min="1" max="20"></div>
+                                <div class="form-row"><label>Season</label><select id="est-season"><option value="winter">Winter</option><option value="spring">Spring</option><option value="summer" selected>Summer</option><option value="fall">Fall</option></select></div>
+                                <div class="form-row"><label>Pipe material</label><select id="est-pipe-material"><option value="PVC C900" selected>PVC C900</option><option value="HDPE">HDPE</option><option value="DIP">DIP</option><option value="PVC SDR 35">PVC SDR 35</option><option value="RCP">RCP</option><option value="PE">PE</option><option value="Steel">Steel</option><option value="PVC Conduit">PVC Conduit</option></select></div>
+                                <div class="form-row form-row-inline"><label><input type="checkbox" id="est-dewatering"> Dewatering</label></div>
+                                <div class="form-row form-row-inline"><label><input type="checkbox" id="est-rock"> Rock excavation</label></div>
+                                <div class="form-row"><label>Fittings</label><input type="number" id="est-fittings" value="0" min="0"></div>
+                                <div class="form-row"><label>Road crossings</label><input type="number" id="est-road-crossings" value="0" min="0"></div>
+                                <div class="modal-actions"><button type="submit" class="btn-primary" id="btn-run-estimate">Run estimate</button></div>
+                            </form>
+                            <div id="estimate-result" class="estimate-result" hidden></div>
+                            <div id="estimate-feedback" class="estimate-feedback" hidden><h4>Submit actual cost (optional)</h4><form id="form-feedback"><input type="number" id="input-actual-cost" placeholder="Actual cost ($)" min="0" step="1000"><button type="submit" class="btn-primary">Submit feedback</button></form></div>
                         </div>
-                        <form class="chat-input-form" id="chat-form" action="javascript:void(0)" method="post" onsubmit="return false;">
-                            <div class="chat-composer">
-                                <div class="chat-composer-text-wrap">
-                                    <textarea class="chat-composer-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
-                                </div>
-                                <div class="chat-composer-bar">
-                                    <div class="chat-composer-left">
-                                        <div class="model-select-wrap">
-                                        <button type="button" class="chat-composer-pill" id="agent-mode-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Mode" title="Ask: chat-only response. Agent: can run tools and workflows.">
-                                            <span class="chat-composer-pill-icon">∞</span>
-                                            <span id="agent-mode-label">Agent</span>
-                                            <span class="chat-composer-chevron chat-composer-chevron-up">▾</span>
-                                        </button>
-                                            <select id="agent-mode-select" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
-                                                <option value="ask">Ask</option>
-                                                <option value="agent">Agent</option>
-                                            </select>
-                                        </div>
-                                        <div class="model-select-wrap">
-                                            <button type="button" class="chat-composer-pill chat-composer-model" id="model-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="AI model">
-                                                <span id="model-select-label">GPT-4o mini</span>
-                                                <span class="chat-composer-chevron chat-composer-chevron-up">▾</span>
-                                            </button>
-                                            <select id="model-select" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
-                                                <option value="mud1">mud1</option>
-                                                <option value="gpt-4o-mini">GPT-4o mini</option>
-                                                <option value="gpt-4o">GPT-4o</option>
-                                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                                <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
-                                                <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
-                                                <option value="claude-opus-4-6">Claude Opus 4.6</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="chat-composer-right">
-                                        <button type="button" class="chat-composer-icon" id="btn-refresh-chat" aria-label="Clear">
-                                            <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                                        </button>
-                                        <label class="chat-composer-icon" for="chat-doc-upload" title="Attach document">
-                                            <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                        </label>
-                                        <input type="file" id="chat-doc-upload" multiple hidden>
-                                        <button type="submit" class="chat-composer-send" id="chat-send" aria-label="Send">
-                                            <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+                        <div id="tool-form-proposal" class="tool-form-wrap">
+                            <form id="form-proposal">
+                                <div class="form-row"><label>Client / project name</label><input type="text" id="prop-client" placeholder="e.g. City of Salt Lake - Main St" required></div>
+                                <div class="form-row"><label>Scope summary</label><textarea id="prop-scope" rows="3" placeholder="e.g. 1,500 LF of 8&quot; sewer, clay soil, 4.5 ft depth"></textarea></div>
+                                <div class="form-row"><label>Total bid ($)</label><input type="number" id="prop-total" placeholder="From estimate or enter manually" min="0" step="1000"></div>
+                                <div class="form-row"><label>Duration (days)</label><input type="number" id="prop-duration" placeholder="From estimate" min="1"></div>
+                                <div class="form-row"><label>Assumptions</label><textarea id="prop-assumptions" rows="2" placeholder="e.g. Existing utilities to be located by others"></textarea></div>
+                                <div class="form-row"><label>Exclusions</label><textarea id="prop-exclusions" rows="2" placeholder="e.g. Traffic control by owner"></textarea></div>
+                                <div class="modal-actions"><button type="submit" class="btn-primary">Generate & download PDF</button></div>
+                            </form>
+                        </div>
+                        <div id="tool-form-schedule" class="tool-form-wrap">
+                            <form id="form-schedule">
+                                <div class="form-row"><label>Project name</label><input type="text" id="sched-project" placeholder="Project name"></div>
+                                <div class="form-row"><label>Start date</label><input type="date" id="sched-start"></div>
+                                <div class="form-row"><label>Duration (days)</label><input type="number" id="sched-duration" value="14" min="1" required></div>
+                                <div class="form-row"><label>Phases (comma-separated)</label><input type="text" id="sched-phases" value="Mobilization, Trenching, Pipe install, Backfill, Restoration" placeholder="Mobilization, Trenching, Pipe, Backfill, Restoration"></div>
+                                <div class="modal-actions"><button type="submit" class="btn-primary">Generate & download PDF</button></div>
+                            </form>
+                            <div id="schedule-preview" class="schedule-preview" hidden></div>
+                        </div>
                     </div>
                 </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-messages-inner" id="chat-messages-inner"></div>
+                    <div class="msg msg-assistant chat-loading-indicator" id="chat-loading-indicator" hidden aria-live="polite">
+                        <div class="msg-content msg-loading-bubbles">
+                            <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+                        </div>
+                    </div>
+                </div>
+                <form class="chat-input-form" id="chat-form" action="javascript:void(0)" method="post" onsubmit="return false;">
+                    <div class="chat-composer">
+                        <div class="chat-composer-text-wrap">
+                            <textarea class="chat-composer-input" id="chat-input" rows="1" placeholder="Ask about estimates or construction…" required></textarea>
+                        </div>
+                        <div class="chat-composer-bar">
+                            <div class="chat-composer-left">
+                                <button type="button" class="chat-composer-pill" id="agent-dropdown" aria-haspopup="true" title="Mode">
+                                    <span class="chat-composer-pill-icon">∞</span>
+                                    <span>Agent</span>
+                                    <span class="chat-composer-chevron">▾</span>
+                                </button>
+                                <div class="model-select-wrap">
+                                    <button type="button" class="chat-composer-pill chat-composer-model" id="model-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="AI model">
+                                        <span id="model-select-label">GPT-4o mini</span>
+                                        <span class="chat-composer-chevron chat-composer-chevron-up">▾</span>
+                                    </button>
+                                    <div class="model-dropdown" id="model-dropdown" role="listbox" hidden>
+                                        <div class="model-dropdown-group">
+                                            <div class="model-dropdown-label">openmud</div>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="mud1">mud1</button>
+                                        </div>
+                                        <div class="model-dropdown-group">
+                                            <div class="model-dropdown-label">OpenAI</div>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o-mini">GPT-4o mini</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o">GPT-4o</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4-turbo">GPT-4 Turbo</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-3.5-turbo">GPT-3.5 Turbo</button>
+                                        </div>
+                                        <div class="model-dropdown-group">
+                                            <div class="model-dropdown-label">Anthropic</div>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-haiku-4-5-20251001">Claude Haiku 4.5</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-sonnet-4-6">Claude Sonnet 4.6</button>
+                                            <button type="button" class="model-dropdown-item" role="option" data-value="claude-opus-4-6">Claude Opus 4.6</button>
+                                        </div>
+                                    </div>
+                                    <select id="model-select" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
+                                        <option value="mud1">mud1</option>
+                                        <option value="gpt-4o-mini">GPT-4o mini</option>
+                                        <option value="gpt-4o">GPT-4o</option>
+                                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
+                                        <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
+                                        <option value="claude-opus-4-6">Claude Opus 4.6</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="chat-composer-right">
+                                <button type="button" class="chat-composer-icon" id="btn-refresh-chat" aria-label="Clear">
+                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                </button>
+                                <label class="chat-composer-icon" for="chat-doc-upload" title="Attach document">
+                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                </label>
+                                <input type="file" id="chat-doc-upload" multiple hidden>
+                                <button type="submit" class="chat-composer-send" id="chat-send" aria-label="Send">
+                                    <svg class="chat-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </main>
     </div>
@@ -232,32 +233,6 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
-    <div class="model-dropdown" id="agent-mode-dropdown" role="listbox" hidden>
-        <div class="model-dropdown-group">
-            <div class="model-dropdown-label">Mode</div>
-            <button type="button" class="model-dropdown-item" role="option" data-value="ask">Ask</button>
-            <button type="button" class="model-dropdown-item" role="option" data-value="agent">Agent</button>
-        </div>
-    </div>
-    <div class="model-dropdown" id="model-dropdown" role="listbox" hidden>
-        <div class="model-dropdown-group">
-            <div class="model-dropdown-label">openmud</div>
-            <button type="button" class="model-dropdown-item" role="option" data-value="mud1">mud1</button>
-        </div>
-        <div class="model-dropdown-group">
-            <div class="model-dropdown-label">OpenAI</div>
-            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o-mini">GPT-4o mini</button>
-            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o">GPT-4o</button>
-            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4-turbo">GPT-4 Turbo</button>
-            <button type="button" class="model-dropdown-item" role="option" data-value="gpt-3.5-turbo">GPT-3.5 Turbo</button>
-        </div>
-        <div class="model-dropdown-group">
-            <div class="model-dropdown-label">Anthropic</div>
-            <button type="button" class="model-dropdown-item" role="option" data-value="claude-haiku-4-5-20251001">Claude Haiku 4.5</button>
-            <button type="button" class="model-dropdown-item" role="option" data-value="claude-sonnet-4-6">Claude Sonnet 4.6</button>
-            <button type="button" class="model-dropdown-item" role="option" data-value="claude-opus-4-6">Claude Opus 4.6</button>
-        </div>
-    </div>
     <script src="js/app.js"></script>
 </body>
 </html>
