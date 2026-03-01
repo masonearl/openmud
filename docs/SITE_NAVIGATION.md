@@ -24,6 +24,7 @@
   - #ai-guide
   - #ai-workflows
   - #ai-autonomy
+  - #software-architecture
   - #youtube
   - #glossary
 - /innovators.html

@@ -1536,6 +1536,138 @@
         "certification",
         "machine operation"
       ]
+    },
+    {
+      "id": "software-architecture-overview",
+      "category": "Reference",
+      "title": "Construction Software Architecture Overview \u2014 How Major Platforms Fit Together",
+      "content": "Construction software is usually not a single platform problem. Heavy civil operations run across five functional layers that exchange data every day. Layer 1 is design and plan production, where Civil 3D and related CAD systems produce geometry, alignments, profiles, and sheet outputs. Layer 2 is document and markup control, where PDF-based review platforms like Bluebeam capture takeoff marks, comments, and review history. Layer 3 is estimating and budget baselines, where systems such as HeavyBid, Bid2Win-family tools, and Excel host cost assumptions and production logic. Layer 4 is field and project controls, where daily production, labor, equipment hours, RFIs, and schedule updates are captured in field tools and PM systems. Layer 5 is finance and analytics, where ERP and BI consume curated cost and production data for forecasting and reporting. Most integration failures in construction are not math failures; they are identity and contract failures where bid item IDs, cost codes, and phase codes do not stay consistent across layers.",
+      "url": "/resources.html#software-architecture",
+      "tags": [
+        "construction software architecture",
+        "integration layers",
+        "heavy civil software stack",
+        "CAD",
+        "estimating",
+        "field management",
+        "project controls",
+        "ERP",
+        "BI"
+      ]
+    },
+    {
+      "id": "excel-architecture-layers",
+      "category": "Reference",
+      "title": "Excel Architecture for Construction Teams \u2014 Calculation Engine, M, VBA, and APIs",
+      "content": "Excel is a layered computation platform, not only a spreadsheet interface. The first layer is the formula grid, where dependencies between cells form a directed graph. Microsoft documentation describes recalculation using dependency trees and calculation chains, including multithreaded recalculation for eligible operations. The second layer is data shaping through Power Query, where the M language transforms external data before it is loaded into workbook tables or the data model. The third layer is automation: legacy VBA macros, Office Scripts for web-based workbook automation, and JavaScript-based Office Add-ins using the Excel JavaScript API. In construction, this architecture supports estimate normalization, crew productivity what-if analysis, and structured export to accounting or BI. The main governance risk is uncontrolled workbook drift: formulas, named ranges, and query logic diverge across estimators. The control pattern is to treat Excel templates as versioned code artifacts with defined owners, test cases, and change logs, not as ad hoc files passed by email.",
+      "url": "/resources.html#software-architecture",
+      "tags": [
+        "Excel calculation engine",
+        "Excel recalculation",
+        "Power Query",
+        "M language",
+        "VBA",
+        "Office Scripts",
+        "Excel JavaScript API",
+        "construction estimating excel"
+      ]
+    },
+    {
+      "id": "bluebeam-architecture-apis",
+      "category": "Reference",
+      "title": "Bluebeam Architecture \u2014 Revu Desktop, Studio Cloud, and API Boundaries",
+      "content": "Bluebeam is most useful when treated as two coordinated layers. Revu desktop handles PDF authoring, markup, measurement, and local automation workflows. Studio cloud services provide shared collaboration contexts and controlled document workflows. Official Studio API documentation organizes capabilities around Sessions, Projects, and Jobs, with OAuth-based authentication and explicit integration scopes. This distinction matters for implementation: Revu JavaScript and script engine commands automate local or document-level actions, while Studio API integrations handle cloud-hosted coordination and external workflow bridges. In heavy civil operations, Bluebeam often sits between design outputs and estimating or PM systems, preserving review traceability and markup intent. A practical integration rule is to separate immutable source documents from derived markup artifacts and to store linkage metadata so downstream systems can reference the specific revision and session context that produced a quantity or scope decision. Without that metadata, disputes over who marked what and when become expensive coordination failures.",
+      "url": "/resources.html#software-architecture",
+      "tags": [
+        "Bluebeam architecture",
+        "Bluebeam Revu",
+        "Bluebeam Studio API",
+        "Studio Sessions",
+        "Studio Projects",
+        "OAuth",
+        "construction document workflows",
+        "PDF markup automation"
+      ]
+    },
+    {
+      "id": "autocad-civil3d-architecture-stack",
+      "category": "Reference",
+      "title": "AutoCAD and Civil 3D Architecture \u2014 DWG Core, Civil Objects, and Extension Stack",
+      "content": "Civil 3D should be understood as a civil-domain layer on top of AutoCAD. The underlying AutoCAD runtime and DWG object ecosystem provide general drafting and extension foundations, while Civil 3D adds domain entities such as alignments, profiles, corridors, pipe networks, and surfaces. Extension options span multiple abstraction levels: AutoLISP task scripting, managed .NET plugins, and lower-level ObjectARX SDK development for advanced scenarios. On the cloud side, Autodesk Platform Services and Autodesk Construction Cloud APIs expose model and project data interfaces used in integration workflows. For construction teams, the key architectural decision is not only which API exists, but which exchange contract is enforced between design and operations systems. If exported sheets, quantities, and object metadata are inconsistent, estimating and field tools cannot reliably map design intent into production controls. Stable naming conventions, revision stamps, and explicit object-to-cost mapping tables are usually the difference between reusable design data and repeated manual re-entry.",
+      "url": "/resources.html#software-architecture",
+      "tags": [
+        "AutoCAD architecture",
+        "Civil 3D API",
+        "DWG",
+        "ObjectARX",
+        "AutoLISP",
+        "Autodesk Platform Services",
+        "construction CAD integration"
+      ]
+    },
+    {
+      "id": "hcss-heavybid-heavyjob-architecture",
+      "category": "Reference",
+      "title": "HCSS HeavyBid and HeavyJob Architecture \u2014 Baseline to Field Variance Loop",
+      "content": "The central HCSS architecture pattern is estimate-to-execution continuity. HeavyBid captures preconstruction assumptions such as bid items, crews, rates, and production logic. HeavyJob captures field execution data such as daily quantities, labor, and equipment hours against those baseline structures. Public developer documentation shows product-specific API surfaces and scoped access models for integration. In practice, value is created when cost and production identity keys remain stable from estimate through daily reporting and analytics. If a contractor changes code structures midstream without controlled mapping, budget-versus-actual diagnostics lose meaning. The architecture implication is that integration design must prioritize canonical identifiers, transformation traceability, and governance over convenience exports. Teams that treat HeavyBid output as a one-time spreadsheet instead of a governed baseline usually cannot detect production drift early enough to intervene. Teams that preserve structural continuity can run fast variance analysis and adjust crews, sequence, or subcontract strategy before overruns harden.",
+      "url": "/resources.html#software-architecture",
+      "tags": [
+        "HCSS architecture",
+        "HeavyBid",
+        "HeavyJob",
+        "budget vs actual",
+        "construction cost controls",
+        "field production data",
+        "HCSS API"
+      ]
+    },
+    {
+      "id": "bid2win-b2w-ineight-integration-model",
+      "category": "Reference",
+      "title": "Bid2Win, B2W, and InEight Integration Model \u2014 Entity Stability and Migration Discipline",
+      "content": "In heavy civil software conversations, Bid2Win and B2W terminology may refer to legacy workflows, while current enterprise programs may use InEight Estimate and related integration services. Architecture decisions should not start with branding; they should start with stable entities: estimate resources, bid items, cost categories, account mappings, and history records. InEight documentation provides API integration guidance and reporting-oriented API patterns that can support enterprise analytics and connected workflows. The recurring migration risk is semantic drift, where old terms map inconsistently to new schemas. The mitigation is a canonical dictionary that maps legacy identifiers, cost structures, and business rules to the target integration model before data is synchronized at scale. Organizations that skip this step often produce technically successful API calls but financially inconsistent reporting outputs. The technical objective is continuity of estimate meaning, not merely continuity of screen-level features.",
+      "url": "/resources.html#software-architecture",
+      "tags": [
+        "Bid2Win",
+        "B2W",
+        "InEight Estimate",
+        "estimating migration",
+        "integration model",
+        "construction software modernization",
+        "estimate entity mapping"
+      ]
+    },
+    {
+      "id": "construction-pm-platform-api-patterns",
+      "category": "Reference",
+      "title": "Project Management Platform API Patterns \u2014 Procore, ACC, Primavera, and ERP-Coupled PM",
+      "content": "Project management platforms in construction share a common architecture pattern: a cloud system of record with workflow state, document linkage, permissions, and externally accessible API surfaces. Procore exposes REST and webhook capabilities for event-driven integrations. Autodesk Construction Cloud exposes APIs through Autodesk Platform Services for project and model-related data operations. Primavera P6 exposes REST interfaces oriented toward schedule and program control operations. ERP-coupled PM systems may combine APIs with file or ETL bridges depending on deployment maturity. The integration design choice is whether to run event-driven updates for operational controls or periodic batch synchronization for financial reporting. Heavy civil contractors typically need both: near-real-time issue and workflow updates, plus audited periodic cost and schedule snapshots. The failure mode is unclear ownership of entities such as change events, schedule milestones, and approved quantities. The architecture fix is a system-of-record matrix that assigns authority per entity and enforces that assignment in every integration service.",
+      "url": "/resources.html#software-architecture",
+      "tags": [
+        "project management software architecture",
+        "Procore API",
+        "Procore webhooks",
+        "Autodesk Construction Cloud API",
+        "Primavera REST API",
+        "construction system of record",
+        "event driven integrations"
+      ]
+    },
+    {
+      "id": "construction-software-integration-blueprint",
+      "category": "Reference",
+      "title": "Construction Software Integration Blueprint \u2014 Design to Estimate to Field to Finance",
+      "content": "A robust construction integration blueprint follows a sequence. First, design and document inputs are versioned and tagged with stable revision metadata. Second, quantity and estimating systems ingest those inputs and publish approved bid baselines with controlled identifiers. Third, field systems capture production, labor, and equipment against the same identity model. Fourth, PM systems govern RFIs, submittals, changes, and schedule states while preserving links to source documents and field records. Fifth, ERP and BI layers consume curated, reconciled data for forecasting and financial close. At each hop, integration services should enforce schema validation, ID mapping, and timestamped audit trails. Contractors often focus on dashboard outputs, but reliability is determined earlier by exchange contracts and transformation controls. The most important technical artifact is a canonical dictionary for bid item IDs, cost codes, phase codes, and equipment classes, with explicit versioning whenever any source system changes structure.",
+      "url": "/resources.html#software-architecture",
+      "tags": [
+        "construction integration blueprint",
+        "estimate to field data flow",
+        "cost code mapping",
+        "bid item identity",
+        "ERP integration",
+        "construction data governance",
+        "project controls architecture"
+      ]
     }
   ]
 }

@@ -163,6 +163,25 @@
 .positive { color: #6ee7b7; }
 .negative { color: #f87171; }
 
+.res-matrix td,
+.res-matrix th {
+    min-width: 140px;
+}
+
+.res-arch-diagram {
+    margin: 10px 0 22px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Cascadia Code', monospace;
+    font-size: 0.76rem;
+    line-height: 1.65;
+    color: #d8d2c6;
+    white-space: pre;
+    overflow-x: auto;
+}
+
 /* Lists */
 .res-list {
     color: var(--text-secondary);
@@ -316,6 +335,28 @@
 .res-ext-link:hover {
     color: var(--text);
     border-color: rgba(255,255,255,0.3);
+}
+
+.res-link-groups {
+    display: grid;
+    gap: 14px;
+}
+
+.res-link-group {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 12px 14px;
+}
+
+.res-link-group-title {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--earth-light);
+    margin-bottom: 8px;
+    font-weight: 700;
 }
 
 /* Card grids */
