@@ -459,11 +459,25 @@
     margin: 8px 0 20px;
 }
 
+/* Companies page: use available width and scroll in main pane */
+.companies-page .res-main {
+    overflow-x: auto;
+}
+
+.companies-page .res-section {
+    max-width: none;
+    width: 100%;
+}
+
 .company-table-wrap {
     border: 1px solid var(--border);
     border-radius: 8px;
     overflow: auto;
     background: var(--bg-alt);
+}
+
+.companies-page .company-table-wrap {
+    overflow: visible;
 }
 
 .company-table {
@@ -472,6 +486,10 @@
     border-collapse: collapse;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-size: 0.8125rem;
+}
+
+.companies-page .company-table {
+    width: max(100%, 1320px);
 }
 
 .company-table th {
