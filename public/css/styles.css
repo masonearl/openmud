@@ -82,7 +82,7 @@ body.has-app .app-layout {
 
 /* Header */
 .header {
-    padding: 12px 0;
+    padding: 8px 0;
     border-bottom: 1px solid var(--border);
 }
 
@@ -90,18 +90,10 @@ body.has-app .app-layout {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-}
-
-/* Match chat header brand position to landing nav */
-body.has-app .header {
-    padding: 8px 0;
-}
-
-body.has-app .header-inner {
-    min-height: 44px;
 }
 
 /* ─── Brand dropdown (inner pages) ───────────────────────── */
@@ -1497,7 +1489,11 @@ body {
 
 @media (max-width: 768px) {
     /* Nav — allow horizontal scroll instead of overflow */
-    .header-inner { padding: 0 14px; }
+    .header { padding: 0; }
+    .header-inner {
+        padding: 0 14px;
+        min-height: 42px;
+    }
     .nav {
         gap: 4px;
         overflow-x: auto;
