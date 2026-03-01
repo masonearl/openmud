@@ -77,6 +77,7 @@
                 <option value="software-design">Design &amp; CAD</option>
                 <option value="software-estimating">Estimating &amp; Takeoff</option>
                 <option value="software-field">Field &amp; Project Management</option>
+                <option value="software-architecture">Software Architecture Deep Dive</option>
                 <option value="software-safety">Safety Training</option>
                 <option value="software-training">Training &amp; Community</option>
             </optgroup>
@@ -118,6 +119,7 @@
                 <a href="#software-design" class="res-nav-link" data-section="software-design">Design &amp; CAD</a>
                 <a href="#software-estimating" class="res-nav-link" data-section="software-estimating">Estimating &amp; Takeoff</a>
                 <a href="#software-field" class="res-nav-link" data-section="software-field">Field &amp; Project Management</a>
+                <a href="#software-architecture" class="res-nav-link" data-section="software-architecture">Software Architecture Deep Dive</a>
                 <a href="#software-safety" class="res-nav-link" data-section="software-safety">Safety Training</a>
                 <a href="#software-training" class="res-nav-link" data-section="software-training">Training &amp; Community</a>
 
@@ -1075,6 +1077,7 @@ Output as a table with: Activity ID, Activity Name, Duration (days), Predecessor
 
                 <div class="res-callout">
                     <strong>How AI fits in:</strong> AI can read exported PDFs from Civil 3D and Bluebeam — extracting quantities, stationing, pipe sizes, and elevations through OCR. openmud is building document extraction tools to pull structured data from plan sheets directly.
+                    <br><br><a href="#software-architecture" class="link" onclick="showSection('software-architecture'); return false;">Go deeper: software architecture, APIs, and integration layers.</a>
                 </div>
             </section>
 
@@ -1118,6 +1121,7 @@ Output as a table with: Activity ID, Activity Name, Duration (days), Predecessor
 
                 <div class="res-callout">
                     <strong>Where AI is being applied:</strong> The biggest opportunity in estimating is document reading — AI that can open a set of plans, read pipe schedules and quantities, and pre-populate a bid item list. OCR + GPT-4o can do this today with the right pipeline. openmud is building toward this. For now: use AI to sense-check your math, draft your scope narratives, and write your sub bid requests.
+                    <br><br><a href="#software-architecture" class="link" onclick="showSection('software-architecture'); return false;">Go deeper: HeavyBid, Bid2Win, and data architecture patterns.</a>
                 </div>
             </section>
 
@@ -1167,6 +1171,301 @@ Output as a table with: Activity ID, Activity Name, Duration (days), Predecessor
                     <li>Email triage — AI reads incoming project emails, classifies them (owner directive, sub question, inspection notice), and drafts responses</li>
                     <li>Meeting summaries — AI transcribes and summarizes OAC meetings, extracts action items and responsible parties</li>
                 </ul>
+                <p class="res-text"><a href="#software-architecture" class="link" onclick="showSection('software-architecture'); return false;">Go deeper: project management API, webhook, and integration architecture.</a></p>
+            </section>
+
+            <!-- Industry Software: Architecture Deep Dive -->
+            <section class="res-section" id="section-software-architecture">
+                <h1 class="res-title">Construction Software Architecture Deep Dive</h1>
+                <p class="res-desc">A technical map of the software stack used in heavy civil: Excel, Bluebeam, AutoCAD/Civil 3D, HCSS, Bid2Win/B2W/InEight, and project management platforms. Focus: architecture layers, APIs, languages, and integration patterns used in real contractor workflows.</p>
+
+                <div class="res-callout">
+                    <strong>Scope and accuracy note:</strong> This section prioritizes publicly documented interfaces. Internal proprietary implementation details are either marked as inferred patterns or intentionally omitted when not documented by the vendor.
+                </div>
+
+                <h2 class="res-h2">Cross-Stack Architecture Matrix</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table res-matrix">
+                        <thead>
+                            <tr>
+                                <th>Platform</th>
+                                <th>Primary Runtime Layer</th>
+                                <th>Typical Data Artifacts</th>
+                                <th>Automation + API Surface</th>
+                                <th>Practical Integration Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Excel</strong></td>
+                                <td>Desktop and web workbook engine + formula recalculation graph</td>
+                                <td>XLSX, tables, Pivot models, CSV exports, Power Query definitions</td>
+                                <td>Formulas, VBA, Office Scripts, Excel JS Add-ins, Power Query M</td>
+                                <td>Cost model host, estimate normalization, handoff to ERP/BI</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bluebeam Revu + Studio</strong></td>
+                                <td>Desktop PDF markup client + Studio cloud collaboration services</td>
+                                <td>PDF, markup sets, Studio Session logs, Project document sets</td>
+                                <td>Studio API (OAuth), Revu JavaScript, Revu script engine commands</td>
+                                <td>Plan review, takeoff markups, review traceability, document routing</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AutoCAD/Civil 3D</strong></td>
+                                <td>DWG-based CAD host + Civil object model extensions</td>
+                                <td>DWG, alignments, profiles, corridors, surfaces, quantity outputs</td>
+                                <td>AutoLISP, .NET API, ObjectARX SDK, APS endpoints</td>
+                                <td>Design source of truth feeding plan production and quantities</td>
+                            </tr>
+                            <tr>
+                                <td><strong>HCSS (HeavyBid + HeavyJob)</strong></td>
+                                <td>Estimating and field operations applications with shared domain schema</td>
+                                <td>Bid items, crews, production rates, cost codes, daily production data</td>
+                                <td>HCSS Developer APIs (HeavyBid, HeavyJob, Estimate Insights)</td>
+                                <td>Budget-to-actual chain from estimate assumptions to field execution</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bid2Win/B2W/InEight</strong></td>
+                                <td>Heavy civil estimating workflows across legacy and modern product lines</td>
+                                <td>Estimate structures, resources, bid items, historical estimate datasets</td>
+                                <td>InEight Estimate + Explore API documentation and integration endpoints</td>
+                                <td>Alternative estimating stack with reporting and enterprise integration</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PM Platforms (Procore, ACC, Primavera)</strong></td>
+                                <td>Cloud project records + workflow/state engines</td>
+                                <td>RFIs, submittals, issues, schedules, transmittals, change events</td>
+                                <td>REST APIs, webhooks/events, identity/scoped auth models</td>
+                                <td>System-of-record layer coordinating field, office, owner, and finance</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Reference Architecture — Typical Construction Data Plane</h2>
+                <pre class="res-arch-diagram">[Design Systems]             [Document Layer]                 [Commercial Core]
+Civil 3D / CAD  --------->   PDF Plans + Specs  ----------->  Estimating (HeavyBid / Bid2Win / Excel)
+      |                             |                                       |
+      |                             | OCR / extraction                       | Budget baselines
+      v                             v                                       v
+As-built revisions           Markup + review history                 Field tracking (HeavyJob / PM)
+      \                             /                                       |
+       \                           /                                        | Daily quantities + costs
+        ----------> [Project Management System of Record] <-----------------
+                             (Procore / ACC / Primavera)
+                                         |
+                                         | API + webhook + exports
+                                         v
+                                ERP / BI / Data warehouse
+                </pre>
+
+                <h2 class="res-h2">Excel Architecture (Deep)</h2>
+                <p class="res-text">Excel is not just a spreadsheet UI. It is a layered computation platform with a dependency graph, calculation chain, query language surface, and multiple automation runtimes.</p>
+                <ul class="res-list">
+                    <li><strong>Grid + formula layer:</strong> cell formulas define directed dependencies; recalc uses dependency trees and calculation chains, with multithreaded recalculation for eligible paths.</li>
+                    <li><strong>Data shaping layer:</strong> Power Query uses the <strong>M language</strong> for extraction and transformation before data reaches reporting models.</li>
+                    <li><strong>Automation layer:</strong> VBA (legacy but dominant), Office Scripts (TypeScript-flavored JS in Excel on the web), and Office Add-ins (Excel JavaScript API).</li>
+                    <li><strong>Integration layer:</strong> Power Automate orchestration, connectors, ODBC/OData and API-driven workflows through add-ins/scripts.</li>
+                </ul>
+                <div class="res-table-wrap">
+                    <table class="res-table res-matrix">
+                        <thead><tr><th>Excel Layer</th><th>Primary Language</th><th>Best Use in Construction</th><th>Limitations to Manage</th></tr></thead>
+                        <tbody>
+                            <tr><td>Formulas + named ranges</td><td>Excel formula language</td><td>Rapid estimate math, production factors, bid alternates</td><td>Hard to govern at scale without strong template discipline</td></tr>
+                            <tr><td>Macros</td><td>VBA</td><td>Legacy automation inside estimator workflows</td><td>Desktop dependency, security policy friction</td></tr>
+                            <tr><td>Power Query</td><td>M</td><td>Importing vendor exports and normalizing cost data</td><td>Can become opaque without documented query steps</td></tr>
+                            <tr><td>Office Scripts</td><td>JavaScript/TypeScript model</td><td>Repeatable web-based workbook automations</td><td>Feature parity differs from desktop VBA patterns</td></tr>
+                            <tr><td>Office Add-ins</td><td>JavaScript API</td><td>Custom estimate assistants and API-connected side panels</td><td>Requires web app hosting + deployment governance</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Bluebeam Architecture (Deep)</h2>
+                <p class="res-text">Bluebeam is best understood as two cooperating layers: <strong>Revu desktop</strong> for authoring/markup and <strong>Studio cloud</strong> for controlled collaboration and workflow automation.</p>
+                <pre class="res-arch-diagram">[Revu Desktop]
+- PDF rendering + markup authoring
+- Measurement + takeoff workflows
+- JavaScript for forms/stamps
+- Script engine for batch actions
+          |
+          | Sync / auth
+          v
+[Studio Cloud]
+- Sessions (real-time review context)
+- Projects (document repositories)
+- Jobs (automated project file operations)
+          |
+          | OAuth 2.0 + scoped access
+          v
+[Studio API Integrations]
+- external document pipelines
+- reporting + workflow bridges
+                </pre>
+                <ul class="res-list">
+                    <li><strong>Studio API model:</strong> Sessions, Projects, and Jobs are the major functional groups in official docs.</li>
+                    <li><strong>Identity/security:</strong> OAuth-based authorization and explicit scopes. Integration governance matters for enterprise rollouts.</li>
+                    <li><strong>Desktop automation boundary:</strong> Revu JavaScript + ScriptEngine support local document automation; Studio API handles cloud-integrated actions.</li>
+                    <li><strong>Construction implication:</strong> treat Bluebeam as a controlled document workflow engine, not just a PDF editor.</li>
+                </ul>
+
+                <h2 class="res-h2">AutoCAD + Civil 3D Architecture (Deep)</h2>
+                <p class="res-text">Civil 3D is a domain layer built on top of AutoCAD. In practical terms, teams use DWG as the exchange artifact, while extension developers work through AutoCAD/Civil APIs at different abstraction levels.</p>
+                <ul class="res-list">
+                    <li><strong>Base CAD host:</strong> AutoCAD command/runtime environment and DWG object ecosystem.</li>
+                    <li><strong>Civil domain objects:</strong> alignments, profiles, corridors, pipe networks, surfaces, and labels.</li>
+                    <li><strong>Extension stack:</strong> AutoLISP for task automation, .NET APIs for managed plugins, ObjectARX SDK for lower-level extensions.</li>
+                    <li><strong>Cloud adjacency:</strong> Autodesk Platform Services (APS) and Construction Cloud APIs expose integration surfaces beyond desktop plugins.</li>
+                </ul>
+                <div class="res-callout">
+                    <strong>Operational rule:</strong> if your estimating or PM tools consume Civil output, define a strict exchange contract (file naming, sheet metadata, object export standards, version stamps). Integration failures are usually process contract failures, not geometry failures.
+                </div>
+
+                <h2 class="res-h2">HCSS HeavyBid + HeavyJob Architecture (Deep)</h2>
+                <p class="res-text">The core HCSS value is continuity: estimate intent to field execution to variance analysis. Architecturally, it is a domain-specific production and cost system rather than a generic PM shell.</p>
+                <pre class="res-arch-diagram">HeavyBid (preconstruction assumptions)
+  - bid items
+  - crews/resources/rates
+  - production assumptions
+              |
+              | baseline mapping
+              v
+HeavyJob (field capture + control)
+  - daily quantities
+  - labor/equipment hours
+  - production against bid items
+              |
+              | analytics APIs / exports
+              v
+Estimate Insights + external BI / ERP
+                </pre>
+                <ul class="res-list">
+                    <li><strong>API surface:</strong> HCSS developer portal exposes product-specific APIs and scopes; integration design should map least-privilege scope to each service.</li>
+                    <li><strong>Key data contract:</strong> stable bid-item/cost-code identity across systems is required for meaningful budget-vs-actual reporting.</li>
+                    <li><strong>Failure mode:</strong> if field data is aggregated too coarsely, estimate-level diagnostics collapse and corrective action arrives too late.</li>
+                </ul>
+
+                <h2 class="res-h2">Bid2Win, B2W, and InEight — Architecture Clarification</h2>
+                <p class="res-text">Naming in this market can be confusing. Depending on organization and deployment history, teams may reference legacy Bid2Win/B2W workflows and/or current InEight Estimate capabilities. Treat this as a lineage and integration continuity problem.</p>
+                <ul class="res-list">
+                    <li><strong>System reality:</strong> organizations often retain historical estimate structures while modernizing reporting/integration interfaces.</li>
+                    <li><strong>Integration anchor:</strong> model around stable estimate entities (resources, bid items, cost accounts), not around UI-specific terminology.</li>
+                    <li><strong>API direction:</strong> InEight documentation provides API integration patterns and Explore/self-service reporting endpoints for downstream analytics.</li>
+                    <li><strong>Migration advice:</strong> keep a canonical mapping dictionary from legacy estimate IDs to enterprise reporting IDs before replacing tools.</li>
+                </ul>
+                <div class="res-callout">
+                    <strong>Practical takeaway:</strong> do not start integration work by asking which product name is current. Start by inventorying the estimate entities your operations and finance teams depend on every week.
+                </div>
+
+                <h2 class="res-h2">Project Management Platform Architecture Patterns</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table res-matrix">
+                        <thead><tr><th>Platform</th><th>Core Model</th><th>API/Event Pattern</th><th>Where It Fits in Heavy Civil</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Procore</strong></td>
+                                <td>Cloud project records for RFIs, submittals, logs, financial workflows</td>
+                                <td>REST APIs + webhook model + OAuth app ecosystem</td>
+                                <td>Owner/GC-facing collaboration and compliance records</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Autodesk Construction Cloud</strong></td>
+                                <td>Project/document and model-centered collaboration stack</td>
+                                <td>APS/ACC APIs across data, models, issues, and integrations</td>
+                                <td>Design-to-construction continuity and model-centric coordination</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Oracle Primavera (P6)</strong></td>
+                                <td>Schedule-first enterprise planning and controls</td>
+                                <td>REST endpoints for programmatic schedule/project operations</td>
+                                <td>Complex schedule governance and owner program controls</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ERP-coupled PM stacks</strong></td>
+                                <td>Finance-led project controls tied to payroll/equipment/accounting</td>
+                                <td>API + ETL + file-based bridges depending on deployment</td>
+                                <td>Cost accountability and accounting integration depth</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Integration Blueprint — Estimate to Field to Finance</h2>
+                <pre class="res-arch-diagram">1) Design + document inputs
+   Civil files, plan PDFs, specs, addenda
+            |
+2) Quantity + estimate layer
+   Bluebeam/Takeoff + HeavyBid/Bid2Win/Excel model
+            |
+3) Baseline publication
+   Approved bid items + production assumptions + cost code map
+            |
+4) Field execution layer
+   HeavyJob / PM daily logs / telematics
+            |
+5) Controls + governance
+   PM system (RFI, submittal, change events, schedule state)
+            |
+6) Financial + analytics layer
+   ERP posting + BI variance views + forecast updates
+
+Critical control point: one canonical dictionary for bid item IDs, cost codes, and phase codes.
+                </pre>
+
+                <h2 class="res-h2">Implementation Checklist (for Contractors Building Integrations)</h2>
+                <ol class="res-list">
+                    <li>Define a canonical data model first (bid item ID, cost code, crew code, equipment code, phase).</li>
+                    <li>Assign system-of-record ownership per entity (estimate, field quantity, cost, schedule, document).</li>
+                    <li>Document API auth + scopes by integration service and enforce least privilege.</li>
+                    <li>Choose event-triggered vs batch synchronization per data type (urgent controls vs historical reporting).</li>
+                    <li>Instrument variance alerts where the business acts: daily production and weekly cost forecast cycles.</li>
+                    <li>Version every exchange contract (schema + transformation rules) before scaling to more projects.</li>
+                </ol>
+
+                <h2 class="res-h2">Primary Technical Sources</h2>
+                <div class="res-link-groups">
+                    <div class="res-link-group">
+                        <div class="res-link-group-title">Excel</div>
+                        <div class="res-links">
+                            <a href="https://learn.microsoft.com/en-us/office/client-developer/excel/excel-recalculation" target="_blank" rel="noopener" class="res-ext-link">Excel Recalculation Architecture</a>
+                            <a href="https://learn.microsoft.com/en-us/office/client-developer/excel/multithreaded-recalculation-in-excel" target="_blank" rel="noopener" class="res-ext-link">Excel Multithreaded Recalculation</a>
+                            <a href="https://learn.microsoft.com/en-us/office/dev/add-ins/reference/overview/excel-add-ins-reference-overview" target="_blank" rel="noopener" class="res-ext-link">Excel JavaScript API Overview</a>
+                            <a href="https://learn.microsoft.com/en-us/office/dev/scripts/" target="_blank" rel="noopener" class="res-ext-link">Office Scripts Documentation</a>
+                            <a href="https://learn.microsoft.com/en-us/powerquery-m/power-query-m-language-specification" target="_blank" rel="noopener" class="res-ext-link">Power Query M Language Specification</a>
+                        </div>
+                    </div>
+
+                    <div class="res-link-group">
+                        <div class="res-link-group-title">Bluebeam</div>
+                        <div class="res-links">
+                            <a href="https://developers.bluebeam.com/articles/getting-started/" target="_blank" rel="noopener" class="res-ext-link">Bluebeam Developer Network — Getting Started</a>
+                            <a href="https://developers.bluebeam.com/articles/studio-api-functionality/" target="_blank" rel="noopener" class="res-ext-link">Studio API Functionality</a>
+                            <a href="https://support.bluebeam.com/developer/authentication-guide.html" target="_blank" rel="noopener" class="res-ext-link">Studio API Authentication Guide</a>
+                            <a href="https://support.bluebeam.com/developer/javascript/api-reference.html" target="_blank" rel="noopener" class="res-ext-link">Revu JavaScript API Reference</a>
+                            <a href="https://support.bluebeam.com/revu/resources/script-reference-guide.html" target="_blank" rel="noopener" class="res-ext-link">Revu Script Reference Guide</a>
+                        </div>
+                    </div>
+
+                    <div class="res-link-group">
+                        <div class="res-link-group-title">AutoCAD / Civil 3D / ACC</div>
+                        <div class="res-links">
+                            <a href="https://forge.autodesk.com/developer/overview/civil-3d" target="_blank" rel="noopener" class="res-ext-link">Civil 3D API Overview</a>
+                            <a href="https://aps.autodesk.com/developer/overview/objectarx-autocad-sdk" target="_blank" rel="noopener" class="res-ext-link">ObjectARX SDK Overview</a>
+                            <a href="https://aps.autodesk.com/developer/overview/autodesk-construction-cloud" target="_blank" rel="noopener" class="res-ext-link">Autodesk Construction Cloud APIs</a>
+                        </div>
+                    </div>
+
+                    <div class="res-link-group">
+                        <div class="res-link-group-title">HCSS + InEight + PM Platforms</div>
+                        <div class="res-links">
+                            <a href="https://developer.hcssapps.com/products/heavyjob/overview/" target="_blank" rel="noopener" class="res-ext-link">HCSS HeavyJob API Overview</a>
+                            <a href="https://developer.hcssapps.com/products/heavybid-pre-construction/overview" target="_blank" rel="noopener" class="res-ext-link">HCSS HeavyBid API Overview</a>
+                            <a href="https://developer.hcssapps.com/hcss/docs/api-scopes" target="_blank" rel="noopener" class="res-ext-link">HCSS API Scopes</a>
+                            <a href="https://learn.ineight.com/Estimate/Content/12-API-Integration/11-1-1-APIIntegration.htm" target="_blank" rel="noopener" class="res-ext-link">InEight Estimate API Integration</a>
+                            <a href="https://developers.procore.com/documentation/webhooks-api" target="_blank" rel="noopener" class="res-ext-link">Procore Webhooks API</a>
+                            <a href="https://docs.oracle.com/cd/G18294_01/English/Integration_Documentation/rest_api/index.html" target="_blank" rel="noopener" class="res-ext-link">Oracle Primavera P6 REST API</a>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- Industry Software: Safety Training -->
