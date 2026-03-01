@@ -449,6 +449,50 @@ body {
     border-top: 1px solid var(--border);
 }
 
+.tools-section {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.tools-header h3 {
+    margin: 0 0 8px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tools-list {
+    display: grid;
+    gap: 6px;
+}
+
+.tool-item {
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 8px;
+    cursor: pointer;
+}
+
+.tool-item:hover {
+    color: var(--text);
+    border-color: #3f3f3f;
+}
+
+.tool-item.active {
+    color: var(--text);
+    border-color: #4a4a4a;
+    background: rgba(255, 255, 255, 0.06);
+}
+
 .documents-header {
     display: flex;
     align-items: center;

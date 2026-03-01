@@ -73,6 +73,7 @@
     var chatToolPanel = document.getElementById('chat-tool-panel');
     var toolPanelTitle = document.getElementById('tool-panel-title');
     var btnCloseTool = document.getElementById('btn-close-tool');
+    var sidebarToolButtons = document.querySelectorAll('[data-sidebar-tool]');
 
     function addMessage(role, content, projectId) {
         projectId = projectId || activeProjectId;
@@ -723,6 +724,22 @@
         if (name) createProject(name);
     });
 
+    function setToolParam(tool) {
+        if (!window.history || !window.history.replaceState) return;
+        var url = new URL(window.location.href);
+        if (tool) url.searchParams.set('tool', tool);
+        else url.searchParams.delete('tool');
+        window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + (url.hash ? url.hash : ''));
+    }
+
+    function updateToolSelectionUI() {
+        sidebarToolButtons.forEach(function (btn) {
+            var isActive = btn.getAttribute('data-sidebar-tool') === activeTool;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+    }
+
     function openTool(tool) {
         activeTool = tool;
         toolsDropdown.hidden = true;
@@ -741,12 +758,16 @@
         if (tool === 'schedule') {
             document.getElementById('sched-start').value = new Date().toISOString().slice(0, 10);
         }
+        updateToolSelectionUI();
+        setToolParam(tool);
     }
 
     function closeTool() {
         activeTool = null;
         chatToolPanel.hidden = true;
         document.querySelectorAll('.tool-form-wrap').forEach(function (el) { el.classList.remove('active'); });
+        updateToolSelectionUI();
+        setToolParam(null);
     }
 
     btnTools.addEventListener('click', function (e) {
@@ -759,6 +780,13 @@
     document.querySelectorAll('.dropdown-item').forEach(function (item) {
         item.addEventListener('click', function () {
             var tool = item.getAttribute('data-tool');
+            if (tool) openTool(tool);
+        });
+    });
+
+    sidebarToolButtons.forEach(function (item) {
+        item.addEventListener('click', function () {
+            var tool = item.getAttribute('data-sidebar-tool');
             if (tool) openTool(tool);
         });
     });
@@ -1047,6 +1075,16 @@
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', updateHeight, { passive: true });
             window.visualViewport.addEventListener('scroll', updateHeight, { passive: true });
+        }
+    })();
+
+    (function initToolRoute() {
+        var url = new URL(window.location.href);
+        var tool = (url.searchParams.get('tool') || '').toLowerCase();
+        if (tool === 'estimate' || tool === 'proposal' || tool === 'schedule') {
+            openTool(tool);
+        } else {
+            updateToolSelectionUI();
         }
     })();
 
