@@ -646,16 +646,67 @@ body {
 .chat-quick-actions {
     flex-shrink: 0;
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 8px 0 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.quick-actions-row {
+    display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    padding: 8px 0 12px;
-    border-bottom: 1px solid var(--border);
+}
+
+.quick-row-label {
+    flex: 0 0 auto;
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 700;
+    min-width: 58px;
 }
 
 .quick-label {
     font-size: 0.8125rem;
     color: var(--text-secondary);
+}
+
+.quick-tool-btn {
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.25;
+    padding: 7px 12px;
+    background: linear-gradient(180deg, #2b231b 0%, #201911 100%);
+    border: 1px solid #4a3a2b;
+    border-radius: 10px;
+    color: #f2e7d8;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 244, 225, 0.08);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.quick-tool-btn:hover {
+    background: linear-gradient(180deg, #392d22 0%, #281d15 100%);
+    border-color: #5a4735;
+    color: #fff5e8;
+    transform: translateY(-1px);
+}
+
+.quick-tool-btn:focus-visible {
+    outline: 2px solid rgba(176, 147, 114, 0.45);
+    outline-offset: 2px;
+}
+
+.quick-tool-btn.active {
+    background: linear-gradient(180deg, #5f4a36 0%, #433122 100%);
+    border-color: #8e7458;
+    color: #fff7eb;
+    box-shadow: inset 0 1px 0 rgba(255, 246, 230, 0.15), 0 0 0 1px rgba(138, 122, 106, 0.25);
 }
 
 .quick-btn {
@@ -664,14 +715,16 @@ body {
     padding: 6px 12px;
     background: var(--bg-alt);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 10px;
     color: var(--text-secondary);
     cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .quick-btn:hover {
     color: var(--text);
     border-color: var(--text-secondary);
+    background: #18140f;
 }
 
 .btn-copy-chat {
@@ -680,10 +733,11 @@ body {
     padding: 6px 10px;
     background: transparent;
     border: 1px dashed var(--border);
-    border-radius: 6px;
+    border-radius: 10px;
     color: var(--text-secondary);
     cursor: pointer;
     margin-left: auto;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .btn-copy-chat:hover {
@@ -1409,15 +1463,23 @@ body {
         height: 20px;
     }
     .chat-quick-actions {
-        gap: 6px;
+        gap: 8px;
         padding: 6px 0 10px;
+    }
+    .quick-actions-row {
         flex-wrap: nowrap;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        padding-bottom: 2px;
     }
-    .chat-quick-actions::-webkit-scrollbar { display: none; }
+    .quick-actions-row::-webkit-scrollbar { display: none; }
+    .quick-row-label {
+        min-width: auto;
+        font-size: 0.625rem;
+    }
     .quick-label { display: none; }
+    .quick-tool-btn,
     .quick-btn {
         font-size: 0.75rem;
         padding: 8px 12px;
