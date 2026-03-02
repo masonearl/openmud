@@ -103,13 +103,21 @@ body {
 }
 
 .lp-nav-caret {
-    font-size: 0.625rem;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-top: -1px;
     opacity: 0.85;
+    border-right: 1.7px solid currentColor;
+    border-bottom: 1.7px solid currentColor;
+    transform: rotate(45deg);
+    text-indent: -9999px;
+    overflow: hidden;
     transition: transform 0.16s ease;
 }
 
 .lp-brand-menu[open] .lp-nav-caret {
-    transform: rotate(180deg);
+    transform: rotate(225deg);
 }
 
 .lp-nav-actions {

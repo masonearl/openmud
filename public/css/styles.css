@@ -124,13 +124,21 @@ body.has-app .app-layout {
 .logo::marker { display: none; }
 
 .brand-caret {
-    font-size: 0.625rem;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-top: -1px;
     opacity: 0.7;
+    border-right: 1.7px solid currentColor;
+    border-bottom: 1.7px solid currentColor;
+    transform: rotate(45deg);
+    text-indent: -9999px;
+    overflow: hidden;
     transition: transform 0.15s ease;
 }
 
 .brand-menu[open] .brand-caret {
-    transform: rotate(180deg);
+    transform: rotate(225deg);
 }
 
 .brand-menu-panel {
