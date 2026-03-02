@@ -95,13 +95,14 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                         </button>
                     </form>
-                    <div class="lp-search-suggestions">
-                        <span onclick="quickSearch('minimum slope 8 inch sewer')">min slope 8" sewer</span>
-                        <span onclick="quickSearch('OSHA Type B soil trench')">OSHA Type B slope</span>
-                        <span onclick="quickSearch('what is an ESOP')">what is an ESOP?</span>
-                        <span onclick="quickSearch('thrust block 45 degree bend')">thrust block 45° bend</span>
-                        <span onclick="quickSearch('811 blue stakes Utah')">811 blue stakes</span>
-                        <span onclick="quickSearch('Manning n value PVC pipe')">Manning's n PVC</span>
+                    <div class="lp-search-suggestion-controls" id="lp-suggest-controls">
+                        <button type="button" class="lp-suggest-filter is-active" data-filter="all">All</button>
+                        <button type="button" class="lp-suggest-filter" data-filter="safety">Safety</button>
+                        <button type="button" class="lp-suggest-filter" data-filter="estimating">Estimating</button>
+                        <button type="button" class="lp-suggest-filter" data-filter="utilities">Utilities</button>
+                        <button type="button" class="lp-suggest-filter lp-suggest-shuffle" id="lp-suggest-shuffle">Shuffle</button>
+                    </div>
+                    <div class="lp-search-suggestions" id="lp-search-suggestions">
                     </div>
                 </div>
 
@@ -430,6 +431,82 @@
             }
         }
 
+        const CURATED_PROMPTS = [
+            { category: 'utilities', label: 'min slope 8" sewer', query: 'minimum slope for 8 inch sewer pipe per common standards' },
+            { category: 'safety', label: 'OSHA Type B slope', query: 'OSHA Type B trench slope requirement in plain language' },
+            { category: 'safety', label: 'Type C trench slope', query: 'OSHA Type C trench slope requirement in plain language' },
+            { category: 'utilities', label: 'Manning\'s n PVC', query: 'Manning n value for PVC pipe' },
+            { category: 'utilities', label: 'thrust block 45° bend', query: 'thrust block basics for 45 degree waterline bend' },
+            { category: 'utilities', label: '811 blue stakes', query: '811 blue stakes process before excavation in Utah' },
+            { category: 'estimating', label: 'trench volume calc', query: 'how to calculate trench volume for utility installation' },
+            { category: 'estimating', label: 'crew day production', query: 'how to estimate daily production for sewer crew by linear foot' },
+            { category: 'estimating', label: 'unit price builder', query: 'how to build a unit price for installed utility pipe' },
+            { category: 'utilities', label: 'bedding for DI pipe', query: 'bedding requirements for ductile iron utility pipe' },
+            { category: 'safety', label: 'shoring vs sloping', query: 'shoring vs sloping trench safety decision guide' },
+            { category: 'safety', label: 'confined space basics', query: 'confined space entry checklist for construction crews' },
+        ];
+
+        const CHIP_COUNT = 6;
+        let activePromptFilter = 'all';
+        let promptDisplayOrder = [];
+
+        function shuffleList(list) {
+            const copy = [...list];
+            for (let i = copy.length - 1; i > 0; i -= 1) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function getFilteredPrompts() {
+            const filtered = activePromptFilter === 'all'
+                ? CURATED_PROMPTS
+                : CURATED_PROMPTS.filter((item) => item.category === activePromptFilter);
+            return filtered.length ? filtered : CURATED_PROMPTS;
+        }
+
+        function renderPromptChips() {
+            const suggestionsEl = document.getElementById('lp-search-suggestions');
+            if (!suggestionsEl) return;
+            const filtered = getFilteredPrompts();
+            const ordered = promptDisplayOrder.length ? promptDisplayOrder : filtered;
+            const visible = ordered.slice(0, Math.min(CHIP_COUNT, ordered.length));
+            suggestionsEl.innerHTML = '';
+            visible.forEach((item) => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'lp-suggest-chip';
+                chip.textContent = item.label;
+                chip.addEventListener('click', () => quickSearch(item.query));
+                suggestionsEl.appendChild(chip);
+            });
+        }
+
+        function refreshPromptOrder(shuffle = false) {
+            const filtered = getFilteredPrompts();
+            promptDisplayOrder = shuffle ? shuffleList(filtered) : [...filtered];
+            renderPromptChips();
+        }
+
+        function setupPromptControls() {
+            const controls = document.getElementById('lp-suggest-controls');
+            const shuffleBtn = document.getElementById('lp-suggest-shuffle');
+            if (!controls || !shuffleBtn) return;
+            controls.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLElement)) return;
+                const filter = target.getAttribute('data-filter');
+                if (!filter) return;
+                activePromptFilter = filter;
+                document.querySelectorAll('.lp-suggest-filter[data-filter]').forEach((btn) => {
+                    btn.classList.toggle('is-active', btn.getAttribute('data-filter') === activePromptFilter);
+                });
+                refreshPromptOrder(true);
+            });
+            shuffleBtn.addEventListener('click', () => refreshPromptOrder(true));
+        }
+
         function quickSearch(q) {
             document.getElementById('site-search-input').value = q;
             runSearch(null);
@@ -512,23 +589,7 @@
         });
 
         // Rolling placeholder animation
-        const PLACEHOLDER_QUERIES = [
-            'minimum slope for 8" sewer pipe',
-            'OSHA Type B soil trench requirements',
-            'Manning\'s n value for PVC pipe',
-            'thrust block sizing for 45° bend',
-            'what is an ESOP in construction?',
-            '811 blue stakes — who do I call?',
-            'bedding requirements for ductile iron pipe',
-            'OSHA confined space entry checklist',
-            'how to calculate trench volume',
-            'water main pressure testing procedure',
-            'shoring vs sloping — which do I use?',
-            'pipe deflection limits for PVC',
-            'how deep before shoring is required?',
-            'union vs open shop in heavy civil',
-            'OSHA 1926 Subpart P summary',
-        ];
+        const PLACEHOLDER_QUERIES = CURATED_PROMPTS.map((item) => item.query);
 
         let phIndex = 0;
         let phCharIndex = 0;
@@ -584,6 +645,8 @@
             }
         });
 
+        setupPromptControls();
+        refreshPromptOrder(true);
         startPlaceholderCycle();
 
     </script>

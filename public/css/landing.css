@@ -781,7 +781,37 @@ body {
     justify-content: center;
 }
 
-.lp-search-suggestions span {
+.lp-search-suggestion-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.lp-suggest-filter {
+    font-size: 0.73rem;
+    color: rgba(255,255,255,0.58);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.lp-suggest-filter.is-active {
+    color: rgba(255,255,255,0.88);
+    border-color: rgba(187,152,113,0.5);
+    background: rgba(187,152,113,0.14);
+}
+
+.lp-suggest-shuffle {
+    color: rgba(255,255,255,0.72);
+}
+
+.lp-suggest-chip {
     font-size: 0.78rem;
     color: rgba(255,255,255,0.45);
     background: rgba(255,255,255,0.06);
@@ -791,9 +821,11 @@ body {
     cursor: pointer;
     transition: color 0.15s, border-color 0.15s, background 0.15s;
     font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.2;
 }
 
-.lp-search-suggestions span:hover {
+.lp-suggest-chip:hover,
+.lp-suggest-filter:hover {
     color: rgba(255,255,255,0.8);
     border-color: rgba(255,255,255,0.25);
     background: rgba(255,255,255,0.1);
