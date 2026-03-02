@@ -244,6 +244,33 @@ function ensureWorkflowBlock(responseText, userMsg, useTools, messages) {
   return trimmed ? `${trimmed}\n\n${block}` : block;
 }
 
+const OSHA_TYPE_C_INTENT = /\b(type\s*c|osha|trench(?:ing)?|slope)\b/i;
+const OSHA_TYPE_C_SPEC = /1\.5\s*[:\-]\s*1|1\.5h\s*[:\-]\s*1v|34\s*(?:°|degrees?)/i;
+const OSHA_TYPE_C_WRONG = /\b1\s*[:\-]\s*1\b/i;
+
+function ensureSafetyCorrections(responseText, userMsg) {
+  const msg = String(userMsg || '');
+  let text = String(responseText || '');
+  if (!OSHA_TYPE_C_INTENT.test(msg)) return text;
+
+  const likelyTypeCQuestion = /\btype\s*c\b/i.test(msg);
+  if (!likelyTypeCQuestion) return text;
+
+  const hasCorrectTypeCRatio = OSHA_TYPE_C_SPEC.test(text);
+  const hasWrongTypeCRatio = OSHA_TYPE_C_WRONG.test(text);
+  if (!hasWrongTypeCRatio && hasCorrectTypeCRatio) return text;
+
+  // Safety guardrail: avoid returning unsafe trench guidance.
+  const correction = 'Safety check: For OSHA Type C soil, use a maximum allowable slope of 1.5H:1V (about 34 degrees) for sloping systems. Do not use 1:1 for Type C.';
+  if (hasWrongTypeCRatio) {
+    text = text.replace(/\b1\s*[:\-]\s*1\b/g, '1.5:1');
+  }
+  if (!/Safety check:/i.test(text)) {
+    text = `${text.trim()}\n\n${correction}`.trim();
+  }
+  return text;
+}
+
 function extractPhasesFromText(text) {
   if (!text || typeof text !== 'string') return null;
   const phases = [];
@@ -702,6 +729,7 @@ module.exports = async function handler(req, res) {
           let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages);
           text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context);
           text = ensureWorkflowBlock(text, lastUser?.content, toolsEnabled, messages);
+          text = ensureSafetyCorrections(text, lastUser?.content);
 
           const uniqueTools = [...new Set(generated.toolsUsed.filter(Boolean))];
           telemetry.recordChatRun({
@@ -754,6 +782,7 @@ module.exports = async function handler(req, res) {
     let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages);
     text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context);
     text = ensureWorkflowBlock(text, lastUser?.content, toolsEnabled, messages);
+    text = ensureSafetyCorrections(text, lastUser?.content);
 
     const uniqueTools = [...new Set(generated.toolsUsed.filter(Boolean))];
     telemetry.recordChatRun({

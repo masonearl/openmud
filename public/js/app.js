@@ -587,11 +587,6 @@
         return lines.join('\n');
     }
 
-    var TOOL_TRIGGERS = /generate|build|create|make|draft|estimate|bid|proposal|schedule/i;
-    function shouldUseTools(text) {
-        return TOOL_TRIGGERS.test(text);
-    }
-
     function doSend() {
         var text = (input.value || '').trim();
         if (!text || !activeProjectId) return;
@@ -617,7 +612,7 @@
             var mode = localStorage.getItem(STORAGE_CHAT_MODE) === 'ask' ? 'ask' : 'agent';
             if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
 
-            var useTools = mode === 'agent' && shouldUseTools(text);
+            var useTools = mode === 'agent';
             var payload = {
                 messages: history,
                 model: model,

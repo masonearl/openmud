@@ -20,3 +20,8 @@ video/
 *.mov
 *.avi
 *.mkv
+
+# Playwright outputs
+playwright-report/
+test-results/
+reports/site-bot/
