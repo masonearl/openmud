@@ -11,6 +11,12 @@ Workflow intake:
 - If user asks to find project info in email/files or extract from a document, switch to workflow-intake behavior.
 - Ask only for missing essentials: project name, source (email/files/document), and target output.
 - If direct connectors are unavailable, state that clearly and ask for uploaded files or pasted email thread text.`;
+const CALENDAR_RULES = `
+Calendar add flow:
+- If user asks to add an event to calendar or uses /addevent, call create_calendar_event.
+- For timed events, pass ISO datetimes for start/end.
+- If details are missing (date/time/timezone/title), ask only for missing essentials.
+- When event data is complete, include [OPENMUD_CALENDAR]{...}[/OPENMUD_CALENDAR] with title, start_iso, end_iso, timezone, location, description, all_day.`;
 
 /** Model-specific system prompts: purpose + when to use which tools */
 const SYSTEM_PROMPTS = {
@@ -96,6 +102,7 @@ const SCHEDULE_INTENT = /generate\s+(a\s+)?schedule|create\s+(a\s+)?schedule|bui
 
 const PROPOSAL_INTENT = /generate\s+(a\s+)?proposal|create\s+(a\s+)?proposal|build\s+(a\s+)?proposal|draft\s+(a\s+)?proposal|make\s+(a\s+)?proposal|proposal\s+for|need\s+(a\s+)?proposal|want\s+(a\s+)?proposal|get\s+(a\s+)?proposal|turn\s+(it\s+)?into\s+(a\s+)?proposal|proposal\s+pdf/i;
 const WORKFLOW_INTENT = /\b(find|search|pull|grab|locate|extract|read|parse)\b[\s\S]{0,80}\b(email|inbox|mail|file|files|folder|drive|document|pdf|attachment)\b|\bfrom\s+this\s+(document|pdf|file)\b/i;
+const CALENDAR_INTENT = /\/addevent\b|\b(add|create|schedule|put)\b[\s\S]{0,80}\b(calendar|event)\b|\badd\s+to\s+(my\s+)?(apple|google)\s+calendar\b/i;
 
 const PROJECT_TYPE_LABELS = {
   waterline: 'waterline',
@@ -106,17 +113,78 @@ const PROJECT_TYPE_LABELS = {
 };
 
 const TOOL_SCHEMA_TTL_MS = 5 * 60 * 1000;
+const REGISTRY_FETCH_TIMEOUT_MS = 2500;
+const PYTHON_TOOL_FETCH_TIMEOUT_MS = 8000;
 const toolSchemaCache = {
   expiresAt: 0,
   tools: [],
 };
+const FALLBACK_LOCAL_TOOLS = [
+  {
+    type: 'function',
+    function: {
+      name: 'build_schedule',
+      description: 'Build a construction schedule with phases and dates.',
+      parameters: {
+        type: 'object',
+        properties: {
+          project_name: { type: 'string' },
+          start_date: { type: 'string', description: 'ISO date YYYY-MM-DD' },
+          duration_days: { type: 'number' },
+          phases: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['project_name', 'duration_days'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'render_proposal_html',
+      description: 'Generate proposal HTML for PDF export.',
+      parameters: {
+        type: 'object',
+        properties: {
+          client: { type: 'string' },
+          scope: { type: 'string' },
+          total: { type: 'number' },
+          duration: { type: 'number' },
+          assumptions: { type: 'string' },
+          exclusions: { type: 'string' },
+        },
+        required: ['client', 'scope', 'total'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'create_calendar_event',
+      description: 'Normalize calendar event data for Apple/Google calendar add flow.',
+      parameters: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          start: { type: 'string' },
+          end: { type: 'string' },
+          duration_minutes: { type: 'number' },
+          timezone: { type: 'string' },
+          location: { type: 'string' },
+          description: { type: 'string' },
+          all_day: { type: 'boolean' },
+        },
+        required: ['title', 'start'],
+      },
+    },
+  },
+];
 
 function getSystemPrompt(model, chatMode = 'agent') {
   const base = SYSTEM_PROMPTS[model] || SYSTEM_PROMPTS['gpt-4o-mini'];
   const modeRules = chatMode === 'ask'
-    ? 'Mode: Ask. Give direct answers only. Do not run tools unless the user explicitly asks you to generate a proposal, schedule, or estimate.'
+    ? 'Mode: Ask. Give direct answers only. Do not run tools unless the user explicitly asks you to generate a proposal, schedule, estimate, or calendar event.'
     : 'Mode: Agent. You may proactively use tools when they improve the result.';
-  return `${base}\n\n${WORKFLOW_RULES}\n\n${modeRules}`;
+  return `${base}\n\n${WORKFLOW_RULES}\n\n${CALENDAR_RULES}\n\n${modeRules}`;
 }
 
 function buildProposalFromEstimate(estimateContext) {
@@ -240,6 +308,67 @@ function ensureWorkflowBlock(responseText, userMsg, useTools, messages) {
     connectors_available: false,
   })}[/OPENMUD_WORKFLOW]`;
 
+  const trimmed = (responseText || '').trim();
+  return trimmed ? `${trimmed}\n\n${block}` : block;
+}
+
+function normalizeCalendarEventArgs(args) {
+  const title = String(args?.title || '').trim();
+  const startRaw = String(args?.start || '').trim();
+  const endRaw = String(args?.end || '').trim();
+  const allDay = Boolean(args?.all_day);
+  const timezone = String(args?.timezone || '').trim() || 'America/Denver';
+  const location = String(args?.location || '').trim();
+  const description = String(args?.description || '').trim();
+  const durationMinutes = Math.max(1, Math.round(toNum(args?.duration_minutes, 60)));
+
+  const missing = [];
+  if (!title) missing.push('title');
+  if (!startRaw) missing.push('start');
+  if (missing.length > 0) {
+    return {
+      needs_clarification: true,
+      missing_fields: missing,
+      prompt: `Missing required event fields: ${missing.join(', ')}.`,
+    };
+  }
+
+  const startMs = Date.parse(startRaw);
+  if (Number.isNaN(startMs)) {
+    return {
+      needs_clarification: true,
+      missing_fields: ['start'],
+      prompt: 'Start date/time is invalid. Provide ISO datetime for start.',
+    };
+  }
+  let endMs = Date.parse(endRaw);
+  if (Number.isNaN(endMs)) {
+    endMs = startMs + (durationMinutes * 60 * 1000);
+  }
+  if (!allDay && endMs <= startMs) {
+    endMs = startMs + (durationMinutes * 60 * 1000);
+  }
+
+  return {
+    needs_clarification: false,
+    event: {
+      title,
+      start_iso: new Date(startMs).toISOString(),
+      end_iso: new Date(endMs).toISOString(),
+      timezone,
+      location,
+      description,
+      all_day: allDay,
+    },
+  };
+}
+
+function ensureCalendarBlock(responseText, userMsg, useTools, calendarEventResult) {
+  if (!useTools || !CALENDAR_INTENT.test(userMsg || '')) return responseText;
+  if (/\[OPENMUD_CALENDAR\]/.test(responseText || '')) return responseText;
+  if (!calendarEventResult || calendarEventResult.needs_clarification || !calendarEventResult.event) return responseText;
+
+  const block = `[OPENMUD_CALENDAR]${JSON.stringify(calendarEventResult.event)}[/OPENMUD_CALENDAR]`;
   const trimmed = (responseText || '').trim();
   return trimmed ? `${trimmed}\n\n${block}` : block;
 }
@@ -368,11 +497,19 @@ function buildInternalHeaders() {
 
 async function callPythonTool(req, toolName, args) {
   const baseUrl = getBaseUrl(req);
-  const response = await fetch(`${baseUrl}/api/python/tools`, {
-    method: 'POST',
-    headers: buildInternalHeaders(),
-    body: JSON.stringify({ tool_name: toolName, arguments: args || {} }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), PYTHON_TOOL_FETCH_TIMEOUT_MS);
+  let response;
+  try {
+    response = await fetch(`${baseUrl}/api/python/tools`, {
+      method: 'POST',
+      headers: buildInternalHeaders(),
+      body: JSON.stringify({ tool_name: toolName, arguments: args || {} }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data?.error || `Python tool call failed for ${toolName}`);
@@ -386,10 +523,18 @@ async function loadToolSchemas(req) {
   }
 
   const baseUrl = getBaseUrl(req);
-  const response = await fetch(`${baseUrl}/api/python/registry`, {
-    method: 'GET',
-    headers: buildInternalHeaders(),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REGISTRY_FETCH_TIMEOUT_MS);
+  let response;
+  try {
+    response = await fetch(`${baseUrl}/api/python/registry`, {
+      method: 'GET',
+      headers: buildInternalHeaders(),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   const data = await response.json();
   if (!response.ok || !Array.isArray(data?.tools)) {
@@ -408,6 +553,15 @@ async function loadToolSchemas(req) {
     }));
   toolSchemaCache.expiresAt = Date.now() + TOOL_SCHEMA_TTL_MS;
   return toolSchemaCache.tools;
+}
+
+async function loadToolSchemasWithFallback(req) {
+  try {
+    return await loadToolSchemas(req);
+  } catch (err) {
+    console.warn('Tool schema registry unavailable; using local fallback tools.', err?.message || err);
+    return FALLBACK_LOCAL_TOOLS;
+  }
 }
 
 function filterToolsByAvailability(allTools, useTools, availableTools) {
@@ -462,6 +616,8 @@ async function executeTool(req, toolName, args) {
         bid_items: result.bid_items || [],
       };
     }
+    case 'create_calendar_event':
+      return normalizeCalendarEventArgs(args);
     case 'estimate_project_cost':
     case 'calculate_material_cost':
     case 'calculate_labor_cost':
@@ -509,6 +665,7 @@ async function runOpenAIWithTools(openai, req, options) {
   const toolsUsed = [];
   let hadToolError = false;
   let messageBuffer = [...apiMessages];
+  let calendarEventResult = null;
 
   for (let step = 0; step < 6; step += 1) {
     const completion = await openai.chat.completions.create({
@@ -522,12 +679,12 @@ async function runOpenAIWithTools(openai, req, options) {
 
     const assistantMessage = completion.choices?.[0]?.message;
     if (!assistantMessage) {
-      return { text: 'No response.', toolsUsed, hadToolError };
+      return { text: 'No response.', toolsUsed, hadToolError, calendarEventResult };
     }
 
     const toolCalls = Array.isArray(assistantMessage.tool_calls) ? assistantMessage.tool_calls : [];
     if (toolCalls.length === 0) {
-      return { text: assistantMessage.content || 'No response.', toolsUsed, hadToolError };
+      return { text: assistantMessage.content || 'No response.', toolsUsed, hadToolError, calendarEventResult };
     }
 
     messageBuffer.push({
@@ -543,6 +700,9 @@ async function runOpenAIWithTools(openai, req, options) {
 
       if (executed.ok) {
         toolsUsed.push(normalizeToolName(name));
+        if (normalizeToolName(name) === 'create_calendar_event') {
+          calendarEventResult = executed.result;
+        }
       } else {
         hadToolError = true;
       }
@@ -566,6 +726,7 @@ async function runOpenAIWithTools(openai, req, options) {
     text: fallback.choices?.[0]?.message?.content || 'No response.',
     toolsUsed,
     hadToolError,
+    calendarEventResult,
   };
 }
 
@@ -582,6 +743,7 @@ async function runAnthropicWithTools(anthropic, req, options) {
   const toolsUsed = [];
   let hadToolError = false;
   let messageBuffer = [...chatMessages];
+  let calendarEventResult = null;
 
   for (let step = 0; step < 6; step += 1) {
     const response = await anthropic.messages.create({
@@ -599,7 +761,7 @@ async function runAnthropicWithTools(anthropic, req, options) {
     const text = textParts.join('\n').trim();
 
     if (toolUses.length === 0) {
-      return { text: text || 'No response.', toolsUsed, hadToolError };
+      return { text: text || 'No response.', toolsUsed, hadToolError, calendarEventResult };
     }
 
     messageBuffer.push({ role: 'assistant', content: blocks });
@@ -612,6 +774,9 @@ async function runAnthropicWithTools(anthropic, req, options) {
 
       if (executed.ok) {
         toolsUsed.push(normalizeToolName(name));
+        if (normalizeToolName(name) === 'create_calendar_event') {
+          calendarEventResult = executed.result;
+        }
       } else {
         hadToolError = true;
       }
@@ -645,6 +810,7 @@ async function runAnthropicWithTools(anthropic, req, options) {
     text: fallbackText || 'No response.',
     toolsUsed,
     hadToolError,
+    calendarEventResult,
   };
 }
 
@@ -682,7 +848,7 @@ module.exports = async function handler(req, res) {
     const selectedModel = ALLOWED_MODELS.has(model) ? model : 'gpt-4o-mini';
     const toolsEnabled = selectedMode === 'agent' && use_tools;
 
-    const registryTools = toolsEnabled ? await loadToolSchemas(req) : [];
+    const registryTools = toolsEnabled ? await loadToolSchemasWithFallback(req) : [];
     const selectedOpenAITools = filterToolsByAvailability(registryTools, toolsEnabled, available_tools);
     const selectedAnthropicTools = toAnthropicTools(selectedOpenAITools);
 
@@ -729,6 +895,7 @@ module.exports = async function handler(req, res) {
           let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages);
           text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context);
           text = ensureWorkflowBlock(text, lastUser?.content, toolsEnabled, messages);
+          text = ensureCalendarBlock(text, lastUser?.content, toolsEnabled, generated.calendarEventResult);
           text = ensureSafetyCorrections(text, lastUser?.content);
 
           const uniqueTools = [...new Set(generated.toolsUsed.filter(Boolean))];
@@ -782,6 +949,7 @@ module.exports = async function handler(req, res) {
     let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages);
     text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context);
     text = ensureWorkflowBlock(text, lastUser?.content, toolsEnabled, messages);
+    text = ensureCalendarBlock(text, lastUser?.content, toolsEnabled, generated.calendarEventResult);
     text = ensureSafetyCorrections(text, lastUser?.content);
 
     const uniqueTools = [...new Set(generated.toolsUsed.filter(Boolean))];

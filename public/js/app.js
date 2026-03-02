@@ -10,7 +10,7 @@
     var STORAGE_SIDEBAR_WIDTH = 'rockmud_sidebarWidth';
     var DEFAULT_MODEL = 'gpt-4o-mini';
 
-    var WELCOME_MSG = "Hi, I'm the openmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
+    var WELCOME_MSG = "Hi, I'm the openmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" You can also use /addevent to create a calendar event with Apple/Google/.ics buttons. Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
 
     function id() { return 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
 
@@ -107,13 +107,49 @@
         return s;
     }
 
+    function toGoogleDate(dateObj) {
+        return dateObj.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    }
+
+    function escapeHtml(str) {
+        return String(str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function buildGoogleCalendarUrl(eventData) {
+        var start = new Date(eventData.start_iso);
+        var end = new Date(eventData.end_iso || eventData.start_iso);
+        var dates;
+        if (eventData.all_day) {
+            var startDay = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()));
+            var endDay = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate() + 1));
+            dates = toGoogleDate(startDay).slice(0, 8) + '/' + toGoogleDate(endDay).slice(0, 8);
+        } else {
+            dates = toGoogleDate(start) + '/' + toGoogleDate(end);
+        }
+        var params = new URLSearchParams({
+            action: 'TEMPLATE',
+            text: eventData.title || 'Event',
+            dates: dates
+        });
+        if (eventData.description) params.set('details', eventData.description);
+        if (eventData.location) params.set('location', eventData.location);
+        return 'https://calendar.google.com/calendar/render?' + params.toString();
+    }
+
     function renderMessageContent(content, wrap) {
         var text = (content || '').trim();
         var scheduleMatch = text.match(/\[OPENMUD_SCHEDULE\]([\s\S]*?)\[\/OPENMUD_SCHEDULE\]/);
         var proposalMatch = text.match(/\[OPENMUD_PROPOSAL\]([\s\S]*?)\[\/OPENMUD_PROPOSAL\]/);
+        var calendarMatch = text.match(/\[OPENMUD_CALENDAR\]([\s\S]*?)\[\/OPENMUD_CALENDAR\]/);
         var displayText = text;
         var scheduleData = null;
         var proposalData = null;
+        var calendarData = null;
         if (scheduleMatch) {
             displayText = displayText.replace(/\[OPENMUD_SCHEDULE\][\s\S]*?\[\/OPENMUD_SCHEDULE\]/, '').trim();
             try {
@@ -124,6 +160,12 @@
             displayText = displayText.replace(/\[OPENMUD_PROPOSAL\][\s\S]*?\[\/OPENMUD_PROPOSAL\]/, '').trim();
             try {
                 proposalData = JSON.parse(proposalMatch[1].trim());
+            } catch (e) { /* ignore */ }
+        }
+        if (calendarMatch) {
+            displayText = displayText.replace(/\[OPENMUD_CALENDAR\][\s\S]*?\[\/OPENMUD_CALENDAR\]/, '').trim();
+            try {
+                calendarData = JSON.parse(calendarMatch[1].trim());
             } catch (e) { /* ignore */ }
         }
         displayText = sanitizeResponse(displayText);
@@ -282,6 +324,51 @@
             }).catch(function () {
                 propCard.innerHTML = '<div class="msg-schedule-error">Could not load proposal.</div>';
             });
+        }
+        if (calendarData && calendarData.title && calendarData.start_iso) {
+            var calCard = document.createElement('div');
+            calCard.className = 'msg-schedule-card msg-calendar-card';
+            var startDate = new Date(calendarData.start_iso);
+            var endDate = new Date(calendarData.end_iso || calendarData.start_iso);
+            var whenText = calendarData.all_day
+                ? startDate.toLocaleDateString()
+                : startDate.toLocaleString() + ' - ' + endDate.toLocaleTimeString();
+            var whereText = calendarData.location ? ('<div class="msg-calendar-meta"><strong>Location:</strong> ' + escapeHtml(calendarData.location) + '</div>') : '';
+            var descText = calendarData.description ? ('<div class="msg-calendar-meta"><strong>Notes:</strong> ' + escapeHtml(calendarData.description) + '</div>') : '';
+            calCard.innerHTML = '<div class="msg-schedule-inner">' +
+                '<div class="msg-calendar-title">' + escapeHtml(calendarData.title) + '</div>' +
+                '<div class="msg-calendar-meta"><strong>When:</strong> ' + escapeHtml(whenText) + '</div>' +
+                whereText +
+                descText +
+                '<div class="msg-schedule-actions"></div>' +
+                '</div>';
+            var actions = calCard.querySelector('.msg-schedule-actions');
+            var payload = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(calendarData)))));
+            var icsUrl = API_BASE + '/calendar/ics?data=' + payload;
+
+            var appleBtn = document.createElement('a');
+            appleBtn.className = 'btn-secondary btn-sm';
+            appleBtn.href = icsUrl;
+            appleBtn.target = '_blank';
+            appleBtn.rel = 'noopener';
+            appleBtn.textContent = 'Add to Apple Calendar';
+
+            var googleBtn = document.createElement('a');
+            googleBtn.className = 'btn-secondary btn-sm';
+            googleBtn.href = buildGoogleCalendarUrl(calendarData);
+            googleBtn.target = '_blank';
+            googleBtn.rel = 'noopener';
+            googleBtn.textContent = 'Add to Google Calendar';
+
+            var downloadBtn = document.createElement('a');
+            downloadBtn.className = 'btn-primary btn-sm';
+            downloadBtn.href = icsUrl + '&download=1';
+            downloadBtn.textContent = 'Download .ics';
+
+            actions.appendChild(appleBtn);
+            actions.appendChild(googleBtn);
+            actions.appendChild(downloadBtn);
+            wrap.appendChild(calCard);
         }
     }
 
@@ -612,7 +699,8 @@
             var mode = localStorage.getItem(STORAGE_CHAT_MODE) === 'ask' ? 'ask' : 'agent';
             if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
 
-            var useTools = mode === 'agent';
+            var addeventCommand = /^\/addevent\b/i.test(text);
+            var useTools = mode === 'agent' || addeventCommand;
             var payload = {
                 messages: history,
                 model: model,
@@ -620,7 +708,7 @@
                 temperature: 0.7,
                 max_tokens: 1024,
                 use_tools: useTools,
-                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined
+                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost', 'create_calendar_event'] : undefined
             };
             if (useTools && lastEstimatePayload && lastEstimateResult) {
                 payload.estimate_context = {
@@ -631,7 +719,7 @@
             if (!useTools) delete payload.available_tools;
 
             var controller = new AbortController();
-            var timeoutId = setTimeout(function () { controller.abort(); }, 60000);
+            var timeoutId = setTimeout(function () { controller.abort(); }, 20000);
             fetch(API_BASE + '/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

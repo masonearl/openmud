@@ -168,6 +168,40 @@ TOOL_DEFINITIONS = [
             "required": ["client", "scope", "total"],
         },
     },
+    {
+        "name": "create_calendar_event",
+        "description": (
+            "Normalize calendar event data for Apple/Google calendar add flow. "
+            "Use when user asks to add an event to calendar or uses /addevent. "
+            "For timed events, provide ISO datetimes in start/end."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string", "description": "Event title"},
+                "start": {
+                    "type": "string",
+                    "description": "Start datetime in ISO 8601 (e.g. 2026-03-03T06:30:00-07:00), or date for all-day",
+                },
+                "end": {
+                    "type": "string",
+                    "description": "End datetime in ISO 8601. Optional if duration_minutes is provided.",
+                },
+                "duration_minutes": {
+                    "type": "number",
+                    "description": "Optional event duration in minutes when end is omitted",
+                },
+                "timezone": {
+                    "type": "string",
+                    "description": "IANA timezone like America/Denver",
+                },
+                "location": {"type": "string"},
+                "description": {"type": "string"},
+                "all_day": {"type": "boolean", "description": "Set true for all-day events"},
+            },
+            "required": ["title", "start"],
+        },
+    },
 ]
 
 
