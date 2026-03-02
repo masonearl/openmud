@@ -1,4 +1,42 @@
 {
   "outputDirectory": "public",
-  "framework": null
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/about.html",
+      "destination": "/pages/about.html"
+    },
+    {
+      "source": "/tools.html",
+      "destination": "/pages/tools.html"
+    },
+    {
+      "source": "/chat.html",
+      "destination": "/pages/chat.html"
+    },
+    {
+      "source": "/calculators.html",
+      "destination": "/pages/calculators.html"
+    },
+    {
+      "source": "/resources.html",
+      "destination": "/pages/resources.html"
+    },
+    {
+      "source": "/innovators.html",
+      "destination": "/pages/innovators.html"
+    },
+    {
+      "source": "/companies.html",
+      "destination": "/pages/companies.html"
+    },
+    {
+      "source": "/documentation.html",
+      "destination": "/pages/documentation.html"
+    },
+    {
+      "source": "/iija-infrastructure-demand.html",
+      "destination": "/pages/iija-infrastructure-demand.html"
+    }
+  ]
 }

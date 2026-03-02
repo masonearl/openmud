@@ -92,9 +92,8 @@ body.has-app .app-layout {
 }
 
 .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+    width: 100%;
+    padding: 8px 20px;
     min-height: 44px;
     display: flex;
     align-items: center;
