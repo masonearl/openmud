@@ -138,6 +138,7 @@ async function auditPage(page, pagePath, index, errors) {
 function checkProbeText(responseText, probe) {
   const findings = [];
   const text = String(responseText || '');
+  const textLower = text.toLowerCase();
   (probe.checks || []).forEach((check) => {
     if (Array.isArray(check.requiredAny) && check.requiredAny.length > 0) {
       const matched = check.requiredAny.some((rx) => rx.test(text));
@@ -152,7 +153,16 @@ function checkProbeText(responseText, probe) {
       }
     }
     if (Array.isArray(check.forbiddenAny) && check.forbiddenAny.length > 0) {
-      const forbiddenHit = check.forbiddenAny.some((rx) => rx.test(text));
+      let forbiddenHit = check.forbiddenAny.some((rx) => rx.test(text));
+      if (forbiddenHit && check.id === 'reject_type_c_one_to_one') {
+        // Allow explicit negative guidance like "do not use 1:1".
+        const oneToOneMentions = [...textLower.matchAll(/1\s*[:\-]\s*1/g)];
+        forbiddenHit = oneToOneMentions.some((m) => {
+          const idx = m.index || 0;
+          const left = textLower.slice(Math.max(0, idx - 24), idx);
+          return !/(do not|don't|never|not)/.test(left);
+        });
+      }
       if (forbiddenHit) {
         findings.push({
           severity: check.severity || 'high',
