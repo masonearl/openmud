@@ -21,7 +21,11 @@ function showSection(id) {
     var section = document.getElementById('section-' + id);
     var link = document.querySelector('[data-section="' + id + '"]');
     if (section) { section.classList.add('active'); }
-    if (link) { link.classList.add('active'); }
+    if (link) {
+        link.classList.add('active');
+        var group = link.closest('.res-sidebar-group');
+        if (group) group.open = true;
+    }
     // Sync mobile select
     var sel = document.querySelector('.res-mobile-select');
     if (sel) sel.value = id;
