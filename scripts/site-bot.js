@@ -14,22 +14,25 @@ const TAKE_SCREENSHOTS = process.env.BOT_SCREENSHOTS === '1';
 const BOT_FAIL_ON = (process.env.BOT_FAIL_ON || 'high').toLowerCase();
 const PAGE_WARN_MS = Number(process.env.BOT_PAGE_WARN_MS || 8000);
 const CHAT_PAGE_WARN_MS = Number(process.env.BOT_CHAT_PAGE_WARN_MS || 15000);
+const BOT_MOCK_API = process.env.BOT_MOCK_API === '1';
+const CHAT_PATH = process.env.BOT_CHAT_PATH || '/chat.html';
+const STATIC_PATHS = process.env.BOT_STATIC_PATHS
+  ? process.env.BOT_STATIC_PATHS.split(',').map((item) => item.trim()).filter(Boolean)
+  : [
+      '/',
+      '/about.html',
+      '/tools.html',
+      '/chat.html',
+      '/calculators.html',
+      '/resources.html',
+      '/innovators.html',
+      '/companies.html',
+      '/documentation.html',
+    ];
 const OUTPUT_DIR = path.join(process.cwd(), 'reports', 'site-bot');
 const LATEST_JSON = path.join(OUTPUT_DIR, 'latest.json');
 const LATEST_MD = path.join(OUTPUT_DIR, 'latest.md');
 const EXTERNAL_ASSET_NOISE = /(youtube\.com|ytimg\.com|fonts\.gstatic\.com|videos\.pexels\.com)/i;
-
-const STATIC_PATHS = [
-  '/',
-  '/about.html',
-  '/tools.html',
-  '/chat.html',
-  '/calculators.html',
-  '/resources.html',
-  '/innovators.html',
-  '/companies.html',
-  '/documentation.html',
-];
 
 const CHAT_PROBES = [
   {
@@ -178,7 +181,7 @@ function checkProbeText(responseText, probe) {
 }
 
 async function runChatProbe(page, probe, idx, errors) {
-  const targetUrl = `${BASE_URL}/chat.html`;
+  const targetUrl = `${BASE_URL}${CHAT_PATH}`;
   const startedAt = Date.now();
   let lastError = null;
 
@@ -279,10 +282,10 @@ function analyzeFindings(summary) {
         message: `Page returned bad status: ${p.status ?? 'unknown'}`,
       });
     }
-    const threshold = p.path === '/chat.html' ? CHAT_PAGE_WARN_MS : PAGE_WARN_MS;
+    const threshold = p.path === CHAT_PATH ? CHAT_PAGE_WARN_MS : PAGE_WARN_MS;
     if (p.elapsedMs > threshold) {
       pushFinding({
-        severity: p.path === '/chat.html' ? 'high' : 'warn',
+        severity: p.path === CHAT_PATH ? 'high' : 'warn',
         kind: 'page_latency',
         path: p.path,
         message: `Page load slow: ${p.elapsedMs}ms (threshold ${threshold}ms)`,
@@ -406,6 +409,23 @@ async function main() {
   const page = await context.newPage();
   const errors = [];
   const seenRequestErrors = new Set();
+
+  if (BOT_MOCK_API) {
+    await page.route('**/api/chat', async (route) => {
+      const body = route.request().postDataJSON() || {};
+      const messages = Array.isArray(body.messages) ? body.messages : [];
+      const lastUserMsg = [...messages].reverse().find((m) => m && m.role === 'user');
+      const promptText = String(lastUserMsg?.content || '').toLowerCase();
+      const response = promptText.includes('type c')
+        ? 'For OSHA Type C soil, use a maximum slope of 1.5H:1V (about 34 degrees). Do not use 1:1.'
+        : 'Estimate outline: include materials, labor, equipment, and total estimated cost.';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ response, tools_used: [] }),
+      });
+    });
+  }
 
   page.on('requestfailed', (request) => {
     const failure = request.failure();

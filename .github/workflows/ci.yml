@@ -55,6 +55,62 @@ jobs:
         with:
           node-version: "20"
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Check for syntax errors in API files
         run: node --check api/chat.js api/search.js api/schedule.js api/proposal.js api/health.js api/predict.js api/feedback.js
+
+  e2e:
+    name: Playwright chat e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run e2e tests
+        run: npm run test:e2e
+
+  site_bot:
+    name: Site bot synthetic checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: npm ci
+      - name: Start local static server
+        run: nohup python3 -m http.server 4312 --directory public > /tmp/openmud-static.log 2>&1 &
+      - name: Wait for local server
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://127.0.0.1:4312/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Local server failed to start"
+          exit 1
+      - name: Run site bot gate
+        env:
+          BASE_URL: http://127.0.0.1:4312
+          BOT_CHAT_PATH: /pages/chat.html
+          BOT_STATIC_PATHS: /,/pages/about.html,/pages/tools.html,/pages/chat.html,/pages/calculators.html,/pages/resources.html,/pages/innovators.html,/pages/companies.html,/pages/documentation.html
+          BOT_MOCK_API: "1"
+          BOT_FAIL_ON: high
+          BOT_CHAT_TIMEOUT_MS: 60000
+        run: npm run bot:site
+      - name: Upload site bot reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-bot-report
+          path: reports/site-bot/

@@ -12,12 +12,12 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
   use: {
-    baseURL: 'http://127.0.0.1:4312',
+    baseURL: 'http://127.0.0.1:4302',
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npx vercel dev --listen 4312',
-    url: 'http://127.0.0.1:4312',
+    command: 'python3 -m http.server 4302 --directory public',
+    url: 'http://127.0.0.1:4302',
     reuseExistingServer: true,
     timeout: 120_000,
   },

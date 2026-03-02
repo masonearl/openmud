@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function openChat(page: Page) {
-  await page.goto('/chat.html');
+  await page.goto('/pages/chat.html');
   await expect(page.locator('#chat-input')).toBeVisible();
 }
 

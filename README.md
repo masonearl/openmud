@@ -222,6 +222,13 @@ Full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ---
 
+## Quality gates
+
+- CI quality checklist: [docs/QUALITY_CHECKLIST.md](docs/QUALITY_CHECKLIST.md)
+- Current CI includes Python tests/lint, Playwright chat e2e, and site-bot synthetic checks
+
+---
+
 ## Community
 
 - **[GitHub Discussions](https://github.com/masonearl/openmud/discussions)** — questions, ideas, show your builds
