@@ -1,2 +1,2 @@
-# openmud tools - no external deps for core tools
-# Add if extending: openai, fastapi, pydantic
+# openmud tools dependencies
+pypdf>=5.0.0

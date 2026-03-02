@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/meta/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/meta/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/meta/apple-touch-icon.png">
+    <link rel="manifest" href="/assets/meta/site.webmanifest">
+    <meta name="theme-color" content="#15120f">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takeoff OCR Preview - openmud</title>
+    <meta name="description" content="Upload up to 5 plan pages for OCR-assisted takeoff preview: extract dimensions, identify utility tokens, and review candidate measurements.">
+    <link rel="stylesheet" href="/css/landing.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .takeoff-wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        .takeoff-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+        .takeoff-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .takeoff-upload {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+        .takeoff-btn {
+            border: 1px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
+            padding: 9px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .takeoff-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .takeoff-note {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        .takeoff-results {
+            display: grid;
+            gap: 10px;
+        }
+        .takeoff-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+        }
+        .takeoff-stat {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .takeoff-stat-label {
+            color: var(--text-tertiary);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .takeoff-stat-value {
+            color: var(--text);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+        .takeoff-page {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.015);
+        }
+        .takeoff-page h3 {
+            margin: 0 0 8px;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+        .takeoff-chip {
+            display: inline-block;
+            border: 1px solid var(--border-light);
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin: 0 5px 5px 0;
+            background: rgba(255,255,255,0.04);
+        }
+        .takeoff-preview-text {
+            color: var(--text-secondary);
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo">openmud <span class="lp-nav-caret">▾</span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/about.html">About</a>
+                <a href="/tools.html">Tools</a>
+                <a href="/chat.html">AI Chat</a>
+                <a href="/calculators.html">Calculators</a>
+                <a href="/resources.html">Resources</a>
+                <a href="/innovators.html">Innovators</a>
+                <a href="/companies.html">Companies</a>
+                <a href="/documentation.html">Documentation</a>
+            </div>
+        </details>
+    </nav>
+
+    <section class="lp-hero" style="padding-bottom: 26px;">
+        <p class="lp-section-label" style="margin-bottom:16px;">Takeoff OCR Preview</p>
+        <h1 class="lp-hero-title" style="font-size: clamp(1.9rem, 5vw, 3rem);">
+            Fast plan extraction,<br><em>for takeoff prep.</em>
+        </h1>
+        <p class="lp-hero-sub">
+            Upload up to 5 PDF pages. This free MVP extracts text-layer dimensions and count tokens so estimators can start faster.
+        </p>
+    </section>
+
+    <div class="takeoff-wrap">
+        <div class="takeoff-card">
+            <div class="takeoff-row">
+                <input id="takeoff-file" type="file" accept="application/pdf" class="takeoff-upload" />
+                <button id="takeoff-run" class="takeoff-btn">Analyze plan set</button>
+            </div>
+            <p class="takeoff-note">Free preview limit: 5 pages, 12MB. OCR for scanned-image pages is next phase.</p>
+            <p id="takeoff-status" class="takeoff-note"></p>
+        </div>
+
+        <div id="takeoff-results" class="takeoff-results"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('takeoff-file');
+        const runBtn = document.getElementById('takeoff-run');
+        const statusEl = document.getElementById('takeoff-status');
+        const resultsEl = document.getElementById('takeoff-results');
+
+        function setStatus(text, isError = false) {
+            statusEl.textContent = text || '';
+            statusEl.style.color = isError ? '#fda4af' : '';
+        }
+
+        function toDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result || ''));
+                reader.onerror = () => reject(new Error('Failed to read file.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderResults(data) {
+            const agg = data.aggregate || {};
+            const pages = Array.isArray(data.pages) ? data.pages : [];
+            const tokenRows = Object.entries(agg.token_counts || {});
+            resultsEl.innerHTML = `
+                <div class="takeoff-stats">
+                    <div class="takeoff-stat"><div class="takeoff-stat-label">Pages</div><div class="takeoff-stat-value">${data.page_count || 0}</div></div>
+                    <div class="takeoff-stat"><div class="takeoff-stat-label">Dimension Candidates</div><div class="takeoff-stat-value">${agg.measurement_candidates || 0}</div></div>
+                    <div class="takeoff-stat"><div class="takeoff-stat-label">Text Characters</div><div class="takeoff-stat-value">${agg.text_characters || 0}</div></div>
+                    <div class="takeoff-stat"><div class="takeoff-stat-label">Token Counts</div><div class="takeoff-stat-value">${tokenRows.map(([k, v]) => `${k}:${v}`).join(' · ') || 'None'}</div></div>
+                </div>
+                ${pages.map((page) => `
+                    <div class="takeoff-page">
+                        <h3>Page ${page.page_number}</h3>
+                        <div>${(page.measurement_candidates || []).map((m) => `<span class="takeoff-chip">${m}</span>`).join('') || '<span class="takeoff-note">No measurement candidates detected.</span>'}</div>
+                        <p class="takeoff-preview-text">${page.text_preview || 'No extractable text detected on this page.'}</p>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        runBtn.addEventListener('click', async () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) {
+                setStatus('Select a PDF first.', true);
+                return;
+            }
+            runBtn.disabled = true;
+            setStatus('Analyzing plan set...');
+            resultsEl.innerHTML = '';
+            try {
+                const pdfBase64 = await toDataUrl(file);
+                const res = await fetch('/api/python/takeoff_preview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pdf_base64: pdfBase64, max_pages: 5 }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to analyze plan set.');
+                renderResults(data);
+                setStatus('Analysis complete.');
+            } catch (err) {
+                setStatus(err.message || 'Takeoff preview failed.', true);
+            } finally {
+                runBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

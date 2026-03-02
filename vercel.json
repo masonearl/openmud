@@ -15,6 +15,10 @@
       "destination": "/pages/chat.html"
     },
     {
+      "source": "/takeoff.html",
+      "destination": "/pages/takeoff.html"
+    },
+    {
       "source": "/calculators.html",
       "destination": "/pages/calculators.html"
     },
