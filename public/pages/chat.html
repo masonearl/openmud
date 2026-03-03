@@ -55,16 +55,20 @@
         <aside class="projects-sidebar" id="projects-sidebar">
             <div class="projects-header">
                 <h3>Projects</h3>
-                <button type="button" class="btn-new-project" id="btn-new-project" title="New project">+ New</button>
+                <button type="button" class="btn-new-project icon-btn" id="btn-new-project" title="New project" aria-label="New project">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                </button>
             </div>
             <ul class="projects-list" id="projects-list"></ul>
             <div class="documents-section" id="documents-section">
                 <div class="documents-header">
                     <h3>Documents</h3>
                     <div class="documents-header-actions">
-                        <button type="button" class="btn-upload btn-folder" id="btn-new-folder" title="Create folder">+ Folder</button>
-                        <label class="btn-upload" title="Upload document">
-                            <span>+ Add</span>
+                        <button type="button" class="btn-upload btn-folder icon-btn" id="btn-new-folder" title="Create folder" aria-label="Create folder">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path><path d="M12 10v6M9 13h6"></path></svg>
+                        </button>
+                        <label class="btn-upload icon-btn" title="Upload document" aria-label="Upload document">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V6"></path><path d="M8 10l4-4 4 4"></path><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path></svg>
                             <input type="file" id="doc-upload" multiple hidden>
                         </label>
                     </div>
