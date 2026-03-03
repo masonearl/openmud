@@ -1,6 +1,11 @@
 {
   "outputDirectory": "public",
   "framework": null,
+  "functions": {
+    "api/python/*.py": {
+      "excludeFiles": "{.git/**,.vercel/**,.venv/**,node_modules/**,video/**,assets/**,reports/**,logo/**,public/assets/**,test-results/**}"
+    }
+  },
   "rewrites": [
     {
       "source": "/about.html",
