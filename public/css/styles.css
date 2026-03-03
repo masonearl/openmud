@@ -1448,6 +1448,85 @@ body {
     accent-color: #c79b6a;
 }
 
+#tool-form-estimate #form-estimate {
+    display: grid;
+    gap: 14px;
+}
+
+.estimator-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid #5a4735;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #2f241b 0%, #241a13 100%);
+}
+
+.estimator-topbar-title h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #f8eede;
+}
+
+.estimator-topbar-title p {
+    margin: 4px 0 0;
+    font-size: 0.8rem;
+    color: #c9b49c;
+}
+
+.estimator-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.estimator-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #5a4735;
+    background: linear-gradient(180deg, #33271d 0%, #271d15 100%);
+    font-size: 0.75rem;
+    color: #e8d9c7;
+}
+
+.estimator-chat-note {
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px solid #7c664e;
+    background: rgba(199, 155, 106, 0.16);
+    color: #f6eadc;
+    font-size: 0.8125rem;
+}
+
+.estimator-section {
+    border: 1px solid #4f3d2d;
+    border-radius: 10px;
+    padding: 12px 12px 2px;
+    background: linear-gradient(180deg, rgba(49, 38, 28, 0.7) 0%, rgba(36, 28, 21, 0.8) 100%);
+}
+
+.estimator-section h5 {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #d7b995;
+}
+
+.estimator-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+}
+
+#tool-form-estimate .form-row-inline {
+    margin-top: 6px;
+}
+
 /* Estimate result */
 .estimate-result {
     margin-top: 20px;
@@ -1636,6 +1715,9 @@ body {
     .sidebar-resize-handle { display: none; }
     .projects-header h3,
     .documents-header h3 { font-size: 0.625rem; }
+    .estimator-grid { grid-template-columns: 1fr; }
+    .estimator-topbar { flex-direction: column; align-items: flex-start; }
+    .estimator-topbar .btn-primary { width: 100%; }
 }
 
 @media (max-width: 600px) {

@@ -72,6 +72,10 @@
     var estimateFeedback = document.getElementById('estimate-feedback');
     var formFeedback = document.getElementById('form-feedback');
     var inputActualCost = document.getElementById('input-actual-cost');
+    var estimatorChipProject = document.getElementById('estimator-chip-project');
+    var estimatorChipDocs = document.getElementById('estimator-chip-docs');
+    var estimatorChipSummary = document.getElementById('estimator-chip-summary');
+    var estimatorChatNote = document.getElementById('estimator-chat-note');
 
     var activeProjectId = null;
     var lastEstimatePayload = null;
@@ -662,6 +666,8 @@
         renderProjects();
         renderMessages();
         renderDocuments();
+        refreshEstimatorProjectSignals();
+        updateEstimatorSummary();
     }
 
     function createProject(name) {
@@ -934,6 +940,14 @@
         var text = (input.value || '').trim();
         if (!text || !activeProjectId) return;
 
+        var estimatorUpdates = applyEstimateUpdatesFromText(text);
+        if (estimatorUpdates.length > 0) {
+            if (activeTool !== 'estimate') openTool('estimate');
+            setEstimatorChatNote('Updated from chat: ' + estimatorUpdates.join(', '));
+        } else {
+            setEstimatorChatNote('');
+        }
+
         addMessage('user', text);
         input.value = '';
         input.style.height = 'auto';
@@ -1117,6 +1131,8 @@
             estimateResult.hidden = true;
             estimateFeedback.hidden = true;
             lastEstimatePayload = null;
+            refreshEstimatorProjectSignals();
+            updateEstimatorSummary();
         }
         if (tool === 'schedule') {
             document.getElementById('sched-start').value = new Date().toISOString().slice(0, 10);
@@ -1188,6 +1204,137 @@
         };
     }
 
+    function updateEstimatorSummary() {
+        if (!estimatorChipSummary) return;
+        var p = getEstimatePayload();
+        estimatorChipSummary.textContent = 'Scope: ' + (p.linear_feet || 0) + ' LF · ' + (p.pipe_diameter || 0) + ' in · ' + (p.trench_depth || 0) + ' ft';
+    }
+
+    function refreshEstimatorProjectSignals() {
+        if (estimatorChipProject) {
+            var projects = getProjects();
+            var active = projects.find(function (p) { return p.id === activeProjectId; });
+            estimatorChipProject.textContent = 'Project: ' + (active ? active.name : 'Untitled project');
+        }
+        if (estimatorChipDocs) {
+            if (!activeProjectId) {
+                estimatorChipDocs.textContent = 'Docs: 0 linked';
+            } else {
+                getDocuments(activeProjectId).then(function (docs) {
+                    estimatorChipDocs.textContent = 'Docs: ' + docs.length + ' linked';
+                }).catch(function () {
+                    estimatorChipDocs.textContent = 'Docs: 0 linked';
+                });
+            }
+        }
+    }
+
+    function setEstimatorChatNote(text) {
+        if (!estimatorChatNote) return;
+        if (!text) {
+            estimatorChatNote.hidden = true;
+            estimatorChatNote.textContent = '';
+            return;
+        }
+        estimatorChatNote.textContent = text;
+        estimatorChatNote.hidden = false;
+    }
+
+    function applyEstimateUpdatesFromText(text) {
+        var t = String(text || '').toLowerCase();
+        if (!t) return [];
+        var updates = [];
+        var byId = {
+            project_type: document.getElementById('est-project-type'),
+            linear_feet: document.getElementById('est-linear-feet'),
+            pipe_diameter: document.getElementById('est-pipe-diameter'),
+            trench_depth: document.getElementById('est-trench-depth'),
+            soil_type: document.getElementById('est-soil-type'),
+            location_zone: document.getElementById('est-location'),
+            crew_size: document.getElementById('est-crew-size'),
+            season: document.getElementById('est-season'),
+            pipe_material: document.getElementById('est-pipe-material'),
+            has_dewatering: document.getElementById('est-dewatering'),
+            has_rock_excavation: document.getElementById('est-rock'),
+            num_fittings: document.getElementById('est-fittings'),
+            road_crossings: document.getElementById('est-road-crossings')
+        };
+
+        function updateValue(key, next, label) {
+            var el = byId[key];
+            if (!el) return;
+            var prev = (el.type === 'checkbox') ? el.checked : el.value;
+            if (el.type === 'checkbox') el.checked = !!next;
+            else el.value = String(next);
+            var now = (el.type === 'checkbox') ? el.checked : el.value;
+            if (String(prev) !== String(now)) updates.push(label + ' → ' + now);
+        }
+
+        var num;
+        num = t.match(/(?:linear\s*feet|lf)\s*(?:to|=)?\s*(\d[\d,]*)/);
+        if (!num) num = t.match(/(\d[\d,]*)\s*(?:lf|linear\s*feet?)/);
+        if (num) updateValue('linear_feet', parseInt(num[1].replace(/,/g, ''), 10), 'LF');
+
+        num = t.match(/(?:diameter|pipe(?:\s+size)?)\s*(?:to|=)?\s*(\d+(?:\.\d+)?)/);
+        if (!num) num = t.match(/(\d+(?:\.\d+)?)\s*(?:in|inch|inches|")\s*(?:pipe|diameter)?/);
+        if (num) updateValue('pipe_diameter', parseFloat(num[1]), 'Diameter');
+
+        num = t.match(/(?:depth|trench\s*depth)\s*(?:to|=)?\s*(\d+(?:\.\d+)?)/);
+        if (!num) num = t.match(/(\d+(?:\.\d+)?)\s*(?:ft|feet|')\s*(?:deep|depth|trench)/);
+        if (num) updateValue('trench_depth', parseFloat(num[1]), 'Depth');
+
+        num = t.match(/(?:crew|crew\s*size)\s*(?:to|=)?\s*(\d{1,2})/);
+        if (!num) num = t.match(/(\d{1,2})\s*(?:person|people|man)[-\s]*crew/);
+        if (num) updateValue('crew_size', parseInt(num[1], 10), 'Crew');
+
+        num = t.match(/(?:fittings?)\s*(?:to|=)?\s*(\d+)/);
+        if (num) updateValue('num_fittings', parseInt(num[1], 10), 'Fittings');
+
+        num = t.match(/(?:road\s*crossings?)\s*(?:to|=)?\s*(\d+)/);
+        if (num) updateValue('road_crossings', parseInt(num[1], 10), 'Road crossings');
+
+        if (/\bwaterline\b/.test(t)) updateValue('project_type', 'waterline', 'Type');
+        else if (/\bsewer\b/.test(t)) updateValue('project_type', 'sewer', 'Type');
+        else if (/\bstorm\b/.test(t)) updateValue('project_type', 'storm_drain', 'Type');
+        else if (/\bgas\b/.test(t)) updateValue('project_type', 'gas', 'Type');
+        else if (/\belectrical\b/.test(t)) updateValue('project_type', 'electrical', 'Type');
+
+        if (/\bsand\b/.test(t)) updateValue('soil_type', 'sand', 'Soil');
+        else if (/\bclay\b/.test(t)) updateValue('soil_type', 'clay', 'Soil');
+        else if (/\bgravel\b/.test(t)) updateValue('soil_type', 'gravel', 'Soil');
+        else if (/\brock\b/.test(t)) updateValue('soil_type', 'rock', 'Soil');
+
+        if (/\bsalt lake\b/.test(t)) updateValue('location_zone', 'salt_lake_metro', 'Location');
+        else if (/\butah county\b/.test(t)) updateValue('location_zone', 'utah_county', 'Location');
+        else if (/\bdavis\b|\bweber\b/.test(t)) updateValue('location_zone', 'davis_weber', 'Location');
+        else if (/\brural\b/.test(t)) updateValue('location_zone', 'rural_utah', 'Location');
+        else if (/\bmountain\b/.test(t)) updateValue('location_zone', 'mountain_areas', 'Location');
+
+        if (/\bwinter\b/.test(t)) updateValue('season', 'winter', 'Season');
+        else if (/\bspring\b/.test(t)) updateValue('season', 'spring', 'Season');
+        else if (/\bsummer\b/.test(t)) updateValue('season', 'summer', 'Season');
+        else if (/\bfall\b|\bautumn\b/.test(t)) updateValue('season', 'fall', 'Season');
+
+        if (/\bhdpe\b/.test(t)) updateValue('pipe_material', 'HDPE', 'Material');
+        else if (/\bdip\b/.test(t)) updateValue('pipe_material', 'DIP', 'Material');
+        else if (/\bsdr\s*35\b/.test(t)) updateValue('pipe_material', 'PVC SDR 35', 'Material');
+        else if (/\brcp\b/.test(t)) updateValue('pipe_material', 'RCP', 'Material');
+        else if (/\bpvc conduit\b/.test(t)) updateValue('pipe_material', 'PVC Conduit', 'Material');
+        else if (/\bpvc\b/.test(t)) updateValue('pipe_material', 'PVC C900', 'Material');
+
+        if (/\bno dewatering\b|\bwithout dewatering\b/.test(t)) updateValue('has_dewatering', false, 'Dewatering');
+        else if (/\bdewatering\b/.test(t)) updateValue('has_dewatering', true, 'Dewatering');
+
+        if (/\bno rock\b|\bwithout rock\b/.test(t)) updateValue('has_rock_excavation', false, 'Rock');
+        else if (/\brock excavation\b|\brock\b/.test(t)) updateValue('has_rock_excavation', true, 'Rock');
+
+        if (updates.length > 0) {
+            updateEstimatorSummary();
+            refreshEstimatorProjectSignals();
+        }
+        return updates;
+    }
+
     formEstimate.addEventListener('submit', function (e) {
         e.preventDefault();
         var btn = document.getElementById('btn-run-estimate');
@@ -1225,6 +1372,7 @@
                 estimateResult.hidden = false;
                 estimateFeedback.hidden = false;
                 lastEstimateResult = data;
+                updateEstimatorSummary();
                 bindEstimateActions();
                 var summary = 'Estimate: $' + (data.predicted_cost || 0).toLocaleString() + ', ' + (data.duration_days || 0) + ' days. Use the buttons above to generate a proposal or schedule, or ask me to adjust values.';
                 addMessage('assistant', summary);
@@ -1276,6 +1424,13 @@
 
     var formProposal = document.getElementById('form-proposal');
     var formSchedule = document.getElementById('form-schedule');
+
+    if (formEstimate) {
+        formEstimate.querySelectorAll('input, select, textarea').forEach(function (el) {
+            el.addEventListener('change', updateEstimatorSummary);
+            el.addEventListener('input', updateEstimatorSummary);
+        });
+    }
 
     var projectTypeLabels = { waterline: 'waterline', sewer: 'sewer', storm_drain: 'storm drain', gas: 'gas', electrical: 'electrical' };
     function openProposalFromEstimate() {
@@ -1540,6 +1695,8 @@
     renderProjects();
     renderMessages();
     renderDocuments();
+    updateEstimatorSummary();
+    refreshEstimatorProjectSignals();
     initSupabaseAuth();
     updateAuthUI();
 

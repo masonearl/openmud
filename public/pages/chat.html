@@ -96,20 +96,50 @@
                     <div class="tool-panel-content" id="tool-panel-content">
                         <div id="tool-form-estimate" class="tool-form-wrap">
                             <form id="form-estimate">
-                                <div class="form-row"><label>Project type</label><select id="est-project-type" required><option value="waterline">Waterline</option><option value="sewer">Sewer</option><option value="storm_drain">Storm drain</option><option value="gas">Gas</option><option value="electrical">Electrical</option></select></div>
-                                <div class="form-row"><label>Linear feet</label><input type="number" id="est-linear-feet" value="1500" min="1" required></div>
-                                <div class="form-row"><label>Pipe diameter (in)</label><input type="number" id="est-pipe-diameter" value="8" min="1" required></div>
-                                <div class="form-row"><label>Trench depth (ft)</label><input type="number" id="est-trench-depth" value="4.5" min="0" step="0.1" required></div>
-                                <div class="form-row"><label>Soil type</label><select id="est-soil-type"><option value="sand">Sand</option><option value="clay" selected>Clay</option><option value="gravel">Gravel</option><option value="rock">Rock</option></select></div>
-                                <div class="form-row"><label>Location</label><select id="est-location"><option value="salt_lake_metro" selected>Salt Lake Metro</option><option value="utah_county">Utah County</option><option value="davis_weber">Davis/Weber</option><option value="rural_utah">Rural Utah</option><option value="mountain_areas">Mountain areas</option></select></div>
-                                <div class="form-row"><label>Crew size</label><input type="number" id="est-crew-size" value="5" min="1" max="20"></div>
-                                <div class="form-row"><label>Season</label><select id="est-season"><option value="winter">Winter</option><option value="spring">Spring</option><option value="summer" selected>Summer</option><option value="fall">Fall</option></select></div>
-                                <div class="form-row"><label>Pipe material</label><select id="est-pipe-material"><option value="PVC C900" selected>PVC C900</option><option value="HDPE">HDPE</option><option value="DIP">DIP</option><option value="PVC SDR 35">PVC SDR 35</option><option value="RCP">RCP</option><option value="PE">PE</option><option value="Steel">Steel</option><option value="PVC Conduit">PVC Conduit</option></select></div>
-                                <div class="form-row form-row-inline"><label><input type="checkbox" id="est-dewatering"> Dewatering</label></div>
-                                <div class="form-row form-row-inline"><label><input type="checkbox" id="est-rock"> Rock excavation</label></div>
-                                <div class="form-row"><label>Fittings</label><input type="number" id="est-fittings" value="0" min="0"></div>
-                                <div class="form-row"><label>Road crossings</label><input type="number" id="est-road-crossings" value="0" min="0"></div>
-                                <div class="modal-actions"><button type="submit" class="btn-primary" id="btn-run-estimate">Run estimate</button></div>
+                                <div class="estimator-topbar">
+                                    <div class="estimator-topbar-title">
+                                        <h4>Estimator workspace</h4>
+                                        <p>Organize scope, assumptions, and cost drivers in one view.</p>
+                                    </div>
+                                    <button type="submit" class="btn-primary" id="btn-run-estimate">Run estimate</button>
+                                </div>
+                                <div class="estimator-chip-row">
+                                    <span class="estimator-chip" id="estimator-chip-project">Project: Untitled project</span>
+                                    <span class="estimator-chip" id="estimator-chip-docs">Docs: 0 linked</span>
+                                    <span class="estimator-chip" id="estimator-chip-summary">Scope: 1500 LF · 8 in · 4.5 ft</span>
+                                </div>
+                                <div class="estimator-chat-note" id="estimator-chat-note" hidden></div>
+
+                                <section class="estimator-section">
+                                    <h5>Project context</h5>
+                                    <div class="estimator-grid">
+                                        <div class="form-row"><label>Project type</label><select id="est-project-type" required><option value="waterline">Waterline</option><option value="sewer">Sewer</option><option value="storm_drain">Storm drain</option><option value="gas">Gas</option><option value="electrical">Electrical</option></select></div>
+                                        <div class="form-row"><label>Location</label><select id="est-location"><option value="salt_lake_metro" selected>Salt Lake Metro</option><option value="utah_county">Utah County</option><option value="davis_weber">Davis/Weber</option><option value="rural_utah">Rural Utah</option><option value="mountain_areas">Mountain areas</option></select></div>
+                                        <div class="form-row"><label>Season</label><select id="est-season"><option value="winter">Winter</option><option value="spring">Spring</option><option value="summer" selected>Summer</option><option value="fall">Fall</option></select></div>
+                                        <div class="form-row"><label>Pipe material</label><select id="est-pipe-material"><option value="PVC C900" selected>PVC C900</option><option value="HDPE">HDPE</option><option value="DIP">DIP</option><option value="PVC SDR 35">PVC SDR 35</option><option value="RCP">RCP</option><option value="PE">PE</option><option value="Steel">Steel</option><option value="PVC Conduit">PVC Conduit</option></select></div>
+                                    </div>
+                                </section>
+
+                                <section class="estimator-section">
+                                    <h5>Scope quantities</h5>
+                                    <div class="estimator-grid">
+                                        <div class="form-row"><label>Linear feet</label><input type="number" id="est-linear-feet" value="1500" min="1" required></div>
+                                        <div class="form-row"><label>Pipe diameter (in)</label><input type="number" id="est-pipe-diameter" value="8" min="1" required></div>
+                                        <div class="form-row"><label>Trench depth (ft)</label><input type="number" id="est-trench-depth" value="4.5" min="0" step="0.1" required></div>
+                                        <div class="form-row"><label>Soil type</label><select id="est-soil-type"><option value="sand">Sand</option><option value="clay" selected>Clay</option><option value="gravel">Gravel</option><option value="rock">Rock</option></select></div>
+                                        <div class="form-row"><label>Fittings</label><input type="number" id="est-fittings" value="0" min="0"></div>
+                                        <div class="form-row"><label>Road crossings</label><input type="number" id="est-road-crossings" value="0" min="0"></div>
+                                    </div>
+                                </section>
+
+                                <section class="estimator-section">
+                                    <h5>Production and conditions</h5>
+                                    <div class="estimator-grid">
+                                        <div class="form-row"><label>Crew size</label><input type="number" id="est-crew-size" value="5" min="1" max="20"></div>
+                                        <div class="form-row form-row-inline"><label><input type="checkbox" id="est-dewatering"> Dewatering required</label></div>
+                                        <div class="form-row form-row-inline"><label><input type="checkbox" id="est-rock"> Rock excavation</label></div>
+                                    </div>
+                                </section>
                             </form>
                             <div id="estimate-result" class="estimate-result" hidden></div>
                             <div id="estimate-feedback" class="estimate-feedback" hidden><h4>Submit actual cost (optional)</h4><form id="form-feedback"><input type="number" id="input-actual-cost" placeholder="Actual cost ($)" min="0" step="1000"><button type="submit" class="btn-primary">Submit feedback</button></form></div>
