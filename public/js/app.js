@@ -1755,15 +1755,12 @@
             .filter(function (item) { return item && item.kind === 'file'; })
             .map(function (item) { return item.getAsFile(); })
             .filter(Boolean);
-        if (files.length === 0) return;
-        e.preventDefault();
-        uploadFilesToActiveProject(files, 'paste');
-    });
-    document.addEventListener('keydown', function (e) {
-        var isPaste = (e.metaKey || e.ctrlKey) && String(e.key || '').toLowerCase() === 'v';
-        if (!isPaste || !docClipboard || !docClipboard.doc || !activeProjectId) return;
-        var target = e.target;
-        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || (target.closest && target.closest('#chat-input')))) return;
+        if (files.length > 0) {
+            e.preventDefault();
+            uploadFilesToActiveProject(files, 'paste');
+            return;
+        }
+        if (!docClipboard || !docClipboard.doc) return;
         e.preventDefault();
         cloneDocumentToProject(docClipboard.doc, activeProjectId).then(function () {
             renderDocuments();

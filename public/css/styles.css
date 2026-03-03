@@ -789,19 +789,17 @@ body {
 }
 
 .btn-new-project {
-    font-family: inherit;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: var(--text);
-    background: var(--border);
-    border: none;
-    border-radius: 5px;
-    padding: 5px 8px;
+    color: #b7a48f;
+    background: #1f1813;
+    border: 1px solid #3b3026;
+    border-radius: 6px;
     cursor: pointer;
 }
 
 .btn-new-project:hover {
-    background: #333;
+    color: #e6d4bf;
+    border-color: #5a4735;
+    background: #261e17;
 }
 
 .projects-list {
@@ -899,19 +897,18 @@ body {
 }
 
 .btn-upload {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--border);
-    border: none;
+    color: #b7a48f;
+    background: #1f1813;
+    border: 1px solid #3b3026;
     border-radius: 6px;
-    padding: 5px 8px;
+    padding: 0;
     cursor: pointer;
 }
 
 .btn-upload:hover {
-    color: var(--text);
-    background: #333;
+    color: #e6d4bf;
+    border-color: #5a4735;
+    background: #261e17;
 }
 
 .icon-btn {
@@ -935,14 +932,15 @@ body {
 }
 
 .btn-upload.btn-folder {
-    background: color-mix(in srgb, var(--earth) 20%, var(--bg-alt) 80%);
-    border: 1px solid color-mix(in srgb, var(--earth) 55%, var(--border) 45%);
-    color: color-mix(in srgb, var(--earth-light) 70%, var(--text-secondary) 30%);
+    color: #b7a48f;
+    background: #1f1813;
+    border: 1px solid #3b3026;
 }
 
 .btn-upload.btn-folder:hover {
-    background: color-mix(in srgb, var(--earth) 32%, var(--bg-alt) 68%);
-    color: var(--text);
+    color: #e6d4bf;
+    border-color: #5a4735;
+    background: #261e17;
 }
 
 .documents-list {
