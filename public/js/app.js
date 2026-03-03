@@ -78,6 +78,8 @@
     var estimatorChatNote = document.getElementById('estimator-chat-note');
 
     var activeProjectId = null;
+    var editingProjectId = null;
+    var docClipboard = null;
     var lastEstimatePayload = null;
     var lastEstimateResult = null;
     var activeTool = null;
@@ -522,14 +524,64 @@
         }
         projects.forEach(function (p) {
             var li = document.createElement('li');
-            var a = document.createElement('button');
-            a.type = 'button';
-            a.className = 'project-item' + (p.id === activeProjectId ? ' active' : '');
-            a.textContent = p.name;
-            a.addEventListener('click', function () { switchProject(p.id); });
-            li.appendChild(a);
+            if (editingProjectId === p.id) {
+                var inputEl = document.createElement('input');
+                inputEl.type = 'text';
+                inputEl.className = 'project-item-input';
+                inputEl.value = p.name;
+                inputEl.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        renameProject(p.id, inputEl.value);
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        editingProjectId = null;
+                        renderProjects();
+                    }
+                });
+                inputEl.addEventListener('blur', function () {
+                    renameProject(p.id, inputEl.value);
+                });
+                li.appendChild(inputEl);
+                projectsList.appendChild(li);
+                setTimeout(function () {
+                    inputEl.focus();
+                    inputEl.select();
+                }, 0);
+                return;
+            }
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'project-item' + (p.id === activeProjectId ? ' active' : '');
+            btn.textContent = p.name;
+            btn.addEventListener('click', function () { switchProject(p.id); });
+            btn.addEventListener('dblclick', function (e) {
+                e.preventDefault();
+                editingProjectId = p.id;
+                renderProjects();
+            });
+            li.appendChild(btn);
             projectsList.appendChild(li);
         });
+    }
+
+    function renameProject(projectId, nextName) {
+        var name = String(nextName || '').trim();
+        editingProjectId = null;
+        if (!name) {
+            renderProjects();
+            return;
+        }
+        var projects = getProjects();
+        var target = projects.find(function (p) { return p.id === projectId; });
+        if (!target) {
+            renderProjects();
+            return;
+        }
+        target.name = name;
+        setProjects(projects);
+        renderProjects();
+        refreshEstimatorProjectSignals();
     }
 
     var DB_NAME = 'rockmud_docs';
@@ -602,6 +654,27 @@
         });
     }
 
+    function cloneDocumentToProject(doc, targetProjectId) {
+        if (!doc || !targetProjectId) return Promise.resolve();
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var newDoc = {
+                    id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
+                    projectId: targetProjectId,
+                    name: doc.name,
+                    size: doc.size,
+                    type: doc.type,
+                    data: doc.data,
+                    createdAt: Date.now()
+                };
+                var tx = db.transaction(DOC_STORE, 'readwrite');
+                tx.objectStore(DOC_STORE).add(newDoc);
+                tx.oncomplete = function () { resolve(newDoc.id); };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        });
+    }
+
     function downloadDocument(doc) {
         var blob = new Blob([doc.data], { type: doc.type || 'application/octet-stream' });
         var a = document.createElement('a');
@@ -642,9 +715,22 @@
                 li.className = 'document-item';
                 li.innerHTML = '<span class="document-name" title="' + (doc.name || '').replace(/"/g, '&quot;') + '">' + (doc.name || 'Document') + '</span>' +
                     '<span class="document-size">' + formatSize(doc.size || 0) + '</span>' +
+                    '<button type="button" class="btn-copy-doc" data-id="' + doc.id + '" title="Copy to another project">⧉</button>' +
                     '<button type="button" class="btn-download-doc" data-id="' + doc.id + '" title="Download">↓</button>' +
                     '<button type="button" class="btn-delete-doc" data-id="' + doc.id + '" title="Remove">×</button>';
                 listEl.appendChild(li);
+            });
+            listEl.querySelectorAll('.btn-copy-doc').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var doc = docs.find(function (d) { return d.id === btn.getAttribute('data-id'); });
+                    if (!doc) return;
+                    docClipboard = {
+                        copiedFromProjectId: activeProjectId,
+                        copiedAt: Date.now(),
+                        doc: doc
+                    };
+                    addMessage('assistant', 'Copied "' + (doc.name || 'document') + '". Switch projects and press Cmd/Ctrl+V to paste.');
+                });
             });
             listEl.querySelectorAll('.btn-delete-doc').forEach(function (btn) {
                 btn.addEventListener('click', function () {
@@ -683,23 +769,35 @@
 
     function handleDocUpload(inputEl) {
         if (!inputEl || !activeProjectId || !inputEl.files || inputEl.files.length === 0) return;
-        var files = Array.from(inputEl.files);
+        uploadFilesToActiveProject(Array.from(inputEl.files), 'upload');
+        inputEl.value = '';
+    }
+
+    function uploadFilesToActiveProject(files, source) {
+        if (!activeProjectId || !files || files.length === 0) return;
         var rejected = 0;
+        var accepted = 0;
+        var tasks = [];
         files.forEach(function (file) {
             if (file.size > MAX_FILE_SIZE) {
                 rejected++;
                 return;
             }
-            saveDocument(activeProjectId, file).then(function () {
-                renderDocuments();
-            }).catch(function (err) {
+            accepted++;
+            tasks.push(saveDocument(activeProjectId, file).catch(function (err) {
                 console.error('Upload failed:', err);
-            });
+            }));
         });
-        if (rejected > 0) {
-            addMessage('assistant', 'Some files were skipped (max 5 MB per file).');
-        }
-        inputEl.value = '';
+        Promise.all(tasks).then(function () {
+            renderDocuments();
+            refreshEstimatorProjectSignals();
+            if (accepted > 0 && source === 'paste') {
+                addMessage('assistant', 'Added ' + accepted + ' pasted document' + (accepted === 1 ? '' : 's') + ' to this project.');
+            }
+            if (rejected > 0) {
+                addMessage('assistant', 'Some files were skipped (max 5 MB per file).');
+            }
+        });
     }
     var docUpload = document.getElementById('doc-upload');
     if (docUpload) {
@@ -711,6 +809,25 @@
     if (chatDocUpload) {
         chatDocUpload.addEventListener('change', function () {
             handleDocUpload(this);
+        });
+    }
+    var documentsSection = document.getElementById('documents-section');
+    if (documentsSection) {
+        documentsSection.addEventListener('dragover', function (e) {
+            if (!activeProjectId) return;
+            e.preventDefault();
+            documentsSection.classList.add('drop-active');
+        });
+        documentsSection.addEventListener('dragleave', function () {
+            documentsSection.classList.remove('drop-active');
+        });
+        documentsSection.addEventListener('drop', function (e) {
+            documentsSection.classList.remove('drop-active');
+            if (!activeProjectId) return;
+            e.preventDefault();
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                uploadFilesToActiveProject(Array.from(e.dataTransfer.files), 'drop');
+            }
         });
     }
 
@@ -1043,6 +1160,31 @@
         if (!imageItem) return; // Keep normal text paste behavior.
         e.preventDefault();
         handleImagePaste(imageItem.getAsFile());
+    });
+    document.addEventListener('paste', function (e) {
+        if (!activeProjectId || !e.clipboardData || !e.clipboardData.items) return;
+        if (e.target === input || (e.target && e.target.closest && e.target.closest('#chat-input'))) return;
+        var files = Array.from(e.clipboardData.items)
+            .filter(function (item) { return item && item.kind === 'file'; })
+            .map(function (item) { return item.getAsFile(); })
+            .filter(Boolean);
+        if (files.length === 0) return;
+        e.preventDefault();
+        uploadFilesToActiveProject(files, 'paste');
+    });
+    document.addEventListener('keydown', function (e) {
+        var isPaste = (e.metaKey || e.ctrlKey) && String(e.key || '').toLowerCase() === 'v';
+        if (!isPaste || !docClipboard || !docClipboard.doc || !activeProjectId) return;
+        var target = e.target;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || (target.closest && target.closest('#chat-input')))) return;
+        e.preventDefault();
+        cloneDocumentToProject(docClipboard.doc, activeProjectId).then(function () {
+            renderDocuments();
+            refreshEstimatorProjectSignals();
+            addMessage('assistant', 'Pasted "' + (docClipboard.doc.name || 'document') + '" into this project.');
+        }).catch(function () {
+            addMessage('assistant', 'Could not paste copied document. Try again.');
+        });
     });
 
     function autoGrowTextarea() {

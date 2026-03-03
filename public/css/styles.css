@@ -538,6 +538,24 @@ body {
     background: var(--border);
 }
 
+.project-item-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    color: var(--text);
+    background: color-mix(in srgb, var(--earth) 12%, var(--bg-alt) 88%);
+    border: 1px solid color-mix(in srgb, var(--earth) 45%, var(--border) 55%);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-bottom: 2px;
+}
+
+.project-item-input:focus {
+    outline: none;
+    border-color: var(--earth-light);
+    box-shadow: 0 0 0 2px rgba(199, 155, 106, 0.18);
+}
+
 .projects-empty {
     font-size: 0.6875rem;
     color: var(--text-secondary);
@@ -550,6 +568,12 @@ body {
     margin-top: 14px;
     padding-top: 12px;
     border-top: 1px solid var(--border);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.documents-section.drop-active {
+    border-top-color: var(--earth-light);
+    background: rgba(199, 155, 106, 0.08);
 }
 
 .documents-header {
@@ -659,8 +683,20 @@ body {
     cursor: pointer;
 }
 
+.btn-copy-doc {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--earth-light);
+    background: none;
+    border: none;
+    padding: 0 4px;
+    cursor: pointer;
+    line-height: 1;
+}
+
 .btn-delete-doc:hover,
-.btn-download-doc:hover {
+.btn-download-doc:hover,
+.btn-copy-doc:hover {
     color: var(--text);
 }
 
