@@ -80,6 +80,8 @@
     var activeProjectId = null;
     var editingProjectId = null;
     var docClipboard = null;
+    var editingDocumentId = null;
+    var activeDocContextMenu = null;
     var lastEstimatePayload = null;
     var lastEstimateResult = null;
     var activeTool = null;
@@ -675,6 +677,92 @@
         });
     }
 
+    function renameDocument(docId, nextName) {
+        var name = String(nextName || '').trim();
+        editingDocumentId = null;
+        if (!activeProjectId || !docId) {
+            renderDocuments();
+            return Promise.resolve(false);
+        }
+        if (!name) {
+            renderDocuments();
+            return Promise.resolve(false);
+        }
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var tx = db.transaction(DOC_STORE, 'readwrite');
+                var store = tx.objectStore(DOC_STORE);
+                var req = store.get(docId);
+                req.onsuccess = function () {
+                    var doc = req.result;
+                    if (!doc) {
+                        resolve(false);
+                        return;
+                    }
+                    doc.name = name;
+                    store.put(doc);
+                };
+                req.onerror = function () { reject(req.error); };
+                tx.oncomplete = function () {
+                    renderDocuments();
+                    resolve(true);
+                };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        }).catch(function () {
+            renderDocuments();
+            return false;
+        });
+    }
+
+    function hideDocContextMenu() {
+        if (!activeDocContextMenu) return;
+        if (activeDocContextMenu.parentNode) activeDocContextMenu.parentNode.removeChild(activeDocContextMenu);
+        activeDocContextMenu = null;
+    }
+
+    function openDocContextMenu(event, doc) {
+        hideDocContextMenu();
+        if (!doc) return;
+        var menu = document.createElement('div');
+        menu.className = 'doc-context-menu';
+        menu.innerHTML = ''
+            + '<button type="button" data-action="rename">Rename</button>'
+            + '<button type="button" data-action="copy">Copy</button>'
+            + '<button type="button" data-action="download">Download</button>'
+            + '<button type="button" data-action="delete" class="danger">Delete</button>';
+        document.body.appendChild(menu);
+        var x = event.clientX;
+        var y = event.clientY;
+        var maxX = window.innerWidth - menu.offsetWidth - 8;
+        var maxY = window.innerHeight - menu.offsetHeight - 8;
+        menu.style.left = Math.max(8, Math.min(x, maxX)) + 'px';
+        menu.style.top = Math.max(8, Math.min(y, maxY)) + 'px';
+        menu.querySelector('[data-action="rename"]').addEventListener('click', function () {
+            editingDocumentId = doc.id;
+            hideDocContextMenu();
+            renderDocuments();
+        });
+        menu.querySelector('[data-action="copy"]').addEventListener('click', function () {
+            docClipboard = {
+                copiedFromProjectId: activeProjectId,
+                copiedAt: Date.now(),
+                doc: doc
+            };
+            hideDocContextMenu();
+            addMessage('assistant', 'Copied "' + (doc.name || 'document') + '". Switch projects and press Cmd/Ctrl+V to paste.');
+        });
+        menu.querySelector('[data-action="download"]').addEventListener('click', function () {
+            hideDocContextMenu();
+            downloadDocument(doc);
+        });
+        menu.querySelector('[data-action="delete"]').addEventListener('click', function () {
+            hideDocContextMenu();
+            deleteDocument(doc.id).then(function () { renderDocuments(); });
+        });
+        activeDocContextMenu = menu;
+    }
+
     function downloadDocument(doc) {
         var blob = new Blob([doc.data], { type: doc.type || 'application/octet-stream' });
         var a = document.createElement('a');
@@ -713,40 +801,48 @@
             docs.forEach(function (doc) {
                 var li = document.createElement('div');
                 li.className = 'document-item';
-                li.innerHTML = '<span class="document-name" title="' + (doc.name || '').replace(/"/g, '&quot;') + '">' + (doc.name || 'Document') + '</span>' +
-                    '<span class="document-size">' + formatSize(doc.size || 0) + '</span>' +
-                    '<button type="button" class="btn-copy-doc" data-id="' + doc.id + '" title="Copy to another project">⧉</button>' +
-                    '<button type="button" class="btn-download-doc" data-id="' + doc.id + '" title="Download">↓</button>' +
-                    '<button type="button" class="btn-delete-doc" data-id="' + doc.id + '" title="Remove">×</button>';
+                if (editingDocumentId === doc.id) {
+                    li.innerHTML = ''
+                        + '<input type="text" class="document-rename-input" value="' + (doc.name || '').replace(/"/g, '&quot;') + '">'
+                        + '<span class="document-size">' + formatSize(doc.size || 0) + '</span>';
+                    var renameInput = li.querySelector('.document-rename-input');
+                    renameInput.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            renameDocument(doc.id, renameInput.value);
+                        } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            editingDocumentId = null;
+                            renderDocuments();
+                        }
+                    });
+                    renameInput.addEventListener('blur', function () {
+                        renameDocument(doc.id, renameInput.value);
+                    });
+                    setTimeout(function () {
+                        renameInput.focus();
+                        renameInput.select();
+                    }, 0);
+                } else {
+                    li.innerHTML = '<span class="document-name" title="' + (doc.name || '').replace(/"/g, '&quot;') + '">' + (doc.name || 'Document') + '</span>' +
+                        '<span class="document-size">' + formatSize(doc.size || 0) + '</span>';
+                }
+                li.addEventListener('dblclick', function () {
+                    editingDocumentId = doc.id;
+                    renderDocuments();
+                });
+                li.addEventListener('contextmenu', function (e) {
+                    e.preventDefault();
+                    openDocContextMenu(e, doc);
+                });
                 listEl.appendChild(li);
-            });
-            listEl.querySelectorAll('.btn-copy-doc').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    var doc = docs.find(function (d) { return d.id === btn.getAttribute('data-id'); });
-                    if (!doc) return;
-                    docClipboard = {
-                        copiedFromProjectId: activeProjectId,
-                        copiedAt: Date.now(),
-                        doc: doc
-                    };
-                    addMessage('assistant', 'Copied "' + (doc.name || 'document') + '". Switch projects and press Cmd/Ctrl+V to paste.');
-                });
-            });
-            listEl.querySelectorAll('.btn-delete-doc').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    deleteDocument(btn.getAttribute('data-id')).then(function () { renderDocuments(); });
-                });
-            });
-            listEl.querySelectorAll('.btn-download-doc').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    var doc = docs.find(function (d) { return d.id === btn.getAttribute('data-id'); });
-                    if (doc) downloadDocument(doc);
-                });
             });
         });
     }
 
     function switchProject(id) {
+        hideDocContextMenu();
+        editingDocumentId = null;
         activeProjectId = id;
         setActiveId(id);
         renderProjects();
@@ -1324,6 +1420,7 @@
 
     if (toolsDropdown) toolsDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
     document.addEventListener('click', function () {
+        hideDocContextMenu();
         if (toolsDropdown) toolsDropdown.hidden = true;
         if (btnTools) btnTools.setAttribute('aria-expanded', 'false');
     });

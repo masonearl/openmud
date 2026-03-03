@@ -648,6 +648,63 @@ body {
     background: rgba(255,255,255,0.05);
 }
 
+.document-rename-input {
+    flex: 1;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 0.6875rem;
+    color: var(--text);
+    background: color-mix(in srgb, var(--earth) 12%, var(--bg-alt) 88%);
+    border: 1px solid color-mix(in srgb, var(--earth) 45%, var(--border) 55%);
+    border-radius: 4px;
+    padding: 4px 6px;
+}
+
+.document-rename-input:focus {
+    outline: none;
+    border-color: var(--earth-light);
+    box-shadow: 0 0 0 2px rgba(199, 155, 106, 0.18);
+}
+
+.doc-context-menu {
+    position: fixed;
+    z-index: 10000;
+    min-width: 170px;
+    border: 1px solid #5a4735;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #2a2119 0%, #1f1812 100%);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+    padding: 6px;
+}
+
+.doc-context-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    color: #e6d5c1;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    padding: 7px 10px;
+    cursor: pointer;
+}
+
+.doc-context-menu button:hover {
+    background: rgba(199, 155, 106, 0.18);
+    color: #fff3e5;
+}
+
+.doc-context-menu button.danger {
+    color: #f2bab0;
+}
+
+.doc-context-menu button.danger:hover {
+    background: rgba(220, 90, 70, 0.22);
+    color: #ffd7d1;
+}
+
 .document-name {
     flex: 1;
     min-width: 0;
