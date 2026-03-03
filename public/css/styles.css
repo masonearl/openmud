@@ -311,6 +311,12 @@ body.has-app .app-layout {
     color: #f4e6d6;
 }
 
+.focus-sidebar-toggle {
+    min-width: 30px;
+    padding: 5px 8px;
+    text-align: center;
+}
+
 .doc-tabs {
     display: flex;
     align-items: center;
@@ -709,6 +715,11 @@ body {
     display: flex;
     flex: 1;
     min-height: 0;
+}
+
+body.sidebar-collapsed .projects-sidebar,
+body.sidebar-collapsed .sidebar-resize-handle {
+    display: none !important;
 }
 
 .projects-sidebar {
