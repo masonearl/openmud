@@ -100,6 +100,7 @@
     var workspaceDocumentPane = document.getElementById('document-viewer-pane');
     var focusTabChat = document.getElementById('focus-tab-chat');
     var focusTabCanvas = document.getElementById('focus-tab-canvas');
+    var canvasZoomControls = document.getElementById('canvas-zoom-controls');
     var chatMessagesPane = document.getElementById('chat-messages');
     var toolPanelTitle = document.getElementById('tool-panel-title');
     var toolPanelSubtitle = document.getElementById('tool-panel-subtitle');
@@ -115,9 +116,10 @@
 
     function setMainFocus(focus) {
         var f = focus === 'document' ? 'document' : (focus === 'canvas' ? 'canvas' : 'chat');
-        if (workspaceFocusBar) workspaceFocusBar.hidden = (f === 'chat');
+        if (workspaceFocusBar) workspaceFocusBar.hidden = false;
         if (workspaceCanvasPane) workspaceCanvasPane.hidden = (f !== 'canvas');
         if (workspaceDocumentPane) workspaceDocumentPane.hidden = (f !== 'document');
+        if (canvasZoomControls) canvasZoomControls.hidden = (f !== 'canvas');
         if (chatMessagesPane) chatMessagesPane.hidden = (f !== 'chat');
         if (focusTabCanvas) {
             if (f === 'canvas') focusTabCanvas.classList.add('focus-tab-active');

@@ -286,27 +286,29 @@ body.has-app .app-layout {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 8px 0 10px;
-    padding: 8px 10px;
-    border: 1px solid #5a4735;
+    margin: 8px 0 6px;
+    padding: 6px 8px;
+    border: 1px solid #3a3027;
     border-radius: 10px;
-    background: linear-gradient(180deg, #2a2118 0%, #1f1812 100%);
+    background: #1a1511;
 }
 
 .focus-tab {
-    border: 1px solid #5a4735;
-    background: linear-gradient(180deg, #3a2d22 0%, #2a2018 100%);
-    color: #e8d9c7;
+    border: 1px solid #3d3227;
+    background: #231c16;
+    color: #b7a48f;
     border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 0.8125rem;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.15;
     cursor: pointer;
 }
 
 .focus-tab-active {
-    border-color: #8e7458;
-    background: linear-gradient(180deg, #5f4a36 0%, #433122 100%);
-    color: #fff4e8;
+    border-color: #6b5742;
+    background: #30251b;
+    color: #f4e6d6;
 }
 
 .doc-tabs {
@@ -323,19 +325,19 @@ body.has-app .app-layout {
     align-items: center;
     gap: 6px;
     max-width: 280px;
-    border: 1px solid #4f3d2d;
+    border: 1px solid #3d3227;
     border-radius: 8px;
-    padding: 5px 8px;
-    color: #cdb89f;
-    background: rgba(255, 255, 255, 0.03);
+    padding: 4px 8px;
+    color: #b9a68f;
+    background: #211a14;
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
 }
 
 .doc-tab-active {
-    border-color: #8e7458;
-    color: #fff4e8;
-    background: rgba(199, 155, 106, 0.2);
+    border-color: #6b5742;
+    color: #f5e8d9;
+    background: #2b2118;
 }
 
 .doc-tab-name {
@@ -357,12 +359,13 @@ body.has-app .app-layout {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    margin-left: auto;
 }
 
 .canvas-zoom-btn {
-    border: 1px solid #5a4735;
-    background: linear-gradient(180deg, #3a2d22 0%, #2a2018 100%);
-    color: #e8d9c7;
+    border: 1px solid #3f3328;
+    background: #241c16;
+    color: #d8c4ad;
     border-radius: 6px;
     width: 26px;
     height: 24px;
@@ -372,8 +375,8 @@ body.has-app .app-layout {
 .canvas-zoom-level {
     min-width: 44px;
     text-align: center;
-    font-size: 0.75rem;
-    color: #cfbaa2;
+    font-size: 0.6875rem;
+    color: #b8a48e;
 }
 
 .canvas-pane,
@@ -551,10 +554,27 @@ body.has-app .app-layout {
     font-size: 0.75rem;
 }
 
-.dv-pdf-wrap iframe,
-.dv-img-wrap img {
+.dv-pdf-wrap iframe {
     width: 100%;
     height: calc(45vh - 70px);
+    border: none;
+}
+
+.dv-img-wrap {
+    width: 100%;
+    height: calc(45vh - 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+}
+
+.dv-img-wrap img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
     border: none;
 }
 
@@ -1180,26 +1200,26 @@ body {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
-    padding: 8px 0 12px;
-    border-bottom: 1px solid var(--border);
+    gap: 6px;
+    padding: 2px 0 8px;
 }
 
 .quick-actions-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .quick-row-label {
     flex: 0 0 auto;
-    font-size: 0.6875rem;
+    font-size: 0.5625rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-secondary);
     font-weight: 700;
-    min-width: 58px;
+    min-width: 50px;
+    opacity: 0.7;
 }
 
 .quick-label {
@@ -1243,30 +1263,30 @@ body {
 
 .quick-btn {
     font-family: inherit;
-    font-size: 0.8125rem;
-    padding: 6px 12px;
-    background: var(--bg-alt);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    padding: 4px 9px;
+    background: #1d1712;
+    border: 1px solid #30261e;
+    border-radius: 8px;
+    color: #a9957e;
     cursor: pointer;
     transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .quick-btn:hover {
-    color: var(--text);
-    border-color: var(--text-secondary);
-    background: #18140f;
+    color: #ddcbb7;
+    border-color: #4a3c2f;
+    background: #231c16;
 }
 
 .btn-copy-chat {
     font-family: inherit;
-    font-size: 0.75rem;
-    padding: 6px 10px;
+    font-size: 0.625rem;
+    padding: 4px 8px;
     background: transparent;
-    border: 1px dashed var(--border);
-    border-radius: 10px;
-    color: var(--text-secondary);
+    border: 1px dashed #3e3329;
+    border-radius: 8px;
+    color: #98856f;
     cursor: pointer;
     margin-left: auto;
     transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
