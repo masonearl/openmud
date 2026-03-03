@@ -167,6 +167,27 @@
                         </div>
                     </div>
                 </div>
+                <div class="workspace-focusbar" id="workspace-focusbar" hidden>
+                    <button type="button" class="focus-tab" data-focus="chat" id="focus-tab-chat">Chat</button>
+                    <button type="button" class="focus-tab focus-tab-active" data-focus="canvas" id="focus-tab-canvas">Canvas</button>
+                    <div class="doc-tabs" id="doc-tabs"></div>
+                    <div class="canvas-zoom-controls" id="canvas-zoom-controls">
+                        <button type="button" class="canvas-zoom-btn" id="canvas-zoom-out" title="Zoom out">-</button>
+                        <span class="canvas-zoom-level" id="canvas-zoom-level">100%</span>
+                        <button type="button" class="canvas-zoom-btn" id="canvas-zoom-in" title="Zoom in">+</button>
+                    </div>
+                </div>
+                <div class="canvas-pane" id="canvas-pane" hidden>
+                    <div class="canvas-drop-zone" id="canvas-drop-zone">
+                        <p class="canvas-empty-hint" id="canvas-empty-hint">Drag files here or use + Add in sidebar</p>
+                        <div class="canvas-cards-wrap" id="canvas-cards-wrap">
+                            <div class="canvas-cards" id="canvas-cards"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="document-viewer-pane" id="document-viewer-pane" hidden>
+                    <div class="document-viewer-content" id="document-viewer-content"></div>
+                </div>
                 <div class="chat-messages" id="chat-messages">
                     <div class="chat-messages-inner" id="chat-messages-inner"></div>
                     <div class="msg msg-assistant chat-loading-indicator" id="chat-loading-indicator" hidden aria-live="polite">
@@ -281,6 +302,11 @@
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+    <script src="/js/canvas.js"></script>
+    <script src="/js/document-viewer.js"></script>
     <script src="/js/app.js"></script>
 </body>
 </html>

@@ -94,6 +94,12 @@
     var btnTools = document.getElementById('btn-tools');
     var toolsDropdown = document.getElementById('tools-dropdown');
     var chatToolPanel = document.getElementById('chat-tool-panel');
+    var workspaceFocusBar = document.getElementById('workspace-focusbar');
+    var workspaceCanvasPane = document.getElementById('canvas-pane');
+    var workspaceDocumentPane = document.getElementById('document-viewer-pane');
+    var focusTabChat = document.getElementById('focus-tab-chat');
+    var focusTabCanvas = document.getElementById('focus-tab-canvas');
+    var chatMessagesPane = document.getElementById('chat-messages');
     var toolPanelTitle = document.getElementById('tool-panel-title');
     var toolPanelSubtitle = document.getElementById('tool-panel-subtitle');
     var btnCloseTool = document.getElementById('btn-close-tool');
@@ -104,6 +110,24 @@
     var btnSigninApple = document.getElementById('btn-signin-apple');
     var btnSignout = document.getElementById('btn-signout');
     var btnConnectGmail = document.getElementById('btn-connect-gmail');
+
+    function setMainFocus(focus) {
+        var f = focus === 'document' ? 'document' : (focus === 'canvas' ? 'canvas' : 'chat');
+        if (workspaceFocusBar) workspaceFocusBar.hidden = (f === 'chat');
+        if (workspaceCanvasPane) workspaceCanvasPane.hidden = (f !== 'canvas');
+        if (workspaceDocumentPane) workspaceDocumentPane.hidden = (f !== 'document');
+        if (chatMessagesPane) chatMessagesPane.hidden = (f !== 'chat');
+        if (focusTabCanvas) {
+            if (f === 'canvas') focusTabCanvas.classList.add('focus-tab-active');
+            else focusTabCanvas.classList.remove('focus-tab-active');
+        }
+        if (focusTabChat) {
+            if (f === 'chat') focusTabChat.classList.add('focus-tab-active');
+            else focusTabChat.classList.remove('focus-tab-active');
+        }
+    }
+
+    window.openmudSetMainFocus = setMainFocus;
 
     function openSettingsModal() {
         if (!modalSettings) return;
@@ -656,6 +680,34 @@
         });
     }
 
+    function updateDocumentContent(docId, dataBuffer) {
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var tx = db.transaction(DOC_STORE, 'readwrite');
+                var store = tx.objectStore(DOC_STORE);
+                var req = store.get(docId);
+                req.onsuccess = function () {
+                    var doc = req.result;
+                    if (!doc) return resolve(false);
+                    doc.data = dataBuffer;
+                    doc.size = dataBuffer ? dataBuffer.byteLength : (doc.size || 0);
+                    store.put(doc);
+                };
+                req.onerror = function () { reject(req.error); };
+                tx.oncomplete = function () {
+                    resolve(true);
+                };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        }).then(function (ok) {
+            if (ok) {
+                renderDocuments();
+                if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
+            }
+            return ok;
+        });
+    }
+
     function cloneDocumentToProject(doc, targetProjectId) {
         if (!doc || !targetProjectId) return Promise.resolve();
         return openDB().then(function (db) {
@@ -727,6 +779,7 @@
         var menu = document.createElement('div');
         menu.className = 'doc-context-menu';
         menu.innerHTML = ''
+            + '<button type="button" data-action="open">Open</button>'
             + '<button type="button" data-action="rename">Rename</button>'
             + '<button type="button" data-action="copy">Copy</button>'
             + '<button type="button" data-action="download">Download</button>'
@@ -738,6 +791,12 @@
         var maxY = window.innerHeight - menu.offsetHeight - 8;
         menu.style.left = Math.max(8, Math.min(x, maxX)) + 'px';
         menu.style.top = Math.max(8, Math.min(y, maxY)) + 'px';
+        menu.querySelector('[data-action="open"]').addEventListener('click', function () {
+            hideDocContextMenu();
+            if (window.openmud && window.openmud.openDocument) {
+                window.openmud.openDocument(doc);
+            }
+        });
         menu.querySelector('[data-action="rename"]').addEventListener('click', function () {
             editingDocumentId = doc.id;
             hideDocContextMenu();
@@ -758,7 +817,10 @@
         });
         menu.querySelector('[data-action="delete"]').addEventListener('click', function () {
             hideDocContextMenu();
-            deleteDocument(doc.id).then(function () { renderDocuments(); });
+            deleteDocument(doc.id).then(function () {
+                renderDocuments();
+                if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
+            });
         });
         activeDocContextMenu = menu;
     }
@@ -801,6 +863,7 @@
             docs.forEach(function (doc) {
                 var li = document.createElement('div');
                 li.className = 'document-item';
+                var openTimer = null;
                 if (editingDocumentId === doc.id) {
                     li.innerHTML = ''
                         + '<input type="text" class="document-rename-input" value="' + (doc.name || '').replace(/"/g, '&quot;') + '">'
@@ -827,7 +890,17 @@
                     li.innerHTML = '<span class="document-name" title="' + (doc.name || '').replace(/"/g, '&quot;') + '">' + (doc.name || 'Document') + '</span>' +
                         '<span class="document-size">' + formatSize(doc.size || 0) + '</span>';
                 }
+                li.addEventListener('click', function () {
+                    if (editingDocumentId === doc.id) return;
+                    if (openTimer) clearTimeout(openTimer);
+                    openTimer = setTimeout(function () {
+                        if (window.openmud && window.openmud.openDocument) {
+                            window.openmud.openDocument(doc);
+                        }
+                    }, 180);
+                });
                 li.addEventListener('dblclick', function () {
+                    if (openTimer) clearTimeout(openTimer);
                     editingDocumentId = doc.id;
                     renderDocuments();
                 });
@@ -848,6 +921,7 @@
         renderProjects();
         renderMessages();
         renderDocuments();
+        if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
         refreshEstimatorProjectSignals();
         updateEstimatorSummary();
     }
@@ -886,6 +960,7 @@
         });
         Promise.all(tasks).then(function () {
             renderDocuments();
+            if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
             refreshEstimatorProjectSignals();
             if (accepted > 0 && source === 'paste') {
                 addMessage('assistant', 'Added ' + accepted + ' pasted document' + (accepted === 1 ? '' : 's') + ' to this project.');
@@ -905,6 +980,11 @@
     if (chatDocUpload) {
         chatDocUpload.addEventListener('change', function () {
             handleDocUpload(this);
+        });
+    }
+    if (focusTabChat) {
+        focusTabChat.addEventListener('click', function () {
+            setMainFocus('chat');
         });
     }
     var documentsSection = document.getElementById('documents-section');
@@ -1930,10 +2010,31 @@
         }
     })();
 
+    window.openmud = {
+        getActiveProjectId: function () { return activeProjectId; },
+        getDocuments: getDocuments,
+        saveDocument: saveDocument,
+        deleteDocument: deleteDocument,
+        renderDocuments: renderDocuments,
+        updateDocumentContent: updateDocumentContent,
+        openDocument: null,
+        closeDocument: null,
+        renderCanvas: null
+    };
+
+    if (typeof window.openmudInitCanvas === 'function') {
+        window.openmudInitCanvas(window.openmud);
+    }
+    if (typeof window.openmudInitDocumentViewer === 'function') {
+        window.openmudInitDocumentViewer(window.openmud);
+    }
+
     ensureProject();
     renderProjects();
     renderMessages();
     renderDocuments();
+    setMainFocus('chat');
+    if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
     updateEstimatorSummary();
     refreshEstimatorProjectSignals();
     initSupabaseAuth();
