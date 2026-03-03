@@ -1,8 +1,22 @@
 {
   "name": "openmud",
   "version": "1.0.0",
-  "description": "AI for construction",
+  "description": "Open-source AI for construction across web and desktop",
   "scripts": {
+    "predev": "for p in 3847 3848 3849 3850 3851 3947 3948 3949 3950 3951; do lsof -ti:$p 2>/dev/null | xargs kill -9 2>/dev/null; done; true",
+    "dev": "./scripts/dev-wrapper.sh",
+    "dev:site": "env -u NODE_OPTIONS ./scripts/dev-from-symlink.sh",
+    "dev:site:static": "serve web -p 3947",
+    "dev:app": "cd desktop && DEV=1 PORT=3947 npm start",
+    "dev:local": "npm run predev && sleep 1 && npx concurrently -k -n site,app -c blue,green \"npm run dev:site:static\" \"sleep 4 && npm run dev:app\"",
+    "dev:clean": "npm run predev && sleep 1 && cd desktop && DEV=1 npm start",
+    "dev:test": "./scripts/dev-and-test.sh",
+    "build:test": "./scripts/build-and-verify.sh",
+    "test:smoke": "node scripts/smoke-test.js",
+    "release:desktop": "node scripts/release-desktop.js",
+    "build:desktop:clean": "cd desktop && npm run build:clean",
+    "setup:auth": "node scripts/setup-auth.js",
+    "generate:apple-jwt": "node scripts/generate-apple-jwt.js",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "bot:site": "node scripts/site-bot.js",
@@ -12,9 +26,14 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
     "@supabase/supabase-js": "^2.98.0",
-    "openai": "^4.73.0"
+    "openai": "^4.73.0",
+    "stripe": "^20.3.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2"
+    "@playwright/test": "^1.58.2",
+    "concurrently": "^9.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "serve": "^14.2.0",
+    "vercel": "^39.0.0"
   }
 }
