@@ -25,6 +25,12 @@ Email workflow:
 - If the user asks to send an email, call send_email.
 - If an email tool returns an auth/connection error, tell the user to sign in and connect Gmail or Outlook from chat.
 - Keep email results short: sender, subject, date, snippet.`;
+const FILE_ACTION_RULES = `
+Project file management:
+- If the user asks to organize files/folders in the current project, output one action tag:
+  [OPENMUD_FILE_ACTION]{"action":"create_folder|rename_folder|delete_folder|delete_file|move_file","folder":"...","to_folder":"...","file":"...","new_name":"..."}[/OPENMUD_FILE_ACTION]
+- Use exact visible names from the project document/folder context when possible.
+- Include only one action per response. If multiple actions are needed, ask for confirmation or sequence them across turns.`;
 
 /** Model-specific system prompts: purpose + when to use which tools */
 const SYSTEM_PROMPTS = {
@@ -229,7 +235,7 @@ function getSystemPrompt(model, chatMode = 'agent') {
   const modeRules = chatMode === 'ask'
     ? 'Mode: Ask. Give direct answers only. Do not run tools unless the user explicitly asks you to generate a proposal, schedule, estimate, or calendar event.'
     : 'Mode: Agent. You may proactively use tools when they improve the result.';
-  return `${base}\n\n${WORKFLOW_RULES}\n\n${CALENDAR_RULES}\n\n${EMAIL_RULES}\n\n${modeRules}`;
+  return `${base}\n\n${WORKFLOW_RULES}\n\n${CALENDAR_RULES}\n\n${EMAIL_RULES}\n\n${FILE_ACTION_RULES}\n\n${modeRules}`;
 }
 
 function buildProposalFromEstimate(estimateContext) {

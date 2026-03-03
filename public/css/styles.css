@@ -859,6 +859,12 @@ body {
     margin-bottom: 8px;
 }
 
+.documents-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .documents-header h3 {
     margin: 0;
     font-size: 0.6875rem;
@@ -882,6 +888,17 @@ body {
 .btn-upload:hover {
     color: var(--text);
     background: #333;
+}
+
+.btn-upload.btn-folder {
+    background: color-mix(in srgb, var(--earth) 20%, var(--bg-alt) 80%);
+    border: 1px solid color-mix(in srgb, var(--earth) 55%, var(--border) 45%);
+    color: color-mix(in srgb, var(--earth-light) 70%, var(--text-secondary) 30%);
+}
+
+.btn-upload.btn-folder:hover {
+    background: color-mix(in srgb, var(--earth) 32%, var(--bg-alt) 68%);
+    color: var(--text);
 }
 
 .documents-list {
@@ -922,6 +939,78 @@ body {
 
 .document-item:hover {
     background: rgba(255,255,255,0.05);
+}
+
+.document-item[draggable="true"] {
+    cursor: pointer;
+}
+
+.document-item.document-item-dragging {
+    opacity: 0.45;
+}
+
+.document-folder {
+    margin-bottom: 4px;
+}
+
+.document-folder-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.025);
+    color: var(--text-secondary);
+    font-size: 0.6875rem;
+}
+
+.document-folder-header:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.document-folder-header.document-folder-drop-target {
+    background: rgba(199, 155, 106, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(199, 155, 106, 0.35);
+}
+
+.document-folder-toggle {
+    width: 12px;
+    text-align: center;
+    color: color-mix(in srgb, var(--earth-light) 75%, var(--text-secondary) 25%);
+    user-select: none;
+}
+
+.document-folder-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-folder-body {
+    margin-left: 12px;
+    margin-top: 3px;
+    border-left: 1px dashed rgba(199, 155, 106, 0.25);
+    padding-left: 7px;
+}
+
+.folder-rename-input {
+    flex: 1;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 0.6875rem;
+    color: var(--text);
+    background: color-mix(in srgb, var(--earth) 12%, var(--bg-alt) 88%);
+    border: 1px solid color-mix(in srgb, var(--earth) 45%, var(--border) 55%);
+    border-radius: 4px;
+    padding: 4px 6px;
+}
+
+.folder-rename-input:focus {
+    outline: none;
+    border-color: var(--earth-light);
+    box-shadow: 0 0 0 2px rgba(199, 155, 106, 0.18);
 }
 
 .document-rename-input {

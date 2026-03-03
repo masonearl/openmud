@@ -61,10 +61,13 @@
             <div class="documents-section" id="documents-section">
                 <div class="documents-header">
                     <h3>Documents</h3>
-                    <label class="btn-upload" title="Upload document">
-                        <span>+ Add</span>
-                        <input type="file" id="doc-upload" multiple hidden>
-                    </label>
+                    <div class="documents-header-actions">
+                        <button type="button" class="btn-upload btn-folder" id="btn-new-folder" title="Create folder">+ Folder</button>
+                        <label class="btn-upload" title="Upload document">
+                            <span>+ Add</span>
+                            <input type="file" id="doc-upload" multiple hidden>
+                        </label>
+                    </div>
                 </div>
                 <div class="documents-list" id="documents-list"></div>
                 <p class="documents-hint" id="documents-hint">Select a project to add documents</p>

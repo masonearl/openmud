@@ -79,6 +79,7 @@
 
     var activeProjectId = null;
     var editingProjectId = null;
+    var editingFolderId = null;
     var docClipboard = null;
     var editingDocumentId = null;
     var activeDocContextMenu = null;
@@ -110,6 +111,7 @@
     var btnSigninApple = document.getElementById('btn-signin-apple');
     var btnSignout = document.getElementById('btn-signout');
     var btnConnectGmail = document.getElementById('btn-connect-gmail');
+    var btnNewFolder = document.getElementById('btn-new-folder');
 
     function setMainFocus(focus) {
         var f = focus === 'document' ? 'document' : (focus === 'canvas' ? 'canvas' : 'chat');
@@ -275,10 +277,12 @@
         var scheduleMatch = text.match(/\[OPENMUD_SCHEDULE\]([\s\S]*?)\[\/OPENMUD_SCHEDULE\]/);
         var proposalMatch = text.match(/\[OPENMUD_PROPOSAL\]([\s\S]*?)\[\/OPENMUD_PROPOSAL\]/);
         var calendarMatch = text.match(/\[OPENMUD_CALENDAR\]([\s\S]*?)\[\/OPENMUD_CALENDAR\]/);
+        var fileActionMatch = text.match(/\[OPENMUD_FILE_ACTION\]([\s\S]*?)\[\/OPENMUD_FILE_ACTION\]/);
         var displayText = text;
         var scheduleData = null;
         var proposalData = null;
         var calendarData = null;
+        var fileActionData = null;
         if (scheduleMatch) {
             displayText = displayText.replace(/\[OPENMUD_SCHEDULE\][\s\S]*?\[\/OPENMUD_SCHEDULE\]/, '').trim();
             try {
@@ -295,6 +299,12 @@
             displayText = displayText.replace(/\[OPENMUD_CALENDAR\][\s\S]*?\[\/OPENMUD_CALENDAR\]/, '').trim();
             try {
                 calendarData = JSON.parse(calendarMatch[1].trim());
+            } catch (e) { /* ignore */ }
+        }
+        if (fileActionMatch) {
+            displayText = displayText.replace(/\[OPENMUD_FILE_ACTION\][\s\S]*?\[\/OPENMUD_FILE_ACTION\]/, '').trim();
+            try {
+                fileActionData = JSON.parse(fileActionMatch[1].trim());
             } catch (e) { /* ignore */ }
         }
         displayText = sanitizeResponse(displayText);
@@ -499,6 +509,12 @@
             actions.appendChild(downloadBtn);
             wrap.appendChild(calCard);
         }
+        if (fileActionData && wrap && !wrap._openmudFileActionDone) {
+            wrap._openmudFileActionDone = true;
+            executeFileAction(fileActionData).then(function (msg) {
+                if (msg) addMessage('assistant', msg);
+            });
+        }
     }
 
     function renderMessages() {
@@ -611,8 +627,9 @@
     }
 
     var DB_NAME = 'rockmud_docs';
-    var DB_VERSION = 1;
+    var DB_VERSION = 2;
     var DOC_STORE = 'documents';
+    var FOLDERS_STORE = 'folders';
     var MAX_FILE_SIZE = 5 * 1024 * 1024;
 
     function openDB() {
@@ -626,11 +643,23 @@
                     var store = db.createObjectStore(DOC_STORE, { keyPath: 'id' });
                     store.createIndex('projectId', 'projectId', { unique: false });
                 }
+                if (e.oldVersion < 2 && db.objectStoreNames.contains(DOC_STORE)) {
+                    try {
+                        var docStore = e.target.transaction.objectStore(DOC_STORE);
+                        if (!docStore.indexNames.contains('folderId')) {
+                            docStore.createIndex('folderId', 'folderId', { unique: false });
+                        }
+                    } catch (err) { /* ignore */ }
+                }
+                if (!db.objectStoreNames.contains(FOLDERS_STORE)) {
+                    var folderStore = db.createObjectStore(FOLDERS_STORE, { keyPath: 'id' });
+                    folderStore.createIndex('projectId', 'projectId', { unique: false });
+                }
             };
         });
     }
 
-    function saveDocument(projectId, file) {
+    function saveDocument(projectId, file, folderId) {
         return openDB().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var reader = new FileReader();
@@ -638,6 +667,7 @@
                     var doc = {
                         id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
                         projectId: projectId,
+                        folderId: folderId || null,
                         name: file.name,
                         size: file.size,
                         type: file.type,
@@ -651,6 +681,102 @@
                 };
                 reader.onerror = function () { reject(reader.error); };
                 reader.readAsArrayBuffer(file);
+            });
+        });
+    }
+
+    function createFolder(projectId, name) {
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var folder = {
+                    id: 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
+                    projectId: projectId,
+                    name: String(name || 'New folder').trim() || 'New folder',
+                    createdAt: Date.now()
+                };
+                var tx = db.transaction(FOLDERS_STORE, 'readwrite');
+                tx.objectStore(FOLDERS_STORE).add(folder);
+                tx.oncomplete = function () { resolve(folder.id); };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        });
+    }
+
+    function getFolders(projectId) {
+        return openDB().then(function (db) {
+            return new Promise(function (resolve) {
+                if (!db.objectStoreNames.contains(FOLDERS_STORE)) { resolve([]); return; }
+                var tx = db.transaction(FOLDERS_STORE, 'readonly');
+                var req = tx.objectStore(FOLDERS_STORE).index('projectId').getAll(projectId);
+                req.onsuccess = function () {
+                    resolve((req.result || []).sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); }));
+                };
+                req.onerror = function () { resolve([]); };
+            });
+        });
+    }
+
+    function renameFolder(folderId, nextName) {
+        var name = String(nextName || '').trim();
+        if (!name) return Promise.resolve(false);
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var tx = db.transaction(FOLDERS_STORE, 'readwrite');
+                var store = tx.objectStore(FOLDERS_STORE);
+                var req = store.get(folderId);
+                req.onsuccess = function () {
+                    var folder = req.result;
+                    if (!folder) return resolve(false);
+                    folder.name = name;
+                    store.put(folder);
+                };
+                req.onerror = function () { reject(req.error); };
+                tx.oncomplete = function () { resolve(true); };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        });
+    }
+
+    function deleteFolder(folderId) {
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var tx = db.transaction([FOLDERS_STORE, DOC_STORE], 'readwrite');
+                tx.objectStore(FOLDERS_STORE).delete(folderId);
+                var docsStore = tx.objectStore(DOC_STORE);
+                if (!docsStore.indexNames.contains('folderId')) {
+                    tx.oncomplete = function () { resolve(); };
+                    tx.onerror = function () { reject(tx.error); };
+                    return;
+                }
+                var req = docsStore.index('folderId').getAll(folderId);
+                req.onsuccess = function () {
+                    (req.result || []).forEach(function (doc) {
+                        doc.folderId = null;
+                        docsStore.put(doc);
+                    });
+                };
+                req.onerror = function () { /* no-op */ };
+                tx.oncomplete = function () { resolve(); };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        });
+    }
+
+    function moveDocumentToFolder(docId, folderId) {
+        return openDB().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var tx = db.transaction(DOC_STORE, 'readwrite');
+                var store = tx.objectStore(DOC_STORE);
+                var req = store.get(docId);
+                req.onsuccess = function () {
+                    var doc = req.result;
+                    if (!doc) return resolve(false);
+                    doc.folderId = folderId || null;
+                    store.put(doc);
+                };
+                req.onerror = function () { reject(req.error); };
+                tx.oncomplete = function () { resolve(true); };
+                tx.onerror = function () { reject(tx.error); };
             });
         });
     }
@@ -715,6 +841,7 @@
                 var newDoc = {
                     id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
                     projectId: targetProjectId,
+                    folderId: null,
                     name: doc.name,
                     size: doc.size,
                     type: doc.type,
@@ -767,6 +894,22 @@
         });
     }
 
+    function findFolderByName(projectId, folderName) {
+        var target = String(folderName || '').trim().toLowerCase();
+        if (!target) return Promise.resolve(null);
+        return getFolders(projectId).then(function (folders) {
+            return folders.find(function (f) { return String(f.name || '').trim().toLowerCase() === target; }) || null;
+        });
+    }
+
+    function findDocumentByName(projectId, docName) {
+        var target = String(docName || '').trim().toLowerCase();
+        if (!target) return Promise.resolve(null);
+        return getDocuments(projectId).then(function (docs) {
+            return docs.find(function (d) { return String(d.name || '').trim().toLowerCase() === target; }) || null;
+        });
+    }
+
     function hideDocContextMenu() {
         if (!activeDocContextMenu) return;
         if (activeDocContextMenu.parentNode) activeDocContextMenu.parentNode.removeChild(activeDocContextMenu);
@@ -781,6 +924,7 @@
         menu.innerHTML = ''
             + '<button type="button" data-action="open">Open</button>'
             + '<button type="button" data-action="rename">Rename</button>'
+            + '<button type="button" data-action="move">Move to folder…</button>'
             + '<button type="button" data-action="copy">Copy</button>'
             + '<button type="button" data-action="download">Download</button>'
             + '<button type="button" data-action="delete" class="danger">Delete</button>';
@@ -801,6 +945,30 @@
             editingDocumentId = doc.id;
             hideDocContextMenu();
             renderDocuments();
+        });
+        menu.querySelector('[data-action="move"]').addEventListener('click', function () {
+            hideDocContextMenu();
+            if (!activeProjectId) return;
+            getFolders(activeProjectId).then(function (folders) {
+                if (!folders || folders.length === 0) {
+                    addMessage('assistant', 'Create a folder first, then move files into it.');
+                    return;
+                }
+                var names = folders.map(function (f) { return f.name; });
+                var selected = window.prompt('Move "' + (doc.name || 'document') + '" to folder:\n' + names.join('\n'));
+                if (!selected) return;
+                var match = folders.find(function (f) {
+                    return String(f.name || '').trim().toLowerCase() === String(selected || '').trim().toLowerCase();
+                });
+                if (!match) {
+                    addMessage('assistant', 'Folder not found. Try exact folder name.');
+                    return;
+                }
+                moveDocumentToFolder(doc.id, match.id).then(function () {
+                    renderDocuments();
+                    if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
+                });
+            });
         });
         menu.querySelector('[data-action="copy"]').addEventListener('click', function () {
             docClipboard = {
@@ -843,7 +1011,8 @@
     function renderDocuments() {
         var listEl = document.getElementById('documents-list');
         var hintEl = document.getElementById('documents-hint');
-        var uploadLabel = document.querySelector('.btn-upload');
+        var uploadLabel = document.querySelector('label.btn-upload');
+        var newFolderBtn = document.getElementById('btn-new-folder');
         if (!listEl || !hintEl) return;
 
         if (!activeProjectId) {
@@ -851,71 +1020,198 @@
             hintEl.textContent = 'Select a project to add documents';
             hintEl.hidden = false;
             if (uploadLabel) uploadLabel.style.pointerEvents = 'none';
+            if (newFolderBtn) newFolderBtn.disabled = true;
             return;
         }
 
         if (uploadLabel) uploadLabel.style.pointerEvents = '';
+        if (newFolderBtn) newFolderBtn.disabled = false;
 
-        getDocuments(activeProjectId).then(function (docs) {
+        function renderDocItem(doc, parentEl) {
+            var li = document.createElement('div');
+            li.className = 'document-item';
+            li.draggable = true;
+            var openTimer = null;
+            if (editingDocumentId === doc.id) {
+                li.innerHTML = ''
+                    + '<input type="text" class="document-rename-input" value="' + (doc.name || '').replace(/"/g, '&quot;') + '">'
+                    + '<span class="document-size">' + formatSize(doc.size || 0) + '</span>';
+                var renameInput = li.querySelector('.document-rename-input');
+                renameInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        renameDocument(doc.id, renameInput.value);
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        editingDocumentId = null;
+                        renderDocuments();
+                    }
+                });
+                renameInput.addEventListener('blur', function () {
+                    renameDocument(doc.id, renameInput.value);
+                });
+                setTimeout(function () {
+                    renameInput.focus();
+                    renameInput.select();
+                }, 0);
+            } else {
+                li.innerHTML = '<span class="document-name" title="' + (doc.name || '').replace(/"/g, '&quot;') + '">' + (doc.name || 'Document') + '</span>' +
+                    '<span class="document-size">' + formatSize(doc.size || 0) + '</span>';
+            }
+            li.addEventListener('dragstart', function (e) {
+                e.dataTransfer.setData('text/plain', doc.id);
+                e.dataTransfer.effectAllowed = 'move';
+                li.classList.add('document-item-dragging');
+            });
+            li.addEventListener('dragend', function () {
+                li.classList.remove('document-item-dragging');
+            });
+            li.addEventListener('click', function () {
+                if (editingDocumentId === doc.id) return;
+                if (openTimer) clearTimeout(openTimer);
+                openTimer = setTimeout(function () {
+                    if (window.openmud && window.openmud.openDocument) {
+                        window.openmud.openDocument(doc);
+                    }
+                }, 180);
+            });
+            li.addEventListener('dblclick', function () {
+                if (openTimer) clearTimeout(openTimer);
+                editingDocumentId = doc.id;
+                renderDocuments();
+            });
+            li.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                openDocContextMenu(e, doc);
+            });
+            parentEl.appendChild(li);
+        }
+
+        function makeFolderDroppable(headerEl, folderId) {
+            headerEl.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                headerEl.classList.add('document-folder-drop-target');
+            });
+            headerEl.addEventListener('dragleave', function (e) {
+                if (!headerEl.contains(e.relatedTarget)) headerEl.classList.remove('document-folder-drop-target');
+            });
+            headerEl.addEventListener('drop', function (e) {
+                e.preventDefault();
+                headerEl.classList.remove('document-folder-drop-target');
+                var docId = e.dataTransfer.getData('text/plain');
+                if (!docId) return;
+                moveDocumentToFolder(docId, folderId || null).then(function () {
+                    renderDocuments();
+                    if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
+                });
+            });
+        }
+
+        Promise.all([getFolders(activeProjectId), getDocuments(activeProjectId)]).then(function (arr) {
+            var folders = arr[0] || [];
+            var docs = arr[1] || [];
             listEl.innerHTML = '';
-            hintEl.textContent = docs.length === 0 ? 'No documents. Click + Add to upload.' : '';
-            hintEl.hidden = docs.length > 0;
-            docs.forEach(function (doc) {
-                var li = document.createElement('div');
-                li.className = 'document-item';
-                var openTimer = null;
-                if (editingDocumentId === doc.id) {
-                    li.innerHTML = ''
-                        + '<input type="text" class="document-rename-input" value="' + (doc.name || '').replace(/"/g, '&quot;') + '">'
-                        + '<span class="document-size">' + formatSize(doc.size || 0) + '</span>';
-                    var renameInput = li.querySelector('.document-rename-input');
-                    renameInput.addEventListener('keydown', function (e) {
+            hintEl.textContent = (docs.length === 0 && folders.length === 0) ? 'No documents. Click + Add to upload.' : '';
+            hintEl.hidden = (docs.length > 0 || folders.length > 0);
+
+            folders.forEach(function (folder) {
+                var folderDocs = docs.filter(function (d) { return d.folderId === folder.id; });
+                var expanded = localStorage.getItem('openmud_folder_expanded_' + folder.id) !== 'false';
+                var box = document.createElement('div');
+                box.className = 'document-folder';
+                box.setAttribute('data-folder-id', folder.id);
+                if (editingFolderId === folder.id) {
+                    box.innerHTML = '<div class="document-folder-header">' +
+                        '<span class="document-folder-toggle">▸</span>' +
+                        '<input type="text" class="folder-rename-input" value="' + (folder.name || '').replace(/"/g, '&quot;') + '">' +
+                        '<span class="document-size">' + folderDocs.length + '</span>' +
+                        '</div><div class="document-folder-body" style="display:' + (expanded ? '' : 'none') + ';"></div>';
+                    var folderInput = box.querySelector('.folder-rename-input');
+                    folderInput.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
-                            renameDocument(doc.id, renameInput.value);
+                            editingFolderId = null;
+                            renameFolder(folder.id, folderInput.value).then(renderDocuments);
                         } else if (e.key === 'Escape') {
                             e.preventDefault();
-                            editingDocumentId = null;
+                            editingFolderId = null;
                             renderDocuments();
                         }
                     });
-                    renameInput.addEventListener('blur', function () {
-                        renameDocument(doc.id, renameInput.value);
+                    folderInput.addEventListener('blur', function () {
+                        editingFolderId = null;
+                        renameFolder(folder.id, folderInput.value).then(renderDocuments);
                     });
                     setTimeout(function () {
-                        renameInput.focus();
-                        renameInput.select();
+                        folderInput.focus();
+                        folderInput.select();
                     }, 0);
                 } else {
-                    li.innerHTML = '<span class="document-name" title="' + (doc.name || '').replace(/"/g, '&quot;') + '">' + (doc.name || 'Document') + '</span>' +
-                        '<span class="document-size">' + formatSize(doc.size || 0) + '</span>';
+                    box.innerHTML = '<div class="document-folder-header' + (expanded ? ' expanded' : '') + '">' +
+                        '<span class="document-folder-toggle">' + (expanded ? '▾' : '▸') + '</span>' +
+                        '<span class="document-folder-name" title="' + (folder.name || '').replace(/"/g, '&quot;') + '">' + (folder.name || 'Folder') + '</span>' +
+                        '<span class="document-size">' + folderDocs.length + '</span>' +
+                        '</div><div class="document-folder-body" style="display:' + (expanded ? '' : 'none') + ';"></div>';
                 }
-                li.addEventListener('click', function () {
-                    if (editingDocumentId === doc.id) return;
-                    if (openTimer) clearTimeout(openTimer);
-                    openTimer = setTimeout(function () {
-                        if (window.openmud && window.openmud.openDocument) {
-                            window.openmud.openDocument(doc);
-                        }
-                    }, 180);
+                var header = box.querySelector('.document-folder-header');
+                var body = box.querySelector('.document-folder-body');
+                makeFolderDroppable(header, folder.id);
+                header.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('folder-rename-input')) return;
+                    if (editingFolderId === folder.id) return;
+                    var isExpanded = header.classList.contains('expanded');
+                    header.classList.toggle('expanded', !isExpanded);
+                    var nowExpanded = !isExpanded;
+                    header.querySelector('.document-folder-toggle').textContent = nowExpanded ? '▾' : '▸';
+                    body.style.display = nowExpanded ? '' : 'none';
+                    localStorage.setItem('openmud_folder_expanded_' + folder.id, String(nowExpanded));
                 });
-                li.addEventListener('dblclick', function () {
-                    if (openTimer) clearTimeout(openTimer);
-                    editingDocumentId = doc.id;
+                header.addEventListener('dblclick', function (e) {
+                    e.preventDefault();
+                    editingFolderId = folder.id;
                     renderDocuments();
                 });
-                li.addEventListener('contextmenu', function (e) {
+                header.addEventListener('contextmenu', function (e) {
                     e.preventDefault();
-                    openDocContextMenu(e, doc);
+                    hideDocContextMenu();
+                    var menu = document.createElement('div');
+                    menu.className = 'doc-context-menu';
+                    menu.innerHTML = ''
+                        + '<button type="button" data-action="rename-folder">Rename folder</button>'
+                        + '<button type="button" data-action="delete-folder" class="danger">Delete folder</button>';
+                    document.body.appendChild(menu);
+                    menu.style.left = Math.max(8, Math.min(e.clientX, window.innerWidth - menu.offsetWidth - 8)) + 'px';
+                    menu.style.top = Math.max(8, Math.min(e.clientY, window.innerHeight - menu.offsetHeight - 8)) + 'px';
+                    menu.querySelector('[data-action="rename-folder"]').addEventListener('click', function () {
+                        editingFolderId = folder.id;
+                        hideDocContextMenu();
+                        renderDocuments();
+                    });
+                    menu.querySelector('[data-action="delete-folder"]').addEventListener('click', function () {
+                        hideDocContextMenu();
+                        deleteFolder(folder.id).then(function () {
+                            renderDocuments();
+                            if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
+                        });
+                    });
+                    activeDocContextMenu = menu;
                 });
-                listEl.appendChild(li);
+
+                folderDocs.forEach(function (doc) { renderDocItem(doc, body); });
+                listEl.appendChild(box);
             });
+
+            var rootDocs = docs.filter(function (d) { return !d.folderId; });
+            rootDocs.forEach(function (doc) { renderDocItem(doc, listEl); });
+            makeFolderDroppable(listEl, null);
         });
     }
 
     function switchProject(id) {
         hideDocContextMenu();
         editingDocumentId = null;
+        editingFolderId = null;
         activeProjectId = id;
         setActiveId(id);
         renderProjects();
@@ -943,7 +1239,7 @@
         inputEl.value = '';
     }
 
-    function uploadFilesToActiveProject(files, source) {
+    function uploadFilesToActiveProject(files, source, folderId) {
         if (!activeProjectId || !files || files.length === 0) return;
         var rejected = 0;
         var accepted = 0;
@@ -954,7 +1250,7 @@
                 return;
             }
             accepted++;
-            tasks.push(saveDocument(activeProjectId, file).catch(function (err) {
+            tasks.push(saveDocument(activeProjectId, file, folderId || null).catch(function (err) {
                 console.error('Upload failed:', err);
             }));
         });
@@ -980,6 +1276,20 @@
     if (chatDocUpload) {
         chatDocUpload.addEventListener('change', function () {
             handleDocUpload(this);
+        });
+    }
+    if (btnNewFolder) {
+        btnNewFolder.addEventListener('click', function () {
+            if (!activeProjectId) {
+                addMessage('assistant', 'Select a project first, then create a folder.');
+                return;
+            }
+            createFolder(activeProjectId, 'New folder').then(function (folderId) {
+                editingFolderId = folderId;
+                renderDocuments();
+            }).catch(function () {
+                addMessage('assistant', 'Could not create folder. Try again.');
+            });
         });
     }
     if (focusTabChat) {
@@ -1047,10 +1357,16 @@
     function getDocumentsContext() {
         return new Promise(function (resolve) {
             if (!activeProjectId) { resolve(''); return; }
-            getDocuments(activeProjectId).then(function (docs) {
-                if (docs.length === 0) { resolve(''); return; }
-                var names = docs.map(function (d) { return d.name + ' (' + formatSize(d.size) + ')'; }).join(', ');
-                resolve('\n[Project has ' + docs.length + ' uploaded document(s): ' + names + '. User may ask about these files.]');
+            Promise.all([getFolders(activeProjectId), getDocuments(activeProjectId)]).then(function (arr) {
+                var folders = arr[0] || [];
+                var docs = arr[1] || [];
+                if (docs.length === 0 && folders.length === 0) { resolve(''); return; }
+                var folderNames = folders.map(function (f) { return f.name; }).join(', ') || 'none';
+                var docLines = docs.map(function (d) {
+                    var folder = folders.find(function (f) { return f.id === d.folderId; });
+                    return d.name + ' (' + formatSize(d.size) + ', folder: ' + (folder ? folder.name : 'root') + ')';
+                }).join(', ');
+                resolve('\n[Project documents: ' + docs.length + '. Folders: ' + folderNames + '. Files: ' + docLines + '. For file operations, you may append one action block: [OPENMUD_FILE_ACTION]{"action":"create_folder|rename_folder|delete_folder|delete_file|move_file","folder":"...","from_folder":"...","to_folder":"...","file":"...","new_name":"..."}[/OPENMUD_FILE_ACTION].]');
             });
         });
     }
@@ -1229,6 +1545,91 @@
         return lines.join('\n');
     }
 
+    function executeFileAction(actionData) {
+        if (!actionData || !activeProjectId) return Promise.resolve('');
+        var action = String(actionData.action || '').toLowerCase();
+        var folderName = String(actionData.folder || '').trim();
+        var fileName = String(actionData.file || '').trim();
+        var toFolder = String(actionData.to_folder || '').trim();
+        var newName = String(actionData.new_name || '').trim();
+
+        if (action === 'create_folder' && folderName) {
+            return findFolderByName(activeProjectId, folderName).then(function (existing) {
+                if (existing) return 'Folder "' + existing.name + '" already exists.';
+                return createFolder(activeProjectId, folderName).then(function () {
+                    renderDocuments();
+                    return 'Created folder "' + folderName + '".';
+                });
+            });
+        }
+        if (action === 'rename_folder' && folderName && newName) {
+            return findFolderByName(activeProjectId, folderName).then(function (folder) {
+                if (!folder) return 'Folder "' + folderName + '" was not found.';
+                return renameFolder(folder.id, newName).then(function () {
+                    renderDocuments();
+                    return 'Renamed folder "' + folderName + '" to "' + newName + '".';
+                });
+            });
+        }
+        if (action === 'delete_folder' && folderName) {
+            return findFolderByName(activeProjectId, folderName).then(function (folder) {
+                if (!folder) return 'Folder "' + folderName + '" was not found.';
+                return deleteFolder(folder.id).then(function () {
+                    renderDocuments();
+                    return 'Deleted folder "' + folderName + '" (files moved to root).';
+                });
+            });
+        }
+        if (action === 'delete_file' && fileName) {
+            return findDocumentByName(activeProjectId, fileName).then(function (doc) {
+                if (!doc) return 'File "' + fileName + '" was not found.';
+                return deleteDocument(doc.id).then(function () {
+                    renderDocuments();
+                    if (window.openmud && window.openmud.renderCanvas) window.openmud.renderCanvas();
+                    return 'Deleted file "' + (doc.name || fileName) + '".';
+                });
+            });
+        }
+        if (action === 'move_file' && fileName) {
+            return Promise.all([findDocumentByName(activeProjectId, fileName), findFolderByName(activeProjectId, toFolder)]).then(function (arr) {
+                var doc = arr[0];
+                var folder = arr[1];
+                if (!doc) return 'File "' + fileName + '" was not found.';
+                if (!folder) return 'Folder "' + toFolder + '" was not found.';
+                return moveDocumentToFolder(doc.id, folder.id).then(function () {
+                    renderDocuments();
+                    return 'Moved "' + (doc.name || fileName) + '" to "' + folder.name + '".';
+                });
+            });
+        }
+        return Promise.resolve('');
+    }
+
+    function tryHandleChatFileCommand(text) {
+        if (!activeProjectId) return Promise.resolve(null);
+        var createFolderMatch = text.match(/^(?:create|add|make)\s+(?:a\s+)?folder\s+(.+)$/i);
+        if (createFolderMatch) {
+            return executeFileAction({ action: 'create_folder', folder: createFolderMatch[1].trim() });
+        }
+        var renameFolderMatch = text.match(/^rename\s+folder\s+(.+?)\s+to\s+(.+)$/i);
+        if (renameFolderMatch) {
+            return executeFileAction({ action: 'rename_folder', folder: renameFolderMatch[1].trim(), new_name: renameFolderMatch[2].trim() });
+        }
+        var deleteFolderMatch = text.match(/^(?:delete|remove)\s+folder\s+(.+)$/i);
+        if (deleteFolderMatch) {
+            return executeFileAction({ action: 'delete_folder', folder: deleteFolderMatch[1].trim() });
+        }
+        var deleteFileMatch = text.match(/^(?:delete|remove)\s+(?:file|document)\s+(.+)$/i);
+        if (deleteFileMatch) {
+            return executeFileAction({ action: 'delete_file', file: deleteFileMatch[1].trim() });
+        }
+        var moveFileMatch = text.match(/^move\s+(?:file|document)\s+(.+?)\s+to\s+folder\s+(.+)$/i);
+        if (moveFileMatch) {
+            return executeFileAction({ action: 'move_file', file: moveFileMatch[1].trim(), to_folder: moveFileMatch[2].trim() });
+        }
+        return Promise.resolve(null);
+    }
+
     function doSend() {
         var text = (input.value || '').trim();
         if (!text || !activeProjectId) return;
@@ -1246,17 +1647,24 @@
         input.style.height = 'auto';
         setLoading(true);
 
-        var msgs = getMessages(activeProjectId);
-        var history = msgs.map(function (m) { return { role: m.role, content: m.content }; }).slice(-20);
-        var toolCtx = getToolContext();
-        if (toolCtx && history.length > 0) {
-            history[history.length - 1].content = history[history.length - 1].content + toolCtx;
-        }
-        if (history.length > 0) {
-            history[history.length - 1].content = history[history.length - 1].content + getBrowserContext();
-        }
+        return tryHandleChatFileCommand(text).then(function (localActionMessage) {
+            if (localActionMessage) {
+                addMessage('assistant', localActionMessage);
+                setLoading(false);
+                return;
+            }
 
-        getDocumentsContext().then(function (docCtx) {
+            var msgs = getMessages(activeProjectId);
+            var history = msgs.map(function (m) { return { role: m.role, content: m.content }; }).slice(-20);
+            var toolCtx = getToolContext();
+            if (toolCtx && history.length > 0) {
+                history[history.length - 1].content = history[history.length - 1].content + toolCtx;
+            }
+            if (history.length > 0) {
+                history[history.length - 1].content = history[history.length - 1].content + getBrowserContext();
+            }
+
+            return getDocumentsContext().then(function (docCtx) {
             if (docCtx && history.length > 0) {
                 history[history.length - 1].content = history[history.length - 1].content + docCtx;
             }
@@ -1314,6 +1722,7 @@
                     setLoading(false);
                     scrollToLatest();
                 });
+            });
         });
     }
 
@@ -2013,8 +2422,12 @@
     window.openmud = {
         getActiveProjectId: function () { return activeProjectId; },
         getDocuments: getDocuments,
+        getFolders: getFolders,
         saveDocument: saveDocument,
         deleteDocument: deleteDocument,
+        createFolder: createFolder,
+        renameFolder: renameFolder,
+        moveDocumentToFolder: moveDocumentToFolder,
         renderDocuments: renderDocuments,
         updateDocumentContent: updateDocumentContent,
         openDocument: null,
