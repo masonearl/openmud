@@ -1403,6 +1403,44 @@ body {
     margin: 0;
 }
 
+/* Tool panel controls (estimate/proposal/schedule) */
+#chat-tool-panel .tool-form-wrap input[type="text"],
+#chat-tool-panel .tool-form-wrap input[type="number"],
+#chat-tool-panel .tool-form-wrap textarea,
+#chat-tool-panel .tool-form-wrap select {
+    background: linear-gradient(180deg, #30261d 0%, #241c15 100%);
+    border: 1px solid #5a4735;
+    color: #f4eadf;
+}
+
+#chat-tool-panel .tool-form-wrap input[type="text"]::placeholder,
+#chat-tool-panel .tool-form-wrap input[type="number"]::placeholder,
+#chat-tool-panel .tool-form-wrap textarea::placeholder {
+    color: #baa791;
+}
+
+#chat-tool-panel .tool-form-wrap input[type="text"]:focus,
+#chat-tool-panel .tool-form-wrap input[type="number"]:focus,
+#chat-tool-panel .tool-form-wrap textarea:focus,
+#chat-tool-panel .tool-form-wrap select:focus {
+    outline: none;
+    border-color: #8e7458;
+    box-shadow: 0 0 0 2px rgba(142, 116, 88, 0.22);
+}
+
+#chat-tool-panel .tool-form-wrap .form-row-inline label {
+    padding: 8px 10px;
+    border: 1px solid #5a4735;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #30261d 0%, #241c15 100%);
+}
+
+#chat-tool-panel .tool-form-wrap .form-row-inline input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #c79b6a;
+}
+
 /* Estimate result */
 .estimate-result {
     margin-top: 20px;
