@@ -9,6 +9,13 @@
     var STORAGE_CHAT_MODE = 'rockmud_chat_mode';
     var STORAGE_SIDEBAR_WIDTH = 'rockmud_sidebarWidth';
     var DEFAULT_MODEL = 'gpt-4o-mini';
+    var BROWSER_TIMEZONE = (function () {
+        try {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+        } catch (e) {
+            return 'UTC';
+        }
+    })();
 
     var WELCOME_MSG = "Hi, I'm the openmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" You can also use /addevent to create a calendar event with Apple/Google/.ics buttons. Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
 
@@ -56,6 +63,7 @@
     var projectsList = document.getElementById('projects-list');
     var btnNewProject = document.getElementById('btn-new-project');
     var modalNewProject = document.getElementById('modal-new-project');
+    var modalSettings = document.getElementById('modal-settings');
     var formNewProject = document.getElementById('form-new-project');
     var inputProjectName = document.getElementById('input-project-name');
     var btnCancelProject = document.getElementById('btn-cancel-project');
@@ -69,6 +77,11 @@
     var lastEstimatePayload = null;
     var lastEstimateResult = null;
     var activeTool = null;
+    var authClient = null;
+    var authUser = null;
+    var authAccessToken = '';
+    var authReady = false;
+    var authSupabaseUrl = '';
 
     var btnTools = document.getElementById('btn-tools');
     var toolsDropdown = document.getElementById('tools-dropdown');
@@ -76,6 +89,23 @@
     var toolPanelTitle = document.getElementById('tool-panel-title');
     var toolPanelSubtitle = document.getElementById('tool-panel-subtitle');
     var btnCloseTool = document.getElementById('btn-close-tool');
+    var btnOpenSettings = document.getElementById('btn-open-settings');
+    var btnCloseSettings = document.getElementById('btn-close-settings');
+    var authStatusEl = document.getElementById('auth-status');
+    var btnSigninGoogle = document.getElementById('btn-signin-google');
+    var btnSigninApple = document.getElementById('btn-signin-apple');
+    var btnSignout = document.getElementById('btn-signout');
+    var btnConnectGmail = document.getElementById('btn-connect-gmail');
+
+    function openSettingsModal() {
+        if (!modalSettings) return;
+        modalSettings.hidden = false;
+    }
+
+    function closeSettingsModal() {
+        if (!modalSettings) return;
+        modalSettings.hidden = true;
+    }
 
     function addMessage(role, content, projectId) {
         projectId = projectId || activeProjectId;
@@ -105,6 +135,73 @@
             .replace(/\n{3,}/g, '\n\n')
             .trim();
         return s;
+    }
+
+    function blobToDataUrl(blob) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function () { resolve(String(reader.result || '')); };
+            reader.onerror = function () { reject(reader.error || new Error('Could not read image.')); };
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    function insertTextAtCursor(el, text) {
+        if (!el) return;
+        var start = typeof el.selectionStart === 'number' ? el.selectionStart : el.value.length;
+        var end = typeof el.selectionEnd === 'number' ? el.selectionEnd : el.value.length;
+        var before = el.value.slice(0, start);
+        var after = el.value.slice(end);
+        var needsSpacer = before && !/\s$/.test(before);
+        var insert = (needsSpacer ? '\n' : '') + text;
+        el.value = before + insert + after;
+        var cursor = (before + insert).length;
+        el.selectionStart = cursor;
+        el.selectionEnd = cursor;
+    }
+
+    function extractImageText(dataUrl) {
+        return fetch(API_BASE + '/ocr-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_data_url: dataUrl })
+        }).then(function (r) {
+            return r.json().then(function (data) {
+                if (!r.ok) {
+                    throw new Error((data && data.error) || ('OCR failed (' + r.status + ')'));
+                }
+                return String((data && data.text) || '').trim();
+            });
+        });
+    }
+
+    function handleImagePaste(file) {
+        if (!file) return;
+        if (file.size > MAX_FILE_SIZE) {
+            addMessage('assistant', 'Pasted image is too large (max 5 MB).');
+            return;
+        }
+        var originalPlaceholder = input.placeholder;
+        input.placeholder = 'Extracting text from pasted image...';
+        sendBtn.disabled = true;
+        blobToDataUrl(file)
+            .then(function (dataUrl) { return extractImageText(dataUrl); })
+            .then(function (text) {
+                if (!text) {
+                    addMessage('assistant', 'No readable text found in the pasted image.');
+                    return;
+                }
+                insertTextAtCursor(input, text);
+                autoGrowTextarea();
+                input.focus();
+            })
+            .catch(function (err) {
+                addMessage('assistant', 'Could not extract text from pasted image. ' + (err.message || 'Try again.'));
+            })
+            .then(function () {
+                input.placeholder = originalPlaceholder;
+                sendBtn.disabled = false;
+            });
     }
 
     function toGoogleDate(dateObj) {
@@ -659,6 +756,165 @@
         });
     }
 
+    function getBrowserContext() {
+        return '\n[Browser timezone: ' + BROWSER_TIMEZONE + ']';
+    }
+
+    function updateAuthUI() {
+        if (!authStatusEl) return;
+        var signedIn = !!(authUser && authUser.email);
+
+        function setButtonState(btn, opts) {
+            if (!btn) return;
+            btn.hidden = !!opts.hidden;
+            btn.disabled = !!opts.disabled;
+        }
+
+        if (!authReady) {
+            authStatusEl.textContent = 'Auth unavailable';
+            setButtonState(btnSigninGoogle, { hidden: false, disabled: true });
+            setButtonState(btnSigninApple, { hidden: false, disabled: true });
+            setButtonState(btnConnectGmail, { hidden: false, disabled: true });
+            setButtonState(btnSignout, { hidden: false, disabled: true });
+            return;
+        }
+
+        if (signedIn) {
+            authStatusEl.textContent = 'Signed in: ' + authUser.email;
+            setButtonState(btnSigninGoogle, { hidden: true, disabled: false });
+            setButtonState(btnSigninApple, { hidden: true, disabled: false });
+            setButtonState(btnConnectGmail, { hidden: false, disabled: false });
+            setButtonState(btnSignout, { hidden: false, disabled: false });
+        } else {
+            authStatusEl.textContent = 'Not signed in';
+            setButtonState(btnSigninGoogle, { hidden: false, disabled: false });
+            setButtonState(btnSigninApple, { hidden: false, disabled: false });
+            setButtonState(btnConnectGmail, { hidden: true, disabled: true });
+            setButtonState(btnSignout, { hidden: true, disabled: true });
+        }
+    }
+
+    function authHeaders() {
+        var headers = { 'Content-Type': 'application/json' };
+        if (authAccessToken) headers.Authorization = 'Bearer ' + authAccessToken;
+        return headers;
+    }
+
+    function refreshAuthSession() {
+        if (!authClient) return Promise.resolve();
+        return authClient.auth.getSession().then(function (res) {
+            var session = res && res.data ? res.data.session : null;
+            authUser = session ? session.user : null;
+            authAccessToken = session ? (session.access_token || '') : '';
+            updateAuthUI();
+        }).catch(function () {
+            authUser = null;
+            authAccessToken = '';
+            updateAuthUI();
+        });
+    }
+
+    function startEmailConnect(provider) {
+        if (!authAccessToken) {
+            addMessage('assistant', 'Sign in first, then connect your email provider.');
+            return;
+        }
+        var returnPath = window.location.pathname || '/pages/chat.html';
+        fetch(API_BASE + '/email/oauth/start', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ provider: provider, return_to: returnPath })
+        }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+            .then(function (result) {
+                if (!result.ok || !result.data || !result.data.auth_url) {
+                    throw new Error((result.data && result.data.error) || 'Could not start OAuth flow.');
+                }
+                window.location.href = result.data.auth_url;
+            })
+            .catch(function (err) {
+                addMessage('assistant', 'Email connect failed. ' + (err.message || 'Try again.'));
+            });
+    }
+
+    function initSupabaseAuth() {
+        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+            updateAuthUI();
+            return;
+        }
+        fetch(API_BASE + '/auth/config', { method: 'GET' })
+            .then(function (r) { return r.json(); })
+            .then(function (config) {
+                if (!config || !config.enabled || !config.supabase_url || !config.supabase_anon_key) {
+                    updateAuthUI();
+                    return;
+                }
+                authSupabaseUrl = String(config.supabase_url || '').trim();
+                authClient = window.supabase.createClient(config.supabase_url, config.supabase_anon_key);
+                authReady = true;
+                return refreshAuthSession().then(function () {
+                    authClient.auth.onAuthStateChange(function (event, session) {
+                        authUser = session ? session.user : null;
+                        authAccessToken = session ? (session.access_token || '') : '';
+                        updateAuthUI();
+                    });
+                });
+            })
+            .catch(function () {
+                authSupabaseUrl = '';
+                updateAuthUI();
+            });
+    }
+
+    function preflightProvider(provider) {
+        if (!authSupabaseUrl) return Promise.resolve({ ok: true });
+        var redirectTo = window.location.origin + (window.location.pathname || '/pages/chat.html');
+        var url = authSupabaseUrl.replace(/\/$/, '') + '/auth/v1/authorize?provider=' + encodeURIComponent(provider) + '&redirect_to=' + encodeURIComponent(redirectTo);
+        return fetch(url, {
+            method: 'GET',
+            redirect: 'manual'
+        }).then(function (res) {
+            if (res.status >= 300 && res.status < 400) return { ok: true };
+            if (res.ok) return { ok: true };
+            return res.json().catch(function () { return {}; }).then(function (data) {
+                var msg = String((data && (data.msg || data.message || data.error_description || data.error)) || '');
+                if (/provider is not enabled/i.test(msg)) {
+                    return { ok: false, reason: 'not_enabled' };
+                }
+                return { ok: true };
+            });
+        }).catch(function () {
+            return { ok: true };
+        });
+    }
+
+    function signInWithProvider(provider, label) {
+        if (!authClient || !authReady) {
+            addMessage('assistant', 'Supabase auth is not configured in environment.');
+            return;
+        }
+        preflightProvider(provider).then(function (check) {
+            if (!check.ok && check.reason === 'not_enabled') {
+                addMessage('assistant', label + ' sign-in is not enabled in Supabase yet. Enable it in Authentication -> Sign In / Providers.');
+                return;
+            }
+            authClient.auth.signInWithOAuth({
+                provider: provider,
+                options: { redirectTo: window.location.origin + (window.location.pathname || '/pages/chat.html') }
+            }).then(function (res) {
+                if (res && res.error) {
+                    var msg = String(res.error.message || '');
+                    if (msg.toLowerCase().indexOf('provider is not enabled') !== -1) {
+                        addMessage('assistant', label + ' sign-in is not enabled in Supabase. Enable this provider in Authentication -> Sign In / Providers.');
+                        return;
+                    }
+                    addMessage('assistant', 'Could not start ' + label + ' sign-in. ' + msg);
+                }
+            }).catch(function (err) {
+                addMessage('assistant', 'Could not start ' + label + ' sign-in. ' + (err.message || 'Try again.'));
+            });
+        });
+    }
+
     function getCopyableChat() {
         var msgs = activeProjectId ? getMessages(activeProjectId) : [];
         if (msgs.length === 0) return '';
@@ -689,6 +945,9 @@
         if (toolCtx && history.length > 0) {
             history[history.length - 1].content = history[history.length - 1].content + toolCtx;
         }
+        if (history.length > 0) {
+            history[history.length - 1].content = history[history.length - 1].content + getBrowserContext();
+        }
 
         getDocumentsContext().then(function (docCtx) {
             if (docCtx && history.length > 0) {
@@ -708,7 +967,7 @@
                 temperature: 0.7,
                 max_tokens: 1024,
                 use_tools: useTools,
-                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost', 'create_calendar_event'] : undefined
+                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost', 'create_calendar_event', 'search_email', 'send_email'] : undefined
             };
             if (useTools && lastEstimatePayload && lastEstimateResult) {
                 payload.estimate_context = {
@@ -722,7 +981,7 @@
             var timeoutId = setTimeout(function () { controller.abort(); }, 20000);
             fetch(API_BASE + '/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: authHeaders(),
                 body: JSON.stringify(payload),
                 signal: controller.signal
             })
@@ -761,6 +1020,15 @@
             e.preventDefault();
             doSend();
         }
+    });
+    input.addEventListener('paste', function (e) {
+        if (!e.clipboardData || !e.clipboardData.items) return;
+        var imageItem = Array.from(e.clipboardData.items).find(function (item) {
+            return item && item.kind === 'file' && item.type && item.type.indexOf('image/') === 0;
+        });
+        if (!imageItem) return; // Keep normal text paste behavior.
+        e.preventDefault();
+        handleImagePaste(imageItem.getAsFile());
     });
 
     function autoGrowTextarea() {
@@ -993,6 +1261,11 @@
     modalNewProject.addEventListener('click', function (e) {
         if (e.target === modalNewProject) modalNewProject.hidden = true;
     });
+    if (modalSettings) {
+        modalSettings.addEventListener('click', function (e) {
+            if (e.target === modalSettings) closeSettingsModal();
+        });
+    }
 
     function bindEstimateActions() {
         var btnProp = document.getElementById('btn-gen-proposal');
@@ -1210,6 +1483,37 @@
         });
     }
 
+    if (btnSigninGoogle) {
+        btnSigninGoogle.addEventListener('click', function () {
+            signInWithProvider('google', 'Google');
+        });
+    }
+    if (btnSigninApple) {
+        btnSigninApple.addEventListener('click', function () {
+            signInWithProvider('apple', 'Apple');
+        });
+    }
+    if (btnSignout) {
+        btnSignout.addEventListener('click', function () {
+            if (!authClient) return;
+            authClient.auth.signOut().then(function () {
+                authUser = null;
+                authAccessToken = '';
+                updateAuthUI();
+                closeSettingsModal();
+            });
+        });
+    }
+    if (btnConnectGmail) {
+        btnConnectGmail.addEventListener('click', function () { startEmailConnect('gmail'); });
+    }
+    if (btnOpenSettings) {
+        btnOpenSettings.addEventListener('click', function () { openSettingsModal(); });
+    }
+    if (btnCloseSettings) {
+        btnCloseSettings.addEventListener('click', function () { closeSettingsModal(); });
+    }
+
     (function initMobileViewportHeight() {
         var root = document.documentElement;
         if (!root || !root.classList.contains('has-app')) return;
@@ -1236,6 +1540,24 @@
     renderProjects();
     renderMessages();
     renderDocuments();
+    initSupabaseAuth();
+    updateAuthUI();
+
+    (function handleEmailConnectCallbackNotice() {
+        var params = new URLSearchParams(window.location.search || '');
+        var connected = params.get('email_connected');
+        if (!connected) return;
+        if (connected === 'gmail') {
+            addMessage('assistant', 'Gmail connected. You can now ask me to search email or draft/send mail.');
+        } else if (connected === 'microsoft') {
+            addMessage('assistant', 'Outlook connected. You can now ask me to search email or draft/send mail.');
+        } else {
+            addMessage('assistant', 'Email connect did not complete. Try connecting again.');
+        }
+        params.delete('email_connected');
+        var next = window.location.pathname + (params.toString() ? ('?' + params.toString()) : '');
+        window.history.replaceState({}, '', next);
+    })();
 
     (function initSidebarResize() {
         var sidebar = document.getElementById('projects-sidebar');

@@ -69,6 +69,9 @@
                 <div class="documents-list" id="documents-list"></div>
                 <p class="documents-hint" id="documents-hint">Select a project to add documents</p>
             </div>
+                <div class="sidebar-footer-settings">
+                    <button type="button" class="btn-sidebar-settings" id="btn-open-settings">Settings</button>
+                </div>
         </aside>
         <div class="sidebar-resize-handle" id="sidebar-resize-handle" aria-label="Resize sidebar"></div>
         <main class="chat-main">
@@ -221,6 +224,25 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modal-settings" hidden>
+        <div class="modal modal-wide">
+            <h3>Settings</h3>
+            <div class="settings-auth-block">
+                <p class="settings-auth-label">Email Account</p>
+                <p class="settings-auth-status" id="auth-status">Not signed in</p>
+                <div class="settings-auth-actions">
+                    <button type="button" class="btn-secondary" id="btn-signin-google">Sign in Google</button>
+                    <button type="button" class="btn-secondary" id="btn-signin-apple">Sign in Apple</button>
+                    <button type="button" class="btn-secondary" id="btn-connect-gmail">Connect Gmail inbox</button>
+                    <button type="button" class="btn-secondary" id="btn-signout">Sign out</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="btn-close-settings">Close</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer footer-mini">
         <p>&copy; <span id="year"></span> openmud</p>
     </footer>
@@ -228,6 +250,7 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/app.js"></script>
 </body>
 </html>

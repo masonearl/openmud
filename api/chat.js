@@ -3,6 +3,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const buildSchedule = require('./schedule').buildSchedule;
 const buildProposal = require('./proposal').buildProposal;
 const telemetry = require('./_lib/toolTelemetry');
+const { searchEmailForUser, sendEmailForUser } = require('./_lib/emailTools');
 
 const OUTPUT_RULES = `
 Output format: Plain text only. No markdown (no **, ##, ###). No LaTeX or math blocks (no \\[, \\], $$). Be concise. Short sentences. Get to the point. Use simple bullets with - if needed.`;
@@ -15,8 +16,15 @@ const CALENDAR_RULES = `
 Calendar add flow:
 - If user asks to add an event to calendar or uses /addevent, call create_calendar_event.
 - For timed events, pass ISO datetimes for start/end.
-- If details are missing (date/time/timezone/title), ask only for missing essentials.
+- If timezone is missing but the user message includes [Browser timezone: ...], use that timezone by default.
+- If details are missing (date/time/title), ask only for missing essentials.
 - When event data is complete, include [OPENMUD_CALENDAR]{...}[/OPENMUD_CALENDAR] with title, start_iso, end_iso, timezone, location, description, all_day.`;
+const EMAIL_RULES = `
+Email workflow:
+- If the user asks to search inbox/email, call search_email.
+- If the user asks to send an email, call send_email.
+- If an email tool returns an auth/connection error, tell the user to sign in and connect Gmail or Outlook from chat.
+- Keep email results short: sender, subject, date, snippet.`;
 
 /** Model-specific system prompts: purpose + when to use which tools */
 const SYSTEM_PROMPTS = {
@@ -177,6 +185,43 @@ const FALLBACK_LOCAL_TOOLS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'search_email',
+      description: 'Search connected inbox (Gmail/Outlook) for matching messages.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string' },
+          from: { type: 'string' },
+          subject: { type: 'string' },
+          since: { type: 'string', description: 'Optional date or Gmail query date constraint.' },
+          limit: { type: 'number' },
+          provider: { type: 'string', enum: ['gmail', 'microsoft', 'apple_imap'] },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'send_email',
+      description: 'Send email from a connected inbox account.',
+      parameters: {
+        type: 'object',
+        properties: {
+          to: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+          cc: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+          bcc: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+          subject: { type: 'string' },
+          body: { type: 'string' },
+          provider: { type: 'string', enum: ['gmail', 'microsoft', 'apple_imap'] },
+        },
+        required: ['to', 'subject', 'body'],
+      },
+    },
+  },
 ];
 
 function getSystemPrompt(model, chatMode = 'agent') {
@@ -184,7 +229,7 @@ function getSystemPrompt(model, chatMode = 'agent') {
   const modeRules = chatMode === 'ask'
     ? 'Mode: Ask. Give direct answers only. Do not run tools unless the user explicitly asks you to generate a proposal, schedule, estimate, or calendar event.'
     : 'Mode: Agent. You may proactively use tools when they improve the result.';
-  return `${base}\n\n${WORKFLOW_RULES}\n\n${CALENDAR_RULES}\n\n${modeRules}`;
+  return `${base}\n\n${WORKFLOW_RULES}\n\n${CALENDAR_RULES}\n\n${EMAIL_RULES}\n\n${modeRules}`;
 }
 
 function buildProposalFromEstimate(estimateContext) {
@@ -618,6 +663,10 @@ async function executeTool(req, toolName, args) {
     }
     case 'create_calendar_event':
       return normalizeCalendarEventArgs(args);
+    case 'search_email':
+      return searchEmailForUser(req, args);
+    case 'send_email':
+      return sendEmailForUser(req, args);
     case 'estimate_project_cost':
     case 'calculate_material_cost':
     case 'calculate_labor_cost':

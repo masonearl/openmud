@@ -202,6 +202,58 @@ TOOL_DEFINITIONS = [
             "required": ["title", "start"],
         },
     },
+    {
+        "name": "search_email",
+        "description": (
+            "Search connected inbox accounts (Gmail/Outlook). "
+            "Use for requests like find emails, search inbox, or check recent messages."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "General keyword query"},
+                "from": {"type": "string", "description": "Optional sender filter"},
+                "subject": {"type": "string", "description": "Optional subject filter"},
+                "since": {"type": "string", "description": "Optional date filter"},
+                "limit": {"type": "number", "description": "Max messages to return (1-20)"},
+                "provider": {
+                    "type": "string",
+                    "enum": ["gmail", "microsoft", "apple_imap"],
+                    "description": "Optional provider hint",
+                },
+            },
+        },
+    },
+    {
+        "name": "send_email",
+        "description": (
+            "Send an email through a connected inbox account (Gmail/Outlook). "
+            "Use after confirming recipients, subject, and body."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "to": {
+                    "oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
+                    "description": "Recipient email or array of emails",
+                },
+                "cc": {
+                    "oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
+                },
+                "bcc": {
+                    "oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
+                },
+                "subject": {"type": "string"},
+                "body": {"type": "string"},
+                "provider": {
+                    "type": "string",
+                    "enum": ["gmail", "microsoft", "apple_imap"],
+                    "description": "Optional provider hint",
+                },
+            },
+            "required": ["to", "subject", "body"],
+        },
+    },
 ]
 
 

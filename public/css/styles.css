@@ -671,6 +671,32 @@ body {
     opacity: 0.8;
 }
 
+.sidebar-footer-settings {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.btn-sidebar-settings {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-align: left;
+}
+
+.btn-sidebar-settings:hover {
+    color: var(--text);
+    border-color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
 .chat-main {
     flex: 1;
     display: flex;
@@ -1457,6 +1483,32 @@ body {
     border-radius: 8px;
     margin-top: 4px;
     resize: vertical;
+}
+
+.settings-auth-label {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.settings-auth-status {
+    margin: 8px 0 14px;
+    font-size: 0.9375rem;
+    color: var(--text);
+}
+
+.settings-auth-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.settings-auth-actions .btn-secondary {
+    width: 100%;
+    text-align: left;
 }
 
 /* Footer */

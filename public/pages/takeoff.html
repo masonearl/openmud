@@ -28,14 +28,54 @@
             margin-bottom: 14px;
         }
         .takeoff-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr auto;
             gap: 12px;
             align-items: center;
+        }
+        .takeoff-actions {
+            display: flex;
+            justify-content: flex-end;
             flex-wrap: wrap;
+            gap: 8px;
         }
         .takeoff-upload {
             color: var(--text-secondary);
             font-size: 0.92rem;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            width: 100%;
+        }
+        .takeoff-upload::file-selector-button {
+            border: 1px solid rgba(187,152,113,0.45);
+            background: rgba(187,152,113,0.16);
+            color: rgba(236, 220, 201, 0.95);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-right: 10px;
+            font-weight: 600;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .takeoff-upload::file-selector-button:hover {
+            background: rgba(187,152,113,0.24);
+            border-color: rgba(206,172,136,0.6);
+        }
+        .takeoff-upload::-webkit-file-upload-button {
+            border: 1px solid rgba(187,152,113,0.45);
+            background: rgba(187,152,113,0.16);
+            color: rgba(236, 220, 201, 0.95);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-right: 10px;
+            font-weight: 600;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .takeoff-upload::-webkit-file-upload-button:hover {
+            background: rgba(187,152,113,0.24);
+            border-color: rgba(206,172,136,0.6);
         }
         .takeoff-btn {
             border: 1px solid var(--border-light);
@@ -45,6 +85,13 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            text-align: right;
+            flex-wrap: wrap;
+            white-space: nowrap;
+            line-height: 1;
         }
         .takeoff-btn:disabled {
             opacity: 0.55;
@@ -107,6 +154,181 @@
             font-size: 0.84rem;
             line-height: 1.5;
         }
+        .takeoff-subhead {
+            margin: 10px 0 6px;
+            color: var(--text-tertiary);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 700;
+        }
+        .takeoff-list {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--text-secondary);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+        .takeoff-list li {
+            margin: 0 0 4px;
+        }
+        .takeoff-kv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 6px;
+        }
+        .takeoff-kv {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 7px 8px;
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .takeoff-kv strong {
+            color: var(--text);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-right: 6px;
+        }
+        .takeoff-measure-card {
+            display: none;
+        }
+        .takeoff-measure-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .takeoff-measure-title {
+            margin: 0;
+            color: var(--text);
+            font-size: 1rem;
+        }
+        .takeoff-measure-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .takeoff-pill {
+            border: 1px solid var(--border-light);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .takeoff-pill.is-active {
+            color: rgba(236, 220, 201, 0.95);
+            border-color: rgba(187,152,113,0.5);
+            background: rgba(187,152,113,0.14);
+        }
+        .takeoff-inline-input {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        .takeoff-inline-input input,
+        .takeoff-inline-input select {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-size: 0.8rem;
+        }
+        .takeoff-canvas-wrap {
+            position: relative;
+            width: 100%;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.18);
+            margin-top: 10px;
+        }
+        .takeoff-canvas-wrap canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+        #measure-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+        .takeoff-measure-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+        .takeoff-measure-log {
+            margin-top: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            background: rgba(255,255,255,0.02);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+        .takeoff-measure-log ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .takeoff-measure-log li {
+            margin: 0 0 4px;
+        }
+        .takeoff-log-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .takeoff-log-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .takeoff-log-btn {
+            border: 1px solid var(--border-light);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            font-size: 0.72rem;
+            padding: 3px 7px;
+            cursor: pointer;
+        }
+        .takeoff-log-btn:hover {
+            border-color: rgba(187,152,113,0.55);
+            color: var(--text);
+        }
+        .takeoff-highlight-legend {
+            margin-top: 8px;
+            color: var(--text-tertiary);
+            font-size: 0.74rem;
+        }
+        @media (max-width: 760px) {
+            .takeoff-row {
+                grid-template-columns: 1fr;
+            }
+            .takeoff-actions {
+                justify-content: flex-start;
+            }
+            .takeoff-measure-nav {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -141,33 +363,695 @@
         <div class="takeoff-card">
             <div class="takeoff-row">
                 <input id="takeoff-file" type="file" accept="application/pdf" class="takeoff-upload" />
-                <button id="takeoff-run" class="takeoff-btn">Analyze plan set</button>
+                <div class="takeoff-actions">
+                    <button id="takeoff-run" class="takeoff-btn">Analyze plan set</button>
+                </div>
             </div>
             <p class="takeoff-note">Free preview limit: 5 pages, 12MB. OCR for scanned-image pages is next phase.</p>
+            <p id="takeoff-file-meta" class="takeoff-note"></p>
             <p id="takeoff-status" class="takeoff-note"></p>
+        </div>
+
+        <div id="takeoff-measure-card" class="takeoff-card takeoff-measure-card">
+            <div class="takeoff-measure-head">
+                <h2 class="takeoff-measure-title">Quick Measure (MVP)</h2>
+                <span class="takeoff-note">Inspired by blueprint measurement workflows</span>
+            </div>
+            <div class="takeoff-measure-controls">
+                <button id="measure-mode-calibrate" class="takeoff-pill is-active" type="button">Calibrate</button>
+                <button id="measure-mode-distance" class="takeoff-pill" type="button">Measure distance</button>
+                <button id="measure-mode-area" class="takeoff-pill" type="button">Measure area</button>
+                <label class="takeoff-inline-input">Known distance
+                    <input id="measure-known" type="number" min="0.01" step="0.01" value="10">
+                </label>
+                <label class="takeoff-inline-input">Unit
+                    <select id="measure-unit">
+                        <option value="ft">ft</option>
+                        <option value="in">in</option>
+                        <option value="m">m</option>
+                    </select>
+                </label>
+                <button id="measure-reset" class="takeoff-pill" type="button">Reset</button>
+                <button id="measure-toggle-highlights" class="takeoff-pill is-active" type="button">Hide extracted highlights</button>
+                <div class="takeoff-measure-nav">
+                    <button id="measure-prev-page" class="takeoff-pill" type="button">Prev page</button>
+                    <span id="measure-page-label" class="takeoff-note">Page 1 / 1</span>
+                    <button id="measure-next-page" class="takeoff-pill" type="button">Next page</button>
+                </div>
+            </div>
+            <p id="measure-status" class="takeoff-note">Calibrate first: click two points that match a known distance.</p>
+            <p id="measure-highlight-legend" class="takeoff-highlight-legend"></p>
+            <div class="takeoff-canvas-wrap">
+                <canvas id="measure-base"></canvas>
+                <canvas id="measure-overlay"></canvas>
+            </div>
+            <div id="measure-log" class="takeoff-measure-log"></div>
         </div>
 
         <div id="takeoff-results" class="takeoff-results"></div>
     </div>
 
-    <script>
+    <script type="module">
+        import * as pdfjsLib from 'https://unpkg.com/pdfjs-dist@4.7.76/build/pdf.min.mjs';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs';
+
+        const MEASURE_CANVAS_BASE_SCALE = 1.25;
+        const MEASURE_ZOOM_MIN = 1;
+        const MEASURE_ZOOM_MAX = 4;
+        const MEASURE_ZOOM_STEP = 0.12;
+        let measureDoc = null;
+
         const fileInput = document.getElementById('takeoff-file');
         const runBtn = document.getElementById('takeoff-run');
         const statusEl = document.getElementById('takeoff-status');
+        const fileMetaEl = document.getElementById('takeoff-file-meta');
         const resultsEl = document.getElementById('takeoff-results');
+        const measureCardEl = document.getElementById('takeoff-measure-card');
+        const measureStatusEl = document.getElementById('measure-status');
+        const measureKnownEl = document.getElementById('measure-known');
+        const measureUnitEl = document.getElementById('measure-unit');
+        const measureLogEl = document.getElementById('measure-log');
+        const measureHighlightLegendEl = document.getElementById('measure-highlight-legend');
+        const measureToggleHighlightsBtn = document.getElementById('measure-toggle-highlights');
+        const measurePageLabelEl = document.getElementById('measure-page-label');
+        const modeCalibrateBtn = document.getElementById('measure-mode-calibrate');
+        const modeDistanceBtn = document.getElementById('measure-mode-distance');
+        const modeAreaBtn = document.getElementById('measure-mode-area');
+        const measurePrevBtn = document.getElementById('measure-prev-page');
+        const measureNextBtn = document.getElementById('measure-next-page');
+        const measureResetBtn = document.getElementById('measure-reset');
+        const baseCanvas = document.getElementById('measure-base');
+        const overlayCanvas = document.getElementById('measure-overlay');
+        const MEASUREMENT_PATTERN = /\b\d+(?:\.\d+)?\s*(?:[-x]\s*)?(?:ft|feet|in|inch|inches|lf|sf|sy|cy|yd|mm|cm|m|')\b/ig;
+        const COUNT_TOKENS = ['MH', 'CB', 'GV', 'HYD', 'VALVE', 'CLEANOUT', 'MANHOLE'];
+        const TAKEOFF_LINE_HINTS = /\b(install|remove|replace|abandon|lf|sf|sy|cy|qty|manhole|valve|pipe|sewer|waterline|station)\b/i;
+        const KEY_FIELD_PATTERNS = [
+            { key: 'Project', pattern: /\bproject(?:\s+name)?\s*[:\-]\s*(.+)$/i },
+            { key: 'Project #', pattern: /\bproject\s*(?:number|no\.?)\s*[:\-]\s*(.+)$/i },
+            { key: 'Sheet', pattern: /\bsheet(?:\s+no\.?)?\s*[:\-]\s*(.+)$/i },
+            { key: 'Date', pattern: /\bdate\s*[:\-]\s*(.+)$/i },
+            { key: 'Drawn By', pattern: /\bdrawn\s+by\s*[:\-]\s*(.+)$/i },
+            { key: 'Checked By', pattern: /\bchecked\s+by\s*[:\-]\s*(.+)$/i },
+        ];
+
+        const measureState = {
+            mode: 'calibrate',
+            calibrationPoints: [],
+            distancePoints: [],
+            areaPoints: [],
+            hoverPoint: null,
+            pxPerUnit: null,
+            lastDistance: null,
+            lastArea: null,
+            currentPage: 1,
+            totalPages: 1,
+            measurementsByPage: {},
+            autoScale: null,
+            highlightsByPage: {},
+            showExtractedHighlights: true,
+            zoom: 1,
+            fitScale: 1,
+            viewportHeightPx: null,
+        };
 
         function setStatus(text, isError = false) {
             statusEl.textContent = text || '';
             statusEl.style.color = isError ? '#fda4af' : '';
         }
 
-        function toDataUrl(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(String(reader.result || ''));
-                reader.onerror = () => reject(new Error('Failed to read file.'));
-                reader.readAsDataURL(file);
+        function setFileMeta(file) {
+            if (!file) {
+                fileMetaEl.textContent = '';
+                return;
+            }
+            const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+            fileMetaEl.textContent = `${file.name} • ${sizeMb} MB`;
+        }
+
+        function escapeHtml(text) {
+            return String(text || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function extractMeasurements(text) {
+            const found = [];
+            const seen = new Set();
+            for (const match of text.matchAll(MEASUREMENT_PATTERN)) {
+                const value = String(match[0] || '').trim();
+                if (value && !seen.has(value)) {
+                    seen.add(value);
+                    found.push(value);
+                }
+                if (found.length >= 20) break;
+            }
+            return found;
+        }
+
+        function extractTokenCounts(text) {
+            const upper = text.toUpperCase();
+            const counts = {};
+            COUNT_TOKENS.forEach((token) => {
+                const hits = upper.match(new RegExp(`\\b${token}\\b`, 'g'));
+                if (hits && hits.length) counts[token] = hits.length;
             });
+            return counts;
+        }
+
+        function buildLineGroupsFromItems(items, viewport = null) {
+            const positioned = (items || [])
+                .map((item) => ({
+                    text: String(item.str || '').trim(),
+                    x: Number(item.transform?.[4] || 0),
+                    y: Number(item.transform?.[5] || 0),
+                    width: Number(item.width || 0),
+                    height: Number(item.height || 0),
+                }))
+                .filter((item) => item.text);
+            if (!positioned.length) return [];
+            positioned.sort((a, b) => (Math.abs(b.y - a.y) > 0.01 ? b.y - a.y : a.x - b.x));
+
+            const groups = [];
+            const yTolerance = 2.5;
+            positioned.forEach((item) => {
+                const group = groups.find((g) => Math.abs(g.y - item.y) <= yTolerance);
+                if (group) {
+                    group.items.push(item);
+                    group.y = (group.y + item.y) / 2;
+                } else {
+                    groups.push({ y: item.y, items: [item] });
+                }
+            });
+
+            return groups
+                .sort((a, b) => b.y - a.y)
+                .map((group) => {
+                    const sortedItems = group.items.sort((a, b) => a.x - b.x);
+                    const text = sortedItems.map((item) => item.text).join(' ').replace(/\s+/g, ' ').trim();
+                    let bounds = null;
+                    if (viewport) {
+                        sortedItems.forEach((item) => {
+                            const rect = viewport.convertToViewportRectangle([
+                                item.x,
+                                item.y,
+                                item.x + Math.max(item.width, 1),
+                                item.y + Math.max(item.height, 8),
+                            ]);
+                            const x = Math.min(rect[0], rect[2]);
+                            const y = Math.min(rect[1], rect[3]);
+                            const w = Math.abs(rect[2] - rect[0]);
+                            const h = Math.abs(rect[3] - rect[1]);
+                            if (!bounds) bounds = { x, y, w, h };
+                            else {
+                                const x2 = Math.max(bounds.x + bounds.w, x + w);
+                                const y2 = Math.max(bounds.y + bounds.h, y + h);
+                                bounds.x = Math.min(bounds.x, x);
+                                bounds.y = Math.min(bounds.y, y);
+                                bounds.w = x2 - bounds.x;
+                                bounds.h = y2 - bounds.y;
+                            }
+                        });
+                    }
+                    return { text, bounds };
+                })
+                .filter((line) => line.text);
+        }
+
+        function buildLinesFromItems(items) {
+            return buildLineGroupsFromItems(items).map((line) => line.text);
+        }
+
+        function extractKeyFields(lines) {
+            const fields = {};
+            lines.forEach((line) => {
+                KEY_FIELD_PATTERNS.forEach(({ key, pattern }) => {
+                    if (fields[key]) return;
+                    const match = line.match(pattern);
+                    if (match && match[1]) fields[key] = match[1].trim().slice(0, 80);
+                });
+            });
+            return fields;
+        }
+
+        function extractTakeoffCandidateLines(lines) {
+            const candidates = [];
+            const seen = new Set();
+            for (const line of lines) {
+                if (line.length < 12) continue;
+                if (!TAKEOFF_LINE_HINTS.test(line)) continue;
+                const compact = line.replace(/\s+/g, ' ').trim();
+                if (seen.has(compact)) continue;
+                seen.add(compact);
+                candidates.push(compact);
+                if (candidates.length >= 10) break;
+            }
+            return candidates;
+        }
+
+        function detectScaleFromLines(lines) {
+            const source = (lines || []).join(' ').replace(/\s+/g, ' ').toUpperCase();
+            const normalized = source
+                .replaceAll('”', '"')
+                .replaceAll('“', '"')
+                .replaceAll('′', "'")
+                .replaceAll('’', "'");
+            let match = normalized.match(/SCALE\s*:?\s*1\s*"\s*=\s*(\d+(?:\.\d+)?)\s*'/);
+            if (!match) match = normalized.match(/\b1\s*"\s*=\s*(\d+(?:\.\d+)?)\s*'/);
+            if (match) {
+                const feet = Number(match[1]);
+                if (feet > 0) {
+                    return { drawing_inches: 1, real_world_feet: feet, label: `1" = ${feet}'`, confidence: 0.9 };
+                }
+            }
+            match = normalized.match(/SCALE\s*1\s*:\s*(\d{2,4})/);
+            if (!match) match = normalized.match(/\b1\s*:\s*(\d{3,4})\b/);
+            if (match) {
+                const ratio = Number(match[1]);
+                if (ratio >= 120) {
+                    const feet = ratio / 12;
+                    return { drawing_inches: 1, real_world_feet: feet, label: `1:${ratio} (${feet.toFixed(1)}')`, confidence: 0.6 };
+                }
+            }
+            return null;
+        }
+
+        function setMeasureStatus(text, isError = false) {
+            measureStatusEl.textContent = text || '';
+            measureStatusEl.style.color = isError ? '#fda4af' : '';
+        }
+
+        function updateMeasurePageLabel() {
+            measurePageLabelEl.textContent = `Page ${measureState.currentPage} / ${measureState.totalPages}`;
+            measurePrevBtn.disabled = measureState.currentPage <= 1;
+            measureNextBtn.disabled = measureState.currentPage >= measureState.totalPages;
+        }
+
+        function updateHighlightToggleUI() {
+            measureToggleHighlightsBtn.classList.toggle('is-active', measureState.showExtractedHighlights);
+            measureToggleHighlightsBtn.textContent = measureState.showExtractedHighlights ? 'Hide extracted highlights' : 'Show extracted highlights';
+            const highlights = measureState.highlightsByPage[measureState.currentPage] || { measurementHits: [], takeoffHits: [] };
+            measureHighlightLegendEl.textContent = `Detected overlays: ${highlights.measurementHits.length} measurement hits, ${highlights.takeoffHits.length} takeoff-line hits. Scroll mouse wheel over drawing to zoom (${Math.round(measureState.zoom * 100)}%).`;
+        }
+
+        function setMeasureMode(mode) {
+            measureState.mode = mode;
+            modeCalibrateBtn.classList.toggle('is-active', mode === 'calibrate');
+            modeDistanceBtn.classList.toggle('is-active', mode === 'distance');
+            modeAreaBtn.classList.toggle('is-active', mode === 'area');
+            if (mode === 'calibrate') {
+                setMeasureStatus('Calibrate: click two points that match a known distance.');
+            } else if (!measureState.pxPerUnit) {
+                setMeasureStatus('Set calibration first before measuring.', true);
+            } else if (mode === 'distance') {
+                setMeasureStatus('Distance mode: click two points.');
+            } else {
+                setMeasureStatus('Area mode: click 3+ points, then click near first point to close polygon.');
+            }
+        }
+
+        function resetMeasurementState(keepScale = false) {
+            measureState.calibrationPoints = [];
+            measureState.distancePoints = [];
+            measureState.areaPoints = [];
+            measureState.hoverPoint = null;
+            measureState.lastDistance = null;
+            measureState.lastArea = null;
+            if (!keepScale) measureState.pxPerUnit = null;
+            redrawOverlay();
+        }
+
+        function getCanvasPoint(event) {
+            const rect = overlayCanvas.getBoundingClientRect();
+            const scaleX = overlayCanvas.width / rect.width;
+            const scaleY = overlayCanvas.height / rect.height;
+            return {
+                x: (event.clientX - rect.left) * scaleX,
+                y: (event.clientY - rect.top) * scaleY,
+            };
+        }
+
+        function dist(a, b) {
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+
+        function polygonArea(points) {
+            if (!Array.isArray(points) || points.length < 3) return 0;
+            let area = 0;
+            for (let i = 0; i < points.length; i += 1) {
+                const j = (i + 1) % points.length;
+                area += (points[i].x * points[j].y) - (points[j].x * points[i].y);
+            }
+            return Math.abs(area / 2);
+        }
+
+        function polygonCenter(points) {
+            if (!points.length) return { x: 0, y: 0 };
+            const sum = points.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
+            return { x: sum.x / points.length, y: sum.y / points.length };
+        }
+
+        function drawPoint(ctx, p, color) {
+            ctx.beginPath();
+            ctx.fillStyle = color;
+            ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawSegment(ctx, p1, p2, color, label, dashed = false) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.setLineDash(dashed ? [6, 4] : []);
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            drawPoint(ctx, p1, color);
+            drawPoint(ctx, p2, color);
+            if (label) {
+                const mx = (p1.x + p2.x) / 2;
+                const my = (p1.y + p2.y) / 2;
+                ctx.fillStyle = 'rgba(15, 14, 12, 0.78)';
+                ctx.fillRect(mx - 50, my - 18, 100, 18);
+                ctx.fillStyle = color;
+                ctx.font = '12px Inter, system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, mx, my - 5);
+            }
+        }
+
+        function drawPolygon(ctx, points, color, label, dashed = false) {
+            if (!points.length) return;
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = 'rgba(134, 239, 172, 0.10)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash(dashed ? [6, 4] : []);
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i += 1) ctx.lineTo(points[i].x, points[i].y);
+            if (!dashed && points.length > 2) ctx.closePath();
+            ctx.stroke();
+            if (!dashed && points.length > 2) ctx.fill();
+            ctx.setLineDash([]);
+            points.forEach((point) => drawPoint(ctx, point, color));
+            if (label && points.length > 2) {
+                const c = polygonCenter(points);
+                ctx.fillStyle = 'rgba(15, 14, 12, 0.78)';
+                ctx.fillRect(c.x - 58, c.y - 18, 116, 18);
+                ctx.fillStyle = color;
+                ctx.font = '12px Inter, system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, c.x, c.y - 5);
+            }
+        }
+
+        function currentPageMeasurements() {
+            return measureState.measurementsByPage[measureState.currentPage] || [];
+        }
+
+        function currentPageHighlights() {
+            return measureState.highlightsByPage[measureState.currentPage] || { measurementHits: [], takeoffHits: [] };
+        }
+
+        function applyCanvasZoomDisplay() {
+            if (!baseCanvas.width || !baseCanvas.height) return;
+            const wrap = baseCanvas.parentElement;
+            const wrapWidth = Math.max((wrap?.clientWidth || baseCanvas.width) - 2, 220);
+            measureState.fitScale = wrapWidth / baseCanvas.width;
+            const scale = measureState.fitScale * measureState.zoom;
+            const width = Math.round(baseCanvas.width * scale);
+            const height = Math.round(baseCanvas.height * scale);
+            const fitHeight = Math.round(baseCanvas.height * measureState.fitScale);
+
+            baseCanvas.style.maxWidth = 'none';
+            overlayCanvas.style.maxWidth = 'none';
+            baseCanvas.style.width = `${width}px`;
+            overlayCanvas.style.width = `${width}px`;
+            baseCanvas.style.height = `${height}px`;
+            overlayCanvas.style.height = `${height}px`;
+            if (wrap) {
+                if (measureState.viewportHeightPx == null) {
+                    const clamped = Math.max(300, Math.min(Math.round(window.innerHeight * 0.68), fitHeight));
+                    measureState.viewportHeightPx = clamped;
+                }
+                wrap.style.height = `${measureState.viewportHeightPx}px`;
+            }
+        }
+
+        function addMeasurement(entry) {
+            const page = measureState.currentPage;
+            const list = measureState.measurementsByPage[page] || [];
+            list.push({ id: Date.now() + Math.random(), ...entry });
+            measureState.measurementsByPage[page] = list;
+            renderMeasurementLog();
+        }
+
+        function removeMeasurementById(id) {
+            const page = measureState.currentPage;
+            const list = measureState.measurementsByPage[page] || [];
+            measureState.measurementsByPage[page] = list.filter((item) => String(item.id) !== String(id));
+            renderMeasurementLog();
+            redrawOverlay();
+        }
+
+        function popLastMeasurement() {
+            const page = measureState.currentPage;
+            const list = measureState.measurementsByPage[page] || [];
+            if (!list.length) return;
+            list.pop();
+            measureState.measurementsByPage[page] = list;
+            renderMeasurementLog();
+            redrawOverlay();
+        }
+
+        function clearCurrentPageMeasurements() {
+            measureState.measurementsByPage[measureState.currentPage] = [];
+            renderMeasurementLog();
+            redrawOverlay();
+        }
+
+        function clearAllMeasurements() {
+            measureState.measurementsByPage = {};
+            renderMeasurementLog();
+            redrawOverlay();
+        }
+
+        function renderMeasurementLog() {
+            const list = currentPageMeasurements();
+            if (!list.length) {
+                measureLogEl.innerHTML = `
+                    <div class="takeoff-log-row">
+                        <div class="takeoff-subhead" style="margin-top:0;">Saved Measurements (Page ${measureState.currentPage})</div>
+                        <div class="takeoff-log-actions">
+                            <button type="button" class="takeoff-log-btn" data-action="clear-page">Clear page</button>
+                            <button type="button" class="takeoff-log-btn" data-action="clear-all">Clear all</button>
+                        </div>
+                    </div>
+                    <span class="takeoff-note">No saved measurements on this page yet.</span>
+                `;
+                return;
+            }
+            measureLogEl.innerHTML = `
+                <div class="takeoff-log-row">
+                    <div class="takeoff-subhead" style="margin-top:0;">Saved Measurements (Page ${measureState.currentPage})</div>
+                    <div class="takeoff-log-actions">
+                        <button type="button" class="takeoff-log-btn" data-action="undo-last">Undo last</button>
+                        <button type="button" class="takeoff-log-btn" data-action="clear-page">Clear page</button>
+                        <button type="button" class="takeoff-log-btn" data-action="clear-all">Clear all</button>
+                    </div>
+                </div>
+                <ul>
+                    ${list.map((item, index) => `
+                        <li>
+                            ${item.type === 'area' ? 'Area' : 'Distance'} ${index + 1}: <strong>${escapeHtml(item.value_label)}</strong>
+                            <button type="button" class="takeoff-log-btn" data-action="remove" data-id="${escapeHtml(item.id)}">Remove</button>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+
+        function drawHighlightRect(ctx, hit, color) {
+            if (!hit?.bounds) return;
+            const { x, y, w, h } = hit.bounds;
+            ctx.fillStyle = `${color}22`;
+            ctx.strokeStyle = `${color}aa`;
+            ctx.lineWidth = 1.5;
+            ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+            ctx.strokeRect(x - 2, y - 2, w + 4, h + 4);
+        }
+
+        async function computePageHighlights(page, viewport) {
+            const textContent = await page.getTextContent();
+            const groups = buildLineGroupsFromItems(textContent.items || [], viewport);
+            const measurementHits = [];
+            const takeoffHits = [];
+            const seenMeasurements = new Set();
+            groups.forEach((group) => {
+                if (!group?.text || !group?.bounds) return;
+                if (TAKEOFF_LINE_HINTS.test(group.text)) {
+                    takeoffHits.push({ text: group.text, bounds: group.bounds });
+                }
+                const matches = [...group.text.matchAll(MEASUREMENT_PATTERN)];
+                matches.forEach((match) => {
+                    const token = String(match[0] || '').trim();
+                    if (!token) return;
+                    const key = `${token}|${Math.round(group.bounds.x)}|${Math.round(group.bounds.y)}`;
+                    if (seenMeasurements.has(key)) return;
+                    seenMeasurements.add(key);
+                    measurementHits.push({ text: token, bounds: group.bounds });
+                });
+            });
+            return {
+                measurementHits: measurementHits.slice(0, 60),
+                takeoffHits: takeoffHits.slice(0, 60),
+            };
+        }
+
+        function redrawOverlay() {
+            const ctx = overlayCanvas.getContext('2d');
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            if (measureState.showExtractedHighlights) {
+                const highlights = currentPageHighlights();
+                highlights.takeoffHits.forEach((hit) => drawHighlightRect(ctx, hit, '#fbbf24'));
+                highlights.measurementHits.forEach((hit) => drawHighlightRect(ctx, hit, '#60a5fa'));
+            }
+
+            currentPageMeasurements().forEach((entry) => {
+                if (entry.type === 'distance' && entry.points?.length === 2) {
+                    drawSegment(ctx, entry.points[0], entry.points[1], '#86efac', entry.value_label);
+                } else if (entry.type === 'area' && entry.points?.length >= 3) {
+                    drawPolygon(ctx, entry.points, '#93c5fd', entry.value_label);
+                }
+            });
+
+            if (measureState.calibrationPoints.length === 2) {
+                const known = Number(measureKnownEl.value || 0);
+                drawSegment(ctx, measureState.calibrationPoints[0], measureState.calibrationPoints[1], '#d8b58e', known > 0 ? `Cal: ${known} ${measureUnitEl.value}` : 'Calibrate');
+            } else if (measureState.calibrationPoints.length === 1) {
+                drawPoint(ctx, measureState.calibrationPoints[0], '#d8b58e');
+                if (measureState.hoverPoint) {
+                    drawSegment(ctx, measureState.calibrationPoints[0], measureState.hoverPoint, '#d8b58e', '', true);
+                }
+            }
+
+            if (measureState.distancePoints.length === 2) {
+                const label = measureState.lastDistance ? `${measureState.lastDistance.toFixed(2)} ${measureUnitEl.value}` : '';
+                drawSegment(ctx, measureState.distancePoints[0], measureState.distancePoints[1], '#86efac', label);
+            } else if (measureState.distancePoints.length === 1) {
+                drawPoint(ctx, measureState.distancePoints[0], '#86efac');
+                if (measureState.hoverPoint) {
+                    drawSegment(ctx, measureState.distancePoints[0], measureState.hoverPoint, '#86efac', '', true);
+                }
+            }
+
+            if (measureState.areaPoints.length) {
+                const preview = measureState.hoverPoint ? [...measureState.areaPoints, measureState.hoverPoint] : [...measureState.areaPoints];
+                drawPolygon(ctx, preview, '#93c5fd', '', true);
+            }
+        }
+
+        async function renderMeasurePage(pageNumber) {
+            if (!measureDoc) return;
+            measureState.currentPage = pageNumber;
+            const page = await measureDoc.getPage(pageNumber);
+            const viewport = page.getViewport({ scale: MEASURE_CANVAS_BASE_SCALE });
+            baseCanvas.width = Math.floor(viewport.width);
+            baseCanvas.height = Math.floor(viewport.height);
+            overlayCanvas.width = baseCanvas.width;
+            overlayCanvas.height = baseCanvas.height;
+
+            await page.render({
+                canvasContext: baseCanvas.getContext('2d'),
+                viewport,
+            }).promise;
+            if (!measureState.highlightsByPage[pageNumber]) {
+                measureState.highlightsByPage[pageNumber] = await computePageHighlights(page, viewport);
+            }
+            applyCanvasZoomDisplay();
+            updateMeasurePageLabel();
+            updateHighlightToggleUI();
+            renderMeasurementLog();
+            resetMeasurementState(true);
+        }
+
+        async function renderMeasureCanvasFromBytes(bytes) {
+            measureDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
+            measureState.totalPages = measureDoc.numPages;
+            measureState.currentPage = 1;
+            measureState.highlightsByPage = {};
+            measureState.zoom = 1;
+            measureState.viewportHeightPx = null;
+            measureCardEl.style.display = 'block';
+            await renderMeasurePage(1);
+            setMeasureMode('calibrate');
+            setMeasureStatus('Calibrate: click two points that match a known distance.');
+        }
+
+        function applyAutoScale(scale) {
+            if (!scale || !scale.real_world_feet) return;
+            measureState.autoScale = scale;
+            measureUnitEl.value = 'ft';
+            measureKnownEl.value = String(Number(scale.real_world_feet.toFixed(2)));
+            const pixelsPerInch = 72 * MEASURE_CANVAS_BASE_SCALE;
+            measureState.pxPerUnit = (pixelsPerInch * (scale.drawing_inches || 1)) / scale.real_world_feet;
+            setMeasureStatus(`Auto scale detected (${scale.label}). Verify and adjust if needed.`);
+        }
+
+        async function extractClientPreview(bytes) {
+            const loadingTask = pdfjsLib.getDocument({ data: bytes });
+            const doc = await loadingTask.promise;
+            if (doc.numPages > 5) {
+                throw new Error('Free preview supports up to 5 pages.');
+            }
+
+            const pages = [];
+            const aggregate = { measurement_candidates: 0, token_counts: {}, text_characters: 0 };
+            let detectedScale = null;
+
+            for (let pageNum = 1; pageNum <= doc.numPages; pageNum += 1) {
+                const page = await doc.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                const lines = buildLinesFromItems(textContent.items || []);
+                const text = lines.join(' ').replace(/\s+/g, ' ').trim();
+                const measurements = extractMeasurements(text);
+                const tokenCounts = extractTokenCounts(text);
+                const keyFields = extractKeyFields(lines);
+                const takeoffLines = extractTakeoffCandidateLines(lines);
+                if (!detectedScale) detectedScale = detectScaleFromLines(lines);
+                Object.entries(tokenCounts).forEach(([k, v]) => {
+                    aggregate.token_counts[k] = (aggregate.token_counts[k] || 0) + v;
+                });
+                aggregate.measurement_candidates += measurements.length;
+                aggregate.text_characters += text.length;
+
+                pages.push({
+                    page_number: pageNum,
+                    text_preview: text.slice(0, 700),
+                    text_characters: text.length,
+                    text_lines: lines.slice(0, 28),
+                    measurement_candidates: measurements,
+                    token_counts: tokenCounts,
+                    key_fields: keyFields,
+                    takeoff_lines: takeoffLines,
+                });
+            }
+
+            return {
+                page_count: doc.numPages,
+                pages,
+                aggregate,
+                auto_scale: detectedScale,
+                limits: { max_pages_free: 5, max_pdf_mb: 12 },
+                notes: [
+                    'Client-side text extraction mode active.',
+                    'Scanned-image OCR pass is next phase (server-side Tesseract).',
+                    'Always validate extracted dimensions before final takeoff.',
+                ],
+            };
         }
 
         function renderResults(data) {
@@ -180,12 +1064,27 @@
                     <div class="takeoff-stat"><div class="takeoff-stat-label">Dimension Candidates</div><div class="takeoff-stat-value">${agg.measurement_candidates || 0}</div></div>
                     <div class="takeoff-stat"><div class="takeoff-stat-label">Text Characters</div><div class="takeoff-stat-value">${agg.text_characters || 0}</div></div>
                     <div class="takeoff-stat"><div class="takeoff-stat-label">Token Counts</div><div class="takeoff-stat-value">${tokenRows.map(([k, v]) => `${k}:${v}`).join(' · ') || 'None'}</div></div>
+                    <div class="takeoff-stat"><div class="takeoff-stat-label">Detected Scale</div><div class="takeoff-stat-value">${data.auto_scale ? escapeHtml(data.auto_scale.label) : 'Not detected'}</div></div>
                 </div>
                 ${pages.map((page) => `
                     <div class="takeoff-page">
                         <h3>Page ${page.page_number}</h3>
+                        ${Object.keys(page.key_fields || {}).length ? `
+                            <div class="takeoff-subhead">Detected Key Fields</div>
+                            <div class="takeoff-kv-grid">
+                                ${Object.entries(page.key_fields || {}).map(([k, v]) => `<div class="takeoff-kv"><strong>${escapeHtml(k)}</strong>${escapeHtml(v)}</div>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${Array.isArray(page.takeoff_lines) && page.takeoff_lines.length ? `
+                            <div class="takeoff-subhead">Likely Takeoff Lines</div>
+                            <ul class="takeoff-list">
+                                ${page.takeoff_lines.map((line) => `<li>${escapeHtml(line)}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+                        <div class="takeoff-subhead">Measurement Candidates</div>
                         <div>${(page.measurement_candidates || []).map((m) => `<span class="takeoff-chip">${m}</span>`).join('') || '<span class="takeoff-note">No measurement candidates detected.</span>'}</div>
-                        <p class="takeoff-preview-text">${page.text_preview || 'No extractable text detected on this page.'}</p>
+                        <div class="takeoff-subhead">Cleaned Text Preview</div>
+                        <p class="takeoff-preview-text">${Array.isArray(page.text_lines) && page.text_lines.length ? page.text_lines.map((line) => escapeHtml(line)).join('<br>') : 'No extractable text detected on this page.'}</p>
                     </div>
                 `).join('')}
             `;
@@ -200,22 +1099,160 @@
             runBtn.disabled = true;
             setStatus('Analyzing plan set...');
             resultsEl.innerHTML = '';
+            measureState.measurementsByPage = {};
             try {
-                const pdfBase64 = await toDataUrl(file);
-                const res = await fetch('/api/python/takeoff_preview', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pdf_base64: pdfBase64, max_pages: 5 }),
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Failed to analyze plan set.');
+                const bytes = await file.arrayBuffer();
+                // pdf.js can detach buffers; use independent copies for each load.
+                const extractData = new Uint8Array(bytes.slice(0));
+                const measureData = new Uint8Array(bytes.slice(0));
+                const data = await extractClientPreview(extractData);
                 renderResults(data);
+                await renderMeasureCanvasFromBytes(measureData);
+                if (data.auto_scale) applyAutoScale(data.auto_scale);
+                renderMeasurementLog();
+                redrawOverlay();
                 setStatus('Analysis complete.');
             } catch (err) {
                 setStatus(err.message || 'Takeoff preview failed.', true);
             } finally {
                 runBtn.disabled = false;
             }
+        });
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files && fileInput.files[0];
+            setFileMeta(file || null);
+        });
+
+        measureLogEl.addEventListener('click', (event) => {
+            const target = event.target.closest('button[data-action]');
+            if (!target) return;
+            const action = target.getAttribute('data-action');
+            if (action === 'remove') {
+                const id = target.getAttribute('data-id');
+                if (id) removeMeasurementById(id);
+                return;
+            }
+            if (action === 'undo-last') {
+                popLastMeasurement();
+                return;
+            }
+            if (action === 'clear-page') {
+                clearCurrentPageMeasurements();
+                return;
+            }
+            if (action === 'clear-all') {
+                clearAllMeasurements();
+            }
+        });
+
+        modeCalibrateBtn.addEventListener('click', () => setMeasureMode('calibrate'));
+        modeDistanceBtn.addEventListener('click', () => setMeasureMode('distance'));
+        modeAreaBtn.addEventListener('click', () => setMeasureMode('area'));
+        measurePrevBtn.addEventListener('click', async () => {
+            if (measureState.currentPage <= 1) return;
+            await renderMeasurePage(measureState.currentPage - 1);
+        });
+        measureNextBtn.addEventListener('click', async () => {
+            if (measureState.currentPage >= measureState.totalPages) return;
+            await renderMeasurePage(measureState.currentPage + 1);
+        });
+        measureResetBtn.addEventListener('click', () => {
+            resetMeasurementState(false);
+            setMeasureMode('calibrate');
+            setMeasureStatus('Calibration reset. Click two points to set scale.');
+        });
+        measureToggleHighlightsBtn.addEventListener('click', () => {
+            measureState.showExtractedHighlights = !measureState.showExtractedHighlights;
+            updateHighlightToggleUI();
+            redrawOverlay();
+        });
+
+        const canvasWrap = document.querySelector('.takeoff-canvas-wrap');
+        canvasWrap.addEventListener('wheel', (event) => {
+            if (!measureDoc) return;
+            event.preventDefault();
+            const direction = event.deltaY > 0 ? -1 : 1;
+            const wrapRect = canvasWrap.getBoundingClientRect();
+            const mouseX = event.clientX - wrapRect.left;
+            const mouseY = event.clientY - wrapRect.top;
+            const oldWidth = parseFloat(baseCanvas.style.width || String(baseCanvas.getBoundingClientRect().width || 1));
+            const oldHeight = parseFloat(baseCanvas.style.height || String(baseCanvas.getBoundingClientRect().height || 1));
+            const contentX = canvasWrap.scrollLeft + mouseX;
+            const contentY = canvasWrap.scrollTop + mouseY;
+            const ratioX = oldWidth > 0 ? contentX / oldWidth : 0;
+            const ratioY = oldHeight > 0 ? contentY / oldHeight : 0;
+            const nextZoom = measureState.zoom + (direction * MEASURE_ZOOM_STEP);
+            measureState.zoom = Math.max(MEASURE_ZOOM_MIN, Math.min(MEASURE_ZOOM_MAX, Number(nextZoom.toFixed(2))));
+            applyCanvasZoomDisplay();
+            const newWidth = parseFloat(baseCanvas.style.width || String(baseCanvas.getBoundingClientRect().width || 1));
+            const newHeight = parseFloat(baseCanvas.style.height || String(baseCanvas.getBoundingClientRect().height || 1));
+            canvasWrap.scrollLeft = Math.max(0, (ratioX * newWidth) - mouseX);
+            canvasWrap.scrollTop = Math.max(0, (ratioY * newHeight) - mouseY);
+            updateHighlightToggleUI();
+        }, { passive: false });
+
+        overlayCanvas.addEventListener('mousemove', (event) => {
+            measureState.hoverPoint = getCanvasPoint(event);
+            redrawOverlay();
+        });
+        overlayCanvas.addEventListener('mouseleave', () => {
+            measureState.hoverPoint = null;
+            redrawOverlay();
+        });
+
+        overlayCanvas.addEventListener('click', (event) => {
+            const point = getCanvasPoint(event);
+            if (measureState.mode === 'calibrate') {
+                if (measureState.calibrationPoints.length === 2) measureState.calibrationPoints = [];
+                measureState.calibrationPoints.push(point);
+                if (measureState.calibrationPoints.length === 2) {
+                    const known = Number(measureKnownEl.value || 0);
+                    const pixelDistance = dist(measureState.calibrationPoints[0], measureState.calibrationPoints[1]);
+                    if (!known || known <= 0) {
+                        setMeasureStatus('Enter a known distance greater than 0 for calibration.', true);
+                    } else if (pixelDistance < 1) {
+                        setMeasureStatus('Calibration points are too close together.', true);
+                    } else {
+                        measureState.pxPerUnit = pixelDistance / known;
+                        setMeasureStatus(`Scale set: ${known} ${measureUnitEl.value} across ${pixelDistance.toFixed(1)} px.`);
+                    }
+                }
+            } else if (measureState.mode === 'distance') {
+                if (!measureState.pxPerUnit) {
+                    setMeasureStatus('Calibrate first before measuring.', true);
+                    return;
+                }
+                if (measureState.distancePoints.length === 2) measureState.distancePoints = [];
+                measureState.distancePoints.push(point);
+                if (measureState.distancePoints.length === 2) {
+                    const px = dist(measureState.distancePoints[0], measureState.distancePoints[1]);
+                    const value = px / measureState.pxPerUnit;
+                    measureState.lastDistance = value;
+                    const valueLabel = `${value.toFixed(2)} ${measureUnitEl.value}`;
+                    addMeasurement({ type: 'distance', points: [...measureState.distancePoints], value_label: valueLabel });
+                    setMeasureStatus(`Measured distance: ${valueLabel}.`);
+                    measureState.distancePoints = [];
+                }
+            } else {
+                if (!measureState.pxPerUnit) {
+                    setMeasureStatus('Calibrate first before measuring area.', true);
+                    return;
+                }
+                if (measureState.areaPoints.length >= 3 && dist(point, measureState.areaPoints[0]) <= 10) {
+                    const pxArea = polygonArea(measureState.areaPoints);
+                    const areaValue = pxArea / (measureState.pxPerUnit * measureState.pxPerUnit);
+                    measureState.lastArea = areaValue;
+                    const valueLabel = `${areaValue.toFixed(2)} ${measureUnitEl.value}\u00b2`;
+                    addMeasurement({ type: 'area', points: [...measureState.areaPoints], value_label: valueLabel });
+                    setMeasureStatus(`Measured area: ${valueLabel}.`);
+                    measureState.areaPoints = [];
+                } else {
+                    measureState.areaPoints.push(point);
+                    setMeasureStatus(`Area points: ${measureState.areaPoints.length}. Click near first point to close.`);
+                }
+            }
+            redrawOverlay();
         });
     </script>
 </body>
