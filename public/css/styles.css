@@ -1029,16 +1029,18 @@ body {
 
 /* Cursor-style composer: text area on top, controls bar on bottom (per Cursor docs/changelog) */
 .chat-composer {
-    background: #1a1a1a;
-    border: 1px solid #2d2d2d;
+    background: linear-gradient(180deg, #2a2118 0%, #1f1812 100%);
+    border: 1px solid #5a4735;
     border-radius: 10px;
     overflow: visible;
     position: relative;
     z-index: 20;
+    box-shadow: inset 0 1px 0 rgba(255, 244, 225, 0.08);
 }
 
 .chat-composer:focus-within {
-    border-color: #404040;
+    border-color: #8e7458;
+    box-shadow: inset 0 1px 0 rgba(255, 244, 225, 0.1), 0 0 0 2px rgba(142, 116, 88, 0.2);
 }
 
 .chat-composer-text-wrap {
@@ -1063,7 +1065,7 @@ body {
 }
 
 .chat-composer-input::placeholder {
-    color: #6b6b6b;
+    color: #b29f8a;
 }
 
 .chat-composer-input:focus {
@@ -1076,7 +1078,7 @@ body {
     justify-content: space-between;
     gap: 12px;
     padding: 6px 10px 8px;
-    border-top: 1px solid #252525;
+    border-top: 1px solid #4a3a2b;
 }
 
 .chat-composer-left {
@@ -1095,9 +1097,9 @@ body {
     padding: 5px 10px;
     font-family: inherit;
     font-size: 0.8125rem;
-    color: #9ca3af;
-    background: transparent;
-    border: none;
+    color: #e8d9c7;
+    background: linear-gradient(180deg, #3a2d22 0%, #2a2018 100%);
+    border: 1px solid #5f4a36;
     border-radius: 6px;
     cursor: pointer;
     appearance: none;
@@ -1105,8 +1107,9 @@ body {
 }
 
 .chat-composer-pill:hover {
-    color: #d1d5db;
-    background: rgba(255, 255, 255, 0.05);
+    color: #fff3e5;
+    background: linear-gradient(180deg, #4a392a 0%, #33271d 100%);
+    border-color: #8e7458;
 }
 
 .mode-select-wrap,
@@ -1136,11 +1139,11 @@ body {
     margin-bottom: 4px;
     min-width: 180px;
     max-height: none;
-    background: var(--bg-alt);
-    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #2a2119 0%, #1f1812 100%);
+    border: 1px solid #5a4735;
     border-radius: 8px;
     padding: 6px 0;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 -8px 20px rgba(0,0,0,0.35);
     z-index: 60;
     overflow-y: visible;
 }
@@ -1151,11 +1154,11 @@ body {
     left: 0;
     margin-bottom: 4px;
     min-width: 130px;
-    background: var(--bg-alt);
-    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #2a2119 0%, #1f1812 100%);
+    border: 1px solid #5a4735;
     border-radius: 8px;
     padding: 6px 0;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 -8px 20px rgba(0,0,0,0.35);
     z-index: 60;
 }
 
@@ -1169,7 +1172,7 @@ body {
     text-align: left;
     font-family: inherit;
     font-size: 0.875rem;
-    color: var(--text-secondary);
+    color: #cfbaa2;
     background: none;
     border: none;
     padding: 8px 12px 8px 24px;
@@ -1177,13 +1180,13 @@ body {
 }
 
 .mode-dropdown-item:hover {
-    color: var(--text);
-    background: rgba(255,255,255,0.05);
+    color: #fff3e5;
+    background: rgba(199, 155, 106, 0.16);
 }
 
 .mode-dropdown-item[aria-selected="true"] {
-    color: var(--text);
-    background: rgba(255,255,255,0.08);
+    color: #fff3e5;
+    background: rgba(199, 155, 106, 0.24);
 }
 
 .model-dropdown[hidden] {
@@ -1195,13 +1198,13 @@ body {
 }
 
 .model-dropdown-group:not(:first-child) {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #4a3a2b;
 }
 
 .model-dropdown-label {
     font-size: 0.6875rem;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: #b9a48c;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 4px 12px 6px;
@@ -1213,7 +1216,7 @@ body {
     text-align: left;
     font-family: inherit;
     font-size: 0.875rem;
-    color: var(--text-secondary);
+    color: #cfbaa2;
     background: none;
     border: none;
     padding: 8px 12px 8px 24px;
@@ -1221,13 +1224,13 @@ body {
 }
 
 .model-dropdown-item:hover {
-    color: var(--text);
-    background: rgba(255,255,255,0.05);
+    color: #fff3e5;
+    background: rgba(199, 155, 106, 0.16);
 }
 
 .model-dropdown-item[aria-selected="true"] {
-    color: var(--text);
-    background: rgba(255,255,255,0.08);
+    color: #fff3e5;
+    background: rgba(199, 155, 106, 0.24);
 }
 
 .chat-composer-pill-icon {
@@ -1261,22 +1264,26 @@ body {
 }
 
 .chat-composer-icon {
-    color: #9ca3af;
-    background: transparent;
+    color: #e1cfbb;
+    background: linear-gradient(180deg, #3a2d22 0%, #2a2018 100%);
+    border: 1px solid #5f4a36;
 }
 
 .chat-composer-icon:hover {
-    color: #d1d5db;
-    background: rgba(255, 255, 255, 0.05);
+    color: #fff3e5;
+    background: linear-gradient(180deg, #4a392a 0%, #33271d 100%);
+    border-color: #8e7458;
 }
 
 .chat-composer-send {
-    color: #111;
-    background: #9ca3af;
+    color: #1b120a;
+    background: linear-gradient(180deg, #d7b289 0%, #c79b6a 100%);
+    border: 1px solid #8e7458;
 }
 
 .chat-composer-send:hover:not(:disabled) {
-    background: #d1d5db;
+    background: linear-gradient(180deg, #e2bf97 0%, #d3a877 100%);
+    border-color: #a07f60;
 }
 
 .chat-composer-send:disabled {
