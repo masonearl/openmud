@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bid Finder — openmud</title>
+    <link rel="icon" type="image/png" href="../../favicon.png">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0f0f0f;--bg2:#161616;--bg3:#1e1e1e;--border:#262626;--border2:#333;
+            --text:#e5e5e5;--text2:#a0a0a0;--text3:#5a5a5a;
+            --accent:#6b7a8f;--accent-glow:rgba(107,122,143,.15);
+            --green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--blue:#3b82f6;
+            --font:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;
+        }
+        body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+
+        /* ── Layout ── */
+        .topbar{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100}
+        .back-btn{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:.85rem;text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .15s}
+        .back-btn:hover{background:var(--bg3);color:var(--text)}
+        .topbar-title{font-weight:600;font-size:.95rem}
+        .topbar-sub{font-size:.8rem;color:var(--text2);margin-left:auto}
+
+        .container{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+
+        /* ── Header ── */
+        .page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:24px}
+        .page-header h1{font-size:1.6rem;font-weight:700;letter-spacing:-.02em}
+        .page-header p{font-size:.9rem;color:var(--text2);margin-top:4px}
+        .header-stats{display:flex;gap:20px;padding:14px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;flex-shrink:0}
+        .stat{text-align:center}
+        .stat-val{font-size:1.4rem;font-weight:700;display:block}
+        .stat-lbl{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+        /* ── Tabs ── */
+        .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px}
+        .tab{padding:8px 16px;background:transparent;border:none;color:var(--text3);font-size:.88rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:inherit}
+        .tab:hover{color:var(--text2)}
+        .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+        .tab-panel{display:none}.tab-panel.active{display:block}
+
+        /* ── Filter bar ── */
+        .filter-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+        .filter-group{display:flex;flex-direction:column;gap:4px}
+        .filter-label{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+        select,input[type=text]{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-size:.85rem;font-family:inherit;cursor:pointer;outline:none;transition:border .15s}
+        select:hover,input[type=text]:hover{border-color:var(--border2)}
+        select:focus,input[type=text]:focus{border-color:var(--accent)}
+        input[type=text]::placeholder{color:var(--text3)}
+
+        .action-bar{display:flex;gap:8px;align-items:flex-end;margin-left:auto}
+        .btn{padding:7px 16px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.85rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+        .btn:hover{background:var(--bg3);border-color:var(--border2)}
+        .btn:disabled{opacity:.4;cursor:not-allowed}
+        .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+        .btn-primary:hover{opacity:.88;background:var(--accent)}
+
+        /* ── Status bar ── */
+        .status-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:.82rem;color:var(--text2);margin-bottom:12px}
+        .status-bar.loading .status-left::after{content:'';display:inline-block;width:10px;height:10px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin-left:8px;vertical-align:middle}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .status-right{margin-left:auto;font-size:.75rem;color:var(--text3)}
+
+        /* ── Source stats ── */
+        .source-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+        .source-stat{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;font-size:.8rem}
+        .source-stat-name{color:var(--text2)}
+        .source-stat-name a{color:inherit;text-decoration:none}
+        .source-stat-name a:hover{color:var(--text);text-decoration:underline}
+        .source-stat-count{font-weight:700;padding:1px 6px;border-radius:4px;font-size:.75rem}
+        .source-stat-count.has-results{background:rgba(34,197,94,.12);color:var(--green)}
+        .source-stat-count.no-results{background:var(--bg3);color:var(--text3)}
+
+        /* ── Results ── */
+        .results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+        .results-count{font-size:.82rem;color:var(--text2)}
+        .view-toggle{display:flex;gap:4px}
+        .view-btn{padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:.78rem;cursor:pointer;font-family:inherit;transition:all .15s}
+        .view-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+
+        /* ── Bid cards ── */
+        .bid-list{display:flex;flex-direction:column;gap:8px}
+        .bid-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .15s}
+        .bid-card:hover{border-color:var(--border2)}
+        .bid-card.saved{border-color:rgba(107,122,143,.4)}
+
+        .bid-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+        .bid-title{font-size:.92rem;font-weight:500;line-height:1.4}
+        .bid-title a{color:var(--text);text-decoration:none}
+        .bid-title a:hover{text-decoration:underline}
+
+        .bid-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+        .bid-action-btn{background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.78rem;display:flex;align-items:center;gap:4px;transition:all .15s;text-decoration:none}
+        .bid-action-btn:hover{background:var(--bg3);border-color:var(--border2);color:var(--text)}
+        .bid-action-btn.saved{color:var(--accent);border-color:var(--accent)}
+        .bid-source{font-size:.7rem;color:var(--text3);background:var(--bg3);border-radius:4px;padding:2px 7px}
+
+        .bid-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--text2);margin-bottom:6px}
+        .bid-meta-label{color:var(--text3)}
+        .bid-date.urgent{color:var(--red);font-weight:600}
+        .bid-date.soon{color:var(--yellow);font-weight:500}
+
+        .bid-description{font-size:.82rem;color:var(--text2);line-height:1.5;margin-top:6px}
+
+        .bid-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+        .bid-tag{font-size:.68rem;padding:2px 8px;border-radius:4px;background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+        .bid-tag.match{background:var(--accent-glow);color:var(--accent);border-color:var(--accent)}
+
+        /* ── Compact view ── */
+        .bid-list.compact .bid-card{padding:8px 12px}
+        .bid-list.compact .bid-description,.bid-list.compact .bid-tags{display:none}
+
+        /* ── Empty state ── */
+        .empty-state{text-align:center;padding:48px 20px;color:var(--text2)}
+        .empty-state h3{font-size:1.1rem;margin-bottom:8px;color:var(--text)}
+        .empty-state p{font-size:.88rem}
+
+        /* ── Saved tab ── */
+        .saved-empty{color:var(--text2);font-size:.88rem;padding:32px;text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px}
+
+        /* ── Sources tab ── */
+        .sources-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+        .source-category{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+        .source-category-title{padding:10px 14px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+        .source-badge{font-size:.6rem;padding:1px 6px;border-radius:3px;font-weight:700;letter-spacing:.3px}
+        .source-badge.auto{background:rgba(34,197,94,.12);color:var(--green)}
+        .source-badge.coming{background:rgba(107,114,128,.12);color:var(--text3)}
+        .source-item{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);font-size:.85rem}
+        .source-item:last-child{border-bottom:none}
+        .source-item a{color:var(--text);text-decoration:none}
+        .source-item a:hover{text-decoration:underline}
+        .source-status{font-size:.7rem;padding:2px 7px;border-radius:4px;font-weight:500}
+        .source-status.active{background:rgba(34,197,94,.12);color:var(--green)}
+        .source-status.coming{background:rgba(107,114,128,.1);color:var(--text3)}
+
+        /* ── GC Invites tab ── */
+        .invite-section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+        .invite-section-header{padding:10px 14px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);background:var(--bg3);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:8px}
+        .invite-list{list-style:none}
+        .invite-item{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid #1a1a1a;gap:12px;font-size:.88rem}
+        .invite-item:last-child{border-bottom:none}
+        .invite-main{flex:1;min-width:0}
+        .invite-title a{color:var(--text);text-decoration:none}
+        .invite-title a:hover{text-decoration:underline}
+        .invite-gc{font-size:.78rem;color:var(--text3)}
+        .invite-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+        .invite-due{font-size:.75rem;color:var(--text2)}
+        .invite-due.urgent{color:var(--red);font-weight:600}
+        .invite-due.soon{color:var(--yellow)}
+        .invite-status-badge{font-size:.65rem;padding:2px 7px;border-radius:3px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+        .invite-status-badge.active{background:rgba(34,197,94,.12);color:var(--green)}
+        .invite-status-badge.new{background:rgba(59,130,246,.12);color:var(--blue)}
+        .invite-status-badge.pending{background:rgba(107,114,128,.1);color:var(--text3)}
+        .invite-status-badge.submitted{background:rgba(34,197,94,.12);color:var(--green)}
+        .invite-status-badge.declined{background:rgba(239,68,68,.1);color:var(--red)}
+
+        /* ── Quick links bar ── */
+        .quick-links{display:flex;gap:12px;flex-wrap:wrap;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;align-items:center}
+        .quick-links-label{font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+        .quick-links a{font-size:.8rem;color:var(--text2);text-decoration:none;transition:color .15s}
+        .quick-links a:hover{color:var(--text)}
+
+        /* ── Setup banner (when not in desktop app) ── */
+        .setup-banner{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--accent-glow);border:1px solid var(--accent);border-radius:10px;margin-bottom:20px;font-size:.88rem}
+        .setup-banner p{color:var(--text2)}
+        .setup-banner strong{color:var(--text)}
+
+        @media(max-width:700px){
+            .page-header{flex-direction:column}
+            .header-stats{justify-content:space-around}
+            .filter-bar{flex-direction:column}
+            .filter-group,select{width:100%}
+            .action-bar{margin-left:0;width:100%}
+            .action-bar .btn{flex:1}
+        }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="#" class="back-btn" onclick="history.back();return false;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+        Back
+    </a>
+    <span class="topbar-title">Bid Finder</span>
+    <span class="topbar-sub" id="lastUpdated"></span>
+</div>
+
+<div class="container">
+
+    <div class="page-header">
+        <div>
+            <h1>Bid Finder</h1>
+            <p>Scan public bid portals, plan rooms, and GC invites for construction work</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat"><span class="stat-val" id="totalBidsCount">—</span><span class="stat-lbl">Total Bids</span></div>
+            <div class="stat"><span class="stat-val" id="matchingCount">—</span><span class="stat-lbl">Matching</span></div>
+            <div class="stat"><span class="stat-val" id="urgentCount">—</span><span class="stat-lbl">Due &lt;7 days</span></div>
+        </div>
+    </div>
+
+    <div id="setupBanner" class="setup-banner" style="display:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <p><strong>Running in browser mode.</strong> Live scraping requires the openmud desktop app. You can still scan SAM.gov (federal) and browse GC invite data below.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" data-tab="scan">Scan Bids</button>
+        <button class="tab" data-tab="invites">GC Invites</button>
+        <button class="tab" data-tab="saved">Saved</button>
+        <button class="tab" data-tab="sources">Sources</button>
+    </div>
+
+    <!-- ── SCAN TAB ── -->
+    <div class="tab-panel active" id="tab-scan">
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <span class="filter-label">Trade / Keyword</span>
+                <input type="text" id="tradeInput" placeholder="waterline, sewer, gas…" style="min-width:180px">
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Category</span>
+                <select id="categoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="underground">Underground Utilities</option>
+                    <option value="water">Water / Waterline</option>
+                    <option value="sewer">Sewer / Sanitary</option>
+                    <option value="storm">Storm Drain</option>
+                    <option value="gas">Gas Distribution</option>
+                    <option value="civil">Heavy Civil</option>
+                    <option value="grading">Grading / Earthwork</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Source</span>
+                <select id="sourceFilter">
+                    <option value="all">All Sources</option>
+                    <option value="SAM.gov (Federal)">SAM.gov (Federal)</option>
+                    <option value="Horrocks Plan Room">Horrocks Plan Room</option>
+                    <option value="Utah Division of Purchasing">Utah Purchasing</option>
+                    <option value="Utah Bonfire Hub">Bonfire Hub</option>
+                    <option value="QuestCDN">QuestCDN</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Status</span>
+                <select id="statusFilter">
+                    <option value="open" selected>Open</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-primary" id="scanBtn" onclick="scanBids(event)" title="Hold Shift to force fresh scan">Scan Sources</button>
+                <button class="btn" id="exportBtn" onclick="exportCSV()" disabled>Export CSV</button>
+            </div>
+        </div>
+
+        <div class="status-bar" id="statusBar">
+            <span class="status-left">Ready — click Scan Sources to search 5 bid portals</span>
+            <span class="status-right" id="scanTime"></span>
+        </div>
+
+        <div class="source-stats" id="sourceStats" style="display:none"></div>
+
+        <div class="quick-links" id="quickLinks" style="display:none">
+            <span class="quick-links-label">Browse directly:</span>
+            <a href="https://sam.gov/search/?index=opp" target="_blank" rel="noopener">SAM.gov ↗</a>
+            <a href="https://contractorzone.udot.utah.gov/projects" target="_blank" rel="noopener">UDOT ↗</a>
+            <a href="https://www.horrocksplanroom.com/jobs/calendar" target="_blank" rel="noopener">Horrocks ↗</a>
+            <a href="https://utah.bonfirehub.com/portal/?tab=openOpportunities" target="_blank" rel="noopener">Bonfire Hub ↗</a>
+            <a href="https://qcpi.questcdn.com/cdn/posting/?group=81&projType=all" target="_blank" rel="noopener">QuestCDN ↗</a>
+        </div>
+
+        <div id="resultsSection" style="display:none">
+            <div class="results-header">
+                <p class="results-count" id="resultsCount"></p>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="expanded">Detailed</button>
+                    <button class="view-btn" data-view="compact">Compact</button>
+                </div>
+            </div>
+            <div class="bid-list" id="bidList"></div>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none">
+            <h3>No matching bids found</h3>
+            <p>Try clearing filters or scanning again. Check back later for new postings.</p>
+        </div>
+
+    </div><!-- /tab-scan -->
+
+    <!-- ── GC INVITES TAB ── -->
+    <div class="tab-panel" id="tab-invites">
+        <p style="font-size:.82rem;color:var(--text2);margin-bottom:16px">
+            GC invites and BuildingConnected requests. Updated manually — last updated <strong id="invitesDate">Feb 2026</strong>.
+        </p>
+
+        <div class="invite-section">
+            <div class="invite-section-header">GC Invites &amp; BuildingConnected</div>
+            <ul class="invite-list" id="gcInviteList"></ul>
+        </div>
+
+        <div class="invite-section">
+            <div class="invite-section-header">PlanHub Active Projects</div>
+            <ul class="invite-list" id="planhubList"></ul>
+        </div>
+
+        <div style="margin-top:16px;font-size:.82rem;color:var(--text2)">
+            <strong>GC Subcontractor Portals:</strong><br>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+                <a href="https://app.buildingconnected.com/" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none">BuildingConnected ↗</a>
+                <a href="https://www.okland.com/subcontractors" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none">Okland ↗</a>
+                <a href="https://www.zwickconstruction.com/subcontractors" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none">Zwick ↗</a>
+                <a href="https://parkwayconstruction.com" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none">Parkway ↗</a>
+                <a href="https://app.planhub.com/projects" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none">PlanHub ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SAVED TAB ── -->
+    <div class="tab-panel" id="tab-saved">
+        <div id="savedContainer"></div>
+    </div>
+
+    <!-- ── SOURCES TAB ── -->
+    <div class="tab-panel" id="tab-sources">
+        <div class="sources-grid">
+            <div class="source-category">
+                <div class="source-category-title">Government Portals <span class="source-badge auto">AUTO-SCAN</span></div>
+                <div class="source-item"><a href="https://sam.gov" target="_blank" rel="noopener">SAM.gov (Federal)</a><span class="source-status active">Active</span></div>
+                <div class="source-item"><a href="https://contractorzone.udot.utah.gov" target="_blank" rel="noopener">UDOT Contractor Zone</a><span class="source-status active">Active</span></div>
+                <div class="source-item"><a href="https://utah.bonfirehub.com" target="_blank" rel="noopener">Utah Bonfire Hub (U3P)</a><span class="source-status active">Active</span></div>
+                <div class="source-item"><a href="https://purchasing.utah.gov" target="_blank" rel="noopener">Utah Division of Purchasing</a><span class="source-status active">Active</span></div>
+            </div>
+            <div class="source-category">
+                <div class="source-category-title">Plan Rooms <span class="source-badge auto">AUTO-SCAN</span></div>
+                <div class="source-item"><a href="https://www.horrocksplanroom.com" target="_blank" rel="noopener">Horrocks Plan Room</a><span class="source-status active">Active</span></div>
+                <div class="source-item"><a href="https://qcpi.questcdn.com" target="_blank" rel="noopener">QuestCDN</a><span class="source-status active">Active</span></div>
+                <div class="source-item"><a href="https://www.planhub.com" target="_blank" rel="noopener">PlanHub</a><span class="source-status coming">Browse Manually</span></div>
+                <div class="source-item"><a href="https://planroom.sunrise-eng.com" target="_blank" rel="noopener">Sunrise Engineering</a><span class="source-status coming">Coming Soon</span></div>
+            </div>
+            <div class="source-category">
+                <div class="source-category-title">GC Platforms <span class="source-badge coming">MANUAL</span></div>
+                <div class="source-item"><a href="https://app.buildingconnected.com" target="_blank" rel="noopener">BuildingConnected</a><span class="source-status coming">Browse</span></div>
+                <div class="source-item"><a href="https://www.okland.com/subcontractors" target="_blank" rel="noopener">Okland Construction</a><span class="source-status coming">Browse</span></div>
+                <div class="source-item"><a href="https://www.zwickconstruction.com" target="_blank" rel="noopener">Zwick Construction</a><span class="source-status coming">Browse</span></div>
+                <div class="source-item"><a href="https://parkwayconstruction.com" target="_blank" rel="noopener">Parkway Construction</a><span class="source-status coming">Browse</span></div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /container -->
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+const GC_INVITES = [
+    { id:'slcdpu-artesian',  title:'SLCDPU Artesian 1 Well Project',          gc:'AE2S / SLC Public Utilities', bidDue:'2026-02-15', status:'new',       link:null },
+    { id:'swg-arizona',      title:'SWG Central Arizona - Gas Distribution',   gc:'Southwest Gas',               bidDue:'2026-02-28', status:'active',    link:null },
+    { id:'zwick-holladay',   title:'Holladay City Hall Remodel',               gc:'Zwick',                       bidDue:'2026-02-05', status:'active',    link:'https://app.buildingconnected.com/public/5c5c26f5ddda5600152a53b0' },
+    { id:'zwick-utah-county',title:'Utah County Security Center Patrol Expansion',gc:'Zwick',                    bidDue:'2026-02-10', status:'new',       link:'https://app.buildingconnected.com/public/5c5c26f5ddda5600152a53b0' },
+    { id:'okland-collective',title:'The Collective at Lehi Morning Vista',     gc:'Okland',                      bidDue:'2026-02-20', status:'active',    link:'https://app.buildingconnected.com/public/5a7be4d6e5d1ec0015858b9f' },
+    { id:'parkway-anthem',   title:'Anthem Oil - Bullhead City, AZ',           gc:'Parkway',                     bidDue:'2026-02-08', status:'pending',   link:'https://app.buildingconnected.com/projects' },
+    { id:'rmp-civil',        title:'PAC01188 - Civil & Underground 2026-2030', gc:'Rocky Mtn Power',             bidDue:'2026-01-08', status:'submitted', link:null },
+];
+
+const PLANHUB = [
+    { id:'ph-hollister-31601', title:'Hollister #31601',                      location:'Orem',         type:'Retail',     link:'https://app.planhub.com/projects' },
+    { id:'ph-lincoln',         title:'Lincoln Academy Expansion & Remodel',    location:'Pleasant Grove',type:'Education', link:'https://app.planhub.com/projects' },
+    { id:'ph-bluffdale',       title:'Bluffdale City Park Admin Building',      location:'Bluffdale',    type:'Municipal', link:'https://app.planhub.com/projects' },
+    { id:'ph-bath-body',       title:'Bath & Body Works #5083',                location:'Spanish Fork',  type:'Retail',     link:'https://app.planhub.com/projects' },
+    { id:'ph-sweetgreen',      title:'Sweetgreen Restaurant',                  location:'Salt Lake City',type:'Restaurant',link:'https://app.planhub.com/projects' },
+    { id:'ph-slcc',            title:'SLCC Respiratory & Nursing Lab Remodel', location:'West Jordan',   type:'Education', link:'https://app.planhub.com/projects' },
+];
+
+const SOURCE_URLS = {
+    'SAM.gov (Federal)':           'https://sam.gov/search/?index=opp',
+    'Horrocks Plan Room':          'https://www.horrocksplanroom.com/jobs/calendar',
+    'Utah Division of Purchasing': 'https://purchasing.utah.gov/bids/',
+    'Utah Bonfire Hub':            'https://utah.bonfirehub.com/portal/?tab=openOpportunities',
+    'QuestCDN':                    'https://qcpi.questcdn.com/cdn/posting/?group=81',
+};
+
+// Category keyword maps
+const CAT_KEYWORDS = {
+    underground: ['underground','utility','pipe','pipeline','excavation','trench','boring','hdpe','ductile'],
+    water:       ['water','waterline','water main','water line','culinary'],
+    sewer:       ['sewer','sanitary','wastewater','force main','lift station'],
+    storm:       ['storm','drainage','stormwater','culvert','catch basin'],
+    gas:         ['gas','natural gas','gas main','gas line'],
+    civil:       ['road','highway','street','bridge','pavement','asphalt','infrastructure'],
+    grading:     ['grading','earthwork','excavation','mass grading'],
+};
+
+let allBids = [];
+let filteredBids = [];
+let savedProjects = JSON.parse(localStorage.getItem('mudrag-saved-bids') || '[]');
+const CACHE_KEY = 'mudrag-bidfinder-cache';
+const CACHE_TTL = 5 * 60 * 1000;
+
+// ── Tool port detection (desktop app vs web) ─────────────────────────────────
+function getToolPort() {
+    const m = location.search.match(/[?&]toolPort=(\d+)/);
+    return m ? parseInt(m[1]) : null;
+}
+const TOOL_PORT = getToolPort();
+const IS_DESKTOP = !!window.mudrag || !!TOOL_PORT;
+
+// ── Cache helpers ─────────────────────────────────────────────────────────────
+function loadCache() {
+    try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const c = JSON.parse(raw);
+        if (!c?.savedAt || !c?.data || Date.now() - c.savedAt > CACHE_TTL) return null;
+        return c;
+    } catch(_) { return null; }
+}
+function saveCache(data) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data })); } catch(_) {}
+}
+
+// ── Scan ──────────────────────────────────────────────────────────────────────
+async function scanBids(e) {
+    const scanBtn = document.getElementById('scanBtn');
+    const statusBar = document.getElementById('statusBar');
+    const statusLeft = statusBar.querySelector('.status-left');
+    const forceRefresh = e && e.shiftKey;
+
+    scanBtn.disabled = true;
+    statusBar.classList.add('loading');
+    statusLeft.textContent = 'Scanning bid sources…';
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'none';
+
+    try {
+        // Check cache
+        const cached = !forceRefresh ? loadCache() : null;
+        if (cached) {
+            statusBar.classList.remove('loading');
+            const ageMin = Math.max(1, Math.round((Date.now() - cached.savedAt) / 60000));
+            statusLeft.textContent = `Loaded cached results (${ageMin}m old)`;
+            applyData(cached.data);
+            scanBtn.disabled = false;
+            return;
+        }
+
+        // Determine endpoint
+        let data;
+        if (TOOL_PORT) {
+            // Desktop tool server
+            const trade = document.getElementById('tradeInput').value.trim() || document.getElementById('categoryFilter').value;
+            const res = await fetch(`http://localhost:${TOOL_PORT}/bids?trade=${encodeURIComponent(trade)}`);
+            data = await res.json();
+        } else {
+            // Try Vercel API (web deployment)
+            const res = await fetch('/api/bids');
+            if (!res.ok) throw new Error(`API error ${res.status}`);
+            data = await res.json();
+        }
+
+        if (data.error) throw new Error(data.error);
+        statusBar.classList.remove('loading');
+        applyData(data);
+        saveCache(data);
+
+    } catch (err) {
+        statusBar.classList.remove('loading');
+        statusLeft.textContent = 'Scan failed: ' + err.message + '. Try opening source links directly below.';
+        document.getElementById('quickLinks').style.display = 'flex';
+        console.error(err);
+    }
+
+    scanBtn.disabled = false;
+}
+
+function applyData(data) {
+    allBids = data.bids || [];
+    const statusBar = document.getElementById('statusBar');
+
+    document.getElementById('totalBidsCount').textContent = allBids.length;
+    document.getElementById('scanTime').textContent = data.elapsed ? `Scanned in ${data.elapsed}` : '';
+    if (data.scannedAt) document.getElementById('lastUpdated').textContent = 'Last scan: ' + new Date(data.scannedAt).toLocaleString();
+
+    if (data.sources) {
+        const ss = document.getElementById('sourceStats');
+        ss.style.display = 'grid';
+        ss.innerHTML = Object.entries(data.sources).map(([name, count]) => {
+            const url = SOURCE_URLS[name];
+            const nameHtml = url ? `<a href="${url}" target="_blank" rel="noopener">${name} ↗</a>` : name;
+            return `<div class="source-stat"><span class="source-stat-name">${nameHtml}</span><span class="source-stat-count ${count > 0 ? 'has-results' : 'no-results'}">${count}</span></div>`;
+        }).join('');
+    }
+
+    document.getElementById('quickLinks').style.display = 'flex';
+    var warningText = (data.warnings && data.warnings.length) ? (' · ' + data.warnings.join(' ')) : '';
+    statusBar.querySelector('.status-left').textContent = `Found ${allBids.length} opportunities from ${Object.keys(data.sources || {}).length} sources${warningText}`;
+    document.getElementById('exportBtn').disabled = false;
+    applyFilters();
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+function applyFilters() {
+    const trade    = document.getElementById('tradeInput').value.trim().toLowerCase();
+    const category = document.getElementById('categoryFilter').value;
+    const source   = document.getElementById('sourceFilter').value;
+    const status   = document.getElementById('statusFilter').value;
+
+    filteredBids = allBids.filter(bid => {
+        if (source !== 'all' && bid.source !== source) return false;
+        if (status === 'open' && bid.status !== 'open') return false;
+        const text = (bid.title + ' ' + (bid.description || '')).toLowerCase();
+        if (trade && !text.includes(trade)) return false;
+        if (category !== 'all') {
+            const keys = CAT_KEYWORDS[category] || [category];
+            if (!keys.some(k => text.includes(k))) return false;
+        }
+        return true;
+    });
+
+    const urgent = filteredBids.filter(b => b.bidDate && daysUntil(b.bidDate) >= 0 && daysUntil(b.bidDate) <= 7);
+    document.getElementById('matchingCount').textContent = filteredBids.length;
+    document.getElementById('urgentCount').textContent = urgent.length;
+    renderBids();
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────────
+function daysUntil(iso) {
+    if (!iso) return null;
+    return Math.ceil((new Date(iso) - Date.now()) / 86400000);
+}
+function fmtDate(iso) {
+    if (!iso) return null;
+    return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function fmtCurrency(v) {
+    if (!v) return null;
+    if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+    if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
+    return '$' + v.toLocaleString();
+}
+function truncate(s, n) { return s && s.length > n ? s.slice(0, n) + '…' : s; }
+
+function renderBids() {
+    const bidList = document.getElementById('bidList');
+    const resultsSection = document.getElementById('resultsSection');
+    const emptyState = document.getElementById('emptyState');
+
+    if (filteredBids.length === 0) {
+        resultsSection.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+    }
+    emptyState.style.display = 'none';
+    resultsSection.style.display = 'block';
+    document.getElementById('resultsCount').textContent = filteredBids.length === allBids.length
+        ? `Showing all ${filteredBids.length} opportunities`
+        : `Showing ${filteredBids.length} of ${allBids.length} opportunities`;
+
+    bidList.innerHTML = filteredBids.map(bid => {
+        const days = daysUntil(bid.bidDate);
+        const dateClass = days !== null && days >= 0 ? (days <= 3 ? 'urgent' : days <= 7 ? 'soon' : '') : '';
+        const isSaved = savedProjects.some(p => p.id === bid.id);
+        const bidUrl = (bid.url && bid.url.startsWith('http')) ? bid.url : (SOURCE_URLS[bid.source] || '#');
+        const hasUrl = bidUrl !== '#';
+        const tags = getTags(bid);
+        return `<div class="bid-card${isSaved ? ' saved' : ''}" data-id="${bid.id}">
+            <div class="bid-header">
+                <h3 class="bid-title">${hasUrl ? `<a href="${bidUrl}" target="_blank" rel="noopener">${escHtml(bid.title)}</a>` : escHtml(bid.title)}</h3>
+                <div class="bid-actions">
+                    ${hasUrl ? `<a href="${bidUrl}" target="_blank" rel="noopener" class="bid-action-btn" title="Open source">↗</a>` : ''}
+                    <button class="bid-action-btn${isSaved ? ' saved' : ''}" onclick="toggleSave('${bid.id}')" title="${isSaved ? 'Unsave' : 'Save'}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    <span class="bid-source">${escHtml(bid.source || '')}</span>
+                </div>
+            </div>
+            <div class="bid-meta">
+                ${bid.bidDate ? `<div class="bid-meta-item"><span class="bid-meta-label">Bid Date:</span> <span class="bid-date ${dateClass}">${fmtDate(bid.bidDate)}${days !== null && days >= 0 ? ` (${days}d)` : ''}</span></div>` : ''}
+                ${bid.location ? `<div class="bid-meta-item"><span class="bid-meta-label">Location:</span> ${escHtml(bid.location)}</div>` : ''}
+                ${bid.estimatedValue ? `<div class="bid-meta-item"><span class="bid-meta-label">Est:</span> ${fmtCurrency(bid.estimatedValue)}</div>` : ''}
+                ${bid.projectType ? `<div class="bid-meta-item"><span class="bid-meta-label">Type:</span> ${escHtml(bid.projectType)}</div>` : ''}
+            </div>
+            ${bid.description ? `<p class="bid-description">${escHtml(truncate(bid.description, 140))}</p>` : ''}
+            ${tags.length ? `<div class="bid-tags">${tags.map(t => `<span class="bid-tag${t.match ? ' match' : ''}">${t.name}</span>`).join('')}</div>` : ''}
+        </div>`;
+    }).join('');
+}
+
+function getTags(bid) {
+    const t = (bid.title + ' ' + (bid.description || '')).toLowerCase();
+    const tags = [];
+    const checks = [
+        ['Water/Sewer', ['water','sewer','waterline','sanitary']],
+        ['Storm Drain', ['storm','drainage']],
+        ['Gas', ['gas','natural gas']],
+        ['Underground', ['underground','utility']],
+        ['Excavation', ['excavation','trenching','earthwork']],
+        ['Heavy Civil', ['road','highway','bridge','civil']],
+        ['Federal', ['sam.gov','federal']],
+    ];
+    for (const [name, kws] of checks) {
+        if (kws.some(k => t.includes(k))) tags.push({ name, match: true });
+    }
+    return tags.slice(0, 4);
+}
+
+function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Save / Export ─────────────────────────────────────────────────────────────
+function toggleSave(bidId) {
+    const bid = allBids.find(b => b.id === bidId);
+    if (!bid) return;
+    const idx = savedProjects.findIndex(p => p.id === bidId);
+    if (idx >= 0) savedProjects.splice(idx, 1);
+    else savedProjects.push({ ...bid, savedAt: new Date().toISOString() });
+    localStorage.setItem('mudrag-saved-bids', JSON.stringify(savedProjects));
+    renderBids();
+}
+
+function exportCSV() {
+    if (!filteredBids.length) return;
+    const headers = ['Title','Source','Location','Bid Date','Type','URL'];
+    const rows = filteredBids.map(b => [b.title, b.source, b.location, fmtDate(b.bidDate) || '', b.projectType, b.url].map(v => `"${String(v||'').replace(/"/g,'""')}"`));
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = `mudrag-bids-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+}
+
+// ── GC Invites ────────────────────────────────────────────────────────────────
+function renderInvites() {
+    const gcList = document.getElementById('gcInviteList');
+    gcList.innerHTML = GC_INVITES.map(inv => {
+        const days = daysUntil(inv.bidDue);
+        const dueCls = days !== null && days >= 0 ? (days <= 3 ? 'urgent' : days <= 7 ? 'soon' : '') : '';
+        return `<li class="invite-item">
+            <div class="invite-main">
+                <div class="invite-title">${inv.link ? `<a href="${inv.link}" target="_blank" rel="noopener">${escHtml(inv.title)}</a>` : escHtml(inv.title)}</div>
+                <div class="invite-gc">${escHtml(inv.gc)}</div>
+            </div>
+            <div class="invite-right">
+                ${inv.bidDue ? `<span class="invite-due ${dueCls}">${fmtDate(inv.bidDue)}${days !== null && days >= 0 ? ` (${days}d)` : ''}</span>` : ''}
+                <span class="invite-status-badge ${inv.status}">${inv.status}</span>
+            </div>
+        </li>`;
+    }).join('');
+
+    const phList = document.getElementById('planhubList');
+    phList.innerHTML = PLANHUB.map(p => `<li class="invite-item">
+        <div class="invite-main">
+            <div class="invite-title"><a href="${p.link}" target="_blank" rel="noopener">${escHtml(p.title)}</a></div>
+            <div class="invite-gc">${p.location} · ${p.type}</div>
+        </div>
+    </li>`).join('');
+}
+
+// ── Saved tab ─────────────────────────────────────────────────────────────────
+function renderSaved() {
+    const c = document.getElementById('savedContainer');
+    if (!savedProjects.length) {
+        c.innerHTML = '<div class="saved-empty">No saved projects yet. Click the bookmark on any bid card to save it here.</div>';
+        return;
+    }
+    c.innerHTML = `<div class="bid-list">${savedProjects.map(bid => {
+        const days = daysUntil(bid.bidDate);
+        const dateClass = days !== null && days >= 0 ? (days <= 3 ? 'urgent' : days <= 7 ? 'soon' : '') : '';
+        return `<div class="bid-card saved">
+            <div class="bid-header">
+                <h3 class="bid-title"><a href="${bid.url || '#'}" target="_blank">${escHtml(bid.title)}</a></h3>
+                <div class="bid-actions">
+                    <button class="bid-action-btn" onclick="bidToChat('${bid.id}')" title="Open in chat">Chat ↗</button>
+                    <button class="bid-action-btn saved" onclick="removeSaved('${bid.id}')" title="Remove">✕</button>
+                    <span class="bid-source">${escHtml(bid.source || '')}</span>
+                </div>
+            </div>
+            <div class="bid-meta">
+                ${bid.bidDate ? `<div class="bid-meta-item"><span class="bid-meta-label">Bid Date:</span> <span class="bid-date ${dateClass}">${fmtDate(bid.bidDate)}</span></div>` : ''}
+                ${bid.location ? `<div class="bid-meta-item"><span class="bid-meta-label">Location:</span> ${escHtml(bid.location)}</div>` : ''}
+            </div>
+        </div>`;
+    }).join('')}</div>`;
+}
+
+function removeSaved(bidId) {
+    savedProjects = savedProjects.filter(p => p.id !== bidId);
+    localStorage.setItem('mudrag-saved-bids', JSON.stringify(savedProjects));
+    renderSaved();
+}
+
+function bidToChat(bidId) {
+    const bid = savedProjects.find(p => p.id === bidId) || allBids.find(b => b.id === bidId);
+    if (!bid || !window.parent) return;
+    window.parent.postMessage({ type: 'mudrag:send', text: `Help me bid on this job: ${bid.title}` }, '*');
+    history.back();
+}
+
+// ── Tab navigation ────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'saved') renderSaved();
+    });
+});
+
+document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('bidList').classList.toggle('compact', btn.dataset.view === 'compact');
+    });
+});
+
+['categoryFilter','sourceFilter','statusFilter'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => { if (allBids.length) applyFilters(); });
+});
+document.getElementById('tradeInput').addEventListener('input', () => { if (allBids.length) applyFilters(); });
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderInvites();
+renderSaved();
+if (!IS_DESKTOP) document.getElementById('setupBanner').style.display = 'flex';
+
+// Pre-fill trade from URL query
+const urlTrade = new URLSearchParams(location.search).get('trade');
+if (urlTrade) { document.getElementById('tradeInput').value = urlTrade; scanBids(null); }
+</script>
+</body>
+</html>

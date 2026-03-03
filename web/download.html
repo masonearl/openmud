@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download openmud – Mac desktop app</title>
+    <meta name="description" content="Download the openmud desktop app for Mac. Construction AI with local tools.">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="/documentation.html">Documentation</a>
+                <a href="/about.html">About</a>
+                <a href="mailto:hi@masonearl.com?subject=openmud&body=Hi%2C%20I'm%20interested%20in%20openmud." class="btn-text">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="dl-hero">
+            <div class="dl-card">
+                <div class="dl-icon">
+                    <img src="/assets/logo-transparent.png" alt="openmud" class="dl-icon-img">
+                </div>
+                <h1 class="dl-title">openmud</h1>
+                <p class="dl-sub">Available for macOS (Apple Silicon)</p>
+                <a href="/api/download-dmg" class="dl-btn">Download for Mac <span class="dl-arrow">↓</span></a>
+                <p class="dl-version" id="download-version"></p>
+                <p class="dl-note">macOS 10.15 or later &middot; Requires Python 3 &middot; <a href="mailto:hi@masonearl.com?subject=openmud%20download%20help">Need help?</a></p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            fetch('/api/desktop-version')
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (data) {
+                    var el = document.getElementById('download-version');
+                    if (el && data && data.version) {
+                        el.textContent = 'v' + data.version;
+                    }
+                })
+                .catch(function () {});
+        })();
+    </script>
+    <style>
+        .dl-hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            padding: 40px 20px;
+        }
+        .dl-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0;
+        }
+        .dl-icon {
+            width: 88px;
+            height: 88px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .dl-icon-img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+        }
+        .dl-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 6px;
+            letter-spacing: -0.01em;
+        }
+        .dl-sub {
+            font-size: 0.9375rem;
+            color: var(--text-secondary, #999);
+            margin: 0 0 28px;
+        }
+        .dl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 22px;
+            background: var(--text, #f0f0f0);
+            color: var(--bg, #111);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: opacity 0.15s;
+            margin-bottom: 12px;
+        }
+        .dl-btn:hover { opacity: 0.85; }
+        .dl-arrow { font-size: 1rem; }
+        .dl-version {
+            font-size: 0.8125rem;
+            color: var(--text-secondary, #777);
+            margin: 0 0 20px;
+            min-height: 1em;
+        }
+        .dl-note {
+            font-size: 0.8125rem;
+            color: var(--muted, #666);
+            margin: 0;
+        }
+        .dl-note a {
+            color: inherit;
+            text-decoration: underline;
+        }
+        .dl-note a:hover { color: var(--text, #f0f0f0); }
+    </style>
+</body>
+</html>

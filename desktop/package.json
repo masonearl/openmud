@@ -1,0 +1,70 @@
+{
+  "name": "mudrag-desktop",
+  "version": "1.1.31",
+  "description": "openmud – AI for construction. Desktop app.",
+  "main": "main.js",
+  "author": "openmud",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac",
+    "build:dmg": "electron-builder --mac dmg",
+    "build:dmg:unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac dmg",
+    "build:local": "node ../scripts/build-signed-local.js",
+    "build:clean": "rm -rf dist && npm run build:dmg:unsigned"
+  },
+  "devDependencies": {
+    "chokidar": "^3.6.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "electron-reload": "^2.0.0-alpha.1"
+  },
+  "build": {
+    "appId": "ai.mudrag.desktop",
+    "productName": "openmud",
+    "afterPack": "../scripts/after-pack.js",
+    "icon": "../assets/mudraglogo.png",
+    "extraResources": [
+      {
+        "from": "../web",
+        "to": "web"
+      },
+      {
+        "from": "../mud1",
+        "to": "mud1"
+      },
+      {
+        "from": "../tools",
+        "to": "tools"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg"
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "protocols": [
+        {
+          "name": "openmud",
+          "schemes": [
+            "openmud",
+            "mudrag"
+          ],
+          "role": "Editor"
+        }
+      ]
+    },
+    "dmg": {
+      "title": "Install openmud"
+    }
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "dotenv": "^17.3.1",
+    "openai": "^6.22.0"
+  }
+}

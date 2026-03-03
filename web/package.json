@@ -1,0 +1,12 @@
+{
+  "name": "mudrag-web",
+  "version": "1.0.0",
+  "description": "openmud (openmud.ai) website and API",
+  "private": true,
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@supabase/supabase-js": "^2.97.0",
+    "openai": "^4.73.0",
+    "stripe": "^20.3.1"
+  }
+}

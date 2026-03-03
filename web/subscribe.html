@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscribe – openmud</title>
+    <meta name="description" content="Subscribe to openmud for unlimited access and desktop tools.">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
+            <nav class="nav">
+                <a href="/settings.html">Settings</a>
+                <a href="/documentation.html">Documentation</a>
+                <a href="/download.html">Download</a>
+                <div class="nav-dropdown">
+                    <button type="button" class="btn-text btn-settings" id="btn-settings" aria-haspopup="true" aria-expanded="false" title="Settings">Settings</button>
+                    <div class="dropdown-menu dropdown-menu-right" id="settings-dropdown" hidden>
+                        <a href="/settings.html" class="dropdown-item">Account & settings</a>
+                        <a href="/about.html" class="dropdown-item">About</a>
+                        <a href="mailto:hi@masonearl.com?subject=openmud&body=Hi%2C%20I'm%20interested%20in%20openmud." class="dropdown-item">Contact</a>
+                        <a href="/download.html" class="dropdown-item">Download app</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Plans & billing</h1>
+                <p class="hero-sub">Choose your plan. Usage and subscription in one place.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <div id="usage-plan-section" class="subscribe-usage-section" hidden>
+                    <div class="subscribe-current-plan" id="current-plan-card">
+                        <div class="subscribe-plan-header">
+                            <h2 id="current-plan-name">Free</h2>
+                            <span class="subscribe-plan-badge" id="current-plan-badge" hidden>Current</span>
+                        </div>
+                        <p class="subscribe-plan-desc" id="current-plan-desc">5 messages per day. Try openmud.</p>
+                        <a href="/settings.html" class="btn-secondary btn-sm" id="btn-manage-subscription">Manage subscription</a>
+                    </div>
+                    <div class="subscribe-usage-block">
+                        <div class="subscribe-usage-header">
+                            <span>Messages today</span>
+                            <span id="usage-display">0 / 5</span>
+                        </div>
+                        <div class="usage-progress-bar subscribe-usage-bar">
+                            <div class="usage-progress-fill" id="usage-progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="subscribe-plans-title">All plans</h2>
+                <div class="subscribe-plans-grid">
+                    <div class="subscribe-plan-card" data-tier="free">
+                        <h3>Free</h3>
+                        <p class="subscribe-plan-price">$0</p>
+                        <p class="subscribe-plan-desc">5 messages per day. Try openmud.</p>
+                        <ul class="subscribe-plan-features">
+                            <li>5 messages/day</li>
+                            <li>Web only</li>
+                            <li>Basic estimates</li>
+                        </ul>
+                        <a href="/try" class="btn-secondary subscribe-plan-btn">Try free</a>
+                    </div>
+                    <div class="subscribe-plan-card" data-tier="personal">
+                        <h3>Personal</h3>
+                        <p class="subscribe-plan-price">$10<span>/mo</span></p>
+                        <p class="subscribe-plan-desc">For individual contractors.</p>
+                        <ul class="subscribe-plan-features">
+                            <li>100 messages/day</li>
+                            <li>Web + desktop app</li>
+                            <li>Proposals & schedules</li>
+                        </ul>
+                        <button type="button" class="btn-secondary subscribe-plan-btn btn-subscribe-tier" data-tier="personal">Subscribe</button>
+                    </div>
+                    <div class="subscribe-plan-card subscribe-plan-card-featured" data-tier="pro">
+                        <span class="subscribe-plan-badge-featured">Popular</span>
+                        <h3>Pro</h3>
+                        <p class="subscribe-plan-price">$25<span>/mo</span></p>
+                        <p class="subscribe-plan-desc">Unlimited access for serious use.</p>
+                        <ul class="subscribe-plan-features">
+                            <li>Unlimited messages</li>
+                            <li>Desktop app & tools</li>
+                            <li>RAG over your data</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <button type="button" class="btn-primary subscribe-plan-btn btn-subscribe-tier" data-tier="pro">Subscribe</button>
+                    </div>
+                    <div class="subscribe-plan-card" data-tier="executive">
+                        <h3>Executive</h3>
+                        <p class="subscribe-plan-price">$100<span>/mo</span></p>
+                        <p class="subscribe-plan-desc">For teams and power users.</p>
+                        <ul class="subscribe-plan-features">
+                            <li>Everything in Pro</li>
+                            <li>Team features</li>
+                            <li>API access</li>
+                            <li>Dedicated support</li>
+                        </ul>
+                        <button type="button" class="btn-secondary subscribe-plan-btn btn-subscribe-tier" data-tier="executive">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="subscribe-modal" hidden>
+        <div class="modal">
+            <h3>Subscribe</h3>
+            <p class="modal-desc">Enter your email to continue to checkout.</p>
+            <form id="subscribe-form" class="subscribe-form">
+                <input type="email" id="subscribe-email" placeholder="your@email.com" required>
+                <button type="submit" class="btn-primary" id="btn-subscribe">Subscribe</button>
+            </form>
+            <p id="subscribe-error" class="subscribe-error" hidden></p>
+            <button type="button" class="btn-text modal-close" id="btn-modal-close">Cancel</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        (function () {
+            var tierInfo = {
+                free: { name: 'Free', desc: '5 messages per day. Try openmud.', limit: 5 },
+                personal: { name: 'Personal', desc: '$10/mo. For individual contractors.', limit: 100 },
+                pro: { name: 'Pro', desc: '$25/mo. Unlimited access for serious use.', limit: null },
+                executive: { name: 'Executive', desc: '$100/mo. For teams and power users.', limit: null }
+            };
+
+            var usageSection = document.getElementById('usage-plan-section');
+            var currentPlanName = document.getElementById('current-plan-name');
+            var currentPlanDesc = document.getElementById('current-plan-desc');
+            var currentPlanBadge = document.getElementById('current-plan-badge');
+            var usageDisplay = document.getElementById('usage-display');
+            var usageProgressFill = document.getElementById('usage-progress-fill');
+            var subscribeModal = document.getElementById('subscribe-modal');
+            var subscribeForm = document.getElementById('subscribe-form');
+            var subscribeEmail = document.getElementById('subscribe-email');
+            var btnSubscribe = document.getElementById('btn-subscribe');
+            var subscribeError = document.getElementById('subscribe-error');
+            var btnModalClose = document.getElementById('btn-modal-close');
+
+            var selectedTier = 'pro';
+
+            function loadUserAndUsage() {
+                mudragAuth.getSession().then(function (r) {
+                    var session = r.data && r.data.session;
+                    if (!session || !session.access_token) {
+                        usageSection.hidden = true;
+                        return;
+                    }
+                    usageSection.hidden = false;
+                    var apiBase = window.location.origin || '';
+
+                    Promise.all([
+                        fetch(apiBase + '/api/user', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(function (r) { return r.ok ? r.json() : null; }),
+                        fetch(apiBase + '/api/usage', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(function (r) { return r.ok ? r.json() : null; })
+                    ]).then(function (results) {
+                        var userData = results[0];
+                        var usageData = results[1];
+                        var tier = (userData && userData.user && userData.user.subscription_tier) ? userData.user.subscription_tier : 'free';
+                        var used = (usageData && usageData.used != null) ? usageData.used : 0;
+                        var limit = (usageData && usageData.limit != null) ? usageData.limit : (tierInfo[tier] && tierInfo[tier].limit) || 5;
+
+                        currentPlanName.textContent = tierInfo[tier] ? tierInfo[tier].name : tier;
+                        currentPlanDesc.textContent = tierInfo[tier] ? tierInfo[tier].desc : '';
+                        currentPlanBadge.hidden = false;
+
+                        var label = limit == null ? (used + ' (unlimited)') : (used + ' / ' + limit);
+                        usageDisplay.textContent = label;
+                        if (limit != null && limit > 0) {
+                            var pct = Math.min(100, (used / limit) * 100);
+                            usageProgressFill.style.width = pct + '%';
+                        } else {
+                            usageProgressFill.style.width = '0%';
+                        }
+
+                        document.querySelectorAll('.subscribe-plan-card').forEach(function (card) {
+                            var t = card.getAttribute('data-tier');
+                            var btn = card.querySelector('.btn-subscribe-tier');
+                            if (t === tier) {
+                                card.classList.add('subscribe-plan-current');
+                                if (btn) { btn.textContent = 'Current plan'; btn.disabled = true; }
+                            } else {
+                                card.classList.remove('subscribe-plan-current');
+                                if (btn) { btn.textContent = 'Subscribe'; btn.disabled = false; }
+                            }
+                        });
+                    });
+                });
+            }
+
+            mudragAuth.getSession().then(loadUserAndUsage);
+            mudragAuth.onAuthStateChange(loadUserAndUsage);
+
+            document.querySelectorAll('.btn-subscribe-tier').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    if (btn.disabled) return;
+                    selectedTier = btn.getAttribute('data-tier');
+                    if (selectedTier === 'free') return;
+                    mudragAuth.getSession().then(function (r) {
+                        var session = r.data && r.data.session;
+                        if (session && session.user && session.user.email) {
+                            subscribeEmail.value = session.user.email;
+                        } else {
+                            subscribeEmail.value = '';
+                        }
+                        subscribeError.hidden = true;
+                        subscribeModal.hidden = false;
+                    });
+                });
+            });
+
+            if (subscribeForm) {
+                subscribeForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var email = subscribeEmail.value.trim();
+                    if (!email) return;
+                    btnSubscribe.disabled = true;
+                    btnSubscribe.textContent = 'Redirecting…';
+                    subscribeError.hidden = true;
+                    fetch(window.location.origin + '/api/stripe-checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, tier: selectedTier })
+                    }).then(function (r) { return r.json(); }).then(function (data) {
+                        if (data && data.url) {
+                            window.location.href = data.url;
+                        } else {
+                            throw new Error(data && data.error ? data.error : 'Checkout failed');
+                        }
+                    }).catch(function (err) {
+                        btnSubscribe.disabled = false;
+                        btnSubscribe.textContent = 'Subscribe';
+                        subscribeError.textContent = err.message || 'Something went wrong. Try again.';
+                        subscribeError.hidden = false;
+                    });
+                });
+            }
+
+            if (btnModalClose) {
+                btnModalClose.addEventListener('click', function () {
+                    subscribeModal.hidden = true;
+                });
+            }
+            subscribeModal.addEventListener('click', function (e) {
+                if (e.target === subscribeModal) subscribeModal.hidden = true;
+            });
+        })();
+    </script>
+    <script src="assets/js/nav.js"></script>
+    <style>
+        .subscribe-usage-section { margin-bottom: 40px; }
+        .subscribe-current-plan {
+            padding: 24px;
+            background: var(--bg-alt);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .subscribe-plan-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .subscribe-current-plan h2 { margin: 0; font-size: 1.25rem; }
+        .subscribe-plan-badge {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(110, 231, 183, 0.2);
+            color: var(--accent, #6ee7b7);
+            border-radius: 6px;
+        }
+        .subscribe-plan-desc { margin: 0 0 16px; color: var(--text-secondary); font-size: 0.9375rem; }
+        .subscribe-usage-block { padding: 20px; background: var(--bg-alt); border-radius: 12px; border: 1px solid var(--border); }
+        .subscribe-usage-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9375rem; }
+        .subscribe-usage-bar { height: 8px; }
+        .subscribe-plans-title { margin: 0 0 24px; font-size: 1.25rem; }
+        .subscribe-plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .subscribe-plan-card {
+            padding: 24px;
+            background: var(--bg-alt);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .subscribe-plan-card-featured { border-color: var(--accent, rgba(110, 231, 183, 0.5)); }
+        .subscribe-plan-card-current { border-color: var(--accent, #6ee7b7); }
+        .subscribe-plan-badge-featured {
+            position: absolute;
+            top: -10px;
+            right: 16px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--accent, #6ee7b7);
+            color: #000;
+            border-radius: 6px;
+        }
+        .subscribe-plan-card h3 { margin: 0 0 4px; font-size: 1.125rem; }
+        .subscribe-plan-price { margin: 0 0 4px; font-size: 1.5rem; font-weight: 700; }
+        .subscribe-plan-price span { font-size: 0.875rem; font-weight: 400; color: var(--text-secondary); }
+        .subscribe-plan-features { flex: 1; margin: 16px 0; padding-left: 1.25rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .subscribe-plan-features li { margin-bottom: 6px; }
+        .subscribe-plan-btn { margin-top: auto; width: 100%; text-align: center; }
+        #subscribe-modal .subscribe-form { flex-direction: column; }
+        #subscribe-modal .subscribe-form input { width: 100%; }
+        #subscribe-modal .modal-close { margin-top: 12px; }
+    </style>
+</body>
+</html>

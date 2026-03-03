@@ -1,0 +1,9 @@
+{
+  "framework": null,
+  "rewrites": [
+    { "source": "/try",       "destination": "/try.html" },
+    { "source": "/download",  "destination": "/download.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/api/agentic-step", "destination": "/api/agentic-step.js" }
+  ]
+}

@@ -1,0 +1,97 @@
+[
+  {
+    "query": "how much does 8 inch sewer pipe cost per foot",
+    "expected_any": ["pipe cost per linear foot", "How much does pipe cost per linear foot?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "operator labor rate",
+    "expected_any": ["What are typical labor rates?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "equipment rental excavator daily cost",
+    "expected_any": ["What do equipment rentals cost?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "how does clay soil affect bid price",
+    "expected_any": ["How does clay soil affect cost?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "price rock excavation for trench",
+    "expected_any": ["How do I price rock excavation?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "what is trench pipe bedding",
+    "expected_any": ["What is pipe bedding?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "difference sanitary sewer and water main",
+    "expected_any": ["What's the difference between sewer and waterline?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "how to build a construction schedule",
+    "expected_any": ["How do I build a construction schedule?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "write an rfi for field conflict",
+    "expected_any": ["What is an RFI and how do I write one?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "submittal log process and approvals",
+    "expected_any": ["How do I manage submittals?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "how to prepare a pay application with retainage",
+    "expected_any": ["How do I prepare a pay application?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "what goes in daily report",
+    "expected_any": ["What goes in a daily report?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "change order steps and pricing",
+    "expected_any": ["How do I handle a change order?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "conditional vs unconditional lien waiver",
+    "expected_any": ["What's the difference between conditional and unconditional lien waivers?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "osha trench safety requirements",
+    "expected_any": ["What are OSHA trenching safety requirements?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "common estimating mistakes on utility bids",
+    "expected_any": ["What are common estimating mistakes?"],
+    "min_confidence": "medium"
+  },
+  {
+    "query": "create proposal from estimate",
+    "expected_any": ["How do I create a proposal?"],
+    "min_confidence": "low"
+  },
+  {
+    "query": "organize my desktop",
+    "expected_any": [],
+    "must_be_empty": true
+  },
+  {
+    "query": "clean my downloads folder",
+    "expected_any": [],
+    "must_be_empty": true
+  }
+]

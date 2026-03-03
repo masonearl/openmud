@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About – openmud</title>
+    <meta name="description" content="Our mission: AI that speaks the language of the job site. Built for contractors and teams.">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
+            <nav class="nav">
+                <a href="/documentation.html">Documentation</a>
+                <a href="/download.html">Download</a>
+                <div class="nav-dropdown">
+                    <button type="button" class="btn-text btn-settings" id="btn-settings" aria-haspopup="true" aria-expanded="false" title="Settings">Settings</button>
+                    <div class="dropdown-menu dropdown-menu-right" id="settings-dropdown" hidden>
+                        <a href="/about.html" class="dropdown-item">About</a>
+                        <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A" class="dropdown-item">Contact</a>
+                        <a href="/download.html" class="dropdown-item">Download app</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Our mission</h1>
+                <p class="hero-sub">AI that speaks the language of the job site.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <h2>Why we exist</h2>
+                <p>Construction runs on estimates, schedules, and decisions made in the field. Most software doesn’t. We’re building AI that understands waterline and sewer, pipe and trench, labor and equipment—so contractors and teams can plan, bid, and run jobs on solid ground.</p>
+            </div>
+        </section>
+
+        <section class="section section-alt">
+            <div class="container narrow">
+                <h2>What we’re building</h2>
+                <p>openmud is in development. We’re starting with cost estimation and an assistant that can answer construction questions and help run numbers. Our goal is to make AI a practical tool for every phase of the job, from bid to closeout.</p>
+            </div>
+        </section>
+
+        <section id="contech" class="section">
+            <div class="container narrow">
+                <h2>Contech API</h2>
+                <p>Our estimation and assistant engine is available as an API for integration into your own tools and workflows. The Contech API provides cost predictions, confidence ranges, and a chat assistant trained on construction context.</p>
+                <p class="contech-status">API status: <span id="api-status">checking…</span></p>
+                <p><a href="https://masonearl.com" class="link link-cta" target="_blank" rel="noopener">Use the Contech tool at masonearl.com →</a></p>
+            </div>
+        </section>
+
+        <section class="section section-alt">
+            <div class="container narrow">
+                <h2>Built by Mason</h2>
+                <p>openmud is built by Mason Earl—construction estimator, developer, and founder. If you're reviewing my resume or application: <a href="https://masonearl.com" class="link link-cta" target="_blank" rel="noopener">visit masonearl.com</a> to learn more and see why I'm a good fit.</p>
+                <blockquote class="about-quote">"The best way to predict the future is to build it."</blockquote>
+                <blockquote class="about-quote">"Measure twice, cut once."</blockquote>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <h2>Get in touch</h2>
+                <p><a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A" class="link">hi@masonearl.com</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> openmud. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        (function () {
+            var el = document.getElementById('api-status');
+            if (!el) return;
+            fetch('/api/health')
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    el.textContent = d.status === 'healthy' ? 'Operational' : d.status || 'Unknown';
+                    el.classList.add('status-ok');
+                })
+                .catch(function () {
+                    el.textContent = 'Unavailable';
+                    el.classList.add('status-error');
+                });
+        })();
+    </script>
+    <script src="assets/js/nav.js"></script>
+</body>
+</html>

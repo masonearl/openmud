@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're subscribed – openmud</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
+            <nav class="nav">
+                <a href="/">App</a>
+                <a href="/documentation.html">Documentation</a>
+                <a href="/download.html">Download</a>
+                <div class="nav-dropdown">
+                    <button type="button" class="btn-text btn-settings" id="btn-settings" aria-haspopup="true" aria-expanded="false" title="Settings">Settings</button>
+                    <div class="dropdown-menu dropdown-menu-right" id="settings-dropdown" hidden>
+                        <a href="/about.html" class="dropdown-item">About</a>
+                        <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A" class="dropdown-item">Contact</a>
+                        <a href="/download.html" class="dropdown-item">Download app</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>You're in</h1>
+                <p class="hero-sub">Thanks for subscribing. You now have full access.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <p><a href="/" class="btn-download">Open openmud</a></p>
+                <p><a href="/download" class="link">Download the desktop app</a> for cleanup tools and local automations.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var email = params.get('email');
+            if (email) {
+                try {
+                    localStorage.setItem('mudrag_subscriber_email', email);
+                    localStorage.setItem('mudrag_subscription_active', 'true');
+                } catch (e) {}
+                fetch('/api/subscription-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                }).then(function (r) { return r.json(); }).then(function (data) {
+                    try {
+                        localStorage.setItem('mudrag_subscription_active', (data && data.active) ? 'true' : 'false');
+                        localStorage.setItem('mudrag_subscription_tier', (data && data.tier) || 'free');
+                    } catch (e) {}
+                }).catch(function () {});
+            }
+        })();
+    </script>
+    <script src="assets/js/nav.js"></script>
+</body>
+</html>

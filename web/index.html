@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>openmud – AI Construction Assistant</title>
+    <meta name="description" content="AI construction assistant, file manager, and agentic agent for contractors. Estimate costs, generate proposals, build schedules. Designed for Mac—Windows coming soon.">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
+            <nav class="nav">
+                <a href="/download.html">Download</a>
+                <a href="/try">Try</a>
+                <a href="/documentation.html">Documentation</a>
+                <a href="/about.html">About</a>
+                <div class="nav-dropdown">
+                    <button type="button" class="btn-text btn-settings" id="btn-settings" aria-haspopup="true" aria-expanded="false" title="Settings">Settings</button>
+                    <div class="dropdown-menu dropdown-menu-right" id="settings-dropdown" hidden>
+                        <a href="/settings.html" class="dropdown-item">Account & settings</a>
+                        <a href="/about.html" class="dropdown-item">About</a>
+                        <a href="mailto:hi@masonearl.com?subject=openmud&body=Hi%2C%20I'm%20interested%20in%20openmud." class="dropdown-item">Contact</a>
+                        <a href="/download.html" class="dropdown-item">Download app</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="landing-simple">
+        <section class="hero hero-simple">
+            <div class="container">
+                <p class="hero-badge">AI Construction Assistant</p>
+                <h1>Your AI for the job site</h1>
+                <p class="hero-tagline">Your AI construction assistant. Chat, file management, and agentic automation—designed for Mac. Windows coming soon.</p>
+                <p class="hero-desc">openmud is an AI assistant, file manager, and agentic agent built for construction. It understands waterline, sewer, storm drain, gas, electrical—pipe sizes, soil types, labor rates, and how bids actually work. Chat naturally, get estimates, generate proposals, and build schedules in minutes. Designed for Mac today; a Windows version is planned for the future.</p>
+                <p class="hero-cta">
+                    <a href="/try" class="btn-primary">Try it free</a>
+                    <span class="hero-cta-sep">or</span>
+                    <a href="/download.html" class="btn-secondary">Download for Mac</a>
+                </p>
+            </div>
+        </section>
+
+        <section class="section section-alt">
+            <div class="container container-narrow">
+                <h2 class="section-title">Ask openmud anything</h2>
+                <p class="section-intro">Chat with mud1, our construction-trained AI. Here's what you can ask:</p>
+                <div class="examples-grid">
+                    <div class="example-card">
+                        <span class="example-label">Estimate</span>
+                        <p class="example-text">"Estimate 1500 LF of 8 inch sewer in clay soil, 6 ft depth"</p>
+                    </div>
+                    <div class="example-card">
+                        <span class="example-label">Proposal</span>
+                        <p class="example-text">"Generate a proposal for Main St waterline—client: City of Salt Lake, $85k total"</p>
+                    </div>
+                    <div class="example-card">
+                        <span class="example-label">Schedule</span>
+                        <p class="example-text">"Create a 14-day schedule for trenching, pipe install, backfill, restoration"</p>
+                    </div>
+                    <div class="example-card">
+                        <span class="example-label">Q&A</span>
+                        <p class="example-text">"What's the typical cost per LF for 6 inch PVC in rocky soil?"</p>
+                    </div>
+                    <div class="example-card">
+                        <span class="example-label">Project</span>
+                        <p class="example-text">"Create a project from this email" (paste RFP or scope)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container container-narrow">
+                <h2 class="section-title">Built-in features</h2>
+                <div class="features-grid features-simple">
+                    <div class="feature-item">
+                        <h3>Quick estimate</h3>
+                        <p>Material, labor, equipment costs. Pipe (4/6/8 inch), concrete, rebar. LF, soil type, crew size. Confidence ranges based on scope and location.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Proposal generator</h3>
+                        <p>Bid documents from estimates. Client, scope, total, line items. Export to PDF. Refine with the AI—no more starting from scratch.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Schedule builder</h3>
+                        <p>Gantt-style project schedules. Phases, duration, start date. Phase breakdowns, crew sizing. Export to PDF.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Projects & documents</h3>
+                        <p>Create projects, upload docs, organize by job. Chat history and files stay with each project.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Construction Q&A</h3>
+                        <p>Pipe cost, labor rates, bedding, soil types, bidding. mud1 knows construction—ask anything.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-alt">
+            <div class="container container-narrow">
+                <h2 class="section-title">Automations (desktop app)</h2>
+                <p class="section-intro">The Mac app includes local tools that run on your machine:</p>
+                <ul class="automation-list automation-list-landing">
+                    <li><strong>Clean Desktop</strong> – Organize files by type (images, documents, archives). Creates project folders when 3+ files share a name.</li>
+                    <li><strong>Clean Downloads</strong> – Same for your Downloads folder. Keep bids and specs organized.</li>
+                    <li><strong>Quick estimate</strong> – Full estimating tools with material, labor, equipment rates.</li>
+                    <li><strong>Proposal & schedule</strong> – Generate PDFs directly from chat.</li>
+                </ul>
+                <p class="section-cta"><a href="/automations.html" class="link">See all automations →</a></p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container container-narrow">
+                <h2 class="section-title">Project types</h2>
+                <p class="section-intro">openmud understands the full scope of construction:</p>
+                <div class="project-types">
+                    <span class="project-type-tag">Waterline</span>
+                    <span class="project-type-tag">Sewer</span>
+                    <span class="project-type-tag">Storm drain</span>
+                    <span class="project-type-tag">Gas</span>
+                    <span class="project-type-tag">Electrical</span>
+                    <span class="project-type-tag">Residential</span>
+                    <span class="project-type-tag">Commercial</span>
+                    <span class="project-type-tag">Civil</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-alt section-cta-block">
+            <div class="container container-narrow" style="text-align: center;">
+                <h2 class="section-title">Get started</h2>
+                <p class="hero-tagline" style="margin-bottom: 24px;">Try openmud free. No credit card required.</p>
+                <p class="hero-cta">
+                    <a href="/try" class="btn-primary">Try in browser</a>
+                    <span class="hero-cta-sep">or</span>
+                    <a href="/download.html" class="btn-secondary">Download for Mac</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-simple">
+        <p><a href="mailto:hi@masonearl.com" class="link">hi@masonearl.com</a></p>
+    </footer>
+    <script src="assets/js/nav.js"></script>
+    <script src="assets/js/landing.js"></script>
+</body>
+</html>

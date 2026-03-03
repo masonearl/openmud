@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposal Generator — openmud</title>
+    <link rel="icon" type="image/png" href="../favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #111111;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #222222;
+            --text: #e5e5e5;
+            --text-secondary: #a0a0a0;
+            --accent: #2563eb;
+            --accent-hover: #3b82f6;
+            --border: #333333;
+            --success: #4ade80;
+            --error: #f87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* ── Header ──────────────────────────────────────────────────────── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .back-btn:hover { color: var(--text); }
+
+        .header h1 { font-size: 20px; font-weight: 600; }
+
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+
+        /* Export dropdown */
+        .export-dropdown { position: relative; }
+
+        .export-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .export-dropdown-btn:hover { background: var(--accent-hover); }
+        .export-dropdown-btn svg { width: 16px; height: 16px; }
+
+        .export-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-width: 160px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        .export-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .export-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            color: var(--text);
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+        .export-option:hover { background: var(--bg-tertiary); }
+        .export-option svg { width: 16px; height: 16px; color: var(--accent); }
+
+        /* ── Layout ──────────────────────────────────────────────────────── */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            height: calc(100vh - 65px);
+        }
+
+        .form-panel {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .preview-panel {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-tertiary);
+            overflow: hidden;
+        }
+
+        /* ── Section Headers ─────────────────────────────────────────────── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        .section-header h2 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        /* ── Form ────────────────────────────────────────────────────────── */
+        .form-content { flex: 1; overflow-y: auto; padding: 16px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+
+        /* ── Buttons ─────────────────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-ghost { background: transparent; color: var(--text-secondary); padding: 8px; }
+        .btn-ghost:hover { color: var(--text); background: var(--bg-tertiary); }
+        .btn-danger { background: transparent; color: var(--error); padding: 8px; }
+        .btn-danger:hover { background: rgba(248, 113, 113, 0.1); }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+        /* ── Cards ───────────────────────────────────────────────────────── */
+        .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-header h3 { font-size: 14px; font-weight: 600; }
+        .card-body { padding: 16px; }
+
+        /* ── Sections list ───────────────────────────────────────────────── */
+        .chunks-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .chunk-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.2s;
+        }
+        .chunk-item:hover { border-color: var(--accent); }
+        .chunk-item.dragging { opacity: 0.5; transform: rotate(2deg); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        .chunk-item.drag-over { border-color: var(--accent); background: rgba(37, 99, 235, 0.08); }
+
+        .drop-zone { display: none; height: 4px; background: var(--accent); border-radius: 2px; margin: 8px 0; }
+        .drop-zone.active { display: block; }
+
+        .drag-handle { color: var(--text-secondary); cursor: grab; }
+        .chunk-info { flex: 1; min-width: 0; }
+        .chunk-title { font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chunk-preview { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chunk-actions { display: flex; gap: 4px; }
+
+        /* ── Templates ───────────────────────────────────────────────────── */
+        .templates-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+
+        .template-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .template-btn:hover { border-color: var(--accent); background: rgba(37, 99, 235, 0.08); }
+        .template-btn svg { width: 16px; height: 16px; color: var(--accent); }
+
+        /* ── Preview ─────────────────────────────────────────────────────── */
+        .preview-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .preview-paper {
+            background: #fff;
+            color: #000;
+            width: 612px;
+            min-height: 792px;
+            padding: 54px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 24px;
+        }
+
+        .preview-paper-content { flex: 1 1 auto; min-height: 0; }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            min-height: 80px;
+            background: #f5f5f5;
+            border: 1px solid #c8c8c8;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            box-sizing: border-box;
+        }
+        .preview-header-left { flex: 1; }
+        .preview-title { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 4px; }
+        .preview-subtitle { font-size: 11px; color: #646464; margin-bottom: 8px; }
+        .preview-meta { font-size: 9px; color: #787878; }
+        .preview-logo { max-width: 120px; max-height: 60px; object-fit: contain; }
+
+        .preview-chunk { margin-bottom: 20px; page-break-inside: avoid; }
+
+        .page-break {
+            border-top: 2px dashed #ccc;
+            margin: 20px 0;
+            padding-top: 20px;
+            position: relative;
+        }
+        .page-break::before {
+            content: 'Page Break';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 0 10px;
+            font-size: 9px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preview-chunk-title {
+            background: #404040;
+            color: #fff;
+            padding: 5px 10px;
+            height: 22px;
+            line-height: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: 3px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .preview-chunk-content { font-size: 10px; line-height: 1.5; color: #323232; }
+        .preview-chunk-content ul { margin: 0; padding-left: 20px; }
+        .preview-chunk-content li { margin-bottom: 4px; }
+
+        .preview-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+        .preview-table th, .preview-table td { padding: 6px 8px; border: 1px solid #000; text-align: left; }
+        .preview-table th { background: #c8c8c8; font-weight: 600; }
+        .preview-table tr:nth-child(even) td { background: #f5f5f5; }
+        .preview-table tr.total-row td { background: #e6e6e6; font-weight: 700; font-size: 10px; }
+
+        .preview-footer {
+            margin-top: auto;
+            padding-top: 8px;
+            border-top: 1px solid #c8c8c8;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .preview-footer-box {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f9f9f9;
+            border: 1px solid #dcdcdc;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .preview-footer-name { font-size: 9px; font-weight: 600; color: #000; }
+        .preview-footer-contact { font-size: 9px; color: #646464; }
+        .preview-page-number { font-size: 8px; color: #969696; margin-top: 8px; }
+
+        /* ── Modal ───────────────────────────────────────────────────────── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: auto;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h3 { font-size: 18px; font-weight: 600; }
+        .modal-body { padding: 20px; }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Keyboard shortcuts ──────────────────────────────────────────── */
+        .shortcuts-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .shortcuts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+        }
+        .shortcut-keys { font-family: 'Monaco', 'Menlo', monospace; font-size: 12px; color: var(--accent); font-weight: 600; }
+        .shortcut-desc { font-size: 13px; color: var(--text-secondary); }
+
+        /* ── Logo upload ─────────────────────────────────────────────────── */
+        .logo-upload { display: flex; align-items: center; gap: 16px; }
+        .logo-preview {
+            width: 100px;
+            height: 50px;
+            background: var(--bg-tertiary);
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .logo-preview-placeholder { font-size: 11px; color: var(--text-secondary); text-align: center; }
+
+        /* ── Empty state ─────────────────────────────────────────────────── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .empty-state svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state p { font-size: 14px; }
+
+        /* ── Responsive ──────────────────────────────────────────────────── */
+        @media (max-width: 1200px) {
+            .main-container { grid-template-columns: 1fr; height: auto; }
+            .form-panel { border-right: none; max-height: none; overflow: visible; }
+            .form-content { overflow: visible; }
+            .preview-panel { border-top: 1px solid var(--border); min-height: 600px; }
+            .preview-content { padding: 16px; }
+            .preview-paper { width: 100%; max-width: 612px; min-height: 792px; padding: 32px; font-size: 10px; }
+            .preview-title { font-size: 16px; }
+            .preview-chunk-title { font-size: 10px; }
+            .preview-chunk-content { font-size: 9px; }
+            .preview-table { font-size: 8px; }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .templates-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 12px; }
+            .preview-paper { padding: 24px; font-size: 9px; }
+            .preview-title { font-size: 14px; }
+            .preview-logo { max-width: 80px; max-height: 40px; }
+        }
+
+        @media (max-width: 500px) {
+            .preview-paper { padding: 16px; font-size: 8px; }
+            .preview-header { flex-direction: column; gap: 12px; }
+            .preview-title { font-size: 12px; }
+            .preview-table th, .preview-table td { padding: 4px; font-size: 7px; }
+        }
+
+        .icon { width: 16px; height: 16px; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="#" class="back-btn" id="backBtn" onclick="history.back(); return false;">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back
+            </a>
+            <h1>Proposal Generator</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="openSettings()">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Settings
+            </button>
+            <div class="export-dropdown">
+                <button class="export-dropdown-btn" onclick="toggleExportMenu()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Export
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="export-menu" id="exportMenu">
+                    <button class="export-option" onclick="exportPDF()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Export PDF
+                    </button>
+                    <button class="export-option" onclick="exportTXT()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Export TXT
+                    </button>
+                    <button class="export-option" onclick="exportHTML()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                        </svg>
+                        Export HTML
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Left Panel -->
+        <div class="form-panel">
+            <div class="section-header"><h2>Proposal Details</h2></div>
+            <div class="form-content">
+                <!-- Project Info -->
+                <div class="card">
+                    <div class="card-header"><h3>Project Information</h3></div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Proposal Title</label>
+                                <input type="text" id="projectTitle" placeholder="Project Name" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Subtitle</label>
+                                <input type="text" id="subtitle" placeholder="Brief description" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Prepared For</label>
+                                <input type="text" id="preparedFor" placeholder="Client / Company" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Prepared By</label>
+                                <input type="text" id="preparedBy" placeholder="Your Name" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Date</label>
+                                <input type="datetime-local" id="proposalDate" oninput="updatePreview()">
+                            </div>
+                        </div>
+                        <div class="logo-upload">
+                            <div class="logo-preview" id="logoPreview">
+                                <span class="logo-preview-placeholder">No Logo</span>
+                            </div>
+                            <div>
+                                <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+                                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('logoInput').click()">Upload Logo</button>
+                                <button class="btn btn-ghost btn-sm" onclick="removeLogo()" id="removeLogoBtn" style="display:none">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 id="chunkEditorTitle">Add New Section</h3>
+                        <button class="btn btn-ghost btn-sm" onclick="cancelEdit()" id="cancelEditBtn" style="display:none">Cancel</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="templates-grid">
+                            <button class="template-btn" onclick="loadTemplate('scope')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                Scope
+                            </button>
+                            <button class="template-btn" onclick="loadTemplate('pricing')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Pricing
+                            </button>
+                            <button class="template-btn" onclick="loadTemplate('inclusions')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Inclusions
+                            </button>
+                            <button class="template-btn" onclick="loadTemplate('exclusions')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Exclusions
+                            </button>
+                            <button class="template-btn" onclick="loadTemplate('assumptions')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Assumptions
+                            </button>
+                            <button class="template-btn" onclick="loadTemplate('schedule')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Schedule
+                            </button>
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px">
+                            <label>Section Title</label>
+                            <input type="text" id="chunkTitle" placeholder="e.g., Scope of Work, Pricing, Terms">
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px">
+                            <label>Content</label>
+                            <textarea id="chunkContent" placeholder="Enter section content. Use - or * for bullet lists. Use | for table columns." rows="8"></textarea>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-primary" onclick="addOrUpdateChunk()" id="addChunkBtn">Add Section</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sections List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Proposal Sections</h3>
+                        <span id="sectionCount" style="font-size:13px;color:var(--text-secondary);">0 sections</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="chunks-list" id="chunksList">
+                            <div class="empty-state">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <p>No sections added yet.<br>Use templates or add a custom section above.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Preview -->
+        <div class="preview-panel">
+            <div class="section-header">
+                <h2>Live Preview</h2>
+                <button class="btn btn-secondary btn-sm" onclick="updatePreview()">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+            <div class="preview-content">
+                <div class="preview-paper" id="previewPaper"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Company Settings</h3>
+                <button class="btn btn-ghost" onclick="closeSettings()">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom:16px">
+                    <label>Company Name</label>
+                    <input type="text" id="companyName" placeholder="Your Company Name">
+                </div>
+                <div class="form-group" style="margin-bottom:16px">
+                    <label>Company Website</label>
+                    <input type="text" id="companyURL" placeholder="yourcompany.com">
+                </div>
+                <div class="form-group" style="margin-bottom:16px">
+                    <label>Contact Name</label>
+                    <input type="text" id="contactName" placeholder="John Doe">
+                </div>
+                <div class="form-group" style="margin-bottom:16px">
+                    <label>Title</label>
+                    <input type="text" id="contactTitle" placeholder="Project Manager">
+                </div>
+                <div class="form-group" style="margin-bottom:16px">
+                    <label>Phone</label>
+                    <input type="tel" id="contactPhone" placeholder="(555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="contactEmail" placeholder="contact@company.com">
+                </div>
+            </div>
+            <div class="shortcuts-section" style="padding:0 20px">
+                <h4 style="margin-bottom:12px;color:var(--text);font-size:16px;">Keyboard Shortcuts</h4>
+                <div class="shortcuts-grid">
+                    <div class="shortcut-item"><span class="shortcut-desc">New Section</span><span class="shortcut-keys">Ctrl+N</span></div>
+                    <div class="shortcut-item"><span class="shortcut-desc">Export PDF</span><span class="shortcut-keys">Ctrl+S</span></div>
+                    <div class="shortcut-item"><span class="shortcut-desc">Delete Section</span><span class="shortcut-keys">Del</span></div>
+                    <div class="shortcut-item"><span class="shortcut-desc">Cancel Edit</span><span class="shortcut-keys">Esc</span></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── State ──────────────────────────────────────────────────────────
+        let state = {
+            chunks: [],
+            editingChunkId: null,
+            logoData: null,
+            logoDimensions: null,
+            companyInfo: {
+                companyName: '',
+                companyURL: '',
+                contactName: '',
+                contactTitle: '',
+                contactPhone: '',
+                contactEmail: ''
+            }
+        };
+
+        // ── Templates ──────────────────────────────────────────────────────
+        const templates = {
+            scope: {
+                title: 'Scope of Work',
+                content: `Provide a complete description of the work to be performed here. Include materials, methods, and any special conditions.`
+            },
+            inclusions: {
+                title: 'Inclusions',
+                content: `- All materials and labor required to complete the described scope
+- Permits and inspections as required by jurisdiction
+- Site cleanup and debris removal upon completion
+- Manufacturer-standard warranties on all installed materials
+- Project coordination and scheduling
+- Safety equipment and compliance with OSHA standards`
+            },
+            exclusions: {
+                title: 'Exclusions',
+                content: `- Work not specifically listed in this proposal
+- Engineering, design, or architectural services unless noted
+- Unforeseen site conditions or hazardous materials
+- Patch and paint beyond directly disturbed areas unless noted
+- Weekend or overtime work unless separately agreed upon
+- Temporary facilities or utilities unless specified`
+            },
+            assumptions: {
+                title: 'Assumptions & Clarifications',
+                content: `- Pricing is based on normal working hours (7 AM – 5 PM, Mon–Fri)
+- Site is accessible and clear for equipment and materials
+- Existing utilities are correctly marked prior to excavation
+- Owner is responsible for any required easements or right-of-way
+- Price is valid for 30 days from the date of this proposal`
+            },
+            pricing: {
+                title: 'Pricing',
+                content: `| # | Description | Qty | Unit | Unit Price | Total |
+|---|-------------|-----|------|------------|-------|
+| 1 | Labor — General Construction | 40 | HR | $75.00 | $3,000.00 |
+| 2 | Materials and Supplies | 1 | LS | $2,500.00 | $2,500.00 |
+| 3 | Equipment Rental | 1 | LS | $500.00 | $500.00 |
+| | | | | **Total:** | **$6,000.00** |`
+            },
+            schedule: {
+                title: 'Project Schedule',
+                content: `| Phase | Description | Duration | Start | End |
+|-------|-------------|----------|-------|-----|
+| 1 | Mobilization & Setup | 1 day | Day 0 | Day 1 |
+| 2 | Site Preparation | 2 days | Day 1 | Day 3 |
+| 3 | Main Construction | 5 days | Day 3 | Day 8 |
+| 4 | Finishing Work | 2 days | Day 8 | Day 10 |
+| 5 | Cleanup & Inspection | 1 day | Day 10 | Day 11 |`
+            }
+        };
+
+        // ── Init ───────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            setDefaultDate();
+            checkForBidData();
+            updatePreview();
+            setupDragAndDrop();
+
+            // If opened from Electron desktop, go back in history instead of navigating to "/"
+            if (window.mudragDesktop) {
+                document.getElementById('backBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    history.back();
+                });
+            }
+        });
+
+        function setDefaultDate() {
+            const now = new Date();
+            const di = document.getElementById('proposalDate');
+            di.value = now.toISOString().slice(0, 16);
+        }
+
+        // ── Data from mud1 / quick-bid ─────────────────────────────────────
+        function checkForBidData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('fromBid') !== 'true') return;
+
+            const raw = localStorage.getItem('proposalFromBid');
+            if (!raw) return;
+
+            try {
+                const d = JSON.parse(raw);
+
+                // Clear existing chunks to prevent duplicates
+                state.chunks = [];
+
+                if (d.projectTitle) document.getElementById('projectTitle').value = d.projectTitle;
+                if (d.subtitle)      document.getElementById('subtitle').value = d.subtitle;
+                if (d.preparedFor)   document.getElementById('preparedFor').value = d.preparedFor;
+                if (d.preparedBy)    document.getElementById('preparedBy').value = d.preparedBy;
+
+                if (d.chunks && d.chunks.length > 0) {
+                    d.chunks.forEach(c => {
+                        state.chunks.push({ id: String(c.id), title: c.title, content: c.content });
+                    });
+                }
+
+                localStorage.removeItem('proposalFromBid');
+                window.history.replaceState(null, null, window.location.pathname);
+
+                saveToStorage();
+                renderChunks();
+            } catch (e) {
+                console.error('Error loading bid data:', e);
+            }
+        }
+
+        // ── Storage ────────────────────────────────────────────────────────
+        function loadFromStorage() {
+            const saved = localStorage.getItem('mudragProposalGenerator');
+            if (!saved) return;
+            try {
+                const data = JSON.parse(saved);
+                state = { ...state, ...data };
+                if (data.projectTitle) document.getElementById('projectTitle').value = data.projectTitle;
+                if (data.subtitle)     document.getElementById('subtitle').value = data.subtitle;
+                if (data.preparedFor)  document.getElementById('preparedFor').value = data.preparedFor;
+                if (data.preparedBy)   document.getElementById('preparedBy').value = data.preparedBy;
+                if (data.proposalDate) document.getElementById('proposalDate').value = data.proposalDate;
+                if (state.logoData) {
+                    displayLogo(state.logoData);
+                    if (!state.logoDimensions) {
+                        const img = new Image();
+                        img.onload = () => {
+                            state.logoDimensions = { width: img.naturalWidth, height: img.naturalHeight };
+                            saveToStorage();
+                        };
+                        img.src = state.logoData;
+                    }
+                }
+                renderChunks();
+            } catch (e) { /* ignore */ }
+        }
+
+        function saveToStorage() {
+            const data = {
+                ...state,
+                projectTitle: document.getElementById('projectTitle').value,
+                subtitle:     document.getElementById('subtitle').value,
+                preparedFor:  document.getElementById('preparedFor').value,
+                preparedBy:   document.getElementById('preparedBy').value,
+                proposalDate: document.getElementById('proposalDate').value
+            };
+            localStorage.setItem('mudragProposalGenerator', JSON.stringify(data));
+        }
+
+        // ── Logo ───────────────────────────────────────────────────────────
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                const img = new Image();
+                img.onload = () => {
+                    state.logoData = dataUrl;
+                    state.logoDimensions = { width: img.naturalWidth, height: img.naturalHeight };
+                    displayLogo(dataUrl);
+                    saveToStorage();
+                    updatePreview();
+                };
+                img.src = dataUrl;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function displayLogo(dataUrl) {
+            document.getElementById('logoPreview').innerHTML = `<img src="${dataUrl}" alt="Logo">`;
+            document.getElementById('removeLogoBtn').style.display = 'inline-flex';
+        }
+
+        function removeLogo() {
+            state.logoData = null;
+            state.logoDimensions = null;
+            document.getElementById('logoPreview').innerHTML = '<span class="logo-preview-placeholder">No Logo</span>';
+            document.getElementById('removeLogoBtn').style.display = 'none';
+            document.getElementById('logoInput').value = '';
+            saveToStorage();
+            updatePreview();
+        }
+
+        // ── Templates ──────────────────────────────────────────────────────
+        function loadTemplate(name) {
+            const t = templates[name];
+            if (t) {
+                document.getElementById('chunkTitle').value = t.title;
+                document.getElementById('chunkContent').value = t.content;
+            }
+        }
+
+        // ── Chunk management ───────────────────────────────────────────────
+        function addOrUpdateChunk() {
+            const title   = document.getElementById('chunkTitle').value.trim();
+            const content = document.getElementById('chunkContent').value.trim();
+            if (!title || !content) { alert('Please enter both a title and content.'); return; }
+
+            if (state.editingChunkId) {
+                const idx = state.chunks.findIndex(c => c.id === state.editingChunkId);
+                if (idx !== -1) state.chunks[idx] = { ...state.chunks[idx], title, content };
+                cancelEdit();
+            } else {
+                state.chunks.push({ id: Date.now().toString(), title, content });
+            }
+
+            document.getElementById('chunkTitle').value = '';
+            document.getElementById('chunkContent').value = '';
+            renderChunks();
+            saveToStorage();
+            updatePreview();
+        }
+
+        function editChunk(id) {
+            const chunk = state.chunks.find(c => c.id === id);
+            if (!chunk) return;
+            state.editingChunkId = id;
+            document.getElementById('chunkTitle').value = chunk.title;
+            document.getElementById('chunkContent').value = chunk.content;
+            document.getElementById('chunkEditorTitle').textContent = 'Edit Section';
+            document.getElementById('addChunkBtn').textContent = 'Update Section';
+            document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+            document.getElementById('chunkTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function cancelEdit() {
+            state.editingChunkId = null;
+            document.getElementById('chunkTitle').value = '';
+            document.getElementById('chunkContent').value = '';
+            document.getElementById('chunkEditorTitle').textContent = 'Add New Section';
+            document.getElementById('addChunkBtn').textContent = 'Add Section';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        }
+
+        function deleteChunk(id) {
+            state.chunks = state.chunks.filter(c => c.id !== id);
+            renderChunks();
+            saveToStorage();
+            updatePreview();
+        }
+
+        function moveChunk(id, direction) {
+            const idx = state.chunks.findIndex(c => c.id === id);
+            if (idx === -1) return;
+            const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+            if (newIdx < 0 || newIdx >= state.chunks.length) return;
+            [state.chunks[idx], state.chunks[newIdx]] = [state.chunks[newIdx], state.chunks[idx]];
+            renderChunks();
+            saveToStorage();
+            updatePreview();
+        }
+
+        function renderChunks() {
+            const container = document.getElementById('chunksList');
+            document.getElementById('sectionCount').textContent =
+                `${state.chunks.length} section${state.chunks.length !== 1 ? 's' : ''}`;
+
+            if (state.chunks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p>No sections added yet.<br>Use templates or add a custom section above.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = state.chunks.map((chunk, index) => `
+                <div class="chunk-item" draggable="true" data-id="${chunk.id}">
+                    <div class="drag-handle">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm8-12a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <div class="chunk-info">
+                        <div class="chunk-title">${escapeHtml(chunk.title)}</div>
+                        <div class="chunk-preview">${escapeHtml(chunk.content.substring(0, 70))}${chunk.content.length > 70 ? '…' : ''}</div>
+                    </div>
+                    <div class="chunk-actions">
+                        <button class="btn btn-ghost" onclick="moveChunk('${chunk.id}','up')" ${index === 0 ? 'disabled' : ''} title="Move up">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        </button>
+                        <button class="btn btn-ghost" onclick="moveChunk('${chunk.id}','down')" ${index === state.chunks.length - 1 ? 'disabled' : ''} title="Move down">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <button class="btn btn-ghost" onclick="editChunk('${chunk.id}')" title="Edit">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteChunk('${chunk.id}')" title="Delete">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            setupDragAndDrop();
+        }
+
+        // ── Drag & drop ────────────────────────────────────────────────────
+        function setupDragAndDrop() {
+            const items = document.querySelectorAll('.chunk-item');
+            let draggedItem = null;
+            let dropZones = [];
+
+            items.forEach(item => {
+                item.addEventListener('dragstart', () => {
+                    draggedItem = item;
+                    item.classList.add('dragging');
+                    createDropZones();
+                });
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    draggedItem = null;
+                    removeDropZones();
+                });
+                item.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    if (draggedItem && draggedItem !== item) item.classList.add('drag-over');
+                });
+                item.addEventListener('dragleave', () => {
+                    if (draggedItem) item.classList.remove('drag-over');
+                });
+                item.addEventListener('drop', e => {
+                    e.preventDefault();
+                    item.classList.remove('drag-over');
+                    if (!draggedItem || draggedItem === item) return;
+                    const rect = item.getBoundingClientRect();
+                    if (e.clientY < rect.top + rect.height / 2) {
+                        item.parentNode.insertBefore(draggedItem, item);
+                    } else {
+                        item.parentNode.insertBefore(draggedItem, item.nextSibling);
+                    }
+                    updateChunkOrder();
+                    updatePreview();
+                });
+            });
+
+            function createDropZones() {
+                const container = document.getElementById('chunksList');
+                container.querySelectorAll('.drop-zone').forEach(z => z.remove());
+                container.querySelectorAll('.chunk-item').forEach((item) => {
+                    const dz = document.createElement('div');
+                    dz.className = 'drop-zone';
+                    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('active'); });
+                    dz.addEventListener('dragleave', () => dz.classList.remove('active'));
+                    dz.addEventListener('drop', e => {
+                        e.preventDefault();
+                        dz.classList.remove('active');
+                        if (draggedItem) { container.insertBefore(draggedItem, item); updateChunkOrder(); updatePreview(); }
+                    });
+                    container.insertBefore(dz, item);
+                    dropZones.push(dz);
+                });
+            }
+
+            function removeDropZones() { dropZones.forEach(z => z.remove()); dropZones = []; }
+        }
+
+        function updateChunkOrder() {
+            const newOrder = Array.from(document.querySelectorAll('.chunk-item')).map(el => el.dataset.id);
+            state.chunks = newOrder.map(id => state.chunks.find(c => c.id === id)).filter(Boolean);
+            saveToStorage();
+        }
+
+        // ── Preview rendering ──────────────────────────────────────────────
+        function updatePreview() {
+            const paper = document.getElementById('previewPaper');
+            const projectTitle = document.getElementById('projectTitle').value || 'PROPOSAL';
+            const subtitle     = document.getElementById('subtitle').value;
+            const preparedFor  = document.getElementById('preparedFor').value;
+            const preparedBy   = document.getElementById('preparedBy').value;
+            const proposalDate = document.getElementById('proposalDate').value;
+
+            const formattedDate = proposalDate
+                ? new Date(proposalDate).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
+                : new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            let html = `
+                <div class="preview-paper-content">
+                    <div class="preview-header">
+                        <div class="preview-header-left">
+                            <div class="preview-title">${escapeHtml(projectTitle)}</div>
+                            ${subtitle ? `<div class="preview-subtitle">${escapeHtml(subtitle)}</div>` : ''}
+                            <div class="preview-meta">
+                                ${preparedFor ? `Submitted To: <strong>${escapeHtml(preparedFor)}</strong>` : ''}
+                                ${preparedFor && preparedBy ? ' &nbsp;|&nbsp; ' : ''}
+                                ${preparedBy ? `Submitted By: <strong>${escapeHtml(preparedBy)}</strong>` : ''}
+                                ${(preparedFor || preparedBy) ? ' &nbsp;|&nbsp; ' : ''}
+                                ${formattedDate}
+                            </div>
+                        </div>
+                        ${state.logoData ? `<img src="${state.logoData}" class="preview-logo" alt="Logo">` : ''}
+                    </div>`;
+
+            state.chunks.forEach(chunk => {
+                html += `
+                    <div class="preview-chunk">
+                        <div class="preview-chunk-title">${escapeHtml(chunk.title)}</div>
+                        <div class="preview-chunk-content">${renderContent(chunk.content)}</div>
+                    </div>`;
+            });
+
+            html += `</div>`; // close preview-paper-content
+
+            // Footer
+            const ci = state.companyInfo;
+            const nameStr = [ci.contactName, ci.contactTitle].filter(Boolean).join(', ');
+            const compStr = ci.companyName || 'openmud';
+            const footerLine1 = [nameStr, compStr].filter(Boolean).join(' | ');
+            const footerLine2 = [ci.contactPhone, ci.contactEmail].filter(Boolean).join(' \u2022 ');
+
+            html += `
+                <div class="preview-footer">
+                    <div class="preview-footer-box">
+                        <div class="preview-footer-name">${escapeHtml(footerLine1 || 'openmud')}</div>
+                        ${footerLine2 ? `<div class="preview-footer-contact">${escapeHtml(footerLine2)}</div>` : ''}
+                    </div>
+                    <div class="preview-page-number">Page 1</div>
+                </div>`;
+
+            paper.innerHTML = html;
+            saveToStorage();
+        }
+
+        function renderContent(content) {
+            const lines = content.split('\n');
+            const nonEmpty = lines.filter(l => l.trim());
+            if (nonEmpty.length > 1 && nonEmpty.every(l => l.includes('|'))) {
+                return renderPreviewTable(nonEmpty);
+            }
+
+            let html = '';
+            let inList = false;
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) { if (inList) { html += '</ul>'; inList = false; } html += '<br>'; return; }
+                if (/^[-*•]\s/.test(trimmed)) {
+                    if (!inList) { html += '<ul>'; inList = true; }
+                    html += `<li>${escapeHtml(trimmed.replace(/^[-*•]\s*/, ''))}</li>`;
+                } else {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    html += `<p>${escapeHtml(trimmed)}</p>`;
+                }
+            });
+            if (inList) html += '</ul>';
+            return html;
+        }
+
+        function renderPreviewTable(lines) {
+            const dataLines = lines.filter(l => !l.match(/^\|?\s*[-:]+\s*\|/));
+            if (!dataLines.length) return '';
+
+            const parseRow = line => line.replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+            const headerCells = parseRow(dataLines[0]);
+            const numColumns = headerCells.length;
+
+            let html = '<table class="preview-table">';
+            dataLines.forEach((line, idx) => {
+                const cells = parseRow(line);
+                const isHeader = idx === 0;
+                const isTotalRow = !isHeader && line.includes('**');
+
+                if (isTotalRow) {
+                    const nonEmpty = cells.filter(c => c);
+                    const amt = nonEmpty[nonEmpty.length - 1].replace(/\*\*/g, '');
+                    html += `<tr class="total-row"><td colspan="${numColumns - 1}"><strong>TOTAL</strong></td><td style="text-align:right"><strong>${escapeHtml(amt)}</strong></td></tr>`;
+                } else {
+                    html += '<tr>';
+                    cells.slice(0, numColumns).forEach(cell => {
+                        const tag = isHeader ? 'th' : 'td';
+                        const formatted = cell.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                        html += `<${tag}>${formatted || '&nbsp;'}</${tag}>`;
+                    });
+                    html += '</tr>';
+                }
+            });
+            html += '</table>';
+            return html;
+        }
+
+        // ── Export dropdown ────────────────────────────────────────────────
+        function toggleExportMenu() {
+            document.getElementById('exportMenu').classList.toggle('active');
+        }
+        document.addEventListener('click', e => {
+            const menu = document.getElementById('exportMenu');
+            const btn  = document.querySelector('.export-dropdown-btn');
+            if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // ── TXT Export ─────────────────────────────────────────────────────
+        function exportTXT() {
+            const title      = document.getElementById('projectTitle').value || 'PROPOSAL';
+            const subtitle   = document.getElementById('subtitle').value;
+            const preparedFor= document.getElementById('preparedFor').value;
+            const preparedBy = document.getElementById('preparedBy').value;
+            const ci         = state.companyInfo;
+
+            let content = `${title}\n${'='.repeat(title.length)}\n\n`;
+            if (subtitle) content += `${subtitle}\n\n`;
+            if (preparedFor) content += `Submitted To: ${preparedFor}\n`;
+            if (preparedBy)  content += `Submitted By: ${preparedBy}\n`;
+            content += `Date: ${new Date().toLocaleDateString()}\n\n`;
+            if (ci.companyName) {
+                content += `${ci.companyName}\n`;
+                if (ci.contactName) content += `${ci.contactName}${ci.contactTitle ? ', ' + ci.contactTitle : ''}\n`;
+                if (ci.contactPhone || ci.contactEmail) content += `${ci.contactPhone || ''} ${ci.contactEmail ? '• ' + ci.contactEmail : ''}\n`;
+                content += '\n';
+            }
+            state.chunks.forEach((c, i) => {
+                content += `${i + 1}. ${c.title}\n${'—'.repeat(c.title.length + 3)}\n${c.content}\n\n`;
+            });
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url; a.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ── HTML Export ────────────────────────────────────────────────────
+        function exportHTML() {
+            const title      = document.getElementById('projectTitle').value || 'PROPOSAL';
+            const subtitle   = document.getElementById('subtitle').value;
+            const preparedFor= document.getElementById('preparedFor').value;
+            const preparedBy = document.getElementById('preparedBy').value;
+            const ci         = state.companyInfo;
+
+            let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(title)}</title>
+<style>body{font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px;line-height:1.6}
+h1{color:#333;border-bottom:2px solid #333;padding-bottom:10px}h2{color:#555;margin-top:30px}
+.meta,.company{background:#f5f5f5;padding:15px;border-radius:5px;margin:20px 0}
+table{border-collapse:collapse;width:100%;margin:15px 0}th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#f2f2f2}ul{margin:10px 0;padding-left:20px}</style></head><body>
+<h1>${escapeHtml(title)}</h1>`;
+            if (subtitle) html += `<p><em>${escapeHtml(subtitle)}</em></p>`;
+            html += `<div class="meta"><strong>Submitted To:</strong> ${escapeHtml(preparedFor || 'N/A')}<br>
+<strong>Submitted By:</strong> ${escapeHtml(preparedBy || 'N/A')}<br>
+<strong>Date:</strong> ${new Date().toLocaleDateString()}</div>`;
+            if (ci.companyName) {
+                html += `<div class="company"><strong>${escapeHtml(ci.companyName)}</strong><br>`;
+                if (ci.contactName) html += `${escapeHtml(ci.contactName)}${ci.contactTitle ? ', ' + escapeHtml(ci.contactTitle) : ''}<br>`;
+                if (ci.contactPhone || ci.contactEmail) html += `${escapeHtml(ci.contactPhone || '')} ${ci.contactEmail ? '• ' + escapeHtml(ci.contactEmail) : ''}`;
+                html += `</div>`;
+            }
+            state.chunks.forEach((c, i) => {
+                html += `<div><h2>${i + 1}. ${escapeHtml(c.title)}</h2><div>${renderContent(c.content)}</div></div>`;
+            });
+            html += '</body></html>';
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url; a.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ── Settings modal ─────────────────────────────────────────────────
+        function openSettings() {
+            const ci = state.companyInfo;
+            document.getElementById('companyName').value  = ci.companyName;
+            document.getElementById('companyURL').value   = ci.companyURL;
+            document.getElementById('contactName').value  = ci.contactName;
+            document.getElementById('contactTitle').value = ci.contactTitle;
+            document.getElementById('contactPhone').value = ci.contactPhone;
+            document.getElementById('contactEmail').value = ci.contactEmail;
+            document.getElementById('settingsModal').classList.add('active');
+        }
+        function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+        function saveSettings() {
+            state.companyInfo = {
+                companyName:  document.getElementById('companyName').value,
+                companyURL:   document.getElementById('companyURL').value,
+                contactName:  document.getElementById('contactName').value,
+                contactTitle: document.getElementById('contactTitle').value,
+                contactPhone: document.getElementById('contactPhone').value,
+                contactEmail: document.getElementById('contactEmail').value
+            };
+            saveToStorage();
+            updatePreview();
+            closeSettings();
+        }
+        document.getElementById('settingsModal').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeSettings();
+        });
+
+        // ── PDF Export (jsPDF — identical layout to masonearl.com) ─────────
+        async function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'letter');
+
+            const pageWidth   = 612;
+            const pageHeight  = 792;
+            const margin      = 54;
+            const contentWidth = pageWidth - margin * 2;
+            let y = margin;
+
+            const projectTitle = document.getElementById('projectTitle').value || 'PROPOSAL';
+            const subtitle     = document.getElementById('subtitle').value;
+            const preparedFor  = document.getElementById('preparedFor').value;
+            const preparedBy   = document.getElementById('preparedBy').value;
+            const proposalDate = document.getElementById('proposalDate').value;
+
+            const formattedDate = proposalDate
+                ? new Date(proposalDate).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
+                : new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            // Header box
+            doc.setFillColor(245, 245, 245);
+            doc.setDrawColor(200, 200, 200);
+            doc.roundedRect(margin, y, contentWidth, 80, 4, 4, 'FD');
+
+            // Logo
+            if (state.logoData) {
+                try {
+                    const maxW = 120, maxH = 60;
+                    let lw, lh;
+                    if (state.logoDimensions?.width && state.logoDimensions?.height) {
+                        const ar = state.logoDimensions.width / state.logoDimensions.height;
+                        if (ar > maxW / maxH) { lw = maxW; lh = maxW / ar; }
+                        else                  { lh = maxH; lw = maxH * ar; }
+                    } else { lw = maxW; lh = maxH; }
+                    const lx = pageWidth - margin - lw - 5;
+                    const ly = y + 10;
+                    const fmt = state.logoData.includes('image/jpeg') ? 'JPEG' : 'PNG';
+                    doc.addImage(state.logoData, fmt, lx, ly, lw, lh);
+                    if (state.companyInfo.companyURL) {
+                        let url = state.companyInfo.companyURL;
+                        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+                        doc.link(lx, ly, lw, lh, { url });
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
+            // Title
+            y += 25;
+            doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.setTextColor(0, 0, 0);
+            doc.text(projectTitle, margin + 12, y);
+
+            // Subtitle
+            if (subtitle) {
+                y += 16;
+                doc.setFontSize(11); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100);
+                doc.text(subtitle, margin + 12, y);
+            }
+
+            // Meta
+            y += 20;
+            doc.setFontSize(9); doc.setTextColor(120, 120, 120);
+            const metaParts = [];
+            if (preparedFor) metaParts.push(`Submitted To: ${preparedFor}`);
+            if (preparedBy)  metaParts.push(`Submitted By: ${preparedBy}`);
+            metaParts.push(formattedDate);
+            doc.text(metaParts.join('  |  '), margin + 12, y);
+
+            y = margin + 100;
+
+            let currentPage = 1;
+
+            function checkPageBreak(space = 100) {
+                if (y > pageHeight - space) {
+                    addPageNumber(currentPage);
+                    doc.addPage();
+                    currentPage++;
+                    y = margin;
+                    return true;
+                }
+                return false;
+            }
+
+            function addPageNumber(n) {
+                doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(150, 150, 150);
+                doc.text(`Page ${n}`, pageWidth / 2, pageHeight - 20, { align: 'center' });
+            }
+
+            // Sections
+            state.chunks.forEach(chunk => {
+                checkPageBreak(150);
+
+                // Section title bar — dark grey, same as masonearl.com
+                doc.setFillColor(64, 64, 64);
+                doc.roundedRect(margin, y, contentWidth, 22, 3, 3, 'F');
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+                doc.text(chunk.title.toUpperCase(), margin + 10, y + 15);
+                y += 32;
+
+                doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50); doc.setFontSize(10);
+
+                const lines    = chunk.content.split('\n');
+                const nonEmpty = lines.filter(l => l.trim());
+                const isTable  = nonEmpty.length > 1 && nonEmpty.every(l => l.includes('|'));
+
+                if (isTable) {
+                    y = renderPDFTable(doc, nonEmpty, margin, y, contentWidth, checkPageBreak);
+                } else {
+                    lines.forEach(line => {
+                        const trimmed = line.trim();
+                        if (!trimmed) { y += 6; return; }
+                        checkPageBreak(80);
+                        if (/^[-*•]\s/.test(trimmed)) {
+                            const text = trimmed.replace(/^[-*•]\s*/, '');
+                            doc.text('•', margin + 10, y);
+                            const split = doc.splitTextToSize(text, contentWidth - 30);
+                            doc.text(split, margin + 25, y);
+                            y += split.length * 14;
+                        } else {
+                            const split = doc.splitTextToSize(trimmed, contentWidth);
+                            doc.text(split, margin, y);
+                            y += split.length * 14;
+                        }
+                    });
+                }
+
+                y += 20;
+            });
+
+            // Footer — always at bottom of last page
+            const footerH = 70;
+            const footerY = pageHeight - footerH;
+            const ci = state.companyInfo;
+
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, footerY, pageWidth - margin, footerY);
+
+            doc.setFillColor(249, 249, 249); doc.setDrawColor(220, 220, 220);
+            const fboxW = 280;
+            const fboxX = (pageWidth - fboxW) / 2;
+            doc.roundedRect(fboxX, footerY + 8, fboxW, 35, 4, 4, 'FD');
+
+            // Footer line 1
+            doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(0, 0, 0);
+            const line1Y = footerY + 22;
+            const namePart    = [ci.contactName, ci.contactTitle].filter(Boolean).join(', ');
+            const companyPart = ci.companyName || 'openmud';
+            const fullLine1   = namePart ? `${namePart} | ${companyPart}` : companyPart;
+            doc.text(fullLine1, pageWidth / 2, line1Y, { align: 'center' });
+
+            // Footer line 2
+            doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 100);
+            const line2Y = footerY + 34;
+            const phonePart = ci.contactPhone || '';
+            const emailPart = ci.contactEmail || '';
+            const fullLine2 = [phonePart, emailPart].filter(Boolean).join(' \u2022 ');
+            if (fullLine2) {
+                doc.text(fullLine2, pageWidth / 2, line2Y, { align: 'center' });
+                // Clickable phone
+                if (phonePart) {
+                    const pw = doc.getTextWidth(phonePart);
+                    const totalW = doc.getTextWidth(fullLine2);
+                    const startX = (pageWidth - totalW) / 2;
+                    doc.link(startX, line2Y - 8, pw, 12, { url: `tel:${phonePart.replace(/[^0-9+]/g, '')}` });
+                }
+                // Clickable email
+                if (emailPart) {
+                    const ew = doc.getTextWidth(emailPart);
+                    const totalW = doc.getTextWidth(fullLine2);
+                    doc.link((pageWidth + totalW) / 2 - ew, line2Y - 8, ew, 12, { url: `mailto:${emailPart}` });
+                }
+            }
+
+            addPageNumber(currentPage);
+
+            const safeTitle = projectTitle.replace(/[^a-zA-Z0-9]/g, '_');
+            doc.save(`Proposal - ${safeTitle}.pdf`);
+        }
+
+        // ── PDF table renderer (identical to masonearl.com) ────────────────
+        function renderPDFTable(doc, lines, x, startY, width, checkPageBreakFn) {
+            let tableY = startY;
+            const rowH = 18, headerH = 22;
+
+            const dataLines = lines.filter(l => !l.match(/^\|?\s*[-:]+\s*\|/));
+            if (!dataLines.length) return tableY;
+
+            const parseRow = line => line.replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+            const headerCells = parseRow(dataLines[0]);
+            const numCols = headerCells.length;
+
+            // Smart column widths for pricing tables
+            const isPricing = numCols === 6 &&
+                headerCells[0]?.toLowerCase().includes('#') || (
+                    numCols >= 4 && headerCells[numCols - 1]?.toLowerCase().includes('total')
+                );
+
+            let colWidths;
+            if (isPricing && numCols === 6) {
+                colWidths = [width * 0.06, width * 0.34, width * 0.10, width * 0.10, width * 0.18, width * 0.22];
+            } else {
+                colWidths = Array(numCols).fill(width / numCols);
+            }
+
+            const colX = i => { let cx = x; for (let j = 0; j < i; j++) cx += colWidths[j]; return cx; };
+
+            dataLines.forEach((line, idx) => {
+                const cells   = parseRow(line);
+                const isHdr   = idx === 0;
+                const isTotalRow = !isHdr && line.includes('**');
+                const currH   = isHdr ? headerH : rowH;
+
+                if (tableY > 792 - 100 && !isHdr) {
+                    if (checkPageBreakFn) { checkPageBreakFn(currH + 20); tableY = 54; }
+                }
+
+                if (isHdr)           doc.setFillColor(200, 200, 200);
+                else if (isTotalRow) doc.setFillColor(230, 230, 230);
+                else if (idx % 2 === 0) doc.setFillColor(245, 245, 245);
+                else                 doc.setFillColor(255, 255, 255);
+                doc.rect(x, tableY, width, currH, 'F');
+                doc.setDrawColor(0, 0, 0);
+                doc.rect(x, tableY, width, currH, 'S');
+
+                if (isTotalRow) {
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(0, 0, 0);
+                    const nonEmpty = cells.filter(c => c);
+                    const amt = nonEmpty[nonEmpty.length - 1].replace(/\*\*/g, '');
+                    doc.text('TOTAL', x + 10, tableY + currH / 2 + 3);
+                    doc.text(amt, x + width - 10, tableY + currH / 2 + 3, { align: 'right' });
+                } else {
+                    for (let i = 1; i < numCols; i++) {
+                        const lx = colX(i);
+                        doc.line(lx, tableY, lx, tableY + currH);
+                    }
+                    doc.setFont('helvetica', isHdr ? 'bold' : 'normal');
+                    doc.setFontSize(9); doc.setTextColor(0, 0, 0);
+                    for (let ci = 0; ci < numCols; ci++) {
+                        const cell = (cells[ci] || '').replace(/\*\*/g, '');
+                        doc.text(cell, colX(ci) + 6, tableY + currH / 2 + 3, { maxWidth: colWidths[ci] - 12 });
+                    }
+                }
+
+                tableY += currH;
+            });
+
+            return tableY + 10;
+        }
+
+        // ── Utilities ──────────────────────────────────────────────────────
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = String(text || '');
+            return div.innerHTML;
+        }
+
+        // ── Keyboard shortcuts ─────────────────────────────────────────────
+        document.addEventListener('keydown', e => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); exportPDF(); }
+                return;
+            }
+            if (e.key === 'Escape') {
+                if (document.getElementById('settingsModal').classList.contains('active')) closeSettings();
+                else cancelEdit();
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); document.getElementById('chunkTitle').focus(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); exportPDF(); return; }
+            if (e.key === 'Delete' && state.editingChunkId) { e.preventDefault(); deleteChunk(state.editingChunkId); return; }
+        });
+    </script>
+</body>
+</html>
