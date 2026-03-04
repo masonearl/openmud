@@ -6081,12 +6081,64 @@
             if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
             var providerConfig = getProviderConfig();
             if (model === 'openclaw') {
-                var openclawEnabled = !!providerConfig.openclawEnabled;
+                var openclawEnabled = !!(providerConfig.openclawEnabled || (providerConfig.openclawApiKey && providerConfig.openclawBaseUrl));
                 if (!openclawEnabled) {
-                    addMessage('assistant', 'OpenClaw is not enabled yet. Go to Settings → OpenClaw access, enable it, and save your key.');
+                    addMessage('assistant', 'OpenClaw is not enabled yet. Go to Settings → OpenClaw access, enter your API key and base URL, and save.');
                     setLoading(false);
                     return;
                 }
+                // Call the local gateway directly from the browser.
+                // Vercel servers cannot reach localhost — only the browser can reach the user's local OpenClaw gateway.
+                var ocBaseUrl = (providerConfig.openclawBaseUrl || '').replace(/\/+$/, '');
+                var ocApiKey = providerConfig.openclawApiKey || '';
+                var ocModel = providerConfig.openclawModel || 'gpt-4.1-mini';
+                var ocSystemPrompt = 'You are OpenClaw, an agentic assistant for openmud. You execute tasks — you do not just answer questions.\n\nEXECUTION RULES:\n- Execute immediately. Do NOT ask for confirmation before acting.\n- If you can infer the intent, act with sensible defaults. Ask at most ONE question only if truly critical info is missing.\n- Calendar events: create with 1 hour duration, 15 min reminder, Work calendar by default.\n- Emails: send if you know recipient and message.\n- State what you are doing in one line, then do it.\n\nYou are connected to the user\'s Mac via OpenClaw nodes and can run osascript to control Apple Calendar, Apple Mail, and other apps.\n\nBe direct, concise, action-first.';
+                var ocPayload = {
+                    model: ocModel,
+                    messages: [{ role: 'system', content: ocSystemPrompt }].concat(history),
+                    temperature: 0.3,
+                    max_tokens: 1024
+                };
+                var ocTimeoutId = setTimeout(function () {
+                    addMessage('assistant', 'OpenClaw request timed out. Check that your gateway is running at ' + ocBaseUrl + ' (run: openclaw gateway start).');
+                    setLoading(false);
+                    scrollToLatest();
+                }, 90000);
+                fetch(ocBaseUrl + '/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + ocApiKey
+                    },
+                    body: JSON.stringify(ocPayload)
+                })
+                    .then(function (r) {
+                        return r.json().then(function (data) {
+                            if (!r.ok) {
+                                var err = data && (data.error || data.message);
+                                throw new Error(typeof err === 'object' ? (err.message || JSON.stringify(err)) : String(err || 'OpenClaw error ' + r.status));
+                            }
+                            return data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || 'No response from OpenClaw.';
+                        });
+                    })
+                    .then(function (reply) {
+                        clearTimeout(ocTimeoutId);
+                        addMessage('assistant', reply);
+                    })
+                    .catch(function (err) {
+                        clearTimeout(ocTimeoutId);
+                        var msg = String(err.message || err || '');
+                        if (/failed to fetch|networkerror|load failed|cors/i.test(msg)) {
+                            addMessage('assistant', 'Cannot reach OpenClaw gateway at ' + ocBaseUrl + '. Make sure OpenClaw is running on your Mac (openclaw gateway start) and your base URL is correct in Settings.');
+                        } else {
+                            addMessage('assistant', 'OpenClaw error: ' + msg);
+                        }
+                    })
+                    .then(function () {
+                        setLoading(false);
+                        scrollToLatest();
+                    });
+                return;
             }
 
             // For vision-capable models, upgrade last user message to multimodal content array
