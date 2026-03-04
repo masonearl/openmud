@@ -280,7 +280,7 @@
                 if (keyAnthropic) keyAnthropic.value = keys.anthropic || '';
                 if (keyGrok) keyGrok.value = keys.grok || '';
                 if (keyOpenRouter) keyOpenRouter.value = keys.openrouter || '';
-                if (openclawEnabled) openclawEnabled.checked = !!keys.openclawEnabled;
+                if (openclawEnabled) openclawEnabled.checked = !!(keys.openclawEnabled || (keys.openclawApiKey && keys.openclawBaseUrl));
                 if (keyOpenClawApi) keyOpenClawApi.value = keys.openclawApiKey || '';
                 if (keyOpenClawBase) keyOpenClawBase.value = keys.openclawBaseUrl || '';
                 if (keyOpenClawModel) keyOpenClawModel.value = keys.openclawModel || '';
@@ -290,14 +290,16 @@
 
             if (btnSaveKeys) {
                 btnSaveKeys.addEventListener('click', function () {
+                    var ocApiKey = keyOpenClawApi ? String(keyOpenClawApi.value || '').trim() : '';
+                    var ocBaseUrl = keyOpenClawBase ? String(keyOpenClawBase.value || '').trim() : '';
                     var next = {
                         openai: keyOpenAi ? String(keyOpenAi.value || '').trim() : '',
                         anthropic: keyAnthropic ? String(keyAnthropic.value || '').trim() : '',
                         grok: keyGrok ? String(keyGrok.value || '').trim() : '',
                         openrouter: keyOpenRouter ? String(keyOpenRouter.value || '').trim() : '',
-                        openclawEnabled: !!(openclawEnabled && openclawEnabled.checked),
-                        openclawApiKey: keyOpenClawApi ? String(keyOpenClawApi.value || '').trim() : '',
-                        openclawBaseUrl: keyOpenClawBase ? String(keyOpenClawBase.value || '').trim() : '',
+                        openclawEnabled: !!(ocApiKey && ocBaseUrl) || !!(openclawEnabled && openclawEnabled.checked),
+                        openclawApiKey: ocApiKey,
+                        openclawBaseUrl: ocBaseUrl,
                         openclawModel: keyOpenClawModel ? String(keyOpenClawModel.value || '').trim() : ''
                     };
                     if (next.openclawBaseUrl && !/^https?:\/\//i.test(next.openclawBaseUrl)) {
