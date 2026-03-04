@@ -1,51 +1,10 @@
 {
-  "outputDirectory": "public",
+  "outputDirectory": "web",
   "framework": null,
-  "functions": {
-    "api/python/*.py": {
-      "excludeFiles": "{.git/**,.vercel/**,.venv/**,node_modules/**,video/**,assets/**,reports/**,logo/**,public/assets/**,test-results/**}"
-    }
-  },
   "rewrites": [
-    {
-      "source": "/about.html",
-      "destination": "/pages/about.html"
-    },
-    {
-      "source": "/tools.html",
-      "destination": "/pages/tools.html"
-    },
-    {
-      "source": "/chat.html",
-      "destination": "/try"
-    },
-    {
-      "source": "/takeoff.html",
-      "destination": "/pages/takeoff.html"
-    },
-    {
-      "source": "/calculators.html",
-      "destination": "/pages/calculators.html"
-    },
-    {
-      "source": "/resources.html",
-      "destination": "/pages/resources.html"
-    },
-    {
-      "source": "/innovators.html",
-      "destination": "/pages/innovators.html"
-    },
-    {
-      "source": "/companies.html",
-      "destination": "/pages/companies.html"
-    },
-    {
-      "source": "/documentation.html",
-      "destination": "/pages/documentation.html"
-    },
-    {
-      "source": "/iija-infrastructure-demand.html",
-      "destination": "/pages/iija-infrastructure-demand.html"
-    }
+    { "source": "/try",       "destination": "/try.html" },
+    { "source": "/download",  "destination": "/download.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/api/agentic-step", "destination": "/api/agentic-step.js" }
   ]
 }
