@@ -19,10 +19,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body class="has-app page-try">
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
     <div class="desktop-title-bar" id="desktop-title-bar" hidden>
         <div class="desktop-title-bar-left">
             <button type="button" class="btn-title-bar-icon btn-sidebar-toggle-bar" id="btn-sidebar-toggle-bar" title="Toggle sidebar" aria-label="Toggle sidebar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
             </button>
         </div>
         <span class="desktop-title-bar-name" id="desktop-title-bar-name"></span>
@@ -34,7 +46,7 @@
     </div>
     <header class="header header-web-bar" id="header-web-fallback" hidden aria-hidden="true">
         <button type="button" class="btn-title-bar-icon btn-sidebar-toggle-bar" id="btn-sidebar-toggle-bar-web" title="Toggle sidebar" aria-label="Toggle sidebar">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
         </button>
         <span class="header-web-bar-name" id="header-web-bar-name"></span>
         <div class="header-web-bar-actions">
@@ -70,7 +82,6 @@
             <div class="dropdown-user-email" id="nav-user-email" hidden></div>
             <a href="https://openmud.ai/welcome.html" class="dropdown-item" data-open-external id="nav-auth-link">Sign in</a>
             <a href="https://openmud.ai/dashboard" class="dropdown-item" data-open-external id="nav-account-link" hidden>Account &amp; settings</a>
-            <a href="https://openmud.ai/subscribe.html" class="dropdown-item" data-open-external id="nav-billing-link" hidden>Billing</a>
         </div>
     </div>
 
@@ -236,10 +247,13 @@
                                         </button>
                                         <select id="model-select" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
                                             <option value="mud1">mud1</option>
+                                            <option value="openclaw">OpenClaw Agent</option>
                                             <option value="gpt-4o-mini">GPT-4o mini</option>
                                             <option value="claude-3-haiku-20240307">Claude Haiku 3</option>
                                             <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
                                             <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
+                                            <option value="grok-2-latest">Grok 2</option>
+                                            <option value="openrouter/openai/gpt-4o-mini">OpenRouter GPT-4o mini</option>
                                         </select>
                                     </div>
                                 </div>
@@ -271,7 +285,7 @@
             <h3 id="modal-upgrade-title">Limit reached</h3>
             <p id="modal-upgrade-desc">You've used your free messages for today.</p>
             <div class="modal-actions" style="flex-direction:column;gap:8px;">
-                <a href="https://openmud.ai/subscribe.html" class="btn-primary" style="text-align:center;text-decoration:none;" data-open-external>Upgrade</a>
+                <button type="button" class="btn-primary" id="btn-go-sign-in">Go to sign in</button>
                 <button type="button" class="btn-secondary" id="btn-dev-access-toggle">I have a dev key</button>
             </div>
             <div id="dev-access-section" hidden style="margin-top:12px;">
@@ -281,6 +295,14 @@
                 <div class="modal-actions">
                     <button type="button" class="btn-primary" id="btn-dev-access-submit">Unlock</button>
                 </div>
+                <p id="dev-access-success" style="color:var(--accent);font-size:0.875rem;margin:8px 0 0;display:flex;align-items:center;gap:6px;" hidden>
+                    <span aria-hidden="true" style="display:inline-flex;line-height:1;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </span>
+                    Dev key accepted
+                </p>
                 <p id="dev-access-error" style="color:#ef4444;font-size:0.8125rem;margin:6px 0 0;" hidden>Invalid key.</p>
             </div>
             <button type="button" class="btn-close-modal" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-secondary);font-size:1.25rem;cursor:pointer;" onclick="document.getElementById('modal-upgrade').hidden=true" aria-label="Close">&times;</button>
@@ -479,12 +501,10 @@
             var link = document.getElementById('nav-auth-link');
             var emailEl = document.getElementById('nav-user-email');
             var accountLink = document.getElementById('nav-account-link');
-            var billingLink = document.getElementById('nav-billing-link');
             if (!link) return;
             var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             var signInUrl  = isLocal ? '/welcome.html'  : 'https://openmud.ai/welcome.html';
             var settingsUrl = isLocal ? '/dashboard.html' : 'https://openmud.ai/dashboard';
-            var billingUrl  = isLocal ? '/subscribe.html' : 'https://openmud.ai/subscribe.html';
 
             function updateAuthNav(session) {
                 if (session && session.user) {
@@ -496,16 +516,20 @@
                     link.removeAttribute('href');
                     link.removeAttribute('data-open-external');
                     link.style.cursor = 'pointer';
-                    if (accountLink) { accountLink.href = settingsUrl; accountLink.hidden = false; }
-                    if (billingLink) { billingLink.href = billingUrl; billingLink.hidden = false; }
+                    if (accountLink) {
+                        accountLink.href = settingsUrl;
+                        accountLink.hidden = false;
+                        if (isLocal) accountLink.removeAttribute('data-open-external');
+                        else accountLink.setAttribute('data-open-external', '');
+                    }
                 } else {
                     if (emailEl) { emailEl.textContent = ''; emailEl.hidden = true; }
                     link.textContent = 'Sign in';
                     link.href = signInUrl;
-                    link.setAttribute('data-open-external', '');
+                    if (isLocal) link.removeAttribute('data-open-external');
+                    else link.setAttribute('data-open-external', '');
                     link.style.cursor = '';
                     if (accountLink) accountLink.hidden = true;
-                    if (billingLink) billingLink.hidden = true;
                 }
             }
 
@@ -556,6 +580,10 @@
             <button type="button" class="model-dropdown-item" role="option" data-value="mud1">mud1</button>
         </div>
         <div class="model-dropdown-group">
+            <div class="model-dropdown-label">OpenClaw</div>
+            <button type="button" class="model-dropdown-item" role="option" data-value="openclaw">OpenClaw Agent</button>
+        </div>
+        <div class="model-dropdown-group">
             <div class="model-dropdown-label">OpenAI</div>
             <button type="button" class="model-dropdown-item" role="option" data-value="gpt-4o-mini">GPT-4o mini</button>
         </div>
@@ -564,6 +592,14 @@
             <button type="button" class="model-dropdown-item" role="option" data-value="claude-3-haiku-20240307">Claude Haiku 3</button>
             <button type="button" class="model-dropdown-item" role="option" data-value="claude-haiku-4-5-20251001">Claude Haiku 4.5</button>
             <button type="button" class="model-dropdown-item" role="option" data-value="claude-sonnet-4-6">Claude Sonnet 4.6</button>
+        </div>
+        <div class="model-dropdown-group">
+            <div class="model-dropdown-label">xAI</div>
+            <button type="button" class="model-dropdown-item" role="option" data-value="grok-2-latest">Grok 2</button>
+        </div>
+        <div class="model-dropdown-group">
+            <div class="model-dropdown-label">OpenRouter</div>
+            <button type="button" class="model-dropdown-item" role="option" data-value="openrouter/openai/gpt-4o-mini">OpenRouter GPT-4o mini</button>
         </div>
     </div>
     <script src="assets/js/canvas.js"></script>

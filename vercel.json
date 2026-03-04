@@ -17,7 +17,7 @@
     },
     {
       "source": "/chat.html",
-      "destination": "/pages/chat.html"
+      "destination": "/try"
     },
     {
       "source": "/takeoff.html",

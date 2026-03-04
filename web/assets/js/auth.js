@@ -9,12 +9,13 @@
 
   function getApiBase() {
     var isDesktopApp = /mudrag-desktop/i.test(navigator.userAgent || '');
-    var isLocal = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
     var search = window.location.search || '';
     var m = search.match(/[?&]toolPort=(\d+)/);
-    var port = m ? m[1] : ((isDesktopApp || isLocal) ? '3847' : null);
-    var useDesktop = /[?&]useDesktopApi=1/.test(search) || isDesktopApp || isLocal;
-    if (useDesktop && port) return 'http://127.0.0.1:' + port + '/api';
+    var port = m ? m[1] : (isDesktopApp ? '3847' : null);
+    var useDesktop = /[?&]useDesktopApi=1/.test(search) || isDesktopApp;
+    if (useDesktop && port) {
+      return 'http://127.0.0.1:' + port + '/api';
+    }
     return '/api';
   }
 
@@ -58,11 +59,30 @@
     return _clientPromise;
   }
 
-  // Always redirect to the canonical domain after auth so the Supabase session
-  // is stored under a single localStorage origin. www.openmud.ai and openmud.ai
-  // have separate localStorage, causing "signed in on settings, not on dashboard"
-  // bugs if the session was created on the other subdomain.
+  function getSafeReturnPath() {
+    if (typeof window === 'undefined' || !window.location) return '/try';
+    var path = window.location.pathname || '/';
+    // Avoid redirect loops through the auth landing page.
+    if (/^\/welcome(?:\.html)?$/i.test(path)) return '/try';
+    var search = window.location.search || '';
+    var hash = window.location.hash || '';
+    var full = path + search + hash;
+    return full && full.charAt(0) === '/' ? full : '/try';
+  }
+
+  function persistAuthNextPath(nextPath) {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem('mudrag_auth_next', nextPath || '/try');
+    } catch (e) {
+      // ignore storage errors
+    }
+  }
+
+  // Always redirect to a single callback page so Supabase can finalize auth,
+  // then bounce back to the original page via localStorage.
   function getRedirectUrl() {
+    persistAuthNextPath(getSafeReturnPath());
     if (typeof window !== 'undefined' && window.location) {
       var host = window.location.hostname || '';
       if (host === 'localhost' || host === '127.0.0.1') {
@@ -98,20 +118,40 @@
   window.mudragAuth = {
     signInWithEmail: function (email) {
       return getClient().then(function (client) {
-        if (!client) return Promise.reject(new Error('Auth not configured'));
+        if (!client) return Promise.reject(new Error('Auth not configured. Missing SUPABASE_URL / SUPABASE_ANON_KEY.'));
         return client.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: getRedirectUrl() } });
       });
     },
     signInWithGoogle: function () {
       return getClient().then(function (client) {
-        if (!client) return Promise.reject(new Error('Auth not configured'));
-        return client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: getRedirectUrl() } });
+        if (!client) return Promise.reject(new Error('Auth not configured. Missing SUPABASE_URL / SUPABASE_ANON_KEY.'));
+        var redirectTo = getRedirectUrl();
+        return client.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: redirectTo, skipBrowserRedirect: true }
+        }).then(function (result) {
+          var oauthUrl = result && result.data && result.data.url;
+          if (oauthUrl && typeof window !== 'undefined' && window.location) {
+            window.location.assign(oauthUrl);
+          }
+          return result;
+        });
       });
     },
     signInWithApple: function () {
       return getClient().then(function (client) {
-        if (!client) return Promise.reject(new Error('Auth not configured'));
-        return client.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: getRedirectUrl() } });
+        if (!client) return Promise.reject(new Error('Auth not configured. Missing SUPABASE_URL / SUPABASE_ANON_KEY.'));
+        var redirectTo = getRedirectUrl();
+        return client.auth.signInWithOAuth({
+          provider: 'apple',
+          options: { redirectTo: redirectTo, skipBrowserRedirect: true }
+        }).then(function (result) {
+          var oauthUrl = result && result.data && result.data.url;
+          if (oauthUrl && typeof window !== 'undefined' && window.location) {
+            window.location.assign(oauthUrl);
+          }
+          return result;
+        });
       });
     },
     signOut: function () {

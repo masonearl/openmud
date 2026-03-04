@@ -6,14 +6,18 @@
     var isLocal = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
     var search = window.location.search || '';
     var toolPortMatch = search.match(/[?&]toolPort=(\d+)/);
-    var toolPort = toolPortMatch ? toolPortMatch[1] : ((isDesktopApp || isLocal) ? '3847' : '');
-    var useDesktopApi = /[?&]useDesktopApi=1/.test(search) || isDesktopApp || isLocal;
+    var toolPort = toolPortMatch ? toolPortMatch[1] : (isDesktopApp ? '3847' : '');
+    // Web localhost should use same-origin /api. Only force desktop API when
+    // explicitly requested or running inside the desktop app runtime.
+    var useDesktopApi = /[?&]useDesktopApi=1/.test(search) || isDesktopApp;
     var chatWindowParam = /[?&]chatWindow=1/.test(search);
     var chatWindowProjectId = (search.match(/[?&]projectId=([^&]+)/) || [])[1] || '';
     var chatWindowChatId = (search.match(/[?&]chatId=([^&]+)/) || [])[1] || '';
     var urlHasProdApi = /[?&]useProductionApi=1/.test(search);
-    if (isLocal && urlHasProdApi) try { localStorage.setItem('mudrag_use_production_api', 'true'); } catch (e) {}
-    var useProdApi = isLocal && (localStorage.getItem('mudrag_use_production_api') === 'true' || urlHasProdApi);
+    // Keep localhost stable: only use production API when explicitly requested
+    // on the current URL. Avoid sticky localStorage flags that can silently force
+    // remote API calls and cause confusing fetch failures during local testing.
+    var useProdApi = isLocal && urlHasProdApi;
     var isToolServerOrigin = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && (window.location.port === '3847' || window.location.port === '3848' || window.location.port === '3849' || window.location.port === '3850');
     var API_BASE = useProdApi ? 'https://openmud.ai/api' : (isToolServerOrigin ? '/api' : (useDesktopApi && toolPort ? 'http://127.0.0.1:' + toolPort + '/api' : '/api'));
     var STORAGE_PROJECTS = 'mudrag_projects';
@@ -31,12 +35,79 @@
     var STORAGE_SUBSCRIBER_EMAIL = 'mudrag_subscriber_email';
     var STORAGE_SUB_ACTIVE = 'mudrag_subscription_active';
     var STORAGE_SUB_TIER = 'mudrag_subscription_tier';
+    var STORAGE_PROVIDER_KEYS = 'mudrag_provider_keys_v1';
     var TIER_LIMITS = { free: 5, personal: 100, pro: null, executive: null };
     var _authToken = null;
+    var DEV_KEY = 'openmud';
 
     function getAuthHeaders() {
         var h = { 'Content-Type': 'application/json' };
         if (_authToken) h['Authorization'] = 'Bearer ' + _authToken;
+        return h;
+    }
+
+    function getProviderKeyHeaders() {
+        var h = {};
+        var cfg = {};
+        try {
+            var raw = localStorage.getItem(STORAGE_PROVIDER_KEYS);
+            cfg = raw ? JSON.parse(raw) : {};
+            if (cfg.openai) h['X-OpenAI-Api-Key'] = String(cfg.openai).trim();
+            if (cfg.anthropic) h['X-Anthropic-Api-Key'] = String(cfg.anthropic).trim();
+            if (cfg.grok) h['X-Grok-Api-Key'] = String(cfg.grok).trim();
+            if (cfg.openrouter) h['X-OpenRouter-Api-Key'] = String(cfg.openrouter).trim();
+            if (cfg.openclawApiKey) h['X-OpenClaw-Api-Key'] = String(cfg.openclawApiKey).trim();
+            if (cfg.openclawBaseUrl) h['X-OpenClaw-Base-Url'] = String(cfg.openclawBaseUrl).trim();
+            if (cfg.openclawModel) h['X-OpenClaw-Model'] = String(cfg.openclawModel).trim();
+        } catch (e) {}
+        return h;
+    }
+
+    function getProviderConfig() {
+        try {
+            var raw = localStorage.getItem(STORAGE_PROVIDER_KEYS);
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveProviderConfig(next) {
+        try {
+            localStorage.setItem(STORAGE_PROVIDER_KEYS, JSON.stringify(next || {}));
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function setModelSelection(value) {
+        var modelSelectEl = document.getElementById('model-select');
+        if (!modelSelectEl) return;
+        var option = modelSelectEl.querySelector('option[value="' + value + '"]');
+        if (!option) return;
+        modelSelectEl.value = value;
+        localStorage.setItem(STORAGE_MODEL, value);
+        var labelEl = document.getElementById('model-select-label');
+        if (labelEl) labelEl.textContent = option.textContent || value;
+        var dropdownEl = document.getElementById('model-dropdown');
+        if (dropdownEl) {
+            dropdownEl.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
+                btn.setAttribute('aria-selected', btn.getAttribute('data-value') === value ? 'true' : 'false');
+            });
+        }
+    }
+
+    function getChatHeaders() {
+        var h = getAuthHeaders();
+        var keyHeaders = getProviderKeyHeaders();
+        Object.keys(keyHeaders).forEach(function (k) {
+            if (keyHeaders[k]) h[k] = keyHeaders[k];
+        });
+        // Dev key unlocks local testing without forcing a degraded fallback mode.
+        try {
+            if (localStorage.getItem('mudrag_dev_unlimited') === 'true') h['X-Openmud-Dev-Key'] = DEV_KEY;
+        } catch (e) {}
         return h;
     }
 
@@ -45,6 +116,7 @@
             _authToken = session.access_token;
             try {
                 localStorage.setItem(STORAGE_SUBSCRIBER_EMAIL, session.user.email || '');
+                localStorage.removeItem('mudrag_dev_unlimited');
             } catch (e) {}
         } else {
             _authToken = null;
@@ -1421,33 +1493,49 @@
             wrap.appendChild(p);
         }
         if (citationsData && citationsData.sources && Array.isArray(citationsData.sources) && citationsData.sources.length > 0) {
-            var citeCard = document.createElement('div');
-            citeCard.className = 'msg-citations-card';
-            var confidence = String(citationsData.confidence || 'low').toUpperCase();
-            citeCard.innerHTML = '<div class="msg-citations-head">' +
-                '<span class="msg-citations-label">Grounded sources</span>' +
-                '<span class="msg-citations-confidence">Confidence: ' + confidence + '</span>' +
-                '</div>';
-            var citeList = document.createElement('div');
-            citeList.className = 'msg-citations-list';
-            citationsData.sources.slice(0, 5).forEach(function (source) {
-                var row = document.createElement('div');
-                row.className = 'msg-citation-item';
-                var title = source.title || source.source || source.id || 'Source';
-                var src = source.source ? (' (' + source.source + ')') : '';
-                var snippet = source.snippet || source.content || '';
-                var sourceEl = document.createElement('div');
-                sourceEl.className = 'msg-citation-source';
-                sourceEl.textContent = title + src;
-                var snippetEl = document.createElement('div');
-                snippetEl.className = 'msg-citation-snippet';
-                snippetEl.textContent = String(snippet || '').slice(0, 300);
-                row.appendChild(sourceEl);
-                row.appendChild(snippetEl);
-                citeList.appendChild(row);
+            var sourcesWrap = document.createElement('div');
+            sourcesWrap.className = 'msg-inline-sources';
+
+            var label = document.createElement('span');
+            label.className = 'msg-inline-sources-label';
+            label.textContent = 'Sources:';
+            sourcesWrap.appendChild(label);
+
+            var visibleSources = citationsData.sources.slice(0, 3);
+            visibleSources.forEach(function (source, i) {
+                var title = String(source.title || source.source || source.id || ('Source ' + (i + 1))).trim();
+                var link = document.createElement('a');
+                link.className = 'msg-inline-source-link';
+                link.textContent = title.length > 56 ? (title.slice(0, 53) + '...') : title;
+
+                var url = typeof source.url === 'string' ? source.url.trim() : '';
+                if (/^https?:\/\//i.test(url)) {
+                    link.href = url;
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                } else {
+                    link.href = '#';
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        doSend('Show the exact source passage for: "' + title + '"');
+                    });
+                }
+                sourcesWrap.appendChild(link);
             });
-            citeCard.appendChild(citeList);
-            wrap.appendChild(citeCard);
+
+            if (citationsData.sources.length > visibleSources.length) {
+                var moreLink = document.createElement('a');
+                moreLink.href = '#';
+                moreLink.className = 'msg-inline-source-link msg-inline-source-link-more';
+                moreLink.textContent = '+' + (citationsData.sources.length - visibleSources.length) + ' more';
+                moreLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    doSend('List all grounded sources you used for your previous answer.');
+                });
+                sourcesWrap.appendChild(moreLink);
+            }
+
+            wrap.appendChild(sourcesWrap);
         }
         if (chooseEmailData && chooseEmailData.accounts && Array.isArray(chooseEmailData.accounts) && chooseEmailData.text) {
             var chooseWrap = document.createElement('div');
@@ -1465,6 +1553,10 @@
                 btn.addEventListener('click', function () {
                     if (window.__mudragRunTool) {
                         window.__mudragRunTool('send_email', { text: chooseEmailData.text, from_account: acct.email }, null);
+                    } else {
+                        addMessage('assistant', 'Desktop mail tools are not available in this browser session. Open openmud desktop app to send through Apple Mail.');
+                        renderMessages();
+                        scrollToLatest();
                     }
                 });
                 btnRow.appendChild(btn);
@@ -4636,6 +4728,10 @@
 
     function updateDesktopTitle() {
         var isDesktop = isDesktopApp || useDesktopApi;
+        var isTryPage = !!(document.body && document.body.classList && document.body.classList.contains('page-try'));
+        // Keep /try on the desktop-title-bar layout so settings + sidebar toggle
+        // remain available with lp-nav fixed as the true top bar.
+        var useDesktopLayout = isDesktop || isTryPage;
         var bar = document.getElementById('desktop-title-bar');
         var nameEl = document.getElementById('desktop-title-bar-name');
         var webHeader = document.getElementById('header-web-fallback');
@@ -4648,7 +4744,7 @@
         } else {
             document.title = name;
         }
-        if (isDesktop && bar) {
+        if (useDesktopLayout && bar) {
             bar.hidden = false;
             document.body.classList.add('has-desktop-title-bar');
             document.body.classList.remove('has-web-bar');
@@ -5672,6 +5768,86 @@
         return true;
     }
 
+    function tryHandleOpenClawSetupCommand(text) {
+        var t = String(text || '').trim();
+        if (!t) return false;
+        var lower = t.toLowerCase();
+        var asksHow = /(how|help|walk me|guide|what).{0,35}(link|connect|setup|set up|enable).{0,35}openclaw/.test(lower)
+            || /^\/openclaw\b/.test(lower)
+            || /^openclaw\s+setup\b/.test(lower);
+        var hasConfigFields = /\b(openclaw\s*(api\s*)?key|base\s*url|endpoint|openclaw\s*model)\b\s*[:=]/i.test(t)
+            || /\bkey=|url=|base=|model=|enable\b|disable\b/i.test(lower) && /\bopenclaw\b/i.test(lower);
+        if (!asksHow && !hasConfigFields) return false;
+
+        addMessage('user', t);
+        input.value = '';
+        input.style.height = 'auto';
+
+        var current = getProviderConfig();
+        var next = {};
+        Object.keys(current || {}).forEach(function (k) { next[k] = current[k]; });
+
+        var keyMatch = t.match(/\b(?:openclaw\s*(?:api\s*)?key|key)\s*[:=]\s*([^\s,;]+)/i) || t.match(/\bkey=([^\s,;]+)/i);
+        var urlMatch = t.match(/\b(?:openclaw\s*(?:base\s*url|url|endpoint)|base\s*url|url|endpoint)\s*[:=]\s*(https?:\/\/[^\s,;]+)/i)
+            || t.match(/\b(?:url|base)=([^\s,;]+)/i);
+        var modelMatch = t.match(/\b(?:openclaw\s*model|model)\s*[:=]\s*([^\s,;]+)/i) || t.match(/\bmodel=([^\s,;]+)/i);
+        var disable = /\b(?:disable|disabled|off)\b/i.test(t);
+        var enable = /\b(?:enable|enabled|on)\b/i.test(t);
+
+        var changed = false;
+        if (keyMatch && keyMatch[1]) {
+            next.openclawApiKey = String(keyMatch[1]).trim();
+            changed = true;
+        }
+        if (urlMatch && urlMatch[1]) {
+            next.openclawBaseUrl = String(urlMatch[1]).trim();
+            changed = true;
+        }
+        if (modelMatch && modelMatch[1]) {
+            next.openclawModel = String(modelMatch[1]).trim();
+            changed = true;
+        }
+        if (enable) {
+            next.openclawEnabled = true;
+            changed = true;
+        }
+        if (disable) {
+            next.openclawEnabled = false;
+            changed = true;
+        }
+        if ((next.openclawApiKey || next.openclawBaseUrl) && !disable) {
+            next.openclawEnabled = true;
+        }
+
+        if (changed) {
+            if (!saveProviderConfig(next)) {
+                addMessage('assistant', 'I could not save OpenClaw settings in this browser. Open Settings and save there.');
+                return true;
+            }
+            if (next.openclawEnabled) setModelSelection('openclaw');
+            var savedSummary = [
+                'OpenClaw setup updated.',
+                '- Enabled: ' + (next.openclawEnabled ? 'yes' : 'no'),
+                '- API key: ' + (next.openclawApiKey ? 'saved' : 'not set'),
+                '- Base URL: ' + (next.openclawBaseUrl || 'not set'),
+                '- Model: ' + (next.openclawModel || 'openclaw')
+            ].join('\n');
+            addMessage('assistant', savedSummary + '\n\nI set your model to OpenClaw Agent when enabled. Send your next task and I will route through OpenClaw.');
+            return true;
+        }
+
+        addMessage('assistant',
+            'OpenClaw setup is quick. Paste one line like:\n'
+            + '/openclaw enable key=YOUR_KEY url=https://YOUR_OPENCLAW_BASE_URL/v1 model=openclaw\n\n'
+            + 'You can also say:\n'
+            + 'openclaw key: YOUR_KEY\n'
+            + 'openclaw base url: https://.../v1\n'
+            + 'openclaw model: openclaw\n\n'
+            + 'After that, I will switch chat to OpenClaw Agent automatically.'
+        );
+        return true;
+    }
+
     var activeLoadingStatusText = '';
     var _loadingPhraseTimer = null;
 
@@ -5790,14 +5966,19 @@
 
     function buildCitationsBlock(rag) {
         if (!rag || !Array.isArray(rag.sources) || rag.sources.length === 0) return '';
+        var confidence = String(rag.confidence || 'low').toLowerCase();
+        // Hide noisy fallback/low-confidence matches so sources only appear when
+        // we have meaningful retrieval grounding.
+        if (confidence === 'low' && !!rag.fallback_used) return '';
         var payload = {
-            confidence: rag.confidence || 'low',
+            confidence: confidence,
             fallback_used: !!rag.fallback_used,
             sources: rag.sources.slice(0, 8).map(function (s) {
                 return {
                     id: s.id || null,
                     title: s.title || s.topic || s.source || 'Source',
                     source: s.source || 'project-doc',
+                    url: s.url || s.href || '',
                     snippet: s.snippet || s.content || '',
                     score: s.score != null ? s.score : null
                 };
@@ -5824,6 +6005,7 @@
         }
         ensureProject();
         if (!activeProjectId) return;
+        if (tryHandleOpenClawSetupCommand(text)) return;
         if (tryHandleBidItemsLoadToProposalCommand(text)) return;
         if (tryHandleCsvEditCommand(text)) return;
 
@@ -5897,6 +6079,15 @@
             var modelSelect = document.getElementById('model-select');
             var model = modelSelect ? modelSelect.value : 'gpt-4o-mini';
             if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
+            var providerConfig = getProviderConfig();
+            if (model === 'openclaw') {
+                var openclawEnabled = !!providerConfig.openclawEnabled;
+                if (!openclawEnabled) {
+                    addMessage('assistant', 'OpenClaw is not enabled yet. Go to Settings → OpenClaw access, enable it, and save your key.');
+                    setLoading(false);
+                    return;
+                }
+            }
 
             // For vision-capable models, upgrade last user message to multimodal content array
             var isVisionModel = /gpt-4o|claude/i.test(model);
@@ -5929,7 +6120,11 @@
                 temperature: 0.7,
                 max_tokens: 1024,
                 use_tools: useTools,
-                stream: !useTools && !effectiveModel.startsWith('claude-') && effectiveModel !== 'mud1',
+                stream: !useTools
+                    && !effectiveModel.startsWith('claude-')
+                    && effectiveModel !== 'mud1'
+                    && !/^grok/i.test(effectiveModel)
+                    && !/^openrouter\//i.test(effectiveModel),
                 available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined,
                 project_data: projectDataForPayload && Object.keys(projectDataForPayload).length ? projectDataForPayload : undefined,
                 project_name: activeProject && activeProject.name ? activeProject.name : undefined,
@@ -5943,6 +6138,7 @@
                 };
             }
             if (!useTools) delete payload.available_tools;
+            var chatEndpoint = API_BASE + '/chat';
 
             var controller = new AbortController();
             var timeoutId = setTimeout(function () { controller.abort(); }, 60000);
@@ -5962,13 +6158,27 @@
                 var msg = String(errMsg || '').toLowerCase();
                 var isRateLimit = statusCode === 429 || /rate.?limit|too many request|usage limit|limit reached|limit exceeded/i.test(errMsg);
                 var isAuthError = statusCode === 401 || statusCode === 403 || /sign in|log in|unauthorized|not authenticated|authentication/i.test(errMsg);
+                var hasDevUnlimited = localStorage.getItem('mudrag_dev_unlimited') === 'true';
+                if (isAuthError && hasDevUnlimited) {
+                    addMessage('assistant', 'Dev mode is enabled. Retrying with dev access unlocked.');
+                    return;
+                }
+                if (isAuthError && typeof mudragAuth !== 'undefined' && mudragAuth.getSession) {
+                    // Best effort: refresh in-memory token, but do not interrupt with a
+                    // "send again" loop message. Let normal auth UI explain next steps.
+                    mudragAuth.getSession().then(function (r) {
+                        var session = r && r.data ? r.data.session : null;
+                        if (session && session.access_token) syncAuthSession(session);
+                    }).catch(function () {});
+                }
                 if (isRateLimit || isAuthError) {
                     var modal = document.getElementById('modal-upgrade');
                     var titleEl = document.getElementById('modal-upgrade-title');
                     var descEl = document.getElementById('modal-upgrade-desc');
                     if (isAuthError) {
+                        var signInPath = '/settings.html';
                         if (titleEl) titleEl.textContent = 'Sign in to continue';
-                        if (descEl) descEl.textContent = 'You need to sign in to use the AI. Go to openmud.ai/settings to sign in, or enter a dev key below.';
+                        if (descEl) descEl.textContent = 'You need to sign in to use the AI. Use the sign in button below, or enter a dev key.';
                     } else {
                         var tier = localStorage.getItem(STORAGE_SUB_TIER) || 'free';
                         if (titleEl) titleEl.textContent = tier === 'free' ? 'Free limit reached' : 'Daily limit reached';
@@ -6013,9 +6223,9 @@
                         streamingEl = assistants.length > 0 ? assistants[assistants.length - 1].querySelector('.msg-content p') : null;
                     }
                 }
-                fetch(API_BASE + '/chat', {
+                fetch(chatEndpoint, {
                     method: 'POST',
-                    headers: getAuthHeaders(),
+                    headers: getChatHeaders(),
                     body: JSON.stringify(payload),
                     signal: controller.signal
                 })
@@ -6024,6 +6234,7 @@
                         if (!r.ok) {
                             return readErrorMessage(r).then(function (errMsg) {
                                 handleApiError(errMsg, r.status);
+                                throw new Error(errMsg || ('Request failed (' + r.status + ')'));
                             });
                         }
                         var reader = r.body.getReader();
@@ -6056,11 +6267,11 @@
                         return readChunk();
                     })
                     .then(function () {
-                        if (!messageAdded) addMessage('assistant', fullText || 'No response.');
+                        if (!messageAdded) addMessage('assistant', fullText || 'The AI returned an empty response. Try again.');
                         else {
                             var msgs = getMessages(activeProjectId);
                             var last = msgs.length - 1;
-                            if (last >= 0 && msgs[last].role === 'assistant') msgs[last].content = fullText || 'No response.';
+                            if (last >= 0 && msgs[last].role === 'assistant') msgs[last].content = fullText || 'The AI returned an empty response. Try again.';
                             setMessages(activeProjectId, msgs);
                         }
                         incrementUsage({ model: effectiveModel });
@@ -6084,9 +6295,9 @@
                     })
                     .then(function () { doneSending(); });
             } else {
-                fetch(API_BASE + '/chat', {
+                fetch(chatEndpoint, {
                     method: 'POST',
-                    headers: getAuthHeaders(),
+                    headers: getChatHeaders(),
                     body: JSON.stringify(payload),
                     signal: controller.signal
                 })
@@ -6095,11 +6306,12 @@
                         if (!r.ok) {
                             return readErrorMessage(r).then(function (errMsg) {
                                 handleApiError(errMsg, r.status);
+                                throw new Error(errMsg || ('Request failed (' + r.status + ')'));
                             });
                         }
                         return r.json().then(function (data) {
                             var txt = (data && data.response) ? String(data.response).trim() : '';
-                            if (data && data.rag) {
+                            if (data && data.rag && effectiveModel === 'mud1') {
                                 txt += buildCitationsBlock(data.rag);
                             }
                             addMessage('assistant', txt || 'Done.');
@@ -6115,7 +6327,12 @@
                     .catch(function (err) {
                         clearTimeout(timeoutId);
                         var isAbort = err.name === 'AbortError';
-                        handleApiError(isAbort ? 'Request timed out. Try again.' : (err.message || 'Check your connection and try again.'), isAbort ? 408 : 0);
+                        var rawMsg = err && err.message ? err.message : '';
+                        var isFetchFail = /failed to fetch|networkerror|load failed/i.test(rawMsg || '');
+                        var friendly = isAbort
+                            ? 'Request timed out. Try again.'
+                            : (isFetchFail ? 'Could not reach the AI service. Check localhost API is running, then refresh and retry.' : (rawMsg || 'Check your connection and try again.'));
+                        handleApiError(friendly, isAbort ? 408 : 0);
                     })
                     .then(function () { doneSending(); });
             }
@@ -6186,6 +6403,7 @@
         { cmd: '/email',     label: 'Send Email',        desc: 'Compose and send an email',             category: 'Productivity', template: 'Send email to [name] about [subject]: [message]', desktopOnly: true },
         { cmd: '/weather',   label: 'Weather',           desc: 'Get current weather for a location',    category: 'Productivity', template: 'What\'s the weather in [city]?', desktopOnly: true },
         { cmd: '/mail',      label: 'Search Mail',       desc: 'Find emails in Mail.app',               category: 'Productivity', template: 'Find email from [sender] about [subject]', desktopOnly: true },
+        { cmd: '/openclaw',  label: 'Link OpenClaw',     desc: 'Connect OpenClaw account for web agent use', category: 'System', template: '/openclaw enable key=[api_key] url=[base_url]/v1 model=[preferred_model]' },
         // System
         { cmd: '/desktop',   label: 'Organize Desktop',  desc: 'Sort and clean up Desktop files',       category: 'System',       template: 'Organize my desktop', desktopOnly: true },
         { cmd: '/downloads', label: 'Organize Downloads', desc: 'Sort and clean up Downloads folder',   category: 'System',       template: 'Organize my downloads', desktopOnly: true },
@@ -6908,6 +7126,47 @@
         });
     }
 
+    function positionSettingsDropdown(dropdown, trigger) {
+        if (!dropdown || !trigger) return;
+        var r = trigger.getBoundingClientRect();
+        var viewportW = window.innerWidth || document.documentElement.clientWidth || 0;
+        var viewportH = window.innerHeight || document.documentElement.clientHeight || 0;
+        var pad = 8;
+        var minTop = pad;
+        var lpNav = document.querySelector('.lp-nav');
+        if (lpNav) {
+            var navRect = lpNav.getBoundingClientRect();
+            if (navRect && navRect.bottom) minTop = Math.max(minTop, Math.round(navRect.bottom + 2));
+        }
+
+        // Use fixed positioning so coordinates are relative to viewport, not
+        // the portal container box.
+        dropdown.style.position = 'fixed';
+        dropdown.style.left = '0px';
+        dropdown.style.top = '0px';
+        dropdown.style.right = 'auto';
+        dropdown.style.visibility = 'hidden';
+        dropdown.hidden = false;
+        var dw = dropdown.offsetWidth || 180;
+        var dh = dropdown.offsetHeight || 0;
+        dropdown.hidden = true;
+        dropdown.style.visibility = '';
+
+        var leftPos = Math.round(r.right - dw);
+        if (leftPos < pad) leftPos = pad;
+        if (leftPos + dw > viewportW - pad) leftPos = Math.max(pad, viewportW - dw - pad);
+
+        // Keep settings menu below the button so it never blocks dismiss clicks.
+        var topPos = Math.round(r.bottom + 2);
+        if (topPos < minTop) topPos = minTop;
+        if (dh && topPos + dh > viewportH - pad) {
+            topPos = Math.max(minTop, viewportH - dh - pad);
+        }
+
+        dropdown.style.left = leftPos + 'px';
+        dropdown.style.top = topPos + 'px';
+    }
+
     [btnSettings, btnSettingsWeb].forEach(function (btn) {
         if (!btn || !settingsDropdown) return;
         btn.addEventListener('click', function (e) {
@@ -6916,6 +7175,7 @@
             var open = !settingsDropdown.hidden;
             closeSettingsDropdown();
             if (!open) {
+                positionSettingsDropdown(settingsDropdown, btn);
                 settingsDropdown.hidden = false;
                 btn.setAttribute('aria-expanded', 'true');
             }
@@ -7069,30 +7329,50 @@
         document.addEventListener('click', function () { closeAllComposerDropdowns(); });
     }
 
-    var DEV_KEY = 'mudrag2025';
     (function initDevAccess() {
         var toggleBtn = document.getElementById('btn-dev-access-toggle');
+        var signInBtn = document.getElementById('btn-go-sign-in');
         var section = document.getElementById('dev-access-section');
         var submitBtn = document.getElementById('btn-dev-access-submit');
         var devInput = document.getElementById('dev-access-input');
         var errorEl = document.getElementById('dev-access-error');
+        var successEl = document.getElementById('dev-access-success');
+        if (signInBtn) {
+            signInBtn.addEventListener('click', function () {
+                var next = '/try';
+                try {
+                    var path = (window.location.pathname || '/try') + (window.location.search || '') + (window.location.hash || '');
+                    if (path && path.charAt(0) === '/' && !/^\/welcome(?:\.html)?(?:[?#]|$)/i.test(path)) {
+                        next = path;
+                    }
+                } catch (e) {}
+                window.location.href = '/welcome.html?next=' + encodeURIComponent(next);
+            });
+        }
         if (toggleBtn && section) {
             toggleBtn.addEventListener('click', function () {
                 section.hidden = !section.hidden;
+                if (errorEl) errorEl.hidden = true;
+                if (successEl) successEl.hidden = true;
                 if (!section.hidden && devInput) devInput.focus();
             });
         }
         if (submitBtn && devInput) {
             function tryUnlock() {
-                var val = (devInput.value || '').trim();
-                if (val === DEV_KEY) {
+                var val = String(devInput.value || '').trim().toLowerCase();
+                if (val === DEV_KEY.toLowerCase()) {
                     localStorage.setItem('mudrag_dev_unlimited', 'true');
                     try { localStorage.setItem(STORAGE_USAGE, JSON.stringify({ date: new Date().toISOString().slice(0, 10), count: 0 })); } catch (e) {}
                     var modal = document.getElementById('modal-upgrade');
-                    if (modal) modal.hidden = true;
                     if (errorEl) errorEl.hidden = true;
+                    if (successEl) successEl.hidden = false;
                     devInput.value = '';
+                    setTimeout(function () {
+                        if (successEl) successEl.hidden = true;
+                        if (modal) modal.hidden = true;
+                    }, 900);
                 } else {
+                    if (successEl) successEl.hidden = true;
                     if (errorEl) { errorEl.hidden = false; errorEl.textContent = 'Invalid key.'; }
                     devInput.value = '';
                     devInput.focus();

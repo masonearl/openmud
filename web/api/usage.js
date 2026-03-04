@@ -36,7 +36,7 @@ module.exports = async function handler(req, res) {
         const alloc = await allocateUsage(user.id, user.email);
         if (!alloc.allowed) {
           return res.status(429).json({
-            error: `Daily limit reached (${alloc.used}/${alloc.limit}). Upgrade at openmud.ai/subscribe.html`,
+            error: `Daily limit reached (${alloc.used}/${alloc.limit}). Sign in at openmud.ai/settings for access.`,
             used: alloc.used,
             limit: alloc.limit,
             date: alloc.date,

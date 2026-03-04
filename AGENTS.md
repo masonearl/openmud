@@ -197,6 +197,20 @@ When adding new domain knowledge:
 
 ---
 
+## Model access and usage policy (default)
+
+This policy should be treated as the default product behavior unless a task explicitly changes it:
+
+- **mud1 is always free** for authenticated users and should not be blocked by daily usage caps.
+- **One hosted low-cost model** is available without user API keys (currently `gpt-4o-mini`) and uses normal daily request limits by subscription tier.
+- **Premium models require BYOK** (bring your own key). If a user selects higher-cost providers/models, they must provide their own key in Settings.
+- **BYOK requests should not consume hosted usage budget** and should not count against hosted daily request caps.
+- **Dashboard/usage views should separate hosted vs BYOK behavior** so hosted cost exposure is clear and predictable.
+
+When adding models or changing routing, preserve this split first: `mud1 free`, `one hosted cheap model with limits`, `premium via user keys`.
+
+---
+
 ## Coding conventions
 
 - **JavaScript**: No frameworks, no build step. Vanilla JS only. No new npm dependencies without a strong reason.

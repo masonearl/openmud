@@ -14,25 +14,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
-            <nav class="nav">
-                <a href="/settings.html">Settings</a>
-                <a href="/documentation.html">Documentation</a>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
                 <a href="/download.html">Download</a>
-                <div class="nav-dropdown">
-                    <button type="button" class="btn-text btn-settings" id="btn-settings" aria-haspopup="true" aria-expanded="false" title="Settings">Settings</button>
-                    <div class="dropdown-menu dropdown-menu-right" id="settings-dropdown" hidden>
-                        <a href="/settings.html" class="dropdown-item">Account & settings</a>
-                        <a href="/about.html" class="dropdown-item">About</a>
-                        <a href="mailto:hi@masonearl.com?subject=openmud&body=Hi%2C%20I'm%20interested%20in%20openmud." class="dropdown-item">Contact</a>
-                        <a href="/download.html" class="dropdown-item">Download app</a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
 
     <main>
         <section class="hero">

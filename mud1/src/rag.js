@@ -16,9 +16,6 @@ const RESERVED = [
   /\b(desktop)\b.*\b(organize|clean|tidy|sort)\b/i,
   /\b(organize|clean|tidy|sort)\b.*\b(downloads?|my downloads?)\b/i,
   /\b(downloads?)\b.*\b(organize|clean|tidy|sort)\b/i,
-  /\b(generate|create|build|make|draft)\s+(a\s+)?proposal\b/i,
-  /\bproposal\s+(for|please)\b/i,
-  /\b(generate|create|build|make)\s+(a\s+)?schedule\b/i,
 ];
 
 const DATA_PATH = path.join(__dirname, '..', 'data', 'construction-qa.json');

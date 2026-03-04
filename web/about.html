@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About – openmud</title>
-    <meta name="description" content="Our mission: AI that speaks the language of the job site. Built for contractors and teams.">
+    <meta name="description" content="openmud mission: build the best open-source AI tool for construction and an agentic platform that executes real workflows.">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
@@ -14,95 +14,65 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
-            <nav class="nav">
-                <a href="/documentation.html">Documentation</a>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
                 <a href="/download.html">Download</a>
-                <div class="nav-dropdown">
-                    <button type="button" class="btn-text btn-settings" id="btn-settings" aria-haspopup="true" aria-expanded="false" title="Settings">Settings</button>
-                    <div class="dropdown-menu dropdown-menu-right" id="settings-dropdown" hidden>
-                        <a href="/about.html" class="dropdown-item">About</a>
-                        <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A" class="dropdown-item">Contact</a>
-                        <a href="/download.html" class="dropdown-item">Download app</a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
 
     <main>
         <section class="hero">
             <div class="container">
                 <h1>Our mission</h1>
-                <p class="hero-sub">AI that speaks the language of the job site.</p>
+                <p class="hero-sub">Build the best AI tool for construction.</p>
             </div>
         </section>
 
         <section class="section">
             <div class="container narrow">
-                <h2>Why we exist</h2>
-                <p>Construction runs on estimates, schedules, and decisions made in the field. Most software doesn’t. We’re building AI that understands waterline and sewer, pipe and trench, labor and equipment—so contractors and teams can plan, bid, and run jobs on solid ground.</p>
+                <h2>What openmud is</h2>
+                <p>openmud is an open-source, agentic AI platform for heavy civil and underground utility construction. The goal is not a chatbot. The goal is AI that executes real workflows from start to finish.</p>
             </div>
         </section>
 
         <section class="section section-alt">
             <div class="container narrow">
-                <h2>What we’re building</h2>
-                <p>openmud is in development. We’re starting with cost estimation and an assistant that can answer construction questions and help run numbers. Our goal is to make AI a practical tool for every phase of the job, from bid to closeout.</p>
-            </div>
-        </section>
-
-        <section id="contech" class="section">
-            <div class="container narrow">
-                <h2>Contech API</h2>
-                <p>Our estimation and assistant engine is available as an API for integration into your own tools and workflows. The Contech API provides cost predictions, confidence ranges, and a chat assistant trained on construction context.</p>
-                <p class="contech-status">API status: <span id="api-status">checking…</span></p>
-                <p><a href="https://masonearl.com" class="link link-cta" target="_blank" rel="noopener">Use the Contech tool at masonearl.com →</a></p>
-            </div>
-        </section>
-
-        <section class="section section-alt">
-            <div class="container narrow">
-                <h2>Built by Mason</h2>
-                <p>openmud is built by Mason Earl—construction estimator, developer, and founder. If you're reviewing my resume or application: <a href="https://masonearl.com" class="link link-cta" target="_blank" rel="noopener">visit masonearl.com</a> to learn more and see why I'm a good fit.</p>
-                <blockquote class="about-quote">"The best way to predict the future is to build it."</blockquote>
-                <blockquote class="about-quote">"Measure twice, cut once."</blockquote>
+                <h2>Build mode</h2>
+                <p>Everything is open source while we are in build mode. We are focused on shipping practical tools that save real time in the field and office, then improving them in public with contractor feedback.</p>
             </div>
         </section>
 
         <section class="section">
             <div class="container narrow">
-                <h2>Get in touch</h2>
-                <p><a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A" class="link">hi@masonearl.com</a></p>
+                <h2>What we are building now</h2>
+                <p>We are building an agentic platform for construction teams to execute and automate work: document understanding, estimating, proposals, schedules, email workflows, and project operations.</p>
+                <p>Current priority is reliability and execution quality across web and desktop so teams can use openmud daily.</p>
+            </div>
+        </section>
+
+        <section class="section section-alt">
+            <div class="container narrow">
+                <h2>Open source and community</h2>
+                <p class="about-community-copy">openmud is community-driven. If you want to contribute, review code, or follow progress, use the links in Settings for <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener">GitHub</a> and <a href="https://discord.gg/qszzMjxD3" target="_blank" rel="noopener">Discord</a>.</p>
             </div>
         </section>
     </main>
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; <span id="year"></span> openmud. All rights reserved.</p>
+            <p>&copy; <span id="year"></span> openmud. Open source in build mode.</p>
         </div>
     </footer>
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
-
-        (function () {
-            var el = document.getElementById('api-status');
-            if (!el) return;
-            fetch('/api/health')
-                .then(function (r) { return r.json(); })
-                .then(function (d) {
-                    el.textContent = d.status === 'healthy' ? 'Operational' : d.status || 'Unknown';
-                    el.classList.add('status-ok');
-                })
-                .catch(function () {
-                    el.textContent = 'Unavailable';
-                    el.classList.add('status-error');
-                });
-        })();
     </script>
     <script src="assets/js/nav.js"></script>
 </body>

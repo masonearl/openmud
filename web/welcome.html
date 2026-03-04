@@ -14,16 +14,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
-            <nav class="nav">
-                <a href="/">Home</a>
-                <a href="/documentation.html">Documentation</a>
-                <a href="/try">Try</a>
-            </nav>
-        </div>
-    </header>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
 
     <main>
         <section class="hero">
@@ -95,6 +97,36 @@
             var btnGoogle = document.getElementById('btn-google');
             var btnApple = document.getElementById('btn-apple');
             var modelGrid = document.getElementById('model-grid');
+            var redirectedAfterAuth = false;
+            var nextRaw = '';
+            try {
+                nextRaw = new URLSearchParams(window.location.search || '').get('next') || '';
+            } catch (e) {
+                nextRaw = '';
+            }
+            if (!nextRaw) {
+                try {
+                    nextRaw = localStorage.getItem('mudrag_auth_next') || '';
+                } catch (e) {
+                    nextRaw = '';
+                }
+            }
+
+            function getSafeNextPath(value) {
+                if (!value || value.charAt(0) !== '/' || value.indexOf('//') === 0) return '';
+                if (/^\/welcome(?:\.html)?(?:[?#]|$)/i.test(value)) return '';
+                return value;
+            }
+            var nextPath = getSafeNextPath(nextRaw);
+
+            function maybeRedirectAfterAuth(session) {
+                if (!nextPath || redirectedAfterAuth || !(session && session.user)) return;
+                redirectedAfterAuth = true;
+                try { localStorage.removeItem('mudrag_auth_next'); } catch (e) {}
+                window.setTimeout(function () {
+                    window.location.replace(nextPath);
+                }, 150);
+            }
 
             function showStatus(msg, isError) {
                 status.textContent = msg;
@@ -107,6 +139,7 @@
                     signedOut.hidden = true;
                     signedIn.hidden = false;
                     emailDisplay.textContent = 'Signed in as ' + (session.user.email || '');
+                    maybeRedirectAfterAuth(session);
                     var saved = localStorage.getItem(STORAGE_MODEL);
                     modelGrid.querySelectorAll('.welcome-model-btn').forEach(function (btn) {
                         btn.classList.toggle('selected', btn.getAttribute('data-value') === (saved || 'mud1'));

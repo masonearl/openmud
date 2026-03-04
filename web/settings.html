@@ -8,29 +8,20 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
-            <nav class="nav">
-                <a href="/">App</a>
-                <a href="/documentation.html">Documentation</a>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI</a>
+                <a href="/about.html">About</a>
                 <a href="/download.html">Download</a>
-                <div class="nav-dropdown">
-                    <button type="button" class="btn-text btn-settings" id="btn-settings" aria-haspopup="true" aria-expanded="false" title="Settings">Settings</button>
-                    <div class="dropdown-menu dropdown-menu-right" id="settings-dropdown" hidden>
-                        <a href="/about.html" class="dropdown-item">About</a>
-                        <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai&body=This%20message%20was%20sent%20via%20openmud.ai%0A%0A" class="dropdown-item">Contact</a>
-                        <a href="/download.html" class="dropdown-item">Download app</a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
 
     <main>
         <section class="hero">
@@ -78,18 +69,78 @@
                         </div>
                     </div>
                 </div>
+                <div class="settings-card settings-item-spaced" id="provider-keys-wrap">
+                    <h2 class="settings-card-title">Provider API keys</h2>
+                    <p class="settings-auth-hint">Optional. Add your own keys to run AI directly with your provider accounts.</p>
+                    <div class="provider-keys-grid">
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">OpenAI</span>
+                            <input id="key-openai" type="password" class="provider-key-input" placeholder="sk-..." autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">Anthropic</span>
+                            <input id="key-anthropic" type="password" class="provider-key-input" placeholder="sk-ant-..." autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">Grok (xAI)</span>
+                            <input id="key-grok" type="password" class="provider-key-input" placeholder="xai-..." autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">OpenRouter</span>
+                            <input id="key-openrouter" type="password" class="provider-key-input" placeholder="sk-or-..." autocomplete="off">
+                        </label>
+                    </div>
+                    <div class="provider-keys-divider" aria-hidden="true"></div>
+                    <div class="provider-keys-grid">
+                        <div class="provider-key-row">
+                            <span class="provider-key-label">OpenClaw access</span>
+                            <label class="provider-key-toggle">
+                                <input id="openclaw-enabled" type="checkbox">
+                                <span>Enable OpenClaw Agent in chat</span>
+                            </label>
+                        </div>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">OpenClaw API key</span>
+                            <input id="key-openclaw-api" type="password" class="provider-key-input" placeholder="oc-..." autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">OpenClaw base URL</span>
+                            <input id="key-openclaw-base" type="text" class="provider-key-input" placeholder="https://api.openclaw.ai/v1" autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">Preferred OpenClaw model</span>
+                            <input id="key-openclaw-model" type="text" class="provider-key-input" placeholder="openclaw">
+                        </label>
+                    </div>
+                    <div class="provider-keys-actions">
+                        <button type="button" class="btn-primary btn-sm" id="btn-save-provider-keys">Save keys</button>
+                        <button type="button" class="btn-secondary btn-sm" id="btn-clear-provider-keys">Clear keys</button>
+                        <span id="provider-keys-status" class="settings-auth-status" hidden></span>
+                    </div>
+                </div>
                 <a href="/dashboard" class="settings-item settings-item-link settings-item-spaced" id="usage-wrap">
                     <span class="settings-label">Usage &amp; dashboard</span>
-                    <span class="settings-arrow">→</span>
-                </a>
-                <a href="/subscribe.html" class="settings-item settings-item-link settings-item-spaced">
-                    <span class="settings-label">Manage subscription</span>
                     <span class="settings-arrow">→</span>
                 </a>
                 <a href="/download.html" class="settings-item settings-item-link settings-item-spaced">
                     <span class="settings-label">Download desktop app</span>
                     <span class="settings-arrow">→</span>
                 </a>
+                <div class="settings-card settings-item-spaced settings-card-compact-list">
+                    <h2 class="settings-card-title">Contact &amp; Community</h2>
+                    <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai" class="settings-item settings-item-link">
+                        <span class="settings-label">Contact</span>
+                        <span class="settings-arrow">→</span>
+                    </a>
+                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="settings-item settings-item-link">
+                        <span class="settings-label">GitHub</span>
+                        <span class="settings-arrow">→</span>
+                    </a>
+                    <a href="https://discord.gg/qszzMjxD3" target="_blank" rel="noopener" class="settings-item settings-item-link">
+                        <span class="settings-label">Discord</span>
+                        <span class="settings-arrow">→</span>
+                    </a>
+                </div>
             </div>
         </section>
     </main>
@@ -98,6 +149,7 @@
     <script src="assets/js/auth.js"></script>
     <script>
         (function () {
+            var STORAGE_PROVIDER_KEYS = 'mudrag_provider_keys_v1';
             var signedOut = document.getElementById('auth-signed-out');
             var signedIn = document.getElementById('auth-signed-in');
             var emailDisplay = document.getElementById('auth-email-display');
@@ -107,6 +159,17 @@
             var btnGoogle = document.getElementById('btn-google');
             var btnApple = document.getElementById('btn-apple');
             var btnSignOut = document.getElementById('btn-sign-out');
+            var keyOpenAi = document.getElementById('key-openai');
+            var keyAnthropic = document.getElementById('key-anthropic');
+            var keyGrok = document.getElementById('key-grok');
+            var keyOpenRouter = document.getElementById('key-openrouter');
+            var openclawEnabled = document.getElementById('openclaw-enabled');
+            var keyOpenClawApi = document.getElementById('key-openclaw-api');
+            var keyOpenClawBase = document.getElementById('key-openclaw-base');
+            var keyOpenClawModel = document.getElementById('key-openclaw-model');
+            var keyStatus = document.getElementById('provider-keys-status');
+            var btnSaveKeys = document.getElementById('btn-save-provider-keys');
+            var btnClearKeys = document.getElementById('btn-clear-provider-keys');
 
             function showStatus(msg, isError) {
                 status.textContent = msg;
@@ -185,6 +248,91 @@
             mudragAuth.onAuthStateChange(function (event, session) {
                 renderAuth(session);
             });
+
+            function showKeyStatus(msg, isError) {
+                if (!keyStatus) return;
+                keyStatus.textContent = msg;
+                keyStatus.hidden = false;
+                keyStatus.className = 'settings-auth-status' + (isError ? ' settings-auth-status-error' : '');
+            }
+
+            function readKeyStore() {
+                try {
+                    var raw = localStorage.getItem(STORAGE_PROVIDER_KEYS);
+                    return raw ? JSON.parse(raw) : {};
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            function writeKeyStore(next) {
+                try {
+                    localStorage.setItem(STORAGE_PROVIDER_KEYS, JSON.stringify(next || {}));
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function renderKeys() {
+                var keys = readKeyStore();
+                if (keyOpenAi) keyOpenAi.value = keys.openai || '';
+                if (keyAnthropic) keyAnthropic.value = keys.anthropic || '';
+                if (keyGrok) keyGrok.value = keys.grok || '';
+                if (keyOpenRouter) keyOpenRouter.value = keys.openrouter || '';
+                if (openclawEnabled) openclawEnabled.checked = !!keys.openclawEnabled;
+                if (keyOpenClawApi) keyOpenClawApi.value = keys.openclawApiKey || '';
+                if (keyOpenClawBase) keyOpenClawBase.value = keys.openclawBaseUrl || '';
+                if (keyOpenClawModel) keyOpenClawModel.value = keys.openclawModel || '';
+            }
+
+            renderKeys();
+
+            if (btnSaveKeys) {
+                btnSaveKeys.addEventListener('click', function () {
+                    var next = {
+                        openai: keyOpenAi ? String(keyOpenAi.value || '').trim() : '',
+                        anthropic: keyAnthropic ? String(keyAnthropic.value || '').trim() : '',
+                        grok: keyGrok ? String(keyGrok.value || '').trim() : '',
+                        openrouter: keyOpenRouter ? String(keyOpenRouter.value || '').trim() : '',
+                        openclawEnabled: !!(openclawEnabled && openclawEnabled.checked),
+                        openclawApiKey: keyOpenClawApi ? String(keyOpenClawApi.value || '').trim() : '',
+                        openclawBaseUrl: keyOpenClawBase ? String(keyOpenClawBase.value || '').trim() : '',
+                        openclawModel: keyOpenClawModel ? String(keyOpenClawModel.value || '').trim() : ''
+                    };
+                    if (next.openclawBaseUrl && !/^https?:\/\//i.test(next.openclawBaseUrl)) {
+                        showKeyStatus('OpenClaw base URL must start with http:// or https://', true);
+                        return;
+                    }
+                    if (next.openclawBaseUrl && !/\/v\d+\/?$/i.test(next.openclawBaseUrl)) {
+                        next.openclawBaseUrl = next.openclawBaseUrl.replace(/\/+$/, '') + '/v1';
+                    }
+                    if (/^https?:\/\//i.test(next.openclawModel || '')) {
+                        next.openclawModel = 'openclaw';
+                    }
+                    if (next.openclawEnabled && (!next.openclawApiKey || !next.openclawBaseUrl)) {
+                        showKeyStatus('To enable OpenClaw, add both OpenClaw API key and base URL.', true);
+                        return;
+                    }
+                    if (!writeKeyStore(next)) {
+                        showKeyStatus('Could not save keys in this browser.', true);
+                        return;
+                    }
+                    showKeyStatus('Provider keys saved. Chat will use these on your next message.', false);
+                    renderKeys();
+                });
+            }
+
+            if (btnClearKeys) {
+                btnClearKeys.addEventListener('click', function () {
+                    if (!writeKeyStore({})) {
+                        showKeyStatus('Could not clear keys in this browser.', true);
+                        return;
+                    }
+                    renderKeys();
+                    showKeyStatus('Provider keys cleared.', false);
+                });
+            }
         })();
     </script>
     <script src="assets/js/nav.js"></script>
@@ -223,21 +371,60 @@
         })();
     </script>
     <style>
-        .settings-open-app-wrap { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border, #333); }
-        .settings-open-app-hint { font-size: 0.875rem; opacity: 0.7; margin-bottom: 0.75rem; }
+        .settings-open-app-wrap { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .settings-open-app-hint { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
         .btn-open-app-settings {
             padding: 0.55rem 1.25rem;
-            background: var(--accent, #e8d5b7);
-            color: #1a1a1a;
-            border: none;
-            border-radius: 6px;
+            background: rgba(187, 152, 113, 0.14);
+            color: var(--text);
+            border: 1px solid rgba(187, 152, 113, 0.45);
+            border-radius: 8px;
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.15s;
+            transition: border-color 0.15s, background 0.15s;
         }
-        .btn-open-app-settings:hover { opacity: 0.85; }
-        .settings-open-app-status { display: block; margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.65; }
+        .btn-open-app-settings:hover {
+            background: rgba(187, 152, 113, 0.24);
+            border-color: rgba(187, 152, 113, 0.62);
+        }
+        .settings-open-app-status { display: block; margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .provider-keys-grid { display: grid; gap: 0.7rem; margin-top: 0.35rem; }
+        .provider-key-row { display: grid; gap: 0.35rem; }
+        .provider-key-label { font-size: 0.83rem; color: var(--text-secondary); font-weight: 600; }
+        .provider-key-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            padding: 0.62rem 0.72rem;
+            font-size: 0.92rem;
+            outline: none;
+        }
+        .provider-key-input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(187, 152, 113, 0.2);
+        }
+        .provider-keys-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+            margin-top: 0.9rem;
+        }
+        .provider-keys-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.95rem 0 0.75rem;
+        }
+        .provider-key-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
     </style>
 </body>
 </html>

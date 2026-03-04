@@ -4,80 +4,821 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentation – openmud</title>
-    <meta name="description" content="openmud skills: Proposal Generator, Schedule Builder, Quick Bid. What the assistant can do.">
+    <meta name="description" content="openmud site architecture — interactive map of every page, API route, and tool.">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ─── Page shell ─── */
+        .doc-outer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .doc-header {
+            padding: 24px 28px 18px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .doc-header h1 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0 0 4px;
+            letter-spacing: -0.01em;
+            color: var(--text);
+        }
+
+        .doc-header p {
+            font-size: 0.8375rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .doc-layout {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ─── Tree panel ─── */
+        .doc-tree-panel {
+            flex: 0 0 256px;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 12px 0 24px;
+            scrollbar-width: thin;
+            scrollbar-color: #3a3028 transparent;
+        }
+
+        .doc-tree-panel::-webkit-scrollbar { width: 5px; }
+        .doc-tree-panel::-webkit-scrollbar-track { background: transparent; }
+        .doc-tree-panel::-webkit-scrollbar-thumb { background: #3a3028; border-radius: 3px; }
+
+        /* ─── Tree groups ─── */
+        .tree-group { margin-bottom: 2px; }
+
+        .tree-group-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.67rem;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: rgba(181, 156, 128, 0.85);
+        }
+
+        .tree-group-header:hover { background: rgba(255,255,255,0.025); }
+
+        .tree-caret {
+            width: 11px;
+            height: 11px;
+            flex-shrink: 0;
+            transition: transform 0.14s ease;
+            color: rgba(138, 122, 106, 0.55);
+        }
+
+        .tree-group.open .tree-caret { transform: rotate(90deg); }
+
+        .tree-children {
+            display: none;
+            padding-bottom: 4px;
+        }
+
+        .tree-group.open .tree-children { display: block; }
+
+        /* ─── Tree leaf nodes ─── */
+        .tree-node {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px 5px 24px;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            border-left: 2px solid transparent;
+            margin-left: 0;
+            transition: color 0.1s, background 0.1s;
+            line-height: 1.35;
+        }
+
+        .tree-node:hover {
+            color: var(--text);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .tree-node.active {
+            color: var(--text);
+            background: rgba(138, 122, 106, 0.08);
+            border-left-color: rgba(187, 152, 113, 0.55);
+        }
+
+        .tree-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .s-live    { background: #6ee7b7; }
+        .s-partial { background: #fbbf24; }
+        .s-planned { background: rgba(138, 122, 106, 0.45); border: 1px solid rgba(138, 122, 106, 0.4); }
+
+        /* ─── Detail panel ─── */
+        .doc-detail-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 36px;
+            scrollbar-width: thin;
+            scrollbar-color: #3a3028 transparent;
+        }
+
+        .doc-detail-panel::-webkit-scrollbar { width: 5px; }
+        .doc-detail-panel::-webkit-scrollbar-track { background: transparent; }
+        .doc-detail-panel::-webkit-scrollbar-thumb { background: #3a3028; border-radius: 3px; }
+
+        .detail-empty {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+            color: rgba(181, 156, 128, 0.35);
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .detail-empty-hint {
+            font-size: 0.775rem;
+            opacity: 0.7;
+        }
+
+        .detail-content { max-width: 580px; }
+
+        .detail-path {
+            font-size: 0.72rem;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            color: rgba(138, 122, 106, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .detail-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .detail-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+
+        .detail-badge {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .badge-live    { background: rgba(110,231,183,0.1); color: #6ee7b7; border: 1px solid rgba(110,231,183,0.22); }
+        .badge-partial { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.22); }
+        .badge-planned { background: rgba(138,122,106,0.1); color: rgba(181,156,128,0.85); border: 1px solid rgba(138,122,106,0.22); }
+
+        .detail-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.75;
+            margin: 0 0 22px;
+        }
+
+        .detail-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(181, 156, 128, 0.6);
+            margin: 0 0 7px;
+        }
+
+        .detail-building {
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            background: rgba(138, 122, 106, 0.05);
+            border: 1px solid rgba(138, 122, 106, 0.14);
+            border-left: 2px solid rgba(187, 152, 113, 0.4);
+            border-radius: 5px;
+            padding: 12px 14px;
+            margin: 0 0 22px;
+            white-space: pre-wrap;
+            font-family: 'Inter', system-ui, sans-serif;
+            word-break: break-word;
+        }
+
+        .detail-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 0 0 22px;
+        }
+
+        .detail-tag {
+            font-size: 0.7rem;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            color: rgba(181, 156, 128, 0.7);
+            background: rgba(138, 122, 106, 0.07);
+            border: 1px solid rgba(138, 122, 106, 0.16);
+            border-radius: 4px;
+            padding: 3px 7px;
+        }
+
+        .detail-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border: 1px solid rgba(138, 122, 106, 0.22);
+            border-radius: 6px;
+            padding: 6px 11px;
+            transition: color 0.13s, border-color 0.13s;
+        }
+
+        .detail-link:hover {
+            color: var(--text);
+            border-color: rgba(187, 152, 113, 0.4);
+        }
+
+        /* ─── Bottom legend ─── */
+        .doc-legend {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 10px 14px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        /* ─── Mobile ─── */
+        @media (max-width: 660px) {
+            .doc-layout { flex-direction: column; overflow: visible; }
+            .doc-tree-panel { flex: none; border-right: none; border-bottom: 1px solid var(--border); overflow-y: visible; max-height: none; padding: 8px 0 12px; }
+            .doc-detail-panel { padding: 20px 18px; }
+            .detail-title { font-size: 1.1rem; }
+            .doc-detail-panel { overflow-y: visible; }
+            .doc-outer { min-height: auto; }
+        }
+    </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <a href="/" class="logo"><img src="/assets/logo-transparent.png" alt="" class="logo-img"><span class="logo-text">openmud</span></a>
-            <nav class="nav">
-                <a href="/documentation.html">Documentation</a>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
                 <a href="/download.html">Download</a>
-                <div class="nav-dropdown">
-                    <button type="button" class="btn-text btn-settings" id="btn-settings" aria-haspopup="true" aria-expanded="false" title="Settings">Settings</button>
-                    <div class="dropdown-menu dropdown-menu-right" id="settings-dropdown" hidden>
-                        <a href="/about.html" class="dropdown-item">About</a>
-                        <a href="mailto:hi@masonearl.com?subject=openmud%20early%20access&body=I'd%20like%20to%20try%20openmud." class="dropdown-item">Contact</a>
-                        <a href="/download.html" class="dropdown-item">Download app</a>
-                    </div>
-                </div>
-            </nav>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
+
+    <div class="doc-outer">
+        <div class="doc-header">
+            <h1>Site Architecture</h1>
+            <p>Every page, API route, and tool in openmud. Click any node to see what it does and what's being built.</p>
         </div>
-    </header>
 
-    <main>
-        <section class="hero">
-            <div class="container">
-                <h1>Documentation</h1>
-                <p class="hero-sub">Skills built into the assistant and what it can do.</p>
+        <div class="doc-layout">
+            <div class="doc-tree-panel" id="tree-panel"></div>
+            <div class="doc-detail-panel" id="detail-panel">
+                <div class="detail-empty">
+                    <span>Select a node from the map</span>
+                    <span class="detail-empty-hint">Pages, API routes, and tools are all listed on the left.</span>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <section class="section">
-            <div class="container narrow">
-                <p class="doc-intro">The openmud assistant is trained on construction context and can help with estimates, proposals, schedules, and quick bids. Use the chat on the homepage to try these in natural language. Below is a reference for each skill.</p>
+        <div class="doc-legend">
+            <div class="legend-item"><div class="legend-dot s-live"></div>Live</div>
+            <div class="legend-item"><div class="legend-dot s-partial"></div>Partial</div>
+            <div class="legend-item"><div class="legend-dot s-planned"></div>Planned</div>
+        </div>
+    </div>
+
+    <script>
+    const SITEMAP = [
+        {
+            id: 'devref', label: 'Agent & Dev Reference', open: true,
+            children: [
+                {
+                    id: 'ref-env', label: 'Environment Setup', path: 'web/.env.example', status: 'live',
+                    desc: 'Copy web/.env.example to web/.env and fill in your keys. Never commit web/.env. Run the dev server with "vercel dev" from the web/ directory (requires Vercel CLI). All API functions in web/api/ are served as serverless functions at /api/*.',
+                    building: `Required environment variables:
+
+OPENAI_API_KEY — Required for GPT-4o, GPT-4o-mini, and mud1 hosted routing. At least one of OpenAI or Anthropic must be set.
+
+ANTHROPIC_API_KEY — Required for Claude models. At least one of OpenAI or Anthropic must be set.
+
+SUPABASE_URL — Your Supabase project URL (https://your-project.supabase.co). Required for auth and all user data.
+
+SUPABASE_ANON_KEY — Supabase publishable key (sb_publishable_...). Used client-side in the browser for auth flows.
+
+SUPABASE_SERVICE_ROLE_KEY — Supabase secret service role key (sb_secret_...). Used server-side only in API functions. Never expose to the browser.
+
+To start locally: cd web && vercel dev`,
+                    files: ['web/.env.example', 'web/.env (gitignored)', 'vercel.json']
+                },
+                {
+                    id: 'ref-openclaw', label: 'OpenClaw', path: '/settings.html', status: 'live',
+                    desc: 'OpenClaw is a local device gateway that lets mud1 invoke tools on paired devices (Mac, iPhone). It bridges the web AI with native device capabilities — currently used for sending email via Mail.app on macOS via osascript. Configured in Settings under the OpenClaw section.',
+                    building: `How it works:
+1. User installs OpenClaw and pairs their Mac as a node (Settings → Nodes → Add This Computer).
+2. User enters their OpenClaw API key (oc-...) and base URL in openmud Settings.
+3. When mud1 needs to send an email or run a device action, it calls invokeOpenClawTool() in chat.js.
+4. That function POSTs to {gatewayBase}/tools/invoke with { tool, action, args, sessionKey }.
+5. The gateway routes the request to the connected Mac node and runs the action (e.g. osascript to open Mail.app and send).
+
+Settings fields (stored in localStorage under the openmud key):
+- openclawEnabled: boolean toggle to enable/disable the agent
+- openclawApiKey: Bearer token (oc-...)
+- openclawBaseUrl: Gateway URL, normalized to end with /v1
+- openclawModel: Preferred model name for the gateway
+
+Error codes from the gateway:
+- 401: Token is invalid for this gateway
+- 404: Tool is blocked by policy or not loaded
+- 429: Gateway is rate-limited — wait and retry
+- 400: Tool input was rejected — check args
+- 5xx: Gateway or runtime error
+
+Troubleshooting sequence (run automatically by mud1):
+Link check → Node status check → Node describe → Run probe (/usr/bin/true) → Send attempt via osascript → Exec fallback → Osascript probe → Mail accessibility probe
+
+If only an iOS node is paired: email send requires a Mac node. Install OpenClaw on Mac, pair it, retry.
+If all nodes show connected:false: the node is offline — wake the Mac and ensure OpenClaw is running.
+
+CLI binary locations checked (in order):
+/opt/homebrew/bin/openclaw, /usr/local/bin/openclaw, ~/.npm-global/bin/openclaw, ~/.local/bin/openclaw`,
+                    files: ['web/api/chat.js (invokeOpenClawTool, analyzeOpenClawNodes, runOpenClawNodeCommand)', 'web/settings.html', 'web/assets/js/auth.js']
+                },
+                {
+                    id: 'ref-supabase', label: 'Supabase Setup', path: 'web/api/lib/', status: 'live',
+                    desc: 'Supabase provides auth (JWT), user storage, usage tracking, project records, chat history, and RAG indexing. All server-side API functions validate auth by calling getUserFromRequest() from web/api/lib/auth.js, which verifies the Bearer JWT against the Supabase service role.',
+                    building: `Auth flow:
+1. Browser calls supabase.auth.signInWithPassword() or OAuth flow.
+2. Supabase returns a JWT (access token).
+3. Frontend attaches it as Authorization: Bearer {token} on every API call.
+4. API functions call getUserFromRequest(req) — this calls supabase.auth.getUser(token) with the service role key to verify the JWT server-side.
+5. If user is null, the request is treated as unauthenticated (some routes allow anonymous access with limits).
+
+Key tables (run migrations in order):
+- web/api/lib/migrations/001_usage_events.sql — usage_events table for per-request logging
+- web/api/lib/migrations/002_usage_daily.sql — usage_daily table + increment_usage_daily RPC for daily counters
+
+Usage tracking:
+- allocateUsage(userId, model) — checks daily limit, returns { allowed, remaining }
+- logUsageEvent(userId, model, tokens) — inserts a row into usage_events
+- BYOK requests are detected by detectSource() and bypass the hosted usage counter
+
+To add a protected API route: import getUserFromRequest from lib/auth.js, call it at the top of your handler, and return 401 if user is null.`,
+                    files: ['web/api/lib/auth.js', 'web/api/lib/usage.js', 'web/api/lib/migrations/001_usage_events.sql', 'web/api/lib/migrations/002_usage_daily.sql', 'web/api/user.js', 'web/api/projects.js']
+                },
+                {
+                    id: 'ref-model-policy', label: 'Model Routing Policy', path: '/api/chat', status: 'live',
+                    desc: 'The model access policy controls which models are free, rate-limited, or require BYOK. This must be preserved when adding or changing model routing. Treat it as a product constraint, not just a technical detail.',
+                    building: `The three tiers:
+
+1. mud1 — always free for authenticated users. No daily cap. The construction-specific assistant. Never block it behind a usage limit.
+
+2. One hosted cheap model (currently gpt-4o-mini) — available without a user API key. Subject to daily request limits by subscription tier. Uses the hosted OPENAI_API_KEY on the server.
+
+3. Premium models (gpt-4o, claude-3-5-sonnet, etc.) — require BYOK (user provides their own API key in Settings). These requests do NOT consume hosted usage budget and do NOT count against hosted daily caps. Detected by detectSource() in lib/usage.js.
+
+HOSTED_FREE_MODELS = new Set(['mud1', 'gpt-4o-mini']) in chat.js — update this set when changing which models are hosted-free.
+
+Dev bypass: requests with header x-openmud-dev-key: openmud skip auth and usage checks. For local development only.
+
+When adding a new model:
+- If it should be hosted-free: add it to HOSTED_FREE_MODELS
+- If it requires BYOK: ensure the user's key is read from settings and passed as the API key, and confirm detectSource() marks it as BYOK so usage is not charged`,
+                    files: ['web/api/chat.js (HOSTED_FREE_MODELS, isDevBypass, detectSource)', 'web/api/lib/usage.js (allocateUsage, detectSource)']
+                },
+                {
+                    id: 'ref-add-tool', label: 'How to Add a Tool', path: 'tools/registry.py', status: 'live',
+                    desc: 'Tools are agentic capabilities that mud1 can invoke during a conversation. Every tool must be registered with an OpenAI function-calling schema. When mud1 selects a tool, chat.js executes it and returns the result as context for the next AI turn.',
+                    building: `Steps to add a new agentic tool:
+
+1. Write the tool logic in Python under tools/{tool-name}/{tool-name}_tools.py.
+   - Pure functions, type hints, clear docstrings.
+   - Input: structured params. Output: JSON-serializable dict.
+
+2. Register the tool in tools/registry.py with an OpenAI function-calling schema:
+   { "name": "tool_name", "description": "...", "parameters": { "type": "object", "properties": { ... }, "required": [...] } }
+
+3. Wire the tool in web/api/chat.js:
+   - Add the schema to the tools array passed to the OpenAI/Anthropic API call.
+   - Add a handler in the tool_calls loop: if (call.function.name === 'tool_name') { ... }
+   - Call the Python tool via execFile or expose it as a Node.js API route under web/api/.
+
+4. Test: send a chat message that should trigger the tool. Confirm the AI selects it, the tool runs, and the result is returned correctly.
+
+5. Update the knowledge base (data/site-content.json) with a chunk describing what the tool does so search can surface it.
+
+Current Tier 1 priority tools: OCR/document extraction, bluestakes/811, email drafting, change order generator.`,
+                    files: ['tools/registry.py', 'web/api/chat.js', 'tools/estimating/estimating_tools.py (example)']
+                },
+                {
+                    id: 'ref-add-page', label: 'How to Add a Page', path: 'web/', status: 'live',
+                    desc: 'All pages are vanilla HTML/CSS/JS — no framework, no build step. Each page should use the standard nav pattern and link to the shared stylesheet.',
+                    building: `Steps to add a new page:
+
+1. Create web/{page-name}.html.
+
+2. Use the standard nav (copy from any existing page like about.html):
+   <nav class="lp-nav">
+     <details class="lp-brand-menu">
+       <summary class="lp-nav-logo">
+         <img src="/assets/logo.png" alt="" class="lp-nav-logo-img">
+         <span>openmud</span>
+         <span class="lp-nav-caret">...</span>
+       </summary>
+       <div class="lp-brand-menu-panel">
+         <a href="/">Homepage</a> ... (5 links)
+       </div>
+     </details>
+   </nav>
+
+3. Link the correct stylesheet:
+   - For pages using the main app styles: <link rel="stylesheet" href="/assets/css/styles.css">
+   - For pages with custom layout: add a page-specific CSS file
+
+4. Add the route to vercel.json if it needs a clean URL (no .html extension).
+
+5. Add knowledge base chunks to data/site-content.json so the page is discoverable via search.
+
+6. Add the page as a node in this documentation site map (web/documentation.html, SITEMAP array).
+
+Do NOT use: React, Vue, Angular, Svelte, or any JS framework. No npm dependencies in the frontend without a strong reason.`,
+                    files: ['web/about.html (reference page)', 'web/assets/css/styles.css', 'web/assets/css/home-landing.css', 'vercel.json', 'data/site-content.json']
+                },
+                {
+                    id: 'ref-add-rag', label: 'How to Extend the Knowledge Base', path: 'data/site-content.json', status: 'live',
+                    desc: 'The knowledge base is the RAG retrieval corpus for site search and AI chat context. It is a flat JSON array of chunks. Adding good chunks directly improves search answer quality and gives mud1 better construction context.',
+                    building: `To add a knowledge base chunk, append an object to the array in data/site-content.json:
+
+{
+  "id": "unique-kebab-case-id",
+  "category": "one of: Safety, Calculator, Reference, Tools, Resources, Companies, Industry, Glossary, About, Navigation",
+  "title": "Short descriptive title",
+  "content": "Factual prose, 150-400 words. Written for direct use — not marketing copy. Should be useful on its own without surrounding context.",
+  "url": "/resources.html#section-id",
+  "tags": ["relevant", "search", "terms", "for", "this", "chunk"]
+}
+
+Guidelines:
+- Content must be factual and self-contained.
+- No marketing copy — say what the thing does, not how great it is.
+- Tags should include the terms users would search to find this content.
+- URL should point to the most relevant page or section anchor.
+- Aim for 150-400 words per chunk — too short loses context, too long dilutes relevance.
+- After adding chunks, test by searching for the topic on the homepage.`,
+                    files: ['data/site-content.json', 'web/api/search.js', 'web/api/rag-search.js']
+                },
+                {
+                    id: 'ref-conventions', label: 'Coding Conventions', path: 'AGENTS.md', status: 'live',
+                    desc: 'Rules that apply to all code in this repo. Follow these when adding any feature, fixing any bug, or writing any content. Agents and contributors must read these before making changes.',
+                    building: `JavaScript (web/api/, web/assets/js/):
+- No frameworks. No build step. Vanilla JS only.
+- No new npm dependencies without a strong reason.
+- API functions are Vercel serverless handlers: module.exports = async (req, res) => { ... }
+
+Python (tools/):
+- PEP 8. Type hints where practical. Clear docstrings.
+- Tools must be pure functions: deterministic input → output, no side effects.
+- Add dependencies to tools/requirements.txt.
+
+UI / content:
+- No emojis anywhere on the site unless explicitly requested for a specific instance.
+- No decorative Unicode (no ★, ☆, ✓) as UI elements — use plain text or CSS.
+- Tone: direct, technical, no fluff. Written for people who work in the field.
+- No marketing copy in the knowledge base or UI.
+
+Comments:
+- No filler comments — do not narrate what the code does.
+- Comments explain non-obvious intent, trade-offs, or constraints only.
+
+The test for any new feature: does this save a construction professional real time on a real task? If yes, build it. If it is only informational, deprioritize.`,
+                    files: ['AGENTS.md']
+                }
+            ]
+        },
+        {
+            id: 'ui', label: 'User Interface', open: false,
+            children: [
+                {
+                    id: 'home', label: 'Homepage', path: '/', status: 'live',
+                    desc: 'Landing page with a fullscreen hero video, site search, and primary CTAs. The search bar queries the RAG knowledge base and returns an AI-synthesized answer with source links to the most relevant pages. First contact for most visitors.',
+                    building: 'The search experience should feel like asking an experienced contractor a question and getting a direct, useful answer — not a results list. Next: improve answer quality for niche construction queries and route calculator/tool queries to return live results directly in the search panel.',
+                    files: ['web/index.html', 'web/assets/css/home-landing.css', 'web/api/search.js', 'data/site-content.json']
+                },
+                {
+                    id: 'chat', label: 'AI Chat', path: '/try', status: 'live',
+                    desc: 'The core product. mud1 is a construction-specific AI assistant built on OpenAI and Anthropic models. Users run estimates, draft proposals, build schedules, write RFIs, and ask field questions. Supports model selection, BYOK (bring your own key), and project context.',
+                    building: 'Moving from chat to execution. The goal: you describe a task and the AI completes it, not just answers it. Priority is wiring tool calling so mud1 can invoke estimating, proposal, bluestakes, and email tools during a conversation without leaving chat.',
+                    files: ['web/try.html', 'web/api/chat.js', 'web/assets/js/app.js', 'mud1/src/rag.js']
+                },
+                {
+                    id: 'dashboard', label: 'Dashboard', path: '/dashboard.html', status: 'partial',
+                    desc: 'Authenticated home base after login. Shows recent activity, project context, and usage. Designed as the starting point once a user has ongoing projects and history.',
+                    building: 'Projects view, usage meter by tier, saved chat history, and pinned tools. Needs backend project storage before it is genuinely useful beyond the current state.',
+                    files: ['web/dashboard.html']
+                },
+                {
+                    id: 'resources', label: 'Resources', path: '/resources.html', status: 'live',
+                    desc: 'Construction reference library with eight content categories: Safety & Compliance (OSHA trenching, PPE, confined space, 811 Blue Stakes), Industry Knowledge (YouTube channels, news, podcasts), Open Source tools and datasets, AI in Construction guide and workflows, Industry Software deep dives (Excel, Bluebeam, HCSS, AutoCAD, Procore architecture), Software Dev Basics, and Reference specs (soil types, utility color codes, pipe specs, construction glossary).',
+                    building: 'Expand the AI in Construction section with real openmud chat examples. Add a document viewer for OSHA standards. Connect search so chatting about a topic surfaces the relevant resource card inline.',
+                    files: ['web/resources.html', 'web/css/resources.css']
+                },
+                {
+                    id: 'calculators', label: 'Calculators', path: '/calculators.html', status: 'live',
+                    desc: '18+ browser-based construction calculators running entirely in JavaScript — no server call. Covers trench volume, pipe volume, concrete, compaction, crew production rates, haul cycles, material quantities, and more.',
+                    building: 'Add more calculators based on user requests. Connect calculator outputs to chat — run a trench volume calc and immediately ask mud1 to estimate the cost from that output.',
+                    files: ['web/calculators.html', 'web/css/calculators.css', 'web/js/calculators.js']
+                },
+                {
+                    id: 'companies', label: 'Companies', path: '/companies.html', status: 'live',
+                    desc: 'ESOP and contractor company directory. Lists notable employee-owned companies in heavy civil construction.',
+                    building: 'Expand to a searchable contractor directory with company type, specialties, and region filters.',
+                    files: ['web/companies.html', 'web/js/companies.js']
+                },
+                {
+                    id: 'innovators', label: 'Innovators', path: '/innovators.html', status: 'live',
+                    desc: 'People, companies, and projects pushing heavy civil construction forward — innovation directory for the industry.',
+                    building: 'Curated, regularly-updated list with links to work, publications, and projects.',
+                    files: ['web/innovators.html']
+                },
+                {
+                    id: 'tools', label: 'Tools', path: '/tools.html', status: 'partial',
+                    desc: 'Tools directory listing openmud tools and integrations. Currently shows links to external apps (Swift Stakes, Construction Takeoff, Construction Docs) and planned internal tools.',
+                    building: 'As agentic tools are built and wired, this becomes the tool invocation hub — run a tool directly from the browser or configure it for use in mud1 chat.',
+                    files: ['web/tools.html']
+                },
+                {
+                    id: 'automations', label: 'Automations', path: '/automations.html', status: 'planned',
+                    desc: 'Automation workflow builder — connect triggers (email received, file uploaded, schedule timer) to tool chains (OCR → extraction → proposal draft → email). The event-triggered layer of the agentic platform.',
+                    building: 'This is where openmud is going. An automation is: trigger + context + tool chain + output destination. First automation target: invoice received → OCR → line item extraction → contract reconciliation flag.',
+                    files: ['web/automations.html']
+                },
+                {
+                    id: 'about', label: 'About', path: '/about.html', status: 'live',
+                    desc: 'Mission and what we are building. Direct, no filler.',
+                    building: 'Keep it tight. Update as the product evolves.',
+                    files: ['web/about.html']
+                },
+                {
+                    id: 'download', label: 'Download', path: '/download.html', status: 'live',
+                    desc: 'Links to macOS and iOS App Store apps: Swift Stakes (811 bluestakes automation for UT/ID/NV/AZ), Construction Takeoff (PDF markup and linear/area measurement), Construction Docs (estimates and bid packages).',
+                    building: 'Add deep linking so the web AI assistant can hand off specific tasks to the native apps — e.g., fill a bluestakes ticket in web chat, then pass it to Swift Stakes for final submission.',
+                    files: ['web/download.html']
+                },
+                {
+                    id: 'settings', label: 'Settings', path: '/settings.html', status: 'live',
+                    desc: 'User settings: BYOK API key management (OpenAI, Anthropic, others), subscription tier, default model selection, and notification preferences.',
+                    building: 'Add persistent construction context settings — default job type, region, crew size, typical pipe materials — so mud1 starts with the right context every session without the user re-explaining it.',
+                    files: ['web/settings.html']
+                }
+            ]
+        },
+        {
+            id: 'api', label: 'API Layer', open: false,
+            children: [
+                {
+                    id: 'api-chat', label: 'chat.js', path: '/api/chat', status: 'live',
+                    desc: 'Core AI handler. Routes messages to OpenAI or Anthropic based on model selection. Applies the mud1 construction system prompt, handles BYOK keys, enforces daily usage limits by subscription tier, manages conversation history, and partially wires tool calling. This is the highest-traffic server function.',
+                    building: 'Wire the full tool registry. When a user asks for an estimate, the AI calls the estimating tool and returns a structured result — not just prose. Same for proposal, schedule, and bluestakes. This is the single highest-leverage change in the codebase.',
+                    files: ['web/api/chat.js', 'mud1/src/rag.js']
+                },
+                {
+                    id: 'api-search', label: 'search.js', path: '/api/search', status: 'live',
+                    desc: 'Semantic site search with RAG context injection. Loads site-content.json into memory, uses an in-memory LRU cache (15-min TTL, 500-entry cap), fast-paths high-confidence keyword matches, then calls GPT-4o-mini to synthesize an answer from the top-ranked chunks. 7-second OpenAI timeout.',
+                    building: 'Improve chunk ranking and query understanding. Surface calculator and tool query results directly. Expand the knowledge base for better construction-specific domain coverage.',
+                    files: ['web/api/search.js', 'data/site-content.json']
+                },
+                {
+                    id: 'api-agentic', label: 'agentic-step.js', path: '/api/agentic-step', status: 'partial',
+                    desc: 'Executes individual steps in multi-step agentic workflows. When mud1 selects a tool during conversation, this endpoint runs the step, returns the structured result, and allows the AI to continue with tool output as context.',
+                    building: 'Harden for reliability, rate limiting, and error recovery. This is the execution engine for agentic workflows — it needs to be rock-solid before powering production contractor workflows.',
+                    files: ['web/api/agentic-step.js']
+                },
+                {
+                    id: 'api-usage', label: 'usage.js', path: '/api/usage', status: 'live',
+                    desc: 'Tracks daily request counts per authenticated user via Supabase. Writes to the usage_events table and calls the increment_usage_daily RPC to maintain a daily counter. Enforces hosted model limits by subscription tier. BYOK requests bypass this counter — they run against the user\'s own API quota and do not consume hosted budget.',
+                    building: 'Add per-model granularity. Surface usage breakdown in the dashboard so users see what they\'re spending their daily hosted allowance on.',
+                    files: ['web/api/usage.js', 'web/api/lib/usage.js', 'web/api/lib/migrations/001_usage_events.sql', 'web/api/lib/migrations/002_usage_daily.sql']
+                },
+                {
+                    id: 'api-config', label: 'config.js', path: '/api/config', status: 'live',
+                    desc: 'Serves runtime configuration to the frontend: available models, feature flags, and system limits. Keeps sensitive values server-side while letting the client adapt to the current deployment.',
+                    building: 'Expand to carry feature flags for staged rollouts of new tools and model capabilities.',
+                    files: ['web/api/config.js']
+                },
+                {
+                    id: 'api-fallback', label: 'mud1-fallback.js', path: '/api/mud1-fallback', status: 'live',
+                    desc: 'Fallback handler for mud1 when primary model routing fails. Ensures the assistant stays responsive with graceful degradation when primary model endpoints are unavailable.',
+                    building: 'Improve fallback intelligence — when the primary model is unavailable, select the best available alternative rather than returning an error.',
+                    files: ['web/api/mud1-fallback.js']
+                }
+            ]
+        },
+        {
+            id: 'tools-lib', label: 'Tool Library', open: false,
+            children: [
+                {
+                    id: 'tool-registry', label: 'Tool Registry', path: 'tools/registry.py', status: 'partial',
+                    desc: 'OpenAI function-calling schema definitions for all agentic tools. This is where tools are registered so mud1 can select and invoke them during conversation. Schemas are defined; full wiring to chat.js is in progress.',
+                    building: 'The highest-leverage file in the codebase. Every tool registered here becomes something mud1 can invoke autonomously. Goal: every Tier 1 tool (estimating, proposal, schedule) fully wired and production-tested.',
+                    files: ['tools/registry.py', 'web/api/chat.js']
+                },
+                {
+                    id: 'tool-estimating', label: 'Estimating', path: 'tools/estimating/', status: 'partial',
+                    desc: 'Unit price estimation and cost calculation. Takes scope parameters (linear footage, pipe size, soil type, depth, region) and returns a cost estimate with confidence range, per-unit rate, and optional breakdown by labor, material, and equipment.',
+                    building: 'Current unit rates are ballpark regional averages. Need calibration against real bid data. Add material escalation factors, dewatering, road crossing, and equipment cost models.',
+                    files: ['tools/estimating/estimating_tools.py']
+                },
+                {
+                    id: 'tool-schedule', label: 'Schedule', path: 'tools/schedule/', status: 'partial',
+                    desc: 'Schedule generation from scope and crew size. CPM-style duration calculation for pipeline installation phases: mobilization, trenching, pipe installation, backfill, surface restoration.',
+                    building: 'Add crew-based production rate logic and phase dependency modeling. Connect output to a visual Gantt display in chat.',
+                    files: ['tools/schedule/schedule_tools.py', 'web/api/schedule.js']
+                },
+                {
+                    id: 'tool-proposal', label: 'Proposal Generator', path: 'tools/proposal/', status: 'partial',
+                    desc: 'Generates client-ready proposal text from a project description or estimate output. Structured HTML with scope, price, schedule, exclusions, and assumptions. Supports different tones.',
+                    building: 'PDF export and formatted document output. Goal: one command in chat, a field-ready proposal in the user\'s downloads. Change order variant (CO generator) is next.',
+                    files: ['tools/proposal/proposal_tools.py', 'web/api/proposal.js']
+                },
+                {
+                    id: 'tool-ocr', label: 'OCR / Document Extraction', path: 'tools/ocr/', status: 'planned',
+                    desc: 'Extract text, tables, and line items from PDFs, plan sheets, invoices, and RFIs. Pipeline: pdfplumber for native PDFs, pdf2image + Tesseract for scanned documents, GPT-4o for structured extraction, JSON output.',
+                    building: 'Unlocks document-based workflows. Once built, every construction document in a user\'s workflow is readable by the AI. First target: invoice line-item extraction for reconciliation against the base contract.',
+                    files: ['tools/ocr/ (planned)']
+                },
+                {
+                    id: 'tool-bluestakes', label: 'Bluestakes / 811', path: 'tools/bluestakes/', status: 'planned',
+                    desc: 'Pre-fill a 811 locate ticket from job information — address, scope, pipe types, depth. Support UT, ID, NV, AZ. High-frequency daily task for underground utility contractors. Swift Stakes iOS app already handles this natively; this is the web agent version.',
+                    building: 'Address geocoding, scope parsing, ticket pre-fill form generation, and direct API submission to state 811 centers. Coordinates from the Job Site Mapper feed directly into this tool.',
+                    files: ['tools/bluestakes/ (planned)']
+                },
+                {
+                    id: 'tool-email', label: 'Email Drafting', path: 'tools/email/', status: 'planned',
+                    desc: 'Draft construction-specific emails and RFI responses from project context. Given the project, counterparty, and issue, produce a professional construction email in the correct format and tone.',
+                    building: 'Construction email is a specific genre. The AI needs to know the difference between an RFI, a notice to proceed, a change order request, a schedule recovery letter, and an NOI — each has a structure and legal weight.',
+                    files: ['tools/email/ (planned)']
+                },
+                {
+                    id: 'tool-co', label: 'Change Order Generator', path: 'tools/change-order/', status: 'planned',
+                    desc: 'Generate a formatted change order from extra work description, with labor, equipment, and material breakdown and markup. Extends the proposal tool for mid-project scope changes.',
+                    building: 'Extend the proposal tool for COs. Key additions: markup logic (overhead %, profit %, bond and insurance), CO numbering tied to the base contract, and owner-facing vs internal versions.',
+                    files: ['tools/change-order/ (planned)']
+                },
+                {
+                    id: 'tool-mapper', label: 'Job Site Mapper', path: 'tools/mapper/', status: 'planned',
+                    desc: 'Embed OpenStreetMap via Leaflet.js for marking job site location, corridor, and staging areas. No API key or billing required — OSM is free and open. Tile server: tile.openstreetmap.org.',
+                    building: 'Address geocode, drop a pin, draw a corridor, export coordinates. Once captured, coordinates feed directly into bluestakes ticket pre-fill. Zero external API dependency.',
+                    files: ['tools/mapper/ (planned)']
+                }
+            ]
+        },
+        {
+            id: 'data', label: 'Data Layer', open: false,
+            children: [
+                {
+                    id: 'data-supabase', label: 'Supabase', path: 'https://supabase.com', status: 'live',
+                    desc: 'The primary backend database and auth layer. Supabase handles user authentication (JWT issuance and verification via Bearer tokens), user account storage, project records, chat message history, daily usage event logging, and RAG document indexing. Used across 14+ API files. Key tables: usage_events, usage_daily (with an increment_usage_daily RPC), projects, and chat messages. Auth is validated server-side via the Supabase service role key on every protected API call.',
+                    building: 'Supabase is the source of truth for all user data. Next: add a projects table migration that stores per-project construction context (job type, region, crew size, active bid items) so mud1 can load context automatically at the start of each chat session.',
+                    files: ['web/api/lib/auth.js', 'web/api/lib/usage.js', 'web/api/lib/project-rag-store.js', 'web/api/projects.js', 'web/api/chat-messages.js', 'web/api/user.js', 'web/assets/js/auth.js', '.env.example (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)']
+                },
+                {
+                    id: 'data-kb', label: 'Knowledge Base', path: 'data/site-content.json', status: 'live',
+                    desc: 'The RAG retrieval database for site search and AI chat context. Contains 100+ chunks of construction domain knowledge: OSHA standards, pipe specs, hydraulics, glossary, tools, companies, and more. Each chunk has an id, category, title, content, URL, and search tags. Loaded into memory by search.js and rag-search.js at cold-start.',
+                    building: 'Expand continuously. Every significant page addition should add knowledge base chunks. Goal: comprehensive enough that search can answer any common construction question without a live web call.',
+                    files: ['data/site-content.json', 'web/api/search.js', 'web/api/rag-search.js', 'web/api/rag-index.js']
+                },
+                {
+                    id: 'data-vercel', label: 'vercel.json', path: 'vercel.json', status: 'live',
+                    desc: 'Deployment configuration for Vercel. Defines API routes, rewrites, and function config. Routes /try to the chat page and maps /api/* to the serverless functions in web/api/. Vercel free tier currently handles all deployment needs.',
+                    building: 'Add caching headers and edge config as traffic grows.',
+                    files: ['vercel.json']
+                }
+            ]
+        }
+    ];
+
+    // ─── State ───
+    let activeId = null;
+
+    // ─── Build tree ───
+    const treePanel   = document.getElementById('tree-panel');
+    const detailPanel = document.getElementById('detail-panel');
+
+    function buildTree() {
+        treePanel.innerHTML = '';
+        SITEMAP.forEach(group => {
+            const groupEl = document.createElement('div');
+            groupEl.className = 'tree-group' + (group.open ? ' open' : '');
+
+            const header = document.createElement('div');
+            header.className = 'tree-group-header';
+            header.innerHTML = `<svg class="tree-caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 2.5L8 6l-3.5 3.5"/></svg>${group.label}`;
+            header.addEventListener('click', () => groupEl.classList.toggle('open'));
+
+            const childrenEl = document.createElement('div');
+            childrenEl.className = 'tree-children';
+
+            group.children.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'tree-node' + (activeId === node.id ? ' active' : '');
+                nodeEl.innerHTML = `<span class="tree-dot s-${node.status}"></span>${node.label}`;
+                nodeEl.addEventListener('click', () => {
+                    document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('active'));
+                    nodeEl.classList.add('active');
+                    activeId = node.id;
+                    showDetail(node);
+                });
+                childrenEl.appendChild(nodeEl);
+            });
+
+            groupEl.appendChild(header);
+            groupEl.appendChild(childrenEl);
+            treePanel.appendChild(groupEl);
+        });
+    }
+
+    // ─── Show detail ───
+    function showDetail(node) {
+        const statusLabel = { live: 'Live', partial: 'Partial', planned: 'Planned' }[node.status] || node.status;
+        const isPage = node.path && node.path.startsWith('/');
+        const filesHtml = (node.files || [])
+            .map(f => `<span class="detail-tag">${f}</span>`).join('');
+        const linkHtml = isPage
+            ? `<a href="${node.path}" class="detail-link" target="_blank" rel="noopener">Open page <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10L10 2M6 2h4v4"/></svg></a>`
+            : '';
+
+        detailPanel.innerHTML = `
+            <div class="detail-content">
+                <div class="detail-path">${node.path || ''}</div>
+                <div class="detail-title-row">
+                    <h2 class="detail-title">${node.label}</h2>
+                    <span class="detail-badge badge-${node.status}">${statusLabel}</span>
+                </div>
+                <p class="detail-desc">${node.desc}</p>
+                <div class="detail-label">What we're building</div>
+                <div class="detail-building">${node.building}</div>
+                ${filesHtml ? `<div class="detail-label">Key files</div><div class="detail-files">${filesHtml}</div>` : ''}
+                ${linkHtml}
             </div>
-        </section>
+        `;
+    }
 
-        <section class="section section-alt">
-            <div class="container narrow">
-                <h2 class="skill-title">Proposal Generator</h2>
-                <p>Generate client-ready proposals from a project description or from an estimate you’ve already run. Tell the assistant the project scope (e.g. linear feet, pipe size, soil type, location) and ask for a proposal; it will produce structured text you can paste into a document or send to a client. You can request different tones (formal, concise) and include exclusions or assumptions.</p>
-                <p class="skill-tip">Try in chat: “Draft a proposal for 1,500 LF of 8 inch sewer in clay, Salt Lake Metro, for [client name].”</p>
-            </div>
-        </section>
-
-        <section class="section">
-            <div class="container narrow">
-                <h2 class="skill-title">Schedule Builder</h2>
-                <p>Get a high-level schedule or duration estimate based on scope. The assistant uses project parameters (length, crew size, complexity) to suggest a realistic timeline and, when you ask, can break it into phases (mobilization, trenching, pipe, backfill, restoration). Useful for internal planning and for including schedule assumptions in proposals.</p>
-                <p class="skill-tip">Try in chat: “How long for 2,000 LF of 12 inch waterline with a 5-person crew?” or “Break that into a simple schedule.”</p>
-            </div>
-        </section>
-
-        <section class="section section-alt">
-            <div class="container narrow">
-                <h2 class="skill-title">Quick Bid</h2>
-                <p>Run a cost estimate in plain language. Describe the job (e.g. “1,500 LF of 8 inch sewer in clay, 4.5 ft depth, Salt Lake, summer”) and the assistant will call the estimation model and return a total cost, confidence range, per-linear-foot rate, and optional breakdown (material, labor, equipment, etc.). You can refine with more detail (fittings, road crossings, dewatering, pipe material) for a tighter number.</p>
-                <p class="skill-tip">Try in chat: “Quick bid: 1,200 LF 10 inch storm drain, gravel, Utah County, crew of 6.”</p>
-            </div>
-        </section>
-
-        <section class="section">
-            <div class="container narrow">
-                <h2>What’s next</h2>
-                <p>We're building v1 with these skills in the chat. Early access—we're focused on making the app great before anything else. If you want to try it or help shape it, <a href="mailto:hi@masonearl.com?subject=openmud%20early%20access&body=I'd%20like%20to%20try%20openmud." class="link">get in touch</a>.</p>
-            </div>
-        </section>
-    </main>
-
-    <script src="assets/js/nav.js"></script>
+    buildTree();
+    </script>
 </body>
 </html>
