@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings – openmud</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Settings</h1>
+                <p class="hero-sub">Manage your account and preferences.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <div class="settings-card" id="auth-wrap">
+                    <h2 class="settings-card-title">Account</h2>
+                    <div id="auth-signed-out">
+                        <p class="settings-auth-hint">Sign in to sync your subscription and access your account across devices.</p>
+                        <form class="settings-auth-form" id="form-sign-in">
+                            <input type="email" id="auth-email" placeholder="your@email.com" required>
+                            <button type="submit" class="btn-primary">Send magic link</button>
+                        </form>
+                        <p class="settings-auth-divider"><span>or continue with</span></p>
+                        <div class="settings-auth-providers">
+                            <button type="button" class="btn-oauth btn-oauth-google" id="btn-google">
+                                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                                Sign in with Google
+                            </button>
+                            <button type="button" class="btn-oauth btn-oauth-apple" id="btn-apple">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-1.18 1.35-2.15 2.7-4.05 2.7-1.95-.01-2.78-.95-4.08-.95zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                                Sign in with Apple
+                            </button>
+                        </div>
+                        <span id="auth-status" class="settings-auth-status" hidden></span>
+                    </div>
+                    <div id="auth-signed-in" hidden>
+                        <div class="settings-auth-signed-in">
+                            <div class="settings-auth-avatar" aria-hidden="true"></div>
+                            <div>
+                                <p class="settings-auth-email" id="auth-email-display"></p>
+                                <button type="button" class="btn-secondary btn-sm" id="btn-sign-out">Sign out</button>
+                            </div>
+                        </div>
+                        <div class="settings-open-app-wrap" id="open-app-wrap">
+                            <p class="settings-open-app-hint">Have the desktop app? Open it and sync your account.</p>
+                            <button type="button" class="btn-open-app-settings" id="btn-open-app-settings">Open openmud</button>
+                            <span class="settings-open-app-status" id="open-app-status" hidden></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-card settings-item-spaced" id="provider-keys-wrap">
+                    <h2 class="settings-card-title">Provider API keys</h2>
+                    <p class="settings-auth-hint">Optional. Add your own keys to run AI directly with your provider accounts.</p>
+                    <div class="provider-keys-grid">
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">OpenAI</span>
+                            <input id="key-openai" type="password" class="provider-key-input" placeholder="sk-..." autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">Anthropic</span>
+                            <input id="key-anthropic" type="password" class="provider-key-input" placeholder="sk-ant-..." autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">Grok (xAI)</span>
+                            <input id="key-grok" type="password" class="provider-key-input" placeholder="xai-..." autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">OpenRouter</span>
+                            <input id="key-openrouter" type="password" class="provider-key-input" placeholder="sk-or-..." autocomplete="off">
+                        </label>
+                    </div>
+                    <div class="provider-keys-divider" aria-hidden="true"></div>
+                    <div class="provider-keys-grid">
+                        <div class="provider-key-row">
+                            <span class="provider-key-label">OpenClaw access</span>
+                            <label class="provider-key-toggle">
+                                <input id="openclaw-enabled" type="checkbox">
+                                <span>Enable OpenClaw Agent in chat</span>
+                            </label>
+                        </div>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">OpenClaw API key</span>
+                            <input id="key-openclaw-api" type="password" class="provider-key-input" placeholder="oc-..." autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">OpenClaw base URL</span>
+                            <input id="key-openclaw-base" type="text" class="provider-key-input" placeholder="https://api.openclaw.ai/v1" autocomplete="off">
+                        </label>
+                        <label class="provider-key-row">
+                            <span class="provider-key-label">Preferred OpenClaw model</span>
+                            <input id="key-openclaw-model" type="text" class="provider-key-input" placeholder="openclaw">
+                        </label>
+                    </div>
+                    <div class="provider-keys-actions">
+                        <button type="button" class="btn-primary btn-sm" id="btn-save-provider-keys">Save keys</button>
+                        <button type="button" class="btn-secondary btn-sm" id="btn-clear-provider-keys">Clear keys</button>
+                        <span id="provider-keys-status" class="settings-auth-status" hidden></span>
+                    </div>
+                </div>
+                <a href="/dashboard" class="settings-item settings-item-link settings-item-spaced" id="usage-wrap">
+                    <span class="settings-label">Usage &amp; dashboard</span>
+                    <span class="settings-arrow">→</span>
+                </a>
+                <a href="/download.html" class="settings-item settings-item-link settings-item-spaced">
+                    <span class="settings-label">Download desktop app</span>
+                    <span class="settings-arrow">→</span>
+                </a>
+                <div class="settings-card settings-item-spaced settings-card-compact-list">
+                    <h2 class="settings-card-title">Contact &amp; Community</h2>
+                    <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai" class="settings-item settings-item-link">
+                        <span class="settings-label">Contact</span>
+                        <span class="settings-arrow">→</span>
+                    </a>
+                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="settings-item settings-item-link">
+                        <span class="settings-label">GitHub</span>
+                        <span class="settings-arrow">→</span>
+                    </a>
+                    <a href="https://discord.gg/qszzMjxD3" target="_blank" rel="noopener" class="settings-item settings-item-link">
+                        <span class="settings-label">Discord</span>
+                        <span class="settings-arrow">→</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        (function () {
+            var STORAGE_PROVIDER_KEYS = 'mudrag_provider_keys_v1';
+            var signedOut = document.getElementById('auth-signed-out');
+            var signedIn = document.getElementById('auth-signed-in');
+            var emailDisplay = document.getElementById('auth-email-display');
+            var form = document.getElementById('form-sign-in');
+            var emailInput = document.getElementById('auth-email');
+            var status = document.getElementById('auth-status');
+            var btnGoogle = document.getElementById('btn-google');
+            var btnApple = document.getElementById('btn-apple');
+            var btnSignOut = document.getElementById('btn-sign-out');
+            var keyOpenAi = document.getElementById('key-openai');
+            var keyAnthropic = document.getElementById('key-anthropic');
+            var keyGrok = document.getElementById('key-grok');
+            var keyOpenRouter = document.getElementById('key-openrouter');
+            var openclawEnabled = document.getElementById('openclaw-enabled');
+            var keyOpenClawApi = document.getElementById('key-openclaw-api');
+            var keyOpenClawBase = document.getElementById('key-openclaw-base');
+            var keyOpenClawModel = document.getElementById('key-openclaw-model');
+            var keyStatus = document.getElementById('provider-keys-status');
+            var btnSaveKeys = document.getElementById('btn-save-provider-keys');
+            var btnClearKeys = document.getElementById('btn-clear-provider-keys');
+
+            function showStatus(msg, isError) {
+                status.textContent = msg;
+                status.hidden = false;
+                status.className = 'settings-auth-status' + (isError ? ' settings-auth-status-error' : '');
+            }
+
+            function renderAuth(session) {
+                if (session && session.user) {
+                    signedOut.hidden = true;
+                    signedIn.hidden = false;
+                    emailDisplay.textContent = 'Signed in as ' + (session.user.email || '');
+                } else {
+                    signedOut.hidden = false;
+                    signedIn.hidden = true;
+                }
+            }
+
+            mudragAuth.getSession().then(function (r) {
+                renderAuth(r.data && r.data.session);
+            });
+
+            if (form && emailInput && status) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var email = emailInput.value.trim();
+                    if (!email) return;
+                    status.hidden = true;
+                    mudragAuth.signInWithEmail(email).then(function (result) {
+                        if (result.error) {
+                            showStatus(result.error.message || 'Sign in failed', true);
+                        } else {
+                            showStatus('Check your email for the magic link.', false);
+                        }
+                    }).catch(function (err) {
+                        showStatus(err.message || 'Sign in failed', true);
+                    });
+                });
+            }
+
+            if (btnGoogle) {
+                btnGoogle.addEventListener('click', function () {
+                    status.hidden = true;
+                    mudragAuth.signInWithGoogle().then(function (result) {
+                        if (result.error) showStatus(result.error.message || 'Sign in failed', true);
+                    }).catch(function (err) {
+                        showStatus(err.message || 'Sign in failed', true);
+                    });
+                });
+            }
+
+            if (btnApple) {
+                btnApple.addEventListener('click', function () {
+                    status.hidden = true;
+                    mudragAuth.signInWithApple().then(function (result) {
+                        if (result.error) showStatus(result.error.message || 'Sign in failed', true);
+                    }).catch(function (err) {
+                        showStatus(err.message || 'Sign in failed', true);
+                    });
+                });
+            }
+
+            if (btnSignOut) {
+                btnSignOut.addEventListener('click', function () {
+                    mudragAuth.signOut().then(function () {
+                        try {
+                            localStorage.removeItem('mudrag_subscriber_email');
+                            localStorage.removeItem('mudrag_subscription_active');
+                            localStorage.removeItem('mudrag_subscription_tier');
+                        } catch (e) {}
+                        renderAuth(null);
+                    });
+                });
+            }
+
+            mudragAuth.onAuthStateChange(function (event, session) {
+                renderAuth(session);
+            });
+
+            function showKeyStatus(msg, isError) {
+                if (!keyStatus) return;
+                keyStatus.textContent = msg;
+                keyStatus.hidden = false;
+                keyStatus.className = 'settings-auth-status' + (isError ? ' settings-auth-status-error' : '');
+            }
+
+            function readKeyStore() {
+                try {
+                    var raw = localStorage.getItem(STORAGE_PROVIDER_KEYS);
+                    return raw ? JSON.parse(raw) : {};
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            function writeKeyStore(next) {
+                try {
+                    localStorage.setItem(STORAGE_PROVIDER_KEYS, JSON.stringify(next || {}));
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function renderKeys() {
+                var keys = readKeyStore();
+                if (keyOpenAi) keyOpenAi.value = keys.openai || '';
+                if (keyAnthropic) keyAnthropic.value = keys.anthropic || '';
+                if (keyGrok) keyGrok.value = keys.grok || '';
+                if (keyOpenRouter) keyOpenRouter.value = keys.openrouter || '';
+                if (openclawEnabled) openclawEnabled.checked = !!keys.openclawEnabled;
+                if (keyOpenClawApi) keyOpenClawApi.value = keys.openclawApiKey || '';
+                if (keyOpenClawBase) keyOpenClawBase.value = keys.openclawBaseUrl || '';
+                if (keyOpenClawModel) keyOpenClawModel.value = keys.openclawModel || '';
+            }
+
+            renderKeys();
+
+            if (btnSaveKeys) {
+                btnSaveKeys.addEventListener('click', function () {
+                    var next = {
+                        openai: keyOpenAi ? String(keyOpenAi.value || '').trim() : '',
+                        anthropic: keyAnthropic ? String(keyAnthropic.value || '').trim() : '',
+                        grok: keyGrok ? String(keyGrok.value || '').trim() : '',
+                        openrouter: keyOpenRouter ? String(keyOpenRouter.value || '').trim() : '',
+                        openclawEnabled: !!(openclawEnabled && openclawEnabled.checked),
+                        openclawApiKey: keyOpenClawApi ? String(keyOpenClawApi.value || '').trim() : '',
+                        openclawBaseUrl: keyOpenClawBase ? String(keyOpenClawBase.value || '').trim() : '',
+                        openclawModel: keyOpenClawModel ? String(keyOpenClawModel.value || '').trim() : ''
+                    };
+                    if (next.openclawBaseUrl && !/^https?:\/\//i.test(next.openclawBaseUrl)) {
+                        showKeyStatus('OpenClaw base URL must start with http:// or https://', true);
+                        return;
+                    }
+                    if (next.openclawBaseUrl && !/\/v\d+\/?$/i.test(next.openclawBaseUrl)) {
+                        next.openclawBaseUrl = next.openclawBaseUrl.replace(/\/+$/, '') + '/v1';
+                    }
+                    if (/^https?:\/\//i.test(next.openclawModel || '')) {
+                        next.openclawModel = 'openclaw';
+                    }
+                    if (next.openclawEnabled && (!next.openclawApiKey || !next.openclawBaseUrl)) {
+                        showKeyStatus('To enable OpenClaw, add both OpenClaw API key and base URL.', true);
+                        return;
+                    }
+                    if (!writeKeyStore(next)) {
+                        showKeyStatus('Could not save keys in this browser.', true);
+                        return;
+                    }
+                    showKeyStatus('Provider keys saved. Chat will use these on your next message.', false);
+                    renderKeys();
+                });
+            }
+
+            if (btnClearKeys) {
+                btnClearKeys.addEventListener('click', function () {
+                    if (!writeKeyStore({})) {
+                        showKeyStatus('Could not clear keys in this browser.', true);
+                        return;
+                    }
+                    renderKeys();
+                    showKeyStatus('Provider keys cleared.', false);
+                });
+            }
+        })();
+    </script>
+    <script src="assets/js/nav.js"></script>
+    <script>
+        (function () {
+            var btnOpenApp = document.getElementById('btn-open-app-settings');
+            var openAppStatus = document.getElementById('open-app-status');
+            var openAppWrap = document.getElementById('open-app-wrap');
+
+            // Hide the open-app section when already inside the desktop app
+            if (/mudrag-desktop/i.test(navigator.userAgent || '')) {
+                if (openAppWrap) openAppWrap.hidden = true;
+            }
+
+            if (btnOpenApp) {
+                btnOpenApp.addEventListener('click', function () {
+                    mudragAuth.getSession().then(function (r) {
+                        var session = r.data && r.data.session;
+                        var url;
+                        if (session && session.access_token && session.refresh_token) {
+                            url = 'openmud://auth?access_token=' + encodeURIComponent(session.access_token)
+                                + '&refresh_token=' + encodeURIComponent(session.refresh_token);
+                        } else {
+                            url = 'openmud://try';
+                        }
+                        window.location.href = url;
+                        if (openAppStatus) {
+                            openAppStatus.textContent = 'Opening openmud\u2026 If nothing happens, make sure the app is installed.';
+                            openAppStatus.hidden = false;
+                        }
+                    }).catch(function () {
+                        window.location.href = 'openmud://try';
+                    });
+                });
+            }
+        })();
+    </script>
+    <style>
+        .settings-open-app-wrap { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .settings-open-app-hint { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+        .btn-open-app-settings {
+            padding: 0.55rem 1.25rem;
+            background: rgba(187, 152, 113, 0.14);
+            color: var(--text);
+            border: 1px solid rgba(187, 152, 113, 0.45);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .btn-open-app-settings:hover {
+            background: rgba(187, 152, 113, 0.24);
+            border-color: rgba(187, 152, 113, 0.62);
+        }
+        .settings-open-app-status { display: block; margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .provider-keys-grid { display: grid; gap: 0.7rem; margin-top: 0.35rem; }
+        .provider-key-row { display: grid; gap: 0.35rem; }
+        .provider-key-label { font-size: 0.83rem; color: var(--text-secondary); font-weight: 600; }
+        .provider-key-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            padding: 0.62rem 0.72rem;
+            font-size: 0.92rem;
+            outline: none;
+        }
+        .provider-key-input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(187, 152, 113, 0.2);
+        }
+        .provider-keys-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+            margin-top: 0.9rem;
+        }
+        .provider-keys-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.95rem 0 0.75rem;
+        }
+        .provider-key-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+    </style>
+</body>
+</html>

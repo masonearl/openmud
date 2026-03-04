@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>openmud – Open-source AI for Heavy Civil Construction</title>
+    <meta name="description" content="openmud combines AI chat, field workflows, and desktop tooling for construction. Search references, run estimates, and download the macOS app.">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="/assets/css/home-landing.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
+
+    <section class="lp-hero-video-wrap">
+        <div class="lp-video-bg" aria-hidden="true">
+            <video autoplay muted playsinline loop preload="auto">
+                <source src="https://videos.pexels.com/video-files/6618333/6618333-hd_1920_1080_24fps.mp4" type="video/mp4">
+                <source src="https://videos.pexels.com/video-files/6618021/6618021-hd_1920_1080_24fps.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="lp-video-overlay" aria-hidden="true"></div>
+        <div class="lp-hero">
+            <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="lp-hero-eyebrow">Open source · Field workflows first</a>
+            <h1 class="lp-hero-title">AI for<br><em>construction.</em></h1>
+            <p class="lp-hero-sub">Free tools for estimating, scheduling, and proposals — built by contractors, for contractors.</p>
+
+            <form class="lp-search-form" id="site-search-form">
+                <input id="site-search-input" class="lp-search-input" placeholder="Search OSHA, pipe specs, estimating workflows..." autocomplete="off" spellcheck="false">
+                <button type="submit" class="lp-search-btn" aria-label="Search">Search</button>
+            </form>
+
+            <div class="lp-hero-actions">
+                <a href="/try" class="lp-btn-secondary">Try AI</a>
+                <a href="/download.html" class="lp-btn-secondary">Download</a>
+                <a href="/documentation.html" class="lp-btn-secondary">Documentation</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="lp-search-results" id="search-results" hidden>
+        <button class="lp-close" id="search-close">esc</button>
+        <h3 id="search-query"></h3>
+        <p id="search-answer"></p>
+        <div id="search-sources"></div>
+    </div>
+
+    <script>
+        (function () {
+            const form = document.getElementById('site-search-form');
+            const input = document.getElementById('site-search-input');
+            const results = document.getElementById('search-results');
+            const closeBtn = document.getElementById('search-close');
+            const queryEl = document.getElementById('search-query');
+            const answerEl = document.getElementById('search-answer');
+            const sourcesEl = document.getElementById('search-sources');
+
+            function closeSearch() {
+                results.hidden = true;
+                sourcesEl.innerHTML = '';
+            }
+
+            closeBtn.addEventListener('click', closeSearch);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeSearch();
+            });
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const query = (input.value || '').trim();
+                if (!query) return;
+                queryEl.textContent = query;
+                answerEl.textContent = 'Searching...';
+                sourcesEl.innerHTML = '';
+                results.hidden = false;
+                try {
+                    const res = await fetch('/api/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query })
+                    });
+                    const data = await res.json();
+                    answerEl.textContent = data.answer || 'No result.';
+                    if (Array.isArray(data.sources)) {
+                        sourcesEl.innerHTML = data.sources.map(function (s) {
+                            return '<a class="lp-source" href="' + s.url + '">' + s.title + '</a>';
+                        }).join('');
+                    }
+                } catch (err) {
+                    answerEl.textContent = 'Search is unavailable right now. Try /documentation or /try.';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

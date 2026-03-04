@@ -1,0 +1,7 @@
+{
+  "name": "mud1",
+  "version": "1.0.0",
+  "description": "openmud's construction AI – local via Ollama or cloud fallback",
+  "private": true,
+  "main": "src/ollama-client.js"
+}

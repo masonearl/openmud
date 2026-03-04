@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automations – openmud</title>
+    <meta name="description" content="Custom workflows: desktop cleanup, email search, and more. Connect openmud to your tools.">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Automations</h1>
+                <p class="hero-sub">Custom workflows that connect openmud to your tools.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <p class="doc-intro">We’re building automations so you can run workflows like “clean up my desktop” or “find that email from PlanHub.” Here’s what’s possible and what’s coming.</p>
+            </div>
+        </section>
+
+        <section id="desktop" class="section section-alt">
+            <div class="container narrow">
+                <h2>Desktop app</h2>
+                <p>Get openmud as a native Mac app. It’s a simple wrapper around openmud.ai—same experience, always in your dock. Future automations (desktop cleanup, local file access) will run through this app.</p>
+                <div class="download-cta">
+                    <a href="https://github.com/masonearl/openmud.ai/releases/latest" class="btn-download" target="_blank" rel="noopener">
+                        Download for Mac (.dmg)
+                    </a>
+                    <p class="download-hint">macOS 10.15 or later. Requires Python 3.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-alt">
+            <div class="container narrow">
+                <h2>Web vs desktop</h2>
+                <p><strong>From the web (openmud.ai):</strong> We can connect to services you authorize via OAuth. For example, “find an email in my inbox” works if you connect Gmail or Outlook—you grant permission once, and openmud can search your mail through their APIs. No desktop app required.</p>
+                <p><strong>From a desktop app:</strong> Actions like “clean up my desktop” or “organize my Downloads folder” need direct file-system access. Browsers can’t do that for security reasons. For those workflows, we’ll offer a small desktop agent you install locally. It runs on your machine, you approve what it can touch, and openmud (openmud.ai) talks to it to run those automations.</p>
+                <p class="skill-tip">TL;DR: Email search → web (OAuth). Desktop cleanup → desktop agent. Both are on the roadmap.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <h2>Coming soon</h2>
+                <ul class="automation-list">
+                    <li><strong>Email search</strong> – Connect Gmail or Outlook, then ask “find the quote from PlanHub” or “emails from last week about the Main St project.”</li>
+                    <li><strong>Desktop cleanup</strong> – A local agent that organizes your Desktop, Downloads, or project folders. You choose what it can access.</li>
+                    <li><strong>Calendar & scheduling</strong> – Block time, check availability, sync with construction schedules.</li>
+                </ul>
+                <p>If you want early access or have workflows you’d like to see, <a href="mailto:hi@masonearl.com?subject=Automations%20from%20openmud&body=I%20want%20to%20try%20automations%20or%20suggest%20a%20workflow%3A%0A%0A" class="link">get in touch</a>.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="assets/js/nav.js"></script>
+</body>
+</html>

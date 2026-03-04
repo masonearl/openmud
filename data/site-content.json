@@ -3,7 +3,7 @@
     {
       "id": "osha-soil-a",
       "category": "Safety",
-      "title": "OSHA Soil Type A \u2014 Trenching",
+      "title": "OSHA Soil Type A — Trenching",
       "content": "Type A soil is the most stable. Cohesive soils with unconfined compressive strength of 1.5 tons per square foot or greater. Includes stiff clay, hardpan, caliche. No fissuring, no previous disturbance, no water seepage. Required slope: 3/4:1 (0.75H per 1V). Thumb penetration test: thumb barely penetrates. Pocket penetrometer reads 1.5 tsf or more.",
       "url": "/resources.html#osha-excavation",
       "tags": [
@@ -19,7 +19,7 @@
     {
       "id": "osha-soil-b",
       "category": "Safety",
-      "title": "OSHA Soil Type B \u2014 Trenching",
+      "title": "OSHA Soil Type B — Trenching",
       "content": "Type B soil has cohesive or granular properties with unconfined compressive strength between 0.5 and 1.5 tsf. Includes angular gravel, silty clay, previously disturbed Type A soil, fissured soils. Required slope: 1:1 (1H per 1V). Most common soil classification in urban trench work. Thumb penetration 0.25 to 1 inch.",
       "url": "/resources.html#osha-excavation",
       "tags": [
@@ -36,7 +36,7 @@
     {
       "id": "osha-soil-c",
       "category": "Safety",
-      "title": "OSHA Soil Type C \u2014 Trenching",
+      "title": "OSHA Soil Type C — Trenching",
       "content": "Type C is the least stable soil classification. Cohesive soils with unconfined strength less than 0.5 tsf, granular soils like sand and gravel, submerged soil, soil subject to water infiltration, or layered systems sloping into excavation. Required slope: 1.5:1 (1.5H per 1V). Benching is NOT permitted in Type C. Thumb penetrates more than 1 inch.",
       "url": "/resources.html#osha-excavation",
       "tags": [
@@ -55,7 +55,7 @@
       "id": "osha-slopes",
       "category": "Safety",
       "title": "OSHA Required Slope Angles by Soil Type",
-      "content": "OSHA 29 CFR 1926 Appendix B slope requirements: Type A soil \u2014 53 degrees, 3/4:1 H:V ratio, 0.75 ft horizontal setback per foot of depth. Type B soil \u2014 45 degrees, 1:1 H:V ratio, 1.0 ft setback per foot. Type C soil \u2014 34 degrees, 1.5:1 H:V ratio, 1.5 ft setback per foot. Stable rock \u2014 90 degrees vertical is allowed.",
+      "content": "OSHA 29 CFR 1926 Appendix B slope requirements: Type A soil — 53 degrees, 3/4:1 H:V ratio, 0.75 ft horizontal setback per foot of depth. Type B soil — 45 degrees, 1:1 H:V ratio, 1.0 ft setback per foot. Type C soil — 34 degrees, 1.5:1 H:V ratio, 1.5 ft setback per foot. Stable rock — 90 degrees vertical is allowed.",
       "url": "/resources.html#osha-excavation",
       "tags": [
         "OSHA",
@@ -69,7 +69,7 @@
     {
       "id": "osha-competent-person",
       "category": "Safety",
-      "title": "Competent Person Requirements \u2014 OSHA Excavation",
+      "title": "Competent Person Requirements — OSHA Excavation",
       "content": "A competent person must be present during all excavation work per OSHA 29 CFR 1926.651. Daily checklist: classify soil before workers enter, locate utilities (811 called 3+ days prior), surface encumbrances removed, spoil placed 2 ft minimum from edge, protective system in place, access and egress within 25 LF, water accumulation evaluated, atmospheric testing if depth over 4 ft, adjacent structures evaluated, inspection after rain or freeze-thaw.",
       "url": "/resources.html#osha-excavation",
       "tags": [
@@ -84,7 +84,7 @@
     {
       "id": "osha-trench-shield",
       "category": "Safety",
-      "title": "Trench Shield and Box Requirements \u2014 OSHA",
+      "title": "Trench Shield and Box Requirements — OSHA",
       "content": "Trench shields (boxes) are permitted in all soil types as an alternative to sloping or shoring. Requirements: must extend 18 inches above top of unstable soil or within 2 ft of surface in stable soil. Workers must exit the shield before repositioning. Must be designed by a PE or meet manufacturer tabulated data. Spoil minimum 2 ft from trench edge. Maximum 2 ft of unprotected trench in front of and behind the shield.",
       "url": "/resources.html#osha-excavation",
       "tags": [
@@ -99,8 +99,8 @@
     {
       "id": "osha-ppe",
       "category": "Safety",
-      "title": "OSHA PPE Requirements \u2014 Construction",
-      "content": "29 CFR 1926 Subpart E personal protective equipment for construction. Hard hat required where head injury risk exists \u2014 Class E for electrical. Safety glasses for grinding, drilling, concrete work. High visibility vest Class 2 minimum near traffic, Class 3 on highway ROW. Steel-toe boots for heavy equipment and material handling. Hearing protection when noise exceeds 85 dBA TWA. Fall protection at 6 ft leading edges. Respiratory protection for silica dust \u2014 PEL 50 micrograms per cubic meter.",
+      "title": "OSHA PPE Requirements — Construction",
+      "content": "29 CFR 1926 Subpart E personal protective equipment for construction. Hard hat required where head injury risk exists — Class E for electrical. Safety glasses for grinding, drilling, concrete work. High visibility vest Class 2 minimum near traffic, Class 3 on highway ROW. Steel-toe boots for heavy equipment and material handling. Hearing protection when noise exceeds 85 dBA TWA. Fall protection at 6 ft leading edges. Respiratory protection for silica dust — PEL 50 micrograms per cubic meter.",
       "url": "/resources.html#osha-ppe",
       "tags": [
         "OSHA",
@@ -131,8 +131,8 @@
     {
       "id": "confined-space",
       "category": "Safety",
-      "title": "Confined Space Entry \u2014 Construction OSHA 1926.1200",
-      "content": "Confined spaces in construction regulated under 29 CFR 1926.1200. A permit-required confined space has a hazardous atmosphere, engulfment risk, internal configuration hazard, or other serious safety risk. Atmospheric testing order: 1) oxygen content (must be 19.5-23.5%), 2) flammable gases below 10% LEL, 3) toxic contaminants below PEL. Common confined spaces in underground utility: manholes, valve vaults, wet wells, lift stations. Over 60% of confined space fatalities are rescuers \u2014 never enter to rescue without proper equipment.",
+      "title": "Confined Space Entry — Construction OSHA 1926.1200",
+      "content": "Confined spaces in construction regulated under 29 CFR 1926.1200. A permit-required confined space has a hazardous atmosphere, engulfment risk, internal configuration hazard, or other serious safety risk. Atmospheric testing order: 1) oxygen content (must be 19.5-23.5%), 2) flammable gases below 10% LEL, 3) toxic contaminants below PEL. Common confined spaces in underground utility: manholes, valve vaults, wet wells, lift stations. Over 60% of confined space fatalities are rescuers — never enter to rescue without proper equipment.",
       "url": "/resources.html#confined-space",
       "tags": [
         "confined space",
@@ -147,7 +147,7 @@
     {
       "id": "bluestakes-811",
       "category": "Safety",
-      "title": "811 Blue Stakes \u2014 Call Before You Dig",
+      "title": "811 Blue Stakes — Call Before You Dig",
       "content": "811 is the national call before you dig number. Blue Stakes of Utah administers the program in Utah. Utah Code 54-8a requires notification at least 3 business days (72 hours) before any excavation. The 5 steps: 1) Call or click 811, 2) Wait the full time, 3) Confirm all markings via EPR, 4) Respect and protect marks, 5) Hand dig within 24 inches of each mark (tolerance zone). Failure to notify can result in fines and full liability for damage.",
       "url": "/resources.html#bluestakes",
       "tags": [
@@ -163,8 +163,8 @@
     {
       "id": "utility-colors",
       "category": "Reference",
-      "title": "Utility Marking Color Codes \u2014 APWA Standard",
-      "content": "APWA uniform color code for underground utility markings. Red: electric power lines, cables, conduit, lighting. Orange: telecommunication, alarm, signal lines, cable TV, fiber optic. Yellow: gas, oil, steam, petroleum, gaseous materials. Green: sewers, storm drain, drain tile. Blue: potable water. Purple: reclaimed water, irrigation, non-potable. Pink: temporary survey markings, unknown utilities. White: proposed excavation area \u2014 mark your dig zone in white. Gray: temporary dewatering lines.",
+      "title": "Utility Marking Color Codes — APWA Standard",
+      "content": "APWA uniform color code for underground utility markings. Red: electric power lines, cables, conduit, lighting. Orange: telecommunication, alarm, signal lines, cable TV, fiber optic. Yellow: gas, oil, steam, petroleum, gaseous materials. Green: sewers, storm drain, drain tile. Blue: potable water. Purple: reclaimed water, irrigation, non-potable. Pink: temporary survey markings, unknown utilities. White: proposed excavation area — mark your dig zone in white. Gray: temporary dewatering lines.",
       "url": "/resources.html#color-codes",
       "tags": [
         "utility",
@@ -202,7 +202,7 @@
     {
       "id": "calc-pipe-flow",
       "category": "Calculator",
-      "title": "Pipe Flow Calculator \u2014 Manning's Equation",
+      "title": "Pipe Flow Calculator — Manning's Equation",
       "content": "Calculate gravity pipe flow capacity and velocity using Manning's equation Q equals (1/n) times A times R to the 2/3 power times S to the 1/2 power. Inputs: pipe diameter in inches, pipe slope in ft/ft, Manning's n coefficient, flow depth ratio d/D. Manning's n values: concrete RCP 0.013, PVC 0.012, HDPE 0.011, ductile iron 0.015, CMP 0.024. Outputs: flow in GPM and CFS, velocity in ft/s, flow area. Maximum hydraulic capacity occurs at about 93% full not 100%.",
       "url": "/calculators.html#pipe-flow",
       "tags": [
@@ -238,7 +238,7 @@
     {
       "id": "calc-trench-safety",
       "category": "Calculator",
-      "title": "Trench Safety Calculator \u2014 OSHA",
+      "title": "Trench Safety Calculator — OSHA",
       "content": "Calculate OSHA required protective system dimensions based on soil type, trench depth, and protection method. Soil types A, B, C. Methods: sloping, benching, trench shield. Outputs slope ratio, horizontal setback each side, total top width. Benching not permitted in Type C soil. Any excavation over 5 feet requires a protective system. Over 20 feet requires PE designed system.",
       "url": "/calculators.html#trench-safety",
       "tags": [
@@ -291,7 +291,7 @@
     {
       "id": "calc-compaction",
       "category": "Calculator",
-      "title": "Compaction Calculator \u2014 Relative Compaction and Lifts",
+      "title": "Compaction Calculator — Relative Compaction and Lifts",
       "content": "Calculate relative compaction from Proctor test data. Formula: relative compaction equals field dry density divided by max dry density times 100. Common requirements: 95% Standard Proctor for trench backfill standard, 90% for subgrade or fill, 98% for pavement subbase. Also calculate number of lifts needed: divide total fill depth by lift thickness per compactor type. Vibratory plate: 6-8 inch lifts. Jumping jack tamper: 4-8 inch lifts. Hand tamper: 3-6 inch lifts.",
       "url": "/calculators.html#compaction",
       "tags": [
@@ -556,7 +556,7 @@
     {
       "id": "soil-classification",
       "category": "Reference",
-      "title": "Soil Classification Reference \u2014 Swell Shrink Bearing",
+      "title": "Soil Classification Reference — Swell Shrink Bearing",
       "content": "Soil engineering properties for construction. Sand clean: swell 10-15%, shrink 5-10%, bearing 1500-3000 PSF. Gravel: swell 10-20%, shrink 5-10%, bearing 3000-6000 PSF. Silty clay: swell 20-30%, shrink 10-15%, bearing 1000-2000 PSF. Stiff clay: swell 25-35%, shrink 15-20%, bearing 2000-4000 PSF. Soft clay: swell 30-40%, shrink 20-25%, bearing 500-1000 PSF. Rock soft: swell 25-40%, bearing 10000-50000 PSF. Rock hard: swell 30-50%, bearing 50000+ PSF.",
       "url": "/resources.html#soil-types",
       "tags": [
@@ -574,7 +574,7 @@
     {
       "id": "esop-explained",
       "category": "Companies",
-      "title": "What is an ESOP \u2014 Employee Stock Ownership Plan",
+      "title": "What is an ESOP — Employee Stock Ownership Plan",
       "content": "An ESOP is a qualified retirement plan that holds company stock for employees. In construction, employees gradually become owners without paying out of pocket. Shares allocated annually based on compensation or tenure. Vesting typically 3-6 years. When employees leave or retire the ESOP buys back shares at fair market value. S-corp ESOPs may eliminate federal income tax on ESOP-owned profit. Common reasons contractors go ESOP: succession planning, recruiting retention, tax benefits, culture, protection from private equity acquisition.",
       "url": "/companies.html#what-is-esop",
       "tags": [
@@ -688,7 +688,7 @@
     {
       "id": "python-hydraulics",
       "category": "Tools",
-      "title": "Python Hydraulics Tools \u2014 pipe_flow_full and minimum_slope",
+      "title": "Python Hydraulics Tools — pipe_flow_full and minimum_slope",
       "content": "openmud Python tools for hydraulic calculations. pipe_flow_full(diameter_in, slope, n) calculates Manning's full pipe flow in CFS and GPM, velocity in ft/s, area, and hydraulic radius. pipe_flow_partial(diameter_in, slope, depth_ratio, n) calculates partial flow at any d/D ratio. minimum_slope(diameter_in, target_velocity, n) solves for minimum slope to achieve self-cleaning velocity. flow_to_slope(diameter_in, target_flow_gpm, n) finds required slope for a target flow. Available via: from tools.field.hydraulics import pipe_flow_full, minimum_slope.",
       "url": "https://github.com/masonearl/openmud/tree/main/tools/field",
       "tags": [
@@ -838,7 +838,7 @@
     {
       "id": "glossary-811",
       "category": "Glossary",
-      "title": "Construction Glossary \u2014 811 to Confined Space",
+      "title": "Construction Glossary — 811 to Confined Space",
       "content": "Key construction terms. 811: national call before you dig number. AASHTO: American Association of State Highway and Transportation Officials. Angle of repose: steepest angle loose material stays stable. APWA: sets utility color codes. As-builts: drawings reflecting actual constructed conditions. AWWA: American Water Works Association sets water pipe standards. Backfill: material refilling trench after pipe install. BCY: bank cubic yards in-place soil volume. Bedding: granular material below and around pipe. Blue stakes: Utah 811 utility locating program. Bore: directional drill or jack-and-bore trenchless install. Butt fusion: HDPE joining method heating and pressing pipe ends.",
       "url": "/resources.html#glossary",
       "tags": [
@@ -857,7 +857,7 @@
     {
       "id": "glossary-ccyto-force",
       "category": "Glossary",
-      "title": "Construction Glossary \u2014 CCY to Force Main",
+      "title": "Construction Glossary — CCY to Force Main",
       "content": "Key construction terms continued. CCY: compacted cubic yards after compaction, 10-20% less than BCY. Change order: written document modifying contract scope price or schedule. CIP: cast iron pipe older water distribution. CMP: corrugated metal pipe for culverts and storm drain. Competent person: OSHA defined person who identifies excavation hazards. Compaction: mechanical densification of soil. Confined space: limited entry not for continuous occupancy like manholes. D/B: design-build project delivery. Dewatering: removal of groundwater from excavation. DIP: ductile iron pipe for water and pressure sewer. DR: dimension ratio pipe OD divided by wall thickness. EPR: electronic positive response for 811 locate status. Force main: pressurized sewer pipe using pump pressure.",
       "url": "/resources.html#glossary",
       "tags": [
@@ -876,7 +876,7 @@
     {
       "id": "glossary-gvwto-work-zone",
       "category": "Glossary",
-      "title": "Construction Glossary \u2014 GVW to Work Zone",
+      "title": "Construction Glossary — GVW to Work Zone",
       "content": "Key construction terms. GVW: gross vehicle weight. Haunching: bedding material at sides of pipe from bedding to springline. HDD: horizontal directional drilling trenchless pipe install. HDPE: high density polyethylene pipe flexible fusion joints. Invert: lowest interior point of pipe, invert elevations control flow. LCY: loose cubic yards after excavation with swell. LEL: lower explosive limit for confined space. Potholing: hand excavating to expose utilities before digging. Prevailing wage: minimum rates on public works projects. RFI: request for information asking engineer to clarify. ROW: right of way legal corridor for construction. Schedule of values: contract price breakdown by work item for pay apps. Spoil: excavated material minimum 2 ft from trench edge. Swell: volume increase of soil when excavated. T&M: time and materials basis for change orders. Tolerance zone: 24 inches each side of utility marks hand dig only.",
       "url": "/resources.html#glossary",
       "tags": [
@@ -900,7 +900,7 @@
       "id": "openmud-mission",
       "category": "About",
       "title": "openmud Mission and Platform Overview",
-      "content": "openmud is an open source AI platform for heavy civil and underground utility construction. MIT license, completely free, no paywall. Mission: make AI a practical tool for every phase of the job from bid to closeout. The platform includes AI chat tuned for heavy civil, 18 construction calculators, OSHA and 811 safety reference, construction company directory, Python tool library for developers, open source GitHub repository at github.com/masonearl/openmud. Goal: automate the monotony of construction \u2014 bid generation, proposal documents, daily reports, takeoffs, email filtering, document extraction, RFI tracking, scheduling. Built by contractors for contractors.",
+      "content": "openmud is an open source AI platform for heavy civil and underground utility construction. MIT license, completely free, no paywall. Mission: make AI a practical tool for every phase of the job from bid to closeout. The platform includes AI chat tuned for heavy civil, 18 construction calculators, OSHA and 811 safety reference, construction company directory, Python tool library for developers, open source GitHub repository at github.com/masonearl/openmud. Goal: automate the monotony of construction — bid generation, proposal documents, daily reports, takeoffs, email filtering, document extraction, RFI tracking, scheduling. Built by contractors for contractors.",
       "url": "/about.html",
       "tags": [
         "openmud",
@@ -919,7 +919,7 @@
     {
       "id": "openmud-chat",
       "category": "Tools",
-      "title": "openmud AI Chat \u2014 mud1 GPT-4o Claude",
+      "title": "openmud AI Chat — mud1 GPT-4o Claude",
       "content": "openmud AI chat at openmud.ai/chat. Multi-model support: mud1 (custom heavy civil model built on GPT-4o-mini), GPT-4o, GPT-4o-mini, GPT-4 Turbo, Claude Haiku 4.5, Claude Sonnet 4.6, Claude Opus 4.6. mud1 is tuned with construction context for estimating scheduling proposals underground utility work. Chat generates schedules with PDF export and proposals with PDF export. Quick estimate tool built into chat interface. Project management with named projects.",
       "url": "/chat.html",
       "tags": [
@@ -939,7 +939,7 @@
       "id": "contribute-openmud",
       "category": "About",
       "title": "How to Contribute to openmud",
-      "content": "openmud welcomes contributions from contractors, estimators, field engineers, and developers. Ways to contribute: improve pricing data in tools/estimating/estimating_tools.py \u2014 regional labor rates, material costs, equipment rental. Add new calculators to calculators.html and assets/js/calculators.js. Build new Python tools in the tools/ directory. Improve AI prompts in api/chat.js SYSTEM_PROMPTS. Fix bugs, improve UI, add mobile support. Submit a pull request on GitHub: fork the repo, create a branch, open a PR describing what you built and why it matters in the field. Contact: hi@masonearl.com.",
+      "content": "openmud welcomes contributions from contractors, estimators, field engineers, and developers. Ways to contribute: improve pricing data in tools/estimating/estimating_tools.py — regional labor rates, material costs, equipment rental. Add new calculators to calculators.html and assets/js/calculators.js. Build new Python tools in the tools/ directory. Improve AI prompts in api/chat.js SYSTEM_PROMPTS. Fix bugs, improve UI, add mobile support. Submit a pull request on GitHub: fork the repo, create a branch, open a PR describing what you built and why it matters in the field. Contact: hi@masonearl.com.",
       "url": "https://github.com/masonearl/openmud",
       "tags": [
         "contribute",
@@ -957,7 +957,7 @@
     {
       "id": "nav-calculators",
       "category": "Navigation",
-      "title": "Go to Calculators \u2014 openmud.ai/calculators",
+      "title": "Go to Calculators — openmud.ai/calculators",
       "content": "The calculators page at openmud.ai/calculators has 24 free construction calculators organized into four categories. Takeoff and Quantities: trench volume, concrete volume, asphalt tonnage, pipe and fittings. Engineering and Field: pipe flow Manning equation, minimum pipe slope, trench safety OSHA, thrust block sizing, grade and slope, compaction. Cost and Bid: markup and bid price, unit price builder, change order, production rate, crew day cost. Reference and Conversion: unit converter, pipe reference table, Manning's n values. All calculators run in the browser with no account needed.",
       "url": "/calculators.html",
       "tags": [
@@ -979,7 +979,7 @@
     {
       "id": "nav-resources",
       "category": "Navigation",
-      "title": "Go to Resources \u2014 openmud.ai/resources",
+      "title": "Go to Resources — openmud.ai/resources",
       "content": "The resources page at openmud.ai/resources has structured construction reference content. Safety: OSHA 29 CFR 1926 Subpart P trenching and excavation standards, OSHA PPE requirements, 811 blue stakes guide, confined space entry. Industry Knowledge: best YouTube channels for heavy civil, construction news and AI updates, podcasts, standards and codes. Open Source: open source tool directory, public datasets. Reference: soil classification swell shrink bearing, utility color codes APWA, pipe specifications, and a searchable 100-term construction glossary.",
       "url": "/resources.html",
       "tags": [
@@ -998,7 +998,7 @@
     {
       "id": "nav-chat",
       "category": "Navigation",
-      "title": "Go to AI Chat \u2014 openmud.ai/chat",
+      "title": "Go to AI Chat — openmud.ai/chat",
       "content": "The AI chat page at openmud.ai/chat lets you talk to construction-tuned AI models. Supported models: mud1 (custom heavy civil model), GPT-4o, GPT-4o-mini, Claude Sonnet, Claude Haiku. The chat can generate construction schedules with PDF export, write project proposals with PDF export, run quick estimates, and answer construction questions. No account required. Bring your own OpenAI or Anthropic API key, or use mudrag.com for a hosted version.",
       "url": "/chat.html",
       "tags": [
@@ -1018,7 +1018,7 @@
     {
       "id": "nav-companies",
       "category": "Navigation",
-      "title": "Go to Companies \u2014 openmud.ai/companies",
+      "title": "Go to Companies — openmud.ai/companies",
       "content": "The companies page at openmud.ai/companies is a construction company directory. Sections: Utah contractors, Mountain West contractors, ENR Top 25 national contractors. Filter by company type: heavy civil, underground utility, general contractor. Also includes: ESOP and employee-owned companies, publicly traded contractors with stock tickers, underground specialty contractors. Industry intelligence: what is an ESOP explained, ownership types explained, market data and IIJA spending trends.",
       "url": "/companies.html",
       "tags": [
@@ -1038,7 +1038,7 @@
     {
       "id": "nav-innovators",
       "category": "Navigation",
-      "title": "Go to Innovators \u2014 openmud.ai/innovators",
+      "title": "Go to Innovators — openmud.ai/innovators",
       "content": "The Innovators page at openmud.ai/innovators covers construction technology innovation. Topics: drones and UAV for surveying and photogrammetry, autonomous equipment and GPS machine control, AI on the job site, horizontal directional drilling and trenchless technology, construction software and BIM, field techniques and methods. Includes featured videos on Komatsu autonomous dozers, drone photogrammetry, and HDD. Links to open GitHub Discussions for each topic.",
       "url": "/innovators.html",
       "tags": [
@@ -1058,7 +1058,7 @@
     {
       "id": "nav-about",
       "category": "Navigation",
-      "title": "Go to About \u2014 openmud.ai/about",
+      "title": "Go to About — openmud.ai/about",
       "content": "The About page at openmud.ai/about explains openmud's mission: make AI a practical tool for every phase of construction, from bid to closeout. Built by contractors for contractors. Covers: AI chat, calculators, resources, companies directory, Python tools library, GitHub open source project. Also includes Contech API information for developers who want to build on top of openmud. Contact: hi@masonearl.com.",
       "url": "/about.html",
       "tags": [
@@ -1075,8 +1075,8 @@
     {
       "id": "openmud-what-we-build",
       "category": "About",
-      "title": "What openmud Is Building \u2014 Roadmap and Vision",
-      "content": "openmud is building the AI layer for heavy civil construction. Current tools: AI chat tuned for construction, 24 calculators, OSHA and safety reference, company directory, Python tool library. What is coming next: real tool calling so AI actually runs Python calculators during chat, change order generator, RFI tracker, automated takeoff from plan sheets, invoice generator, daily report automation, better regional pricing data. The vision is a construction OS \u2014 one platform from bid day to project closeout, open source and free forever. Contribute on GitHub or reach out at hi@masonearl.com.",
+      "title": "What openmud Is Building — Roadmap and Vision",
+      "content": "openmud is building the AI layer for heavy civil construction. Current tools: AI chat tuned for construction, 24 calculators, OSHA and safety reference, company directory, Python tool library. What is coming next: real tool calling so AI actually runs Python calculators during chat, change order generator, RFI tracker, automated takeoff from plan sheets, invoice generator, daily report automation, better regional pricing data. The vision is a construction OS — one platform from bid day to project closeout, open source and free forever. Contribute on GitHub or reach out at hi@masonearl.com.",
       "url": "/about.html",
       "tags": [
         "roadmap",
@@ -1162,8 +1162,8 @@
     {
       "id": "hdd-horizontal-directional-drilling",
       "category": "Reference",
-      "title": "Horizontal Directional Drilling \u2014 HDD Guide",
-      "content": "HDD is a trenchless method for installing pipe, conduit, or cable under roads, rivers, and structures. Process: bore a pilot hole using a steerable drill head, enlarge with a reamer to the required diameter, pull the product pipe back through. Common uses: water and sewer under roads, fiber conduit, gas lines, utility crossings. Advantages: no surface disruption, ROW preservation, lower cost in some conditions. Key specs: entry angle typically 8-12 degrees, exit angle 4-8 degrees. HDPE pipe is the most common product pipe. Slurry control is critical \u2014 bentonite drilling fluid.",
+      "title": "Horizontal Directional Drilling — HDD Guide",
+      "content": "HDD is a trenchless method for installing pipe, conduit, or cable under roads, rivers, and structures. Process: bore a pilot hole using a steerable drill head, enlarge with a reamer to the required diameter, pull the product pipe back through. Common uses: water and sewer under roads, fiber conduit, gas lines, utility crossings. Advantages: no surface disruption, ROW preservation, lower cost in some conditions. Key specs: entry angle typically 8-12 degrees, exit angle 4-8 degrees. HDPE pipe is the most common product pipe. Slurry control is critical — bentonite drilling fluid.",
       "url": "/innovators.html",
       "tags": [
         "HDD",
@@ -1181,7 +1181,7 @@
     {
       "id": "gps-machine-control",
       "category": "Reference",
-      "title": "GPS Machine Control \u2014 Excavators and Dozers",
+      "title": "GPS Machine Control — Excavators and Dozers",
       "content": "GPS machine control uses 3D design models and GNSS positioning to guide excavators, dozers, and graders to grade automatically. Systems include Trimble, Leica, and Topcon retrofit kits and factory-installed Komatsu and Caterpillar integrated systems. Dozer grade control: blade automatically adjusts to hit design grade. Excavator guidance: bucket tip position shown on cab display relative to design surface. Benefits: reduced staking, fewer survey checks, higher production, less over-excavation. Accuracy: 1-2 cm horizontal, 1-3 cm vertical with base station. Machine control is standard on large UDOT and DOT projects.",
       "url": "/innovators.html",
       "tags": [
@@ -1222,7 +1222,7 @@
     {
       "id": "pipe-bedding-classes",
       "category": "Reference",
-      "title": "Pipe Bedding Classes \u2014 ASTM and APWA",
+      "title": "Pipe Bedding Classes — ASTM and APWA",
       "content": "Pipe bedding determines how load is distributed to the pipe. Class A: concrete cradle or concrete arch, highest load factor. Class B: granular material from trench bottom to 6 inches above pipe, most common for pressure pipe. Class C: lightly compacted backfill from native material. Class D: hand placed compacted native material, minimal support. ASTM C12 (concrete pipe) and APWA specifies bedding classes by soil and pipe type. For PVC and HDPE flexible pipe: Class B is standard, compaction to 85% or better in the pipe zone is critical for preventing deflection.",
       "url": "/resources.html",
       "tags": [
@@ -1242,7 +1242,7 @@
     {
       "id": "prevailing-wage",
       "category": "Reference",
-      "title": "Prevailing Wage \u2014 Davis Bacon and State Requirements",
+      "title": "Prevailing Wage — Davis Bacon and State Requirements",
       "content": "Federal Davis-Bacon Act requires prevailing wage on all federal construction contracts over 2000 dollars. State equivalents: Utah state prevailing wage applies to state funded projects over certain thresholds. Prevailing wage rates set by DOL are published by county and work classification: operator, laborer, carpenter, ironworker, electrician. Certified payroll required weekly. Consequences for non-compliance: back wages, debarment from future projects. Most UDOT and municipal projects trigger prevailing wage. Check current rates at dol.gov/agencies/whd/davis-bacon.",
       "url": "/resources.html",
       "tags": [
@@ -1261,7 +1261,7 @@
     {
       "id": "thrust-block-45-degree",
       "category": "Calculator",
-      "title": "Thrust Block for 45 Degree Bend \u2014 Example Calculation",
+      "title": "Thrust Block for 45 Degree Bend — Example Calculation",
       "content": "Example: 8-inch waterline, 150 PSI test pressure, 45-degree bend, sandy clay soil bearing 2000 PSF. Pipe area = pi/4 x (8/12)^2 = 0.349 SF. Pressure in PSF = 150 x 144 = 21600 PSF. Thrust = 2 x 21600 x 0.349 x sin(22.5 degrees) = 2 x 21600 x 0.349 x 0.383 = 5769 lbs. Minimum bearing area = 5769 / 2000 = 2.88 SF. Design area with 1.5 safety factor = 4.32 SF. Square block approximately 2.1 x 2.1 feet, 18 inches thick. Use the thrust block calculator at openmud.ai/calculators for other fittings and pressures.",
       "url": "/calculators.html#thrust-block",
       "tags": [
@@ -1279,8 +1279,8 @@
     {
       "id": "change-order-best-practices",
       "category": "Reference",
-      "title": "Change Order Best Practices \u2014 Documentation and Pricing",
-      "content": "Key practices for construction change orders. Documentation: photograph before and during, note time and date, get T&M ticket signed daily by owner's rep. Pricing: always include overhead and profit on top of direct cost, include bond rate, include extended general conditions if project duration is affected. Markup: 15-20% O&P is standard on most public works, some owners specify 10% in the contract \u2014 read the GCs. Time extension: price separately from dollar value, submit concurrent delay notice. Never start work on a verbal only. Always respond within the contract notice period. Use the change order calculator at openmud.ai/calculators.",
+      "title": "Change Order Best Practices — Documentation and Pricing",
+      "content": "Key practices for construction change orders. Documentation: photograph before and during, note time and date, get T&M ticket signed daily by owner's rep. Pricing: always include overhead and profit on top of direct cost, include bond rate, include extended general conditions if project duration is affected. Markup: 15-20% O&P is standard on most public works, some owners specify 10% in the contract — read the GCs. Time extension: price separately from dollar value, submit concurrent delay notice. Never start work on a verbal only. Always respond within the contract notice period. Use the change order calculator at openmud.ai/calculators.",
       "url": "/calculators.html#change-order",
       "tags": [
         "change order",
@@ -1300,7 +1300,7 @@
       "id": "open-source-tools-heavy-civil",
       "category": "Resources",
       "title": "Open Source Tools for Heavy Civil and Underground Construction",
-      "content": "Several free, open-source tools are directly useful for heavy civil and underground utility contractors. QGIS (qgis.org) is a full GIS platform \u2014 free alternative to ArcGIS \u2014 used for site mapping, right-of-way review, grading plans, and utility corridor analysis. Runs on Windows, Mac, and Linux with no license cost. EngineeringPaper.xyz is a browser-based engineering calculation tool at engineeringpaper.xyz \u2014 create, save, and share hydraulic and structural calculations. Good for field engineers who need to document slope checks or thrust block sizing. Calcpad (calcpad.eu) is free, open-source software for mathematical and engineering calculations with unit support \u2014 useful for estimators building custom calculation sheets. IfcBorehole is a Python CLI tool for creating borehole records from Excel or GIS data \u2014 relevant for geotechnical and underground utility work where borehole logs need to be standardized. sPrint is a Chrome extension for batch-printing PDFs from BIM360 and ACC platforms \u2014 useful for project managers pulling plan sets. All projects listed in the AEC Open Source Directory at github.com/opensource-construction/osc-directory under MIT license.",
+      "content": "Several free, open-source tools are directly useful for heavy civil and underground utility contractors. QGIS (qgis.org) is a full GIS platform — free alternative to ArcGIS — used for site mapping, right-of-way review, grading plans, and utility corridor analysis. Runs on Windows, Mac, and Linux with no license cost. EngineeringPaper.xyz is a browser-based engineering calculation tool at engineeringpaper.xyz — create, save, and share hydraulic and structural calculations. Good for field engineers who need to document slope checks or thrust block sizing. Calcpad (calcpad.eu) is free, open-source software for mathematical and engineering calculations with unit support — useful for estimators building custom calculation sheets. IfcBorehole is a Python CLI tool for creating borehole records from Excel or GIS data — relevant for geotechnical and underground utility work where borehole logs need to be standardized. sPrint is a Chrome extension for batch-printing PDFs from BIM360 and ACC platforms — useful for project managers pulling plan sets. All projects listed in the AEC Open Source Directory at github.com/opensource-construction/osc-directory under MIT license.",
       "url": "/resources.html",
       "tags": [
         "open source",
@@ -1320,8 +1320,8 @@
     {
       "id": "civil3d-dynamo-camber",
       "category": "Tools",
-      "title": "AutoCAD Civil 3D, Dynamo, and Camber \u2014 Open Source Automation",
-      "content": "AutoCAD Civil 3D is Autodesk's industry-standard CAD platform for heavy civil design \u2014 roads, grading, utilities, and drainage. It is used by most DOTs, engineering firms, and larger contractors for design deliverables. Civil 3D uses the DWG file format. Dynamo is a visual programming environment built into Civil 3D (and Revit) that lets engineers automate repetitive tasks without writing code \u2014 corridor processing, sheet generation, alignment edits, label updates. Camber is a free, open-source Dynamo package specifically for Civil 3D at github.com/mzjensen/Camber. It extends Civil 3D with additional nodes for pipes, structures, corridors, alignments, and survey data \u2014 things Dynamo does not support natively. Useful for contractors and engineers who use Civil 3D and want to automate takeoffs, coordinate with subcontractors, or speed up plan production. MIT license. Requires Civil 3D subscription (Autodesk, not free). Alternative to Civil 3D for smaller firms: OpenRoads Designer (Bentley) or FreeCAD with the BIM workbench.",
+      "title": "AutoCAD Civil 3D, Dynamo, and Camber — Open Source Automation",
+      "content": "AutoCAD Civil 3D is Autodesk's industry-standard CAD platform for heavy civil design — roads, grading, utilities, and drainage. It is used by most DOTs, engineering firms, and larger contractors for design deliverables. Civil 3D uses the DWG file format. Dynamo is a visual programming environment built into Civil 3D (and Revit) that lets engineers automate repetitive tasks without writing code — corridor processing, sheet generation, alignment edits, label updates. Camber is a free, open-source Dynamo package specifically for Civil 3D at github.com/mzjensen/Camber. It extends Civil 3D with additional nodes for pipes, structures, corridors, alignments, and survey data — things Dynamo does not support natively. Useful for contractors and engineers who use Civil 3D and want to automate takeoffs, coordinate with subcontractors, or speed up plan production. MIT license. Requires Civil 3D subscription (Autodesk, not free). Alternative to Civil 3D for smaller firms: OpenRoads Designer (Bentley) or FreeCAD with the BIM workbench.",
       "url": "/resources.html#opensource",
       "tags": [
         "Civil 3D",
@@ -1339,8 +1339,8 @@
     {
       "id": "qgis-civil-construction",
       "category": "Tools",
-      "title": "QGIS for Civil Construction \u2014 Free GIS for Contractors",
-      "content": "QGIS is a free, open-source GIS (Geographic Information System) at qgis.org. It is the primary open-source alternative to Esri ArcGIS, which costs thousands per year. For heavy civil and underground utility contractors, QGIS is useful for: importing utility as-built data (shapefiles, KML, GeoJSON), overlaying survey data on aerial imagery, reviewing right-of-way and easement boundaries, analyzing corridor routes for pipeline or conduit, and creating site maps for bid packages. QGIS reads most GIS formats \u2014 Shapefile, GeoPackage, GeoJSON, KML, WMS, WFS. It imports CAD files (DXF/DWG) with the DXF import tool. State DOTs and municipalities often publish GIS data in these formats for free. QGIS can export to PDF for plan sheets. Runs on Windows, Mac, and Linux. Free with no seat limit \u2014 useful for an office with multiple estimators. The learning curve is moderate; the QGIS documentation is solid and YouTube has many tutorials.",
+      "title": "QGIS for Civil Construction — Free GIS for Contractors",
+      "content": "QGIS is a free, open-source GIS (Geographic Information System) at qgis.org. It is the primary open-source alternative to Esri ArcGIS, which costs thousands per year. For heavy civil and underground utility contractors, QGIS is useful for: importing utility as-built data (shapefiles, KML, GeoJSON), overlaying survey data on aerial imagery, reviewing right-of-way and easement boundaries, analyzing corridor routes for pipeline or conduit, and creating site maps for bid packages. QGIS reads most GIS formats — Shapefile, GeoPackage, GeoJSON, KML, WMS, WFS. It imports CAD files (DXF/DWG) with the DXF import tool. State DOTs and municipalities often publish GIS data in these formats for free. QGIS can export to PDF for plan sheets. Runs on Windows, Mac, and Linux. Free with no seat limit — useful for an office with multiple estimators. The learning curve is moderate; the QGIS documentation is solid and YouTube has many tutorials.",
       "url": "/resources.html#opensource",
       "tags": [
         "QGIS",
@@ -1359,8 +1359,8 @@
     {
       "id": "engineering-calcs-free-tools",
       "category": "Tools",
-      "title": "Free Engineering Calculation Tools \u2014 EngineeringPaper.xyz and Calcpad",
-      "content": "EngineeringPaper.xyz is a free, browser-based engineering calculation tool. No install required \u2014 runs in Chrome or Firefox. You can create calculation sheets with proper units (feet, inches, psi, gpm, etc.), save them to your account, and share links with PEs, inspectors, or owners. Useful for field engineers needing to document minimum slope checks, thrust block sizing, or Manning's flow calculations. Available at engineeringpaper.xyz, MIT license. Calcpad is free, open-source software for mathematical and engineering calculations at calcpad.eu. It supports custom units, symbolic math, and lets you build reusable calculation templates. Useful for estimators who want to build their own takeoff sheets or engineering formulas without Excel. Both tools are good alternatives to paid software like Mathcad or hand-calc sheets. For trench-specific calculations, openmud's built-in calculators at openmud.ai/calculators handle trench volume, pipe flow, minimum slope, thrust block sizing, compaction, and more \u2014 no account required.",
+      "title": "Free Engineering Calculation Tools — EngineeringPaper.xyz and Calcpad",
+      "content": "EngineeringPaper.xyz is a free, browser-based engineering calculation tool. No install required — runs in Chrome or Firefox. You can create calculation sheets with proper units (feet, inches, psi, gpm, etc.), save them to your account, and share links with PEs, inspectors, or owners. Useful for field engineers needing to document minimum slope checks, thrust block sizing, or Manning's flow calculations. Available at engineeringpaper.xyz, MIT license. Calcpad is free, open-source software for mathematical and engineering calculations at calcpad.eu. It supports custom units, symbolic math, and lets you build reusable calculation templates. Useful for estimators who want to build their own takeoff sheets or engineering formulas without Excel. Both tools are good alternatives to paid software like Mathcad or hand-calc sheets. For trench-specific calculations, openmud's built-in calculators at openmud.ai/calculators handle trench volume, pipe flow, minimum slope, thrust block sizing, compaction, and more — no account required.",
       "url": "/resources.html#opensource",
       "tags": [
         "engineering calculations",
@@ -1377,8 +1377,8 @@
     {
       "id": "openstreetmap-construction",
       "category": "Tools",
-      "title": "OpenStreetMap \u2014 Free Map Data for Construction",
-      "content": "OpenStreetMap (openstreetmap.org) is a free, open-source map of the world built by volunteers. It is the open-source alternative to Google Maps \u2014 no API key required, no billing account, no per-request cost. For construction, OSM is useful for marking job site locations and coordinates, reviewing road access and corridor routing, overlaying utility as-built data, generating site coordinates for bluestakes and permit applications, and embedding interactive maps in web tools. OSM can be embedded in any browser page using Leaflet.js (MIT license). Tile URL: tile.openstreetmap.org. OSM data can be downloaded as shapefiles or GeoJSON and imported into QGIS for more advanced analysis. State DOTs and utilities publish their own GIS layers that can be overlaid on OSM. For heavy civil contractors, the most practical uses are: (1) marking a job site address and verifying access routes, (2) measuring corridor length for pipe installation bids, (3) generating GPS coordinates for bluestakes submissions, and (4) site logistics planning for staging, equipment access, and traffic control.",
+      "title": "OpenStreetMap — Free Map Data for Construction",
+      "content": "OpenStreetMap (openstreetmap.org) is a free, open-source map of the world built by volunteers. It is the open-source alternative to Google Maps — no API key required, no billing account, no per-request cost. For construction, OSM is useful for marking job site locations and coordinates, reviewing road access and corridor routing, overlaying utility as-built data, generating site coordinates for bluestakes and permit applications, and embedding interactive maps in web tools. OSM can be embedded in any browser page using Leaflet.js (MIT license). Tile URL: tile.openstreetmap.org. OSM data can be downloaded as shapefiles or GeoJSON and imported into QGIS for more advanced analysis. State DOTs and utilities publish their own GIS layers that can be overlaid on OSM. For heavy civil contractors, the most practical uses are: (1) marking a job site address and verifying access routes, (2) measuring corridor length for pipe installation bids, (3) generating GPS coordinates for bluestakes submissions, and (4) site logistics planning for staging, equipment access, and traffic control.",
       "url": "/resources.html#opensource",
       "tags": [
         "OpenStreetMap",
@@ -1396,8 +1396,8 @@
     {
       "id": "ocr-document-extraction-construction",
       "category": "Tools",
-      "title": "OCR and Document Extraction for Construction \u2014 PDF to Structured Data",
-      "content": "OCR (optical character recognition) converts scanned documents and PDFs into machine-readable text. In construction, most documents arrive as PDFs: plan sheets, specifications, invoices, RFIs, change orders, submittals. OCR and document extraction lets AI read these documents and extract structured data. Key open-source tools: pdfplumber (Python, MIT) extracts text and tables from native PDFs \u2014 useful for typed invoices and digital specs. Tesseract is the leading open-source OCR engine \u2014 reads scanned images and handwritten-style text. pdf2image converts PDF pages to images before Tesseract processes them. OpenCV preprocesses images (deskew, denoise, contrast) before OCR for better accuracy. The typical pipeline is: upload PDF \u2192 extract text with pdfplumber \u2192 if no text layer, run Tesseract OCR \u2192 pass raw text to GPT-4o to extract structured fields (line items, quantities, amounts, dates, addresses) \u2192 output JSON. For construction: extract line items from subcontractor invoices, pull pipe sizes and stationing from plan sheets, read RFI numbers and response deadlines, extract quantities from pay applications. This data can feed downstream tools like change order generators, invoice reconcilers, and proposal builders.",
+      "title": "OCR and Document Extraction for Construction — PDF to Structured Data",
+      "content": "OCR (optical character recognition) converts scanned documents and PDFs into machine-readable text. In construction, most documents arrive as PDFs: plan sheets, specifications, invoices, RFIs, change orders, submittals. OCR and document extraction lets AI read these documents and extract structured data. Key open-source tools: pdfplumber (Python, MIT) extracts text and tables from native PDFs — useful for typed invoices and digital specs. Tesseract is the leading open-source OCR engine — reads scanned images and handwritten-style text. pdf2image converts PDF pages to images before Tesseract processes them. OpenCV preprocesses images (deskew, denoise, contrast) before OCR for better accuracy. The typical pipeline is: upload PDF → extract text with pdfplumber → if no text layer, run Tesseract OCR → pass raw text to GPT-4o to extract structured fields (line items, quantities, amounts, dates, addresses) → output JSON. For construction: extract line items from subcontractor invoices, pull pipe sizes and stationing from plan sheets, read RFI numbers and response deadlines, extract quantities from pay applications. This data can feed downstream tools like change order generators, invoice reconcilers, and proposal builders.",
       "url": "/resources.html",
       "tags": [
         "OCR",
@@ -1416,8 +1416,8 @@
     {
       "id": "agentic-ai-construction-workflows",
       "category": "Tools",
-      "title": "Agentic AI for Construction \u2014 Automated Workflows and Task Execution",
-      "content": "Agentic AI goes beyond answering questions \u2014 it executes tasks. In construction, this means AI that reads an invoice and flags discrepancies, pre-fills a bluestakes ticket from job address and scope, drafts an RFI response from project context, generates a change order from a field note, or processes an incoming email and routes it to the right action. openmud is building a tool library that AI agents can call during a conversation. When a user describes a task, the AI selects the right tool (proposal generator, bluestakes builder, schedule creator, OCR extractor), runs it, and returns a completed result. Two modes: user-triggered (user asks, agent executes) and event-triggered (a new document arrives, agent processes it automatically). The tool registry is in tools/registry.py using OpenAI function-calling schema. High-priority tools being built: bluestakes automation, email drafting agent, OCR document pipeline, change order generator, production tracker, and job site mapper using OpenStreetMap. All tools are free and open source under MIT license.",
+      "title": "Agentic AI for Construction — Automated Workflows and Task Execution",
+      "content": "Agentic AI goes beyond answering questions — it executes tasks. In construction, this means AI that reads an invoice and flags discrepancies, pre-fills a bluestakes ticket from job address and scope, drafts an RFI response from project context, generates a change order from a field note, or processes an incoming email and routes it to the right action. openmud is building a tool library that AI agents can call during a conversation. When a user describes a task, the AI selects the right tool (proposal generator, bluestakes builder, schedule creator, OCR extractor), runs it, and returns a completed result. Two modes: user-triggered (user asks, agent executes) and event-triggered (a new document arrives, agent processes it automatically). The tool registry is in tools/registry.py using OpenAI function-calling schema. High-priority tools being built: bluestakes automation, email drafting agent, OCR document pipeline, change order generator, production tracker, and job site mapper using OpenStreetMap. All tools are free and open source under MIT license.",
       "url": "/chat.html",
       "tags": [
         "agentic AI",
@@ -1435,8 +1435,8 @@
     {
       "id": "software-design-cad",
       "category": "Reference",
-      "title": "Design and CAD Software \u2014 Heavy Civil and Underground Utility",
-      "content": "AutoCAD Civil 3D (Autodesk) is the industry-standard design platform for heavy civil \u2014 roads, grading, underground utilities, drainage, and corridors. Used by DOTs, engineering firms, and large contractors. Outputs DWG files, plan and profile sheets, and quantity reports. Subscription-based. Bluebeam Revu is the de facto standard for PDF markup and collaboration \u2014 estimators use it for digital takeoffs, PMs use it for RFI markups and submittals. Most plan sets are marked up in Bluebeam. OpenRoads Designer (Bentley Systems) is the Civil 3D equivalent for transportation and DOT work in states that use Bentley standards \u2014 uses DGN format. Carlson Software runs inside AutoCAD and is common for smaller contractors and surveyors doing site grading and utility work at a lower price point. Agisoft Metashape processes drone imagery into 3D models and orthomosaics for earthwork calculations, stockpile measurement, and site progress documentation.",
+      "title": "Design and CAD Software — Heavy Civil and Underground Utility",
+      "content": "AutoCAD Civil 3D (Autodesk) is the industry-standard design platform for heavy civil — roads, grading, underground utilities, drainage, and corridors. Used by DOTs, engineering firms, and large contractors. Outputs DWG files, plan and profile sheets, and quantity reports. Subscription-based. Bluebeam Revu is the de facto standard for PDF markup and collaboration — estimators use it for digital takeoffs, PMs use it for RFI markups and submittals. Most plan sets are marked up in Bluebeam. OpenRoads Designer (Bentley Systems) is the Civil 3D equivalent for transportation and DOT work in states that use Bentley standards — uses DGN format. Carlson Software runs inside AutoCAD and is common for smaller contractors and surveyors doing site grading and utility work at a lower price point. Agisoft Metashape processes drone imagery into 3D models and orthomosaics for earthwork calculations, stockpile measurement, and site progress documentation.",
       "url": "/resources.html#software-design",
       "tags": [
         "Civil 3D",
@@ -1456,8 +1456,8 @@
     {
       "id": "software-estimating-takeoff",
       "category": "Reference",
-      "title": "Estimating and Takeoff Software \u2014 Heavy Civil",
-      "content": "HCSS HeavyBid is the dominant estimating platform for heavy civil and highway construction \u2014 handles bid items, crew pricing, equipment rates, subcontractor bids, and bid schedule assembly. Integrates with HeavyJob for budget-to-actual tracking. Industry standard for DOT and municipal work. Stack CT is a cloud-based takeoff and estimating platform with a strong digital plan takeoff workflow \u2014 measure linear footage, area, and item counts on uploaded PDFs. More accessible price point than HCSS. B2W Software is an integrated platform for heavy civil estimating, scheduling, and field tracking that competes with HCSS. Bid2Win is an estimating platform strong in highway, pipeline, and utility work. PlanSwift is desktop takeoff software that exports to Excel \u2014 popular with smaller contractors. Construction Takeoff is a Mac-native app for PDF measurement and markup with no subscription required.",
+      "title": "Estimating and Takeoff Software — Heavy Civil",
+      "content": "HCSS HeavyBid is the dominant estimating platform for heavy civil and highway construction — handles bid items, crew pricing, equipment rates, subcontractor bids, and bid schedule assembly. Integrates with HeavyJob for budget-to-actual tracking. Industry standard for DOT and municipal work. Stack CT is a cloud-based takeoff and estimating platform with a strong digital plan takeoff workflow — measure linear footage, area, and item counts on uploaded PDFs. More accessible price point than HCSS. B2W Software is an integrated platform for heavy civil estimating, scheduling, and field tracking that competes with HCSS. Bid2Win is an estimating platform strong in highway, pipeline, and utility work. PlanSwift is desktop takeoff software that exports to Excel — popular with smaller contractors. Construction Takeoff is a Mac-native app for PDF measurement and markup with no subscription required.",
       "url": "/resources.html#software-estimating",
       "tags": [
         "HCSS",
@@ -1476,8 +1476,8 @@
     {
       "id": "software-field-management",
       "category": "Reference",
-      "title": "Field and Project Management Software \u2014 Heavy Civil",
-      "content": "HCSS HeavyJob is the benchmark field management platform for heavy civil \u2014 foremen enter daily production quantities, labor hours, and equipment hours from the field. Office sees real-time cost vs. budget by bid item. Integrates with HeavyBid. Procore is the dominant cloud-based construction management platform for RFIs, submittals, drawings, and daily logs \u2014 most large GCs and owners now use it. Trimble Viewpoint (Vista/Spectrum) is an ERP system for construction covering accounting, payroll, equipment, and project management. Fieldwire is a mobile field management tool good for plan management, punch lists, and task assignment \u2014 works offline. Samsara is a fleet and equipment telematics platform for GPS tracking, engine hours, fuel, driver behavior, and ELD compliance. Tenna is construction-specific equipment tracking using GPS, Bluetooth, and cellular \u2014 tracks heavy iron down to small tools.",
+      "title": "Field and Project Management Software — Heavy Civil",
+      "content": "HCSS HeavyJob is the benchmark field management platform for heavy civil — foremen enter daily production quantities, labor hours, and equipment hours from the field. Office sees real-time cost vs. budget by bid item. Integrates with HeavyBid. Procore is the dominant cloud-based construction management platform for RFIs, submittals, drawings, and daily logs — most large GCs and owners now use it. Trimble Viewpoint (Vista/Spectrum) is an ERP system for construction covering accounting, payroll, equipment, and project management. Fieldwire is a mobile field management tool good for plan management, punch lists, and task assignment — works offline. Samsara is a fleet and equipment telematics platform for GPS tracking, engine hours, fuel, driver behavior, and ELD compliance. Tenna is construction-specific equipment tracking using GPS, Bluetooth, and cellular — tracks heavy iron down to small tools.",
       "url": "/resources.html#software-field",
       "tags": [
         "HCSS",
@@ -1498,8 +1498,8 @@
     {
       "id": "software-safety-training",
       "category": "Reference",
-      "title": "Safety Training Software \u2014 Construction",
-      "content": "Tyfoom is a video-based micro-training platform built for construction crews. Short daily safety videos delivered to workers phones \u2014 watch, pass a quick quiz, completion is logged automatically. Available in multiple languages including Spanish. Covers OSHA topics, equipment safety, and trade-specific hazards. Used by large heavy civil contractors for OSHA documentation compliance. SafetyCulture (iAuditor) is a mobile inspection platform for custom safety checklists, JHA documentation, equipment pre-start inspections, and incident reporting with photo documentation. Predictive Solutions analyzes safety observation data to predict where incidents are likely to occur before they happen. HCSS Safety integrates with HeavyBid and HeavyJob for safety observations, near-miss reporting, and training documentation within the HCSS platform.",
+      "title": "Safety Training Software — Construction",
+      "content": "Tyfoom is a video-based micro-training platform built for construction crews. Short daily safety videos delivered to workers phones — watch, pass a quick quiz, completion is logged automatically. Available in multiple languages including Spanish. Covers OSHA topics, equipment safety, and trade-specific hazards. Used by large heavy civil contractors for OSHA documentation compliance. SafetyCulture (iAuditor) is a mobile inspection platform for custom safety checklists, JHA documentation, equipment pre-start inspections, and incident reporting with photo documentation. Predictive Solutions analyzes safety observation data to predict where incidents are likely to occur before they happen. HCSS Safety integrates with HeavyBid and HeavyJob for safety observations, near-miss reporting, and training documentation within the HCSS platform.",
       "url": "/resources.html#software-safety",
       "tags": [
         "Tyfoom",
@@ -1518,8 +1518,8 @@
     {
       "id": "buildwitt-training-community",
       "category": "Resources",
-      "title": "BuildWitt Training and Community \u2014 Heavy Civil",
-      "content": "BuildWitt Training (buildwitt.com/training) is a video training platform built specifically for heavy civil and underground construction crews. Founded by Aaron Witt. Content covers machine operation, pipe installation, safety, leadership, and business \u2014 made on real job sites by people who actually do the work. Available in English and Spanish. One of the most practical training investments a heavy civil contractor can make. BuildWitt Community (buildwitt.com/community) is an online community for owners, operators, foremen, and estimators in dirt work and heavy civil. Active discussion on equipment, business, hiring, and operations. Aaron Witt and the BuildWitt team participate directly. BuildWitt YouTube channel (youtube.com/@BuildWitt) has free content on job site footage, equipment, and culture. NCCER (nccer.org) is the primary credentialing body for construction craft training in the US \u2014 certifications are portable and often required for public works projects. AGC (agc.org) is the primary trade association for general contractors \u2014 provides training, certification programs, industry data, and legislative advocacy. APWA (apwa.net) is the American Public Works Association \u2014 the people who own and maintain the infrastructure contractors build, and the publisher of the utility color-coding standard.",
+      "title": "BuildWitt Training and Community — Heavy Civil",
+      "content": "BuildWitt Training (buildwitt.com/training) is a video training platform built specifically for heavy civil and underground construction crews. Founded by Aaron Witt. Content covers machine operation, pipe installation, safety, leadership, and business — made on real job sites by people who actually do the work. Available in English and Spanish. One of the most practical training investments a heavy civil contractor can make. BuildWitt Community (buildwitt.com/community) is an online community for owners, operators, foremen, and estimators in dirt work and heavy civil. Active discussion on equipment, business, hiring, and operations. Aaron Witt and the BuildWitt team participate directly. BuildWitt YouTube channel (youtube.com/@BuildWitt) has free content on job site footage, equipment, and culture. NCCER (nccer.org) is the primary credentialing body for construction craft training in the US — certifications are portable and often required for public works projects. AGC (agc.org) is the primary trade association for general contractors — provides training, certification programs, industry data, and legislative advocacy. APWA (apwa.net) is the American Public Works Association — the people who own and maintain the infrastructure contractors build, and the publisher of the utility color-coding standard.",
       "url": "/resources.html#software-training",
       "tags": [
         "BuildWitt",
@@ -1540,7 +1540,7 @@
     {
       "id": "software-architecture-overview",
       "category": "Reference",
-      "title": "Construction Software Architecture Overview \u2014 How Major Platforms Fit Together",
+      "title": "Construction Software Architecture Overview — How Major Platforms Fit Together",
       "content": "Construction software is usually not a single platform problem. Heavy civil operations run across five functional layers that exchange data every day. Layer 1 is design and plan production, where Civil 3D and related CAD systems produce geometry, alignments, profiles, and sheet outputs. Layer 2 is document and markup control, where PDF-based review platforms like Bluebeam capture takeoff marks, comments, and review history. Layer 3 is estimating and budget baselines, where systems such as HeavyBid, Bid2Win-family tools, and Excel host cost assumptions and production logic. Layer 4 is field and project controls, where daily production, labor, equipment hours, RFIs, and schedule updates are captured in field tools and PM systems. Layer 5 is finance and analytics, where ERP and BI consume curated cost and production data for forecasting and reporting. Most integration failures in construction are not math failures; they are identity and contract failures where bid item IDs, cost codes, and phase codes do not stay consistent across layers.",
       "url": "/resources.html#software-architecture",
       "tags": [
@@ -1558,7 +1558,7 @@
     {
       "id": "excel-architecture-layers",
       "category": "Reference",
-      "title": "Excel Architecture for Construction Teams \u2014 Calculation Engine, M, VBA, and APIs",
+      "title": "Excel Architecture for Construction Teams — Calculation Engine, M, VBA, and APIs",
       "content": "Excel is a layered computation platform, not only a spreadsheet interface. The first layer is the formula grid, where dependencies between cells form a directed graph. Microsoft documentation describes recalculation using dependency trees and calculation chains, including multithreaded recalculation for eligible operations. The second layer is data shaping through Power Query, where the M language transforms external data before it is loaded into workbook tables or the data model. The third layer is automation: legacy VBA macros, Office Scripts for web-based workbook automation, and JavaScript-based Office Add-ins using the Excel JavaScript API. In construction, this architecture supports estimate normalization, crew productivity what-if analysis, and structured export to accounting or BI. The main governance risk is uncontrolled workbook drift: formulas, named ranges, and query logic diverge across estimators. The control pattern is to treat Excel templates as versioned code artifacts with defined owners, test cases, and change logs, not as ad hoc files passed by email.",
       "url": "/resources.html#software-architecture",
       "tags": [
@@ -1575,7 +1575,7 @@
     {
       "id": "bluebeam-architecture-apis",
       "category": "Reference",
-      "title": "Bluebeam Architecture \u2014 Revu Desktop, Studio Cloud, and API Boundaries",
+      "title": "Bluebeam Architecture — Revu Desktop, Studio Cloud, and API Boundaries",
       "content": "Bluebeam is most useful when treated as two coordinated layers. Revu desktop handles PDF authoring, markup, measurement, and local automation workflows. Studio cloud services provide shared collaboration contexts and controlled document workflows. Official Studio API documentation organizes capabilities around Sessions, Projects, and Jobs, with OAuth-based authentication and explicit integration scopes. This distinction matters for implementation: Revu JavaScript and script engine commands automate local or document-level actions, while Studio API integrations handle cloud-hosted coordination and external workflow bridges. In heavy civil operations, Bluebeam often sits between design outputs and estimating or PM systems, preserving review traceability and markup intent. A practical integration rule is to separate immutable source documents from derived markup artifacts and to store linkage metadata so downstream systems can reference the specific revision and session context that produced a quantity or scope decision. Without that metadata, disputes over who marked what and when become expensive coordination failures.",
       "url": "/resources.html#software-architecture",
       "tags": [
@@ -1592,7 +1592,7 @@
     {
       "id": "autocad-civil3d-architecture-stack",
       "category": "Reference",
-      "title": "AutoCAD and Civil 3D Architecture \u2014 DWG Core, Civil Objects, and Extension Stack",
+      "title": "AutoCAD and Civil 3D Architecture — DWG Core, Civil Objects, and Extension Stack",
       "content": "Civil 3D should be understood as a civil-domain layer on top of AutoCAD. The underlying AutoCAD runtime and DWG object ecosystem provide general drafting and extension foundations, while Civil 3D adds domain entities such as alignments, profiles, corridors, pipe networks, and surfaces. Extension options span multiple abstraction levels: AutoLISP task scripting, managed .NET plugins, and lower-level ObjectARX SDK development for advanced scenarios. On the cloud side, Autodesk Platform Services and Autodesk Construction Cloud APIs expose model and project data interfaces used in integration workflows. For construction teams, the key architectural decision is not only which API exists, but which exchange contract is enforced between design and operations systems. If exported sheets, quantities, and object metadata are inconsistent, estimating and field tools cannot reliably map design intent into production controls. Stable naming conventions, revision stamps, and explicit object-to-cost mapping tables are usually the difference between reusable design data and repeated manual re-entry.",
       "url": "/resources.html#software-architecture",
       "tags": [
@@ -1608,7 +1608,7 @@
     {
       "id": "hcss-heavybid-heavyjob-architecture",
       "category": "Reference",
-      "title": "HCSS HeavyBid and HeavyJob Architecture \u2014 Baseline to Field Variance Loop",
+      "title": "HCSS HeavyBid and HeavyJob Architecture — Baseline to Field Variance Loop",
       "content": "The central HCSS architecture pattern is estimate-to-execution continuity. HeavyBid captures preconstruction assumptions such as bid items, crews, rates, and production logic. HeavyJob captures field execution data such as daily quantities, labor, and equipment hours against those baseline structures. Public developer documentation shows product-specific API surfaces and scoped access models for integration. In practice, value is created when cost and production identity keys remain stable from estimate through daily reporting and analytics. If a contractor changes code structures midstream without controlled mapping, budget-versus-actual diagnostics lose meaning. The architecture implication is that integration design must prioritize canonical identifiers, transformation traceability, and governance over convenience exports. Teams that treat HeavyBid output as a one-time spreadsheet instead of a governed baseline usually cannot detect production drift early enough to intervene. Teams that preserve structural continuity can run fast variance analysis and adjust crews, sequence, or subcontract strategy before overruns harden.",
       "url": "/resources.html#software-architecture",
       "tags": [
@@ -1624,7 +1624,7 @@
     {
       "id": "bid2win-b2w-ineight-integration-model",
       "category": "Reference",
-      "title": "Bid2Win, B2W, and InEight Integration Model \u2014 Entity Stability and Migration Discipline",
+      "title": "Bid2Win, B2W, and InEight Integration Model — Entity Stability and Migration Discipline",
       "content": "In heavy civil software conversations, Bid2Win and B2W terminology may refer to legacy workflows, while current enterprise programs may use InEight Estimate and related integration services. Architecture decisions should not start with branding; they should start with stable entities: estimate resources, bid items, cost categories, account mappings, and history records. InEight documentation provides API integration guidance and reporting-oriented API patterns that can support enterprise analytics and connected workflows. The recurring migration risk is semantic drift, where old terms map inconsistently to new schemas. The mitigation is a canonical dictionary that maps legacy identifiers, cost structures, and business rules to the target integration model before data is synchronized at scale. Organizations that skip this step often produce technically successful API calls but financially inconsistent reporting outputs. The technical objective is continuity of estimate meaning, not merely continuity of screen-level features.",
       "url": "/resources.html#software-architecture",
       "tags": [
@@ -1640,7 +1640,7 @@
     {
       "id": "construction-pm-platform-api-patterns",
       "category": "Reference",
-      "title": "Project Management Platform API Patterns \u2014 Procore, ACC, Primavera, and ERP-Coupled PM",
+      "title": "Project Management Platform API Patterns — Procore, ACC, Primavera, and ERP-Coupled PM",
       "content": "Project management platforms in construction share a common architecture pattern: a cloud system of record with workflow state, document linkage, permissions, and externally accessible API surfaces. Procore exposes REST and webhook capabilities for event-driven integrations. Autodesk Construction Cloud exposes APIs through Autodesk Platform Services for project and model-related data operations. Primavera P6 exposes REST interfaces oriented toward schedule and program control operations. ERP-coupled PM systems may combine APIs with file or ETL bridges depending on deployment maturity. The integration design choice is whether to run event-driven updates for operational controls or periodic batch synchronization for financial reporting. Heavy civil contractors typically need both: near-real-time issue and workflow updates, plus audited periodic cost and schedule snapshots. The failure mode is unclear ownership of entities such as change events, schedule milestones, and approved quantities. The architecture fix is a system-of-record matrix that assigns authority per entity and enforces that assignment in every integration service.",
       "url": "/resources.html#software-architecture",
       "tags": [
@@ -1656,7 +1656,7 @@
     {
       "id": "construction-software-integration-blueprint",
       "category": "Reference",
-      "title": "Construction Software Integration Blueprint \u2014 Design to Estimate to Field to Finance",
+      "title": "Construction Software Integration Blueprint — Design to Estimate to Field to Finance",
       "content": "A robust construction integration blueprint follows a sequence. First, design and document inputs are versioned and tagged with stable revision metadata. Second, quantity and estimating systems ingest those inputs and publish approved bid baselines with controlled identifiers. Third, field systems capture production, labor, and equipment against the same identity model. Fourth, PM systems govern RFIs, submittals, changes, and schedule states while preserving links to source documents and field records. Fifth, ERP and BI layers consume curated, reconciled data for forecasting and financial close. At each hop, integration services should enforce schema validation, ID mapping, and timestamped audit trails. Contractors often focus on dashboard outputs, but reliability is determined earlier by exchange contracts and transformation controls. The most important technical artifact is a canonical dictionary for bid item IDs, cost codes, phase codes, and equipment classes, with explicit versioning whenever any source system changes structure.",
       "url": "/resources.html#software-architecture",
       "tags": [
@@ -1669,13 +1669,1283 @@
         "project controls architecture"
       ]
     },
-
-    {"id":"dev-concepts-basics","category":"Software Dev","title":"Software Development Core Concepts — API, SDK, Database, Frontend, Backend","content":"Essential software terminology for construction professionals. API (Application Programming Interface): a structured way for two programs to talk to each other, like Procore sending data to your accounting system. SDK (Software Development Kit): pre-built tools and code for building on top of a platform, like the Procore SDK or Trimble SDK. Database: organized storage for data — like a spreadsheet with millions of rows that queries instantly. Frontend: the UI you see in your browser or app. Backend: server-side code that processes data and runs business logic. Cloud: rented servers on the internet — AWS, Google Cloud, Azure. SaaS: Software as a Service — you pay a subscription, vendor runs everything (Procore, HCSS, ACC). Open Source: code that is publicly available for anyone to read, use, and contribute to — openmud is MIT-licensed open source. Integration: connecting two software systems to share data automatically. Webhook: automatic push notification from one system to another when something happens.","url":"/resources.html#dev-concepts","tags":["API","SDK","database","frontend","backend","cloud","SaaS","open source","integration","webhook","software development","contech"]},
-
-    {"id":"dev-stack-layers","category":"Software Dev","title":"Frontend, Backend, and Database — The Three-Layer Software Stack","content":"Every software application is built on three layers. Frontend (client): what the user sees — HTML, CSS, JavaScript, React, mobile apps. Runs on the user's device. Backend (server): processes requests, runs business logic, communicates with database and third-party services. Runs on servers in the cloud. Common languages: Node.js, Python, Java, Go, C#. Database (storage): persistent data storage. Relational SQL databases (PostgreSQL, MySQL) store structured data in tables with relationships — used by HCSS, most ERP systems. NoSQL document databases (MongoDB) store flexible JSON-like records. Redis is a fast key-value store used for caching. CDN (Content Delivery Network): distributes files geographically for fast load times. Serverless: backend functions that run on demand without managing servers — openmud runs serverless on Vercel. CI/CD: automated testing and deployment pipeline.","url":"/resources.html#dev-stack","tags":["frontend","backend","database","SQL","PostgreSQL","Node.js","Python","cloud","AWS","serverless","Vercel","CDN","infrastructure","stack"]},
-
-    {"id":"dev-apis-webhooks","category":"Software Dev","title":"APIs, SDKs, and Webhooks — How Software Systems Connect","content":"APIs are the backbone of software integration. REST API: URLs map to resources, HTTP verbs define actions (GET=read, POST=create, PUT=update, DELETE=remove). Most construction software uses REST APIs: Procore, HCSS, openmud. HTTP methods: GET retrieves data, POST creates records, PUT/PATCH updates, DELETE removes. API Authentication: API Key (secret string in header, like OpenAI key), OAuth 2.0 (sign in with Google/GitHub), JWT (signed token). SDK: pre-built code library that wraps API calls — Procore SDK, Trimble SDK, DJI SDK, OpenAI SDK. Webhook: push notification from one system to another the moment something happens — more efficient than polling. Polling asks 'any changes?' repeatedly; webhooks push 'this just happened' instantly. openmud's API endpoints: /api/python/estimate (regional estimating), /api/python/schedule (schedule builder), /api/python/proposal (proposal generator), /api/python/rates (regional rate tables).","url":"/resources.html#dev-apis","tags":["API","REST","webhook","SDK","authentication","OAuth","JWT","Procore API","Trimble SDK","OpenAI","integration","HTTP","GET","POST"]},
-
-    {"id":"dev-contech-evaluation","category":"Software Dev","title":"Software Development Concepts for Construction — Evaluating Contech","content":"Questions to ask when evaluating construction software: Do you have a public API? (reveals integration capability and data ownership). What's your data export format? (reveals lock-in risk — no CSV/JSON export is a red flag). What is your uptime SLA? (99.9% = 8.7 hours downtime per year). Where is my data stored? (sovereignty, compliance, security). Do you have a sandbox environment? (test integrations without affecting live data — no sandbox is a red flag). Common integration patterns in construction: bidirectional sync (Procore to Viewpoint accounting), one-way push (HCSS field logs to payroll), ETL pipeline (GPS fleet data to job cost reports), event-driven via webhooks (submittal approved triggers document filing). The openmud stack: frontend HTML/CSS/JS, backend Node.js serverless on Vercel, Python engine for estimating and scheduling, RAG knowledge base in JSON. All open source on GitHub.","url":"/resources.html#dev-contech","tags":["contech","software evaluation","API","data export","SaaS","integration","Procore","HCSS","openmud stack","open source","webhook","ETL","data sovereignty"]}
+    {
+      "id": "dev-concepts-basics",
+      "category": "Software Dev",
+      "title": "Software Development Core Concepts — API, SDK, Database, Frontend, Backend",
+      "content": "Essential software terminology for construction professionals. API (Application Programming Interface): a structured way for two programs to talk to each other, like Procore sending data to your accounting system. SDK (Software Development Kit): pre-built tools and code for building on top of a platform, like the Procore SDK or Trimble SDK. Database: organized storage for data — like a spreadsheet with millions of rows that queries instantly. Frontend: the UI you see in your browser or app. Backend: server-side code that processes data and runs business logic. Cloud: rented servers on the internet — AWS, Google Cloud, Azure. SaaS: Software as a Service — you pay a subscription, vendor runs everything (Procore, HCSS, ACC). Open Source: code that is publicly available for anyone to read, use, and contribute to — openmud is MIT-licensed open source. Integration: connecting two software systems to share data automatically. Webhook: automatic push notification from one system to another when something happens.",
+      "url": "/resources.html#dev-concepts",
+      "tags": [
+        "API",
+        "SDK",
+        "database",
+        "frontend",
+        "backend",
+        "cloud",
+        "SaaS",
+        "open source",
+        "integration",
+        "webhook",
+        "software development",
+        "contech"
+      ]
+    },
+    {
+      "id": "dev-stack-layers",
+      "category": "Software Dev",
+      "title": "Frontend, Backend, and Database — The Three-Layer Software Stack",
+      "content": "Every software application is built on three layers. Frontend (client): what the user sees — HTML, CSS, JavaScript, React, mobile apps. Runs on the user's device. Backend (server): processes requests, runs business logic, communicates with database and third-party services. Runs on servers in the cloud. Common languages: Node.js, Python, Java, Go, C#. Database (storage): persistent data storage. Relational SQL databases (PostgreSQL, MySQL) store structured data in tables with relationships — used by HCSS, most ERP systems. NoSQL document databases (MongoDB) store flexible JSON-like records. Redis is a fast key-value store used for caching. CDN (Content Delivery Network): distributes files geographically for fast load times. Serverless: backend functions that run on demand without managing servers — openmud runs serverless on Vercel. CI/CD: automated testing and deployment pipeline.",
+      "url": "/resources.html#dev-stack",
+      "tags": [
+        "frontend",
+        "backend",
+        "database",
+        "SQL",
+        "PostgreSQL",
+        "Node.js",
+        "Python",
+        "cloud",
+        "AWS",
+        "serverless",
+        "Vercel",
+        "CDN",
+        "infrastructure",
+        "stack"
+      ]
+    },
+    {
+      "id": "dev-apis-webhooks",
+      "category": "Software Dev",
+      "title": "APIs, SDKs, and Webhooks — How Software Systems Connect",
+      "content": "APIs are the backbone of software integration. REST API: URLs map to resources, HTTP verbs define actions (GET=read, POST=create, PUT=update, DELETE=remove). Most construction software uses REST APIs: Procore, HCSS, openmud. HTTP methods: GET retrieves data, POST creates records, PUT/PATCH updates, DELETE removes. API Authentication: API Key (secret string in header, like OpenAI key), OAuth 2.0 (sign in with Google/GitHub), JWT (signed token). SDK: pre-built code library that wraps API calls — Procore SDK, Trimble SDK, DJI SDK, OpenAI SDK. Webhook: push notification from one system to another the moment something happens — more efficient than polling. Polling asks 'any changes?' repeatedly; webhooks push 'this just happened' instantly. openmud's API endpoints: /api/python/estimate (regional estimating), /api/python/schedule (schedule builder), /api/python/proposal (proposal generator), /api/python/rates (regional rate tables).",
+      "url": "/resources.html#dev-apis",
+      "tags": [
+        "API",
+        "REST",
+        "webhook",
+        "SDK",
+        "authentication",
+        "OAuth",
+        "JWT",
+        "Procore API",
+        "Trimble SDK",
+        "OpenAI",
+        "integration",
+        "HTTP",
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "id": "dev-contech-evaluation",
+      "category": "Software Dev",
+      "title": "Software Development Concepts for Construction — Evaluating Contech",
+      "content": "Questions to ask when evaluating construction software: Do you have a public API? (reveals integration capability and data ownership). What's your data export format? (reveals lock-in risk — no CSV/JSON export is a red flag). What is your uptime SLA? (99.9% = 8.7 hours downtime per year). Where is my data stored? (sovereignty, compliance, security). Do you have a sandbox environment? (test integrations without affecting live data — no sandbox is a red flag). Common integration patterns in construction: bidirectional sync (Procore to Viewpoint accounting), one-way push (HCSS field logs to payroll), ETL pipeline (GPS fleet data to job cost reports), event-driven via webhooks (submittal approved triggers document filing). The openmud stack: frontend HTML/CSS/JS, backend Node.js serverless on Vercel, Python engine for estimating and scheduling, RAG knowledge base in JSON. All open source on GitHub.",
+      "url": "/resources.html#dev-contech",
+      "tags": [
+        "contech",
+        "software evaluation",
+        "API",
+        "data export",
+        "SaaS",
+        "integration",
+        "Procore",
+        "HCSS",
+        "openmud stack",
+        "open source",
+        "webhook",
+        "ETL",
+        "data sovereignty"
+      ]
+    },
+    {
+      "id": "pvc-c900-pressure-classes",
+      "category": "Reference",
+      "title": "PVC C900 Pressure Classes -- DR Ratings and OD by Size",
+      "content": "AWWA C900 PVC water main pipe. Dimension Ratio (DR) determines working pressure. DR18: 100 psi working pressure. DR14: 150 psi. DR11: 200 psi. Outside diameters (IPS OD): 4-inch = 4.800 in, 6-inch = 6.900 in, 8-inch = 9.050 in, 10-inch = 11.100 in, 12-inch = 13.200 in, 16-inch = 17.000 in. Blue color standard. Lengths: 20 ft standard. Joints: bell-and-spigot with rubber gasket. Bedding: Class B per AWWA. Minimum cover: 3 ft in roadway, 2.5 ft in non-traffic areas. Temperature derating: apply factor above 73 F. Used for potable water distribution and transmission lines.",
+      "url": "/resources.html#pipe-specs",
+      "tags": [
+        "PVC",
+        "C900",
+        "water main",
+        "DR18",
+        "DR14",
+        "DR11",
+        "pressure class",
+        "pipe specs",
+        "AWWA",
+        "OD",
+        "outside diameter"
+      ]
+    },
+    {
+      "id": "hdpe-pipe-dr-pressure",
+      "category": "Reference",
+      "title": "HDPE Pipe DR Series -- Pressure Ratings and Wall Thickness",
+      "content": "HDPE pipe pressure ratings by Dimension Ratio (DR). DR9: 200 psi. DR11: 160 psi. DR13.5: 128 psi. DR17: 100 psi. DR21: 80 psi. All ratings at 73 F with water. Temperature derating required above 73 F. HDPE is flexible, fuse-joined (butt fusion or electrofusion) -- no gaskets. ASTM D3035 and AWWA C906 govern. Common uses: directional drill (HDD) carrier pipe, river crossings, casing liner, force mains. High resistance to corrosion, joint pullout, and soil movement. Black with blue or yellow stripe indicates potable water or gas respectively. Minimum bend radius varies by DR. PE4710 resin is current standard for pressure pipe.",
+      "url": "/resources.html#pipe-specs",
+      "tags": [
+        "HDPE",
+        "DR11",
+        "DR17",
+        "DR9",
+        "pressure rating",
+        "pipe specs",
+        "AWWA C906",
+        "butt fusion",
+        "electrofusion",
+        "HDD",
+        "force main"
+      ]
+    },
+    {
+      "id": "ductile-iron-pipe-classes",
+      "category": "Reference",
+      "title": "Ductile Iron Pipe -- Class 50, 52, 54 Wall Thickness by Size",
+      "content": "Ductile iron pipe per AWWA C151. Wall thickness determined by pressure class and diameter. Class 50 is the minimum standard; Class 52 is the most common specified. Class 54 used for high-pressure or special conditions. Approximate wall thickness (Class 52): 4-inch = 0.26 in, 6-inch = 0.25 in, 8-inch = 0.27 in, 10-inch = 0.29 in, 12-inch = 0.31 in, 16-inch = 0.34 in, 24-inch = 0.40 in. Joints: push-on (Tyton), mechanical joint (MJ), restrained joint (TR Flex, Lok-Fast, Megalug). Lining: cement mortar per AWWA C104 standard. Exterior: asphaltic coating standard, polyethylene encasement (AWWA C105) in corrosive soils. DI is used for water mains, force mains, and high-pressure applications.",
+      "url": "/resources.html#pipe-specs",
+      "tags": [
+        "ductile iron",
+        "DI pipe",
+        "class 52",
+        "class 50",
+        "wall thickness",
+        "AWWA C151",
+        "mechanical joint",
+        "restrained joint",
+        "Megalug",
+        "push-on",
+        "water main"
+      ]
+    },
+    {
+      "id": "rcp-strength-classes",
+      "category": "Reference",
+      "title": "Reinforced Concrete Pipe -- Strength Classes and D-Load",
+      "content": "RCP per ASTM C76. Strength classes defined by D-load (lbs per linear ft per ft of inside diameter under three-edge bearing test). Class I: 800 D-load. Class II: 1000 D-load. Class III: 1350 D-load (most common storm drain). Class IV: 2000 D-load. Class V: 3000 D-load (very deep cover or heavy surface load). Common sizes: 12-inch through 144-inch diameter. Lengths: 4, 6, 8 ft. Joints: rubber gasket per ASTM C443 (watertight), O-ring, or tongue-and-groove. Pipe class selection is a structural calculation based on fill height, traffic loading (H-20 or H-25), bedding class, and native soil. Bedding Class A (concrete) provides highest load factor; Class D (impermissible) must not be used.",
+      "url": "/resources.html#pipe-specs",
+      "tags": [
+        "RCP",
+        "reinforced concrete pipe",
+        "ASTM C76",
+        "D-load",
+        "storm drain",
+        "class III",
+        "strength class",
+        "bedding class",
+        "fill height"
+      ]
+    },
+    {
+      "id": "pvc-sdr35-sewer",
+      "category": "Reference",
+      "title": "PVC SDR 35 and SDR 26 Sewer Pipe Specifications",
+      "content": "PVC gravity sewer pipe per ASTM D3034 (4- through 15-inch) and ASTM F679 (18- through 27-inch). SDR 35: most common gravity sewer, green color, rated 46 psi. SDR 26: heavier wall, 115 psi, used under roads or where point load risk exists. Outside diameters: 4-inch = 4.215 in, 6-inch = 6.275 in, 8-inch = 8.400 in, 10-inch = 10.500 in, 12-inch = 12.500 in, 15-inch = 15.300 in. Lengths: 12.5 and 14 ft standard. Bell-and-spigot with ASTM F477 elastomeric gasket. Minimum slope: 8-inch at 0.40%, 6-inch at 0.60%. Not rated for pressure service without upsizing. Bedding: Class B per APWA. Deflection must not exceed 5% (check 30 days post-install).",
+      "url": "/resources.html#pipe-specs",
+      "tags": [
+        "PVC",
+        "SDR 35",
+        "SDR 26",
+        "sewer pipe",
+        "ASTM D3034",
+        "gravity sewer",
+        "green pipe",
+        "sanitary sewer",
+        "OD",
+        "deflection"
+      ]
+    },
+    {
+      "id": "pipe-bedding-zones",
+      "category": "Reference",
+      "title": "Pipe Bedding Zones -- Haunch, Initial Backfill, and Final Backfill",
+      "content": "Pipe bedding is divided into zones that directly affect structural load distribution. Foundation: native ground or import if unstable, graded to provide uniform support. Bedding: material from foundation to pipe centerline or springline. Must be compacted to 90% proctor minimum. Haunch zone: from pipe bottom to springline -- most critical zone, requires hand tamping or mechanical compaction in lifts. Initial backfill: springline to 12 inches above pipe crown. Protect from equipment damage. Final backfill: 12 inches above crown to subgrade. APWA Bedding Class A: concrete cradle, highest load factor. Class B: granular material to springline, 90% compaction. Class C: lightly compacted native, only for shallow non-traffic cover. Bedding material: clean granular, sand, or crushed rock passing 3/4-inch sieve, less than 12% fines.",
+      "url": "/resources.html#pipe-installation",
+      "tags": [
+        "pipe bedding",
+        "haunch zone",
+        "initial backfill",
+        "bedding class",
+        "APWA",
+        "springline",
+        "compaction",
+        "pipe installation",
+        "granular bedding",
+        "foundation"
+      ]
+    },
+    {
+      "id": "pipe-joint-types",
+      "category": "Reference",
+      "title": "Pipe Joint Types -- Push-On, Mechanical, Restrained, and Flanged",
+      "content": "Push-on (bell-and-spigot): standard joint for gravity sewer and water main. Rubber gasket seated in bell groove. No thrust restraint. Deflection limited per manufacturer (typically 3-5 degrees). Mechanical joint (MJ): bolted gland and gasket for ductile iron. Allows field deflection and removal. Restrained joint: prevents joint pullout under pressure or unbalanced thrust. Types include TR Flex, Lok-Fast, Snap-Lok, Megalug retainer glands. Required at bends, tees, reducers, dead ends, and where cover is insufficient for thrust block. Flanged joint: bolted, used for above-grade piping, valves, meters, pump connections. Full face or ring gaskets. Electrofusion: HDPE only, electric coil melts pipe wall for leak-free joint. Butt fusion: heated plate joins HDPE pipe ends under pressure. Grooved coupling (Victaulic): quick connect for steel and ductile iron above grade.",
+      "url": "/resources.html#pipe-specs",
+      "tags": [
+        "pipe joint",
+        "push-on",
+        "mechanical joint",
+        "restrained joint",
+        "Megalug",
+        "TR Flex",
+        "bell and spigot",
+        "flanged",
+        "butt fusion",
+        "electrofusion",
+        "Victaulic",
+        "thrust restraint"
+      ]
+    },
+    {
+      "id": "corrugated-metal-pipe",
+      "category": "Reference",
+      "title": "Corrugated Metal Pipe -- Gauges, Coatings, and Sizes",
+      "content": "CMP per AASHTO M36. Available in round, arch, and elliptical profiles. Gauges: 16-gauge (thinnest, shallow cover), 14-gauge, 12-gauge, 10-gauge (deep fill or heavy load). Corrugation profiles: 2-2/3 x 1/2 inch (common), 3 x 1 inch, 5 x 1 inch (larger diameters). Sizes: 12-inch through 144-inch round. Coatings: galvanized (AASHTO M36), aluminized Type 2 (best corrosion resistance), polymer-precoated (aggressive soils), bituminous-coated. Service life varies by soil resistivity, pH, and abrasion. Galvanized life: 25-50 years in neutral soil. Structural plate CMP assembled in-field for large openings. Soil cover minimum: 1 ft for H-20 loading. Used for storm drain culverts, bridge pipes, access conduits.",
+      "url": "/resources.html#pipe-specs",
+      "tags": [
+        "CMP",
+        "corrugated metal pipe",
+        "culvert",
+        "gauge",
+        "galvanized",
+        "aluminized",
+        "storm drain",
+        "AASHTO M36",
+        "corrugation",
+        "arch pipe"
+      ]
+    },
+    {
+      "id": "utility-separation-requirements",
+      "category": "Reference",
+      "title": "Utility Separation Requirements -- Horizontal and Vertical Spacing",
+      "content": "Ten-foot horizontal separation between water and sewer mains is the standard per AWWA and most state health departments. Utah Division of Drinking Water requires 10 ft horizontal and 18 inches vertical (water over sewer). Where 10-ft horizontal cannot be maintained: reduce to 3 ft minimum with water in ductile iron with no joints within 10 ft of crossing. Vertical crossing: water must cross at least 18 inches above sewer. Gas mains: 12 inches vertical from water and sewer. Electric and telecom: 12 inches from water, 6 inches from gas. Storm drain to water: 10 ft horizontal minimum. Potable water to recycled water: 10 ft horizontal, color-code all recycled lines purple. Directional drill crossings: maintain separation at bore path even when surface alignment is tight.",
+      "url": "/resources.html#pipe-installation",
+      "tags": [
+        "utility separation",
+        "horizontal separation",
+        "vertical separation",
+        "water sewer separation",
+        "10-foot rule",
+        "AWWA",
+        "Utah DDW",
+        "crossing",
+        "parallel utilities",
+        "recycled water"
+      ]
+    },
+    {
+      "id": "fire-hydrant-assembly",
+      "category": "Reference",
+      "title": "Fire Hydrant Installation -- Assembly, Placement, and Specifications",
+      "content": "Fire hydrant placement: maximum 500 ft spacing in residential, 300 ft in commercial or industrial, at each intersection, and within 150 ft of all structures. Minimum 3 ft from back of curb, 18 inches clear on all sides. Hydrant branch: 6-inch minimum from water main with gate valve or resilient wedge valve. Thrust restraint required at tee and at hydrant elbow. Hydrant bury depth: barrel length matched to local frost depth plus 6 inches. Drain port must be above seasonal high groundwater. Traffic model (breakaway) required within 2 ft of travel lane. Hydrant facing: angled toward street, pumper nozzle facing nearest apparatus approach. Testing: 1500 GPM minimum flow at 20 psi residual for Class AA. Gravel drain pad at base, no concrete encasement of drain port.",
+      "url": "/resources.html#utility-specs",
+      "tags": [
+        "fire hydrant",
+        "hydrant installation",
+        "hydrant spacing",
+        "thrust restraint",
+        "gate valve",
+        "NFPA 291",
+        "flow test",
+        "bury depth",
+        "hydrant valve",
+        "water main"
+      ]
+    },
+    {
+      "id": "service-lateral-specs",
+      "category": "Reference",
+      "title": "Water Service Laterals -- Tap, Corporation Stop, Meter, and Sizing",
+      "content": "Water service lateral from main to meter. Tap types: direct tap (small diameter, 3/4 to 2 inch), service saddle for larger or plastic mains. Corporation stop (corp): brass ball valve at the tap point. Common sizes: 3/4-inch and 1-inch residential. Service line: copper type K underground (most common), HDPE, or polyethylene. Meter box (curb box): at property line, contains curb stop valve. Meter size: 3/4-inch for single family, 1-inch for multifamily or commercial, larger for fire-sprinkler lines. Service sizing: friction loss calc using AWWA M22. Minimum pressure at meter: 40 psi. Maximum static pressure: 80 psi (pressure reducing valve required above). Backflow preventer: required at all commercial, irrigation, and potentially hazardous connections.",
+      "url": "/resources.html#utility-specs",
+      "tags": [
+        "service lateral",
+        "water service",
+        "corporation stop",
+        "meter",
+        "copper service",
+        "curb stop",
+        "backflow preventer",
+        "tap",
+        "service saddle",
+        "AWWA"
+      ]
+    },
+    {
+      "id": "prevailing-wage-utah-laborer",
+      "category": "Reference",
+      "title": "Utah Prevailing Wage -- Laborer and Common Laborer Rates",
+      "content": "Utah prevailing wage rates are set by county under the Utah Prevailing Wage Act. Rates vary by county and are updated periodically by the Utah Labor Commission. Approximate 2024 rates for Salt Lake and Utah counties: Common Laborer -- $25-$32/hr base wage, $12-$16/hr fringe. Utility Laborer (pipe work) -- $27-$35/hr base, $13-$17/hr fringe. Mason Tender -- $25-$30/hr. Traffic Control -- $22-$28/hr. Total package (base + fringe) for laborer on public works: $37-$52/hr. Certified payroll required weekly on state-funded projects. Fringes must be paid to bona fide benefits plan or as cash in lieu. Apprentice rates allowed at percentage of journeyman rate depending on OJT hours.",
+      "url": "/resources.html#prevailing-wage",
+      "tags": [
+        "prevailing wage",
+        "Utah",
+        "laborer",
+        "common laborer",
+        "fringe",
+        "public works",
+        "certified payroll",
+        "Utah Labor Commission",
+        "wage rate",
+        "Davis-Bacon"
+      ]
+    },
+    {
+      "id": "prevailing-wage-utah-operator",
+      "category": "Reference",
+      "title": "Utah Prevailing Wage -- Heavy Equipment Operator Rates",
+      "content": "Utah prevailing wage for Operating Engineers (heavy equipment operators) in Salt Lake and Utah counties 2024. Excavator operator (up to 1.5 CY): $45-$58/hr base, $18-$22/hr fringe. Total package $63-$80/hr. Dozer operator (D6-D8 class): $48-$60/hr base, $18-$22/hr fringe. Crane operator: $55-$75/hr base plus fringe. Grade setter or grade checker: $35-$45/hr. Compaction roller operator: $42-$52/hr. Loader operator: $42-$52/hr. Rates are higher for specialty equipment and depth work. IUOE Local 3 represents heavy equipment operators in Utah. Overtime threshold: 8 hr/day or 40 hr/week at 1.5x on Davis-Bacon and most state contracts.",
+      "url": "/resources.html#prevailing-wage",
+      "tags": [
+        "prevailing wage",
+        "Utah",
+        "equipment operator",
+        "operating engineer",
+        "excavator operator",
+        "dozer operator",
+        "crane operator",
+        "IUOE",
+        "fringe",
+        "public works"
+      ]
+    },
+    {
+      "id": "prevailing-wage-utah-pipefitter",
+      "category": "Reference",
+      "title": "Utah Prevailing Wage -- Pipefitter and Plumber Rates",
+      "content": "Utah prevailing wage for Pipefitter and Plumber on public works projects 2024. Pipefitter (underground utility): $38-$52/hr base, $18-$22/hr fringe. Total package $56-$74/hr. Plumber (plumbing contractor work): $45-$60/hr base, $20-$25/hr fringe. Sprinkler fitter: $45-$58/hr base plus fringe. Pipe journeyman wage is one of the highest in underground utility trades. Apprentice ratio typically 1:3 (1 apprentice per 3 journeyman). Apprentices paid at percentage of journeyman: 1st period 50%, progressing to 90% at journeyman. UA Local 140 (Salt Lake) and UA Local 131 (Ogden area) represent pipefitters and plumbers in Utah.",
+      "url": "/resources.html#prevailing-wage",
+      "tags": [
+        "prevailing wage",
+        "Utah",
+        "pipefitter",
+        "plumber",
+        "UA Local 140",
+        "underground utility",
+        "fringe benefits",
+        "public works",
+        "apprentice",
+        "journeyman"
+      ]
+    },
+    {
+      "id": "davis-bacon-act-overview",
+      "category": "Reference",
+      "title": "Davis-Bacon Act -- Federal Prevailing Wage Requirements",
+      "content": "The Davis-Bacon Act (40 U.S.C. 3141) requires payment of locally prevailing wages on federally funded or assisted construction projects over $2,000. Applies to all public building and public works contracts. Wage determinations are published by the U.S. Department of Labor Wage and Hour Division by county and trade classification. Contractors must post wage determination on job site, pay at least the listed wage plus fringe, submit certified payroll weekly (WH-347 form), and keep payroll records for 3 years. Fringe benefits can be paid to a bona fide benefit plan (health, retirement) or as cash supplement. IIJA projects include Davis-Bacon requirements -- largest expansion of prevailing wage coverage in decades. Failure to comply: contract debarment, back wages, civil penalty. LCPtracker and Elation are common certified payroll software platforms.",
+      "url": "/resources.html#prevailing-wage",
+      "tags": [
+        "Davis-Bacon",
+        "prevailing wage",
+        "federal",
+        "certified payroll",
+        "WH-347",
+        "wage determination",
+        "fringe",
+        "IIJA",
+        "LCPtracker",
+        "public works"
+      ]
+    },
+    {
+      "id": "certified-payroll-requirements",
+      "category": "Reference",
+      "title": "Certified Payroll -- Weekly Reporting Requirements and Process",
+      "content": "Certified payroll is a weekly payroll report required on prevailing wage projects. Federal form WH-347 or equivalent state form. Must include: employee name, last four of SSN, work classification, hours worked each day, hourly rate, fringe payments, gross wages, deductions, and net pay. Submitted weekly, covering Monday through Sunday pay period. General contractor is responsible for all subcontractor certified payrolls. Retain records for 3 years post-project. Common errors: wrong classification for work performed, missing fringe documentation, late submission. Software: LCPtracker, Elation, B2W Comply, or Sage integrations. Anti-kickback (Copeland Act) requires statement that wages were not kicked back to employer. Apprentice ratios must be verified each week.",
+      "url": "/resources.html#prevailing-wage",
+      "tags": [
+        "certified payroll",
+        "WH-347",
+        "prevailing wage",
+        "payroll reporting",
+        "LCPtracker",
+        "Copeland Act",
+        "fringe",
+        "classification",
+        "subcontractor",
+        "Davis-Bacon"
+      ]
+    },
+    {
+      "id": "excavator-size-classes",
+      "category": "Reference",
+      "title": "Excavator Size Classes -- Mini, Mid, Standard, and Large",
+      "content": "Excavators are classified by operating weight. Mini excavators (1-6 tons): zero tail swing options, access tight areas, 6-10 ft dig depth. Used for landscaping, utility service work, demo. Examples: Cat 303-308 series, Komatsu PC26-55. Compact or midi (7-14 tons): 12-15 ft dig depth, 0.3-0.5 CY bucket, versatile for urban utility work. Standard (15-25 tons): 16-22 ft dig depth, 0.5-1.2 CY bucket, typical water and sewer main machine. Komatsu PC200, Cat 320 class. Large (26-50 tons): 22-30 ft dig depth, 1.2-2.5 CY bucket, deep sewers and large pipeline. Cat 336, Komatsu PC360. Mining class (50+ tons): 3+ CY, rock and mass excavation. Long stick: deeper excavation, less breakout. Short stick: more breakout force, less depth.",
+      "url": "/resources.html#equipment",
+      "tags": [
+        "excavator",
+        "mini excavator",
+        "Cat 320",
+        "Komatsu PC200",
+        "excavator size",
+        "dig depth",
+        "bucket size",
+        "equipment",
+        "trenching",
+        "backhoe"
+      ]
+    },
+    {
+      "id": "dozer-size-classes",
+      "category": "Reference",
+      "title": "Dozer Size Classes -- D3 Through D11, Horsepower, and Applications",
+      "content": "Bulldozers classified by weight and horsepower. D3 or D4 class (Cat) or D37 or D39 (Komatsu): 75-110 HP, 5-7 tons, small site work, finish grading. D5 or D51 class: 110-130 HP, 10-13 tons, residential site work, light earthwork. D6 or D61 class: 130-175 HP, 18-22 tons, most common for utility construction, capable production dozer. D7 or D65 class: 200-240 HP, 25-30 tons, road building, heavy earthwork. D8 or D85 class: 310-355 HP, 38-42 tons, large mass grading, dam and levee work. D9 class: 410-460 HP, 48-52 tons, very heavy production dozing, rock. Blades: straight (S), semi-U, full-U (more capacity, less penetration). Rippers: single shank preferred for rock, multi-shank for soil. GPS machine control is now standard on most production dozers.",
+      "url": "/resources.html#equipment",
+      "tags": [
+        "dozer",
+        "bulldozer",
+        "Cat D6",
+        "D7",
+        "D8",
+        "Komatsu",
+        "horsepower",
+        "blade",
+        "ripper",
+        "GPS machine control",
+        "earthwork",
+        "equipment"
+      ]
+    },
+    {
+      "id": "compaction-equipment-types",
+      "category": "Reference",
+      "title": "Compaction Equipment -- Jumping Jack, Plate, Padfoot, and Smooth Drum",
+      "content": "Compaction equipment selection depends on soil type, lift thickness, and confined space. Jumping jack rammer: cohesive soils (clay), confined spaces, trench backfill haunch and initial backfill zones. Impact and kneading action. Lift thickness: 6-8 inches. Plate compactor (vibratory): granular soils (sand, gravel, select fill), flat surfaces. Centrifugal force plus vibration. Lift thickness: 6-12 inches depending on model. Walk-behind smooth drum vibratory roller: granular base course, asphalt mat, larger flat areas. Padfoot (sheepsfoot) roller: cohesive soils, mass earthwork fill, breaking up clods. Protrusions penetrate soil surface, good for clay. Pneumatic tired roller: good for granular and mixed soils, road subbase. Self-propelled smooth drum: asphalt compaction, finish grade. Rule of thumb: 8-10 passes at optimum moisture for 95% Modified Proctor in granular fill.",
+      "url": "/resources.html#equipment",
+      "tags": [
+        "compaction",
+        "jumping jack",
+        "plate compactor",
+        "padfoot",
+        "sheepsfoot",
+        "smooth drum",
+        "vibratory roller",
+        "trench compaction",
+        "Modified Proctor",
+        "nuclear density gauge"
+      ]
+    },
+    {
+      "id": "equipment-daily-rental-rates",
+      "category": "Reference",
+      "title": "Construction Equipment Daily Rental Rates -- Ballpark 2024",
+      "content": "Approximate daily rental rates for common construction equipment, bare rental, western US 2024, excluding fuel, operator, and delivery. Mini excavator 3-5 ton: $300-$450/day. Compact excavator 8-12 ton: $500-$750/day. Standard excavator 20-ton: $900-$1,400/day. Large excavator 35-ton: $1,400-$2,000/day. Dozer D6 class: $700-$1,100/day. Dozer D8 class: $1,300-$2,000/day. Skid steer: $350-$550/day. Track loader: $600-$900/day. Motor grader: $800-$1,300/day. Smooth drum roller 84-inch: $400-$650/day. Plate compactor: $100-$180/day. Water truck 4000 gal: $450-$700/day. Trench box rental: $75-$200/day depending on size. Submersible pump: $100-$250/day. Rates vary by vendor (Sunbelt, United, BlueLine, Fabco) and local market.",
+      "url": "/resources.html#equipment",
+      "tags": [
+        "equipment rental",
+        "daily rate",
+        "excavator rental",
+        "dozer rental",
+        "compactor rental",
+        "Sunbelt",
+        "United Rentals",
+        "construction equipment cost",
+        "bare rental",
+        "2024"
+      ]
+    },
+    {
+      "id": "vacuum-excavation-methods",
+      "category": "Reference",
+      "title": "Vacuum Excavation -- Hydrovac and Air Vacuum Methods",
+      "content": "Vacuum excavation is the safest method for exposing existing utilities (potholing). Two types: hydrovac uses pressurized water jet to break soil, vacuum removes slurry. Air vacuum uses compressed air to break soil -- preferred for gas lines, avoids water damage. Hydrovac is faster in hard soil but creates contaminated slurry for disposal. Typical hydrovac production: 2-6 pothole locations per day depending on depth and soil. Pothole dimensions: minimum 12-inch wide, extend 6-inch below and past pipe to confirm position and depth. Required before any excavation within tolerance zone (18-24 inches of a locate mark depending on state). Common equipment: Vactor, Ditch Witch HydraFlex, McLaughlin Versa-Vac. Hydrovac trucks: 500-1500 gallon water capacity, 800-2000 gallon debris tank.",
+      "url": "/resources.html#equipment",
+      "tags": [
+        "vacuum excavation",
+        "hydrovac",
+        "potholing",
+        "air vacuum",
+        "utility exposure",
+        "Vactor",
+        "daylighting",
+        "tolerance zone",
+        "existing utilities",
+        "pothole"
+      ]
+    },
+    {
+      "id": "dewatering-methods-detail",
+      "category": "Reference",
+      "title": "Dewatering Methods -- Sump Pumps, Wellpoints, and Deep Wells",
+      "content": "Trench dewatering options by groundwater condition. Sump pump method: pump from collection pit at low point of trench. Works in low-flow, stable soil. Risk: piping and erosion at pump inlet. Wellpoint system: horizontal perforated pipe header at ground surface, vertical wellpoints spaced 5-8 ft, vacuum applied by centrifugal pump. Lowers water table 15-20 ft. Best for sandy or gravelly soils. Eductor wells: high-pressure water creates vacuum, lowers table 30+ ft. Deep well pumps: individual turbine pumps in drilled wells, handles large volumes at depth. Cutoff (sheet pile or slurry wall): physical barrier to groundwater, no pumping required. Used where dewatering would damage adjacent structures. Disposal: dewatered groundwater typically requires NPDES permit, may need sediment control and pH adjustment.",
+      "url": "/resources.html#equipment",
+      "tags": [
+        "dewatering",
+        "sump pump",
+        "wellpoints",
+        "deep well",
+        "groundwater",
+        "trench",
+        "NPDES",
+        "dewatering permit",
+        "piping failure",
+        "cutoff wall"
+      ]
+    },
+    {
+      "id": "pipe-laying-production-rates",
+      "category": "Reference",
+      "title": "Pipe Installation Production Rates -- LF Per Day by Diameter",
+      "content": "Typical pipe laying production rates for experienced underground utility crew in average soil conditions. 6-inch water or sewer main: 300-500 LF/day with 4-5 person crew. 8-inch main: 250-400 LF/day. 12-inch main: 180-300 LF/day. 16-inch main: 120-200 LF/day. 24-inch main: 80-140 LF/day. 36-inch sewer or storm: 50-90 LF/day. Deep sewer (10-15 ft): reduce 25-30% for shoring setup time. Rock: reduce 40-60%, depends on drilling and blasting rate. HDD (directional drill): 100-400 LF/day depending on soil, diameter, and bore length. Microtunnel: 30-80 LF/day average. Production factors that reduce rate: multiple utility crossings, poor soil, dewatering, traffic control setup, short runs with many fittings. Track progress daily against bid LF/day to identify problems early.",
+      "url": "/resources.html#field-workflows",
+      "tags": [
+        "production rate",
+        "pipe installation",
+        "LF per day",
+        "crew productivity",
+        "water main",
+        "sewer",
+        "HDD",
+        "deep excavation",
+        "daily production",
+        "pipeline"
+      ]
+    },
+    {
+      "id": "osha-egress-ladder-ramp",
+      "category": "Safety",
+      "title": "OSHA Egress Requirements -- Ladders and Ramps in Excavations",
+      "content": "OSHA 29 CFR 1926.651(c) requires safe means of egress in all excavations 4 feet or more in depth. Maximum lateral travel to egress: 25 linear feet. Ladders: must extend 3 feet above excavation edge. Portable extension ladders are acceptable. Structural ramps: designed by competent person for single-person use, by PE for vehicle or heavier loads. Ramp slope max 45 degrees for walking, less for vehicle access. Cleats or nonskid surface required on wood ramps. Employees must not be required to jump across or climb excavation walls. Trench boxes must have a ladder available within the box. Egress must remain accessible at all times. Inspection after rain or freeze-thaw may require repositioning of ladder.",
+      "url": "/resources.html#osha-excavation",
+      "tags": [
+        "OSHA",
+        "egress",
+        "ladder",
+        "ramp",
+        "excavation",
+        "trench safety",
+        "1926.651",
+        "access",
+        "exit",
+        "competent person"
+      ]
+    },
+    {
+      "id": "osha-benching-systems",
+      "category": "Safety",
+      "title": "OSHA Benching Systems -- Simple and Multiple in Type A and B Soil",
+      "content": "Benching cuts the excavation into horizontal steps (benches). Only permitted in Type A and Type B soil -- benching is never allowed in Type C soil. Simple bench (Type A): vertical height of bottom cut maximum 4 ft, then bench of equal horizontal distance, maximum vertical overall 20 ft. Multiple bench (Type B): bottom cut maximum 4 ft, then horizontal bench of equal or greater width, repeat. Overall slope of benched system must not exceed 1:1 for Type B. Bench width must equal or exceed bench height. Water infiltration at any level: reclassify down or evacuate. Benching reduces spoil volume compared to full sloping and is common in urban trench work with limited right-of-way.",
+      "url": "/resources.html#osha-excavation",
+      "tags": [
+        "OSHA",
+        "benching",
+        "bench cut",
+        "trench safety",
+        "Type A soil",
+        "Type B soil",
+        "sloping",
+        "excavation",
+        "simple bench",
+        "multiple bench"
+      ]
+    },
+    {
+      "id": "osha-atmospheric-testing",
+      "category": "Safety",
+      "title": "OSHA Atmospheric Testing -- Confined Space and Deep Excavation",
+      "content": "OSHA requires atmospheric testing of excavations over 4 feet deep if the atmosphere may be hazardous. Four parameters to test: oxygen content, combustible gases (LEL), carbon monoxide, and hydrogen sulfide. Safe ranges: oxygen 19.5%-23.5%, LEL less than 10%, CO less than 35 ppm (PEL 50 ppm), H2S less than 1 ppm (PEL 20 ppm). Testing order: oxygen first, then LEL, then toxics. 4-gas monitor is standard. Continuous monitoring required if conditions detected or suspected. Sewer manholes, vaults, and areas near gas lines are highest risk. Forced air ventilation required before entry if atmosphere is deficient or hazardous. Purge and confirm safe before workers enter.",
+      "url": "/resources.html#osha-safety",
+      "tags": [
+        "atmospheric testing",
+        "confined space",
+        "oxygen",
+        "LEL",
+        "hydrogen sulfide",
+        "H2S",
+        "carbon monoxide",
+        "4-gas monitor",
+        "OSHA",
+        "sewer manhole",
+        "excavation safety"
+      ]
+    },
+    {
+      "id": "osha-fall-protection",
+      "category": "Safety",
+      "title": "OSHA Fall Protection -- Guardrail, PFAS, and Safety Net Requirements",
+      "content": "OSHA 29 CFR 1926 Subpart M: fall protection required at 6 feet in construction for unprotected sides and edges. Systems: guardrail (top rail 42 inches plus or minus 3 inches, midrail at 21 inches, withstand 200-lb force), personal fall arrest system (PFAS), or safety net. PFAS components: full-body harness, lanyard or self-retracting lifeline (SRL), anchorage rated at 5,000 lbs per worker. PFAS must arrest fall within 3.5 feet, max arresting force 1,800 lbs. Shock-absorbing lanyard extends to 6 ft plus deceleration distance. SRL (self-retracting lifeline): auto-locks, much shorter fall distance than lanyard. Leading edge work: SRL or specific leading-edge rated PFAS required. Scaffolding: 10 ft trigger height (Subpart L). Excavation spoil edge: 2-ft setback is a tripping hazard.",
+      "url": "/resources.html#osha-safety",
+      "tags": [
+        "fall protection",
+        "OSHA",
+        "guardrail",
+        "PFAS",
+        "harness",
+        "lanyard",
+        "SRL",
+        "self-retracting lifeline",
+        "1926 Subpart M",
+        "leading edge",
+        "anchorage",
+        "fall arrest"
+      ]
+    },
+    {
+      "id": "osha-lockout-tagout",
+      "category": "Safety",
+      "title": "OSHA Lockout/Tagout -- Energy Control for Construction",
+      "content": "OSHA 29 CFR 1910.147 and 29 CFR 1926.417 govern control of hazardous energy during maintenance and servicing. Sequence: notify affected employees, identify and locate all energy sources, shut down equipment, isolate all energy (shut valves, disconnect electrical, block mechanical), apply personal lock and danger tag to each energy source, release or restrain stored energy (capacitors, springs, compressed air, gravity), verify by attempting to start. Each worker applies their own lock -- never rely on another person's lock for protection. Multi-hasp allows multiple locks on single isolation point. Tagout only permitted if lock application is not possible. Re-energization: remove tools and materials, employees clear, remove locks in reverse order. Applies to pump stations, traffic control systems, electrical panels.",
+      "url": "/resources.html#osha-safety",
+      "tags": [
+        "lockout tagout",
+        "LOTO",
+        "OSHA 1910.147",
+        "energy control",
+        "hazardous energy",
+        "lock",
+        "tag",
+        "pump station",
+        "electrical",
+        "safety procedure",
+        "maintenance"
+      ]
+    },
+    {
+      "id": "osha-struck-by-hazards",
+      "category": "Safety",
+      "title": "OSHA Struck-By Hazards -- Vehicle and Equipment Safety",
+      "content": "Struck-by incidents are the second leading cause of construction fatalities. Four types: struck by flying object, struck by falling object, struck by swinging equipment, struck by vehicle. Prevention: establish clear equipment exclusion zones, never allow workers in the swing radius of excavators or cranes. Operator must have clear sight lines or use a spotter. Spotter required when equipment backs up or changes direction near workers. High-visibility vest Class 2 minimum near equipment, Class 3 near moving traffic. Barricade work zone from vehicle traffic per MUTCD standards. Backup alarms required on all equipment. Spotters must be a designated, trained person. Suspended loads: stay clear of load path at all times. Tag lines to control load swing.",
+      "url": "/resources.html#osha-safety",
+      "tags": [
+        "struck by",
+        "OSHA",
+        "traffic control",
+        "equipment safety",
+        "spotter",
+        "swing radius",
+        "high visibility",
+        "backup alarm",
+        "crane",
+        "excavator",
+        "work zone safety"
+      ]
+    },
+    {
+      "id": "osha-heat-illness-prevention",
+      "category": "Safety",
+      "title": "OSHA Heat Illness Prevention -- Field Protocol for Hot Weather Work",
+      "content": "Heat illness is preventable. OSHA recommends water-rest-shade protocol. Water: 1 cup (8 oz) every 15-20 minutes during heat exposure, cold water preferred. Shade: rest area must be nearby, shaded or air-conditioned. Rest: schedule breaks during hottest part of day (10 AM - 2 PM), rotate crews. Acclimatization: new workers must be gradually exposed to heat over 14 days -- most heat fatalities occur in first few days. Warning signs of heat exhaustion: heavy sweating, weakness, cold and pale skin, fast weak pulse, nausea. Heat stroke (emergency): high body temperature (103+ F), hot red dry skin, rapid strong pulse, confusion -- call 911, cool immediately. WBGT (Wet Bulb Globe Temperature) index accounts for humidity, sun, and air temperature. OSHA General Duty Clause applies in all states.",
+      "url": "/resources.html#osha-safety",
+      "tags": [
+        "heat illness",
+        "heat stroke",
+        "heat exhaustion",
+        "water rest shade",
+        "OSHA heat",
+        "acclimatization",
+        "WBGT",
+        "hot weather",
+        "field safety",
+        "summer construction"
+      ]
+    },
+    {
+      "id": "material-pricing-concrete",
+      "category": "Reference",
+      "title": "Concrete Material Pricing -- Ready-Mix, CDF, and Flowable Fill (2024)",
+      "content": "Approximate concrete material prices, western US 2024. Ready-mix 3000 psi: $150-$185/CY. 4000 psi: $165-$200/CY. 5000 psi: $180-$220/CY. Fiber-reinforced add $8-$12/CY. Short load charge (less than 8 CY): $15-$25. Overtime and Saturday delivery add 10-20%. Controlled Density Fill (CDF or flowable fill): $90-$130/CY -- self-leveling, excavatable, used for utility trench abandonment and structure backfill. Lean concrete base: $110-$145/CY. Shotcrete (wet mix): $250-$400/CY installed. Grout (non-shrink): $30-$60 per 50-lb bag. Concrete pump mobilization: $800-$1,500/day plus per-yard charge. Winter concrete: cold weather protection add $15-$30/CY. These are material-only prices -- add forming, labor, and equipment for all-in cost.",
+      "url": "/resources.html#material-pricing",
+      "tags": [
+        "concrete price",
+        "ready-mix",
+        "CDF",
+        "flowable fill",
+        "$/CY",
+        "concrete cost",
+        "material pricing",
+        "pump",
+        "shotcrete",
+        "western US",
+        "2024"
+      ]
+    },
+    {
+      "id": "material-pricing-asphalt",
+      "category": "Reference",
+      "title": "Asphalt Material Pricing -- HMA Tonnage and Surface Rates (2024)",
+      "content": "Hot mix asphalt (HMA) pricing varies significantly by oil price index and region. Western US 2024 approximate: HMA 3/4-inch surface mix: $90-$135/ton. HMA 1-inch base course: $80-$125/ton. Open-graded friction course: $100-$145/ton. Warm mix asphalt (WMA): add $5-$10/ton. SMA (stone matrix asphalt): add $15-$25/ton. Liquid asphalt (AC-20 or PG 64-22): $700-$950/ton -- oil index drives everything. Tack coat: $0.10-$0.20/SY. Crack seal: $0.50-$1.50/LF. Trench patch per SY: 2-inch overlay $15-$25/SY material only. Asphalt millings (recycled): $8-$18/ton, usable for base or temporary access. Compacted density: 110-115 lbs/SY per inch of thickness. Rule of thumb: 1 ton covers approximately 50 SY at 2 inches compacted.",
+      "url": "/resources.html#material-pricing",
+      "tags": [
+        "asphalt price",
+        "HMA",
+        "hot mix asphalt",
+        "$/ton",
+        "asphalt cost",
+        "tack coat",
+        "WMA",
+        "millings",
+        "trench patch",
+        "paving",
+        "material pricing",
+        "2024"
+      ]
+    },
+    {
+      "id": "material-pricing-pipe",
+      "category": "Reference",
+      "title": "Pipe Material Pricing -- PVC, HDPE, Ductile Iron by Size (2024)",
+      "content": "Approximate pipe material prices, western US 2024 (20-ft sticks, FOB distributor, not installed). PVC C900 water main: 6-inch DR18 $12-$18/LF, 8-inch $18-$27/LF, 12-inch $32-$48/LF. PVC SDR 35 sewer: 6-inch $6-$10/LF, 8-inch $10-$15/LF, 12-inch $18-$28/LF. HDPE DR11: 6-inch $14-$20/LF, 8-inch $22-$32/LF, 12-inch $40-$58/LF. Ductile iron class 52: 6-inch $28-$40/LF, 8-inch $40-$58/LF, 12-inch $70-$95/LF, 16-inch $110-$150/LF. RCP class III: 18-inch $35-$55/LF, 24-inch $55-$80/LF, 36-inch $90-$130/LF. Corrugated HDPE storm: 12-inch $6-$10/LF, 18-inch $12-$18/LF, 24-inch $20-$30/LF. Prices increase with oil index, tariffs, and freight. Fittings and specials typically add 15-25% to straight run cost.",
+      "url": "/resources.html#material-pricing",
+      "tags": [
+        "pipe price",
+        "PVC cost",
+        "HDPE price",
+        "ductile iron price",
+        "RCP cost",
+        "$/LF",
+        "material pricing",
+        "water main cost",
+        "sewer pipe cost",
+        "pipe material",
+        "2024"
+      ]
+    },
+    {
+      "id": "material-pricing-aggregate",
+      "category": "Reference",
+      "title": "Aggregate Material Pricing -- Base Course, Select Fill, Bedding (2024)",
+      "content": "Aggregate pricing varies by quarry distance and haul. Western US 2024 approximate, FOB quarry or pit. 3/4-inch crushed gravel (road base, Class 6): $14-$22/ton. 1.5-inch base course: $12-$20/ton. 3/8-inch pea gravel (pipe bedding): $18-$28/ton. Concrete sand (bedding): $16-$25/ton. Select fill (pit run gravel): $8-$16/ton. Native select (screened, no organics): $5-$12/ton. Rip rap D50=12-inch: $35-$55/ton. Rip rap D50=24-inch: $40-$60/ton. Recycled concrete base: $8-$14/ton. Haul cost: $4-$8/ton/mile, 15-20 miles typical economical radius from quarry. Bank measure to compacted measure: 1.15-1.30 shrinkage factor for granular fill. Swell factor for excavated material: 1.10-1.35 depending on soil type.",
+      "url": "/resources.html#material-pricing",
+      "tags": [
+        "aggregate price",
+        "base course cost",
+        "gravel price",
+        "select fill",
+        "bedding sand",
+        "rip rap",
+        "$/ton",
+        "material pricing",
+        "haul cost",
+        "crushed gravel",
+        "2024"
+      ]
+    },
+    {
+      "id": "material-pricing-water-fittings",
+      "category": "Reference",
+      "title": "Water Main Fittings and Valves -- Pricing Reference (2024)",
+      "content": "Approximate material pricing for water main fittings and appurtenances, western US 2024. Ductile iron fittings (MJ): 6-inch 90-degree elbow $85-$130, 8-inch $140-$210, 12-inch $280-$420. Gate valves (resilient wedge, AWWA C509): 6-inch $350-$550, 8-inch $600-$900, 12-inch $1,400-$2,000. Butterfly valves (AWWA C504, 10-inch and larger): 10-inch $600-$900, 12-inch $800-$1,200, 16-inch $1,400-$2,200. Fire hydrant (3-way, 5-1/4-inch main valve): $1,500-$2,800 depending on brand and bury depth. Megalug retainer glands: 6-inch $45-$75 set, 8-inch $65-$110, 12-inch $120-$180. Air release valve (1-inch): $200-$450. Blow-off assembly (2-inch): $400-$700. Corporation stops (3/4-inch): $25-$45 each.",
+      "url": "/resources.html#material-pricing",
+      "tags": [
+        "water main fittings",
+        "gate valve price",
+        "butterfly valve",
+        "fire hydrant cost",
+        "Megalug price",
+        "DI fittings",
+        "valve pricing",
+        "water works",
+        "AWWA",
+        "2024"
+      ]
+    },
+    {
+      "id": "material-pricing-steel",
+      "category": "Reference",
+      "title": "Steel and Rebar Material Pricing -- Structural and Reinforcing (2024)",
+      "content": "Structural and reinforcing steel pricing, US 2024. Reinforcing bar (rebar): #4 (1/2-inch) $0.65-$0.90/lb, #5 (5/8-inch) $0.65-$0.90/lb, #6 (3/4-inch) $0.65-$0.90/lb. Rebar is sold by weight: #4 = 0.668 lb/LF, #5 = 1.043 lb/LF, #6 = 1.502 lb/LF. Welded wire reinforcement (WWR): $0.20-$0.45/SF. Structural steel (wide flange beams): $0.90-$1.30/lb fabricated. Plate steel: $0.80-$1.20/lb. HSS tube: $0.90-$1.20/lb. Sheet pile (steel): $35-$60/SF of wall face depending on section. Trench plate (road plate): rental $5-$15/day per plate or buy at $600-$1,200 each (4x8 to 4x12). Steel prices are volatile -- tied to iron ore and scrap markets. Fabricated structural steel order lead times: 8-16 weeks typical.",
+      "url": "/resources.html#material-pricing",
+      "tags": [
+        "rebar price",
+        "reinforcing steel",
+        "structural steel",
+        "rebar cost",
+        "$/lb",
+        "sheet pile",
+        "trench plate",
+        "WWR",
+        "welded wire",
+        "material pricing",
+        "2024"
+      ]
+    },
+    {
+      "id": "pipe-installation-workflow",
+      "category": "Reference",
+      "title": "Water and Sewer Main Installation -- Step-by-Step Field Workflow",
+      "content": "Standard underground utility pipe installation sequence: 1. Locate existing utilities (811, vacuum excavate to verify at conflicts). 2. Establish grade stakes from survey shots, mark every 50-100 ft. 3. Open cut trench to design depth plus bedding depth. 4. Shape trench bottom, remove soft spots, compact if disturbed. 5. Place bedding material (typically 4-inch minimum), strike to grade with laser or grade rod. 6. Set pipe: clean bell and spigot, lubricate gasket, pull joint home, check deflection angle. 7. Verify invert elevation with laser or grade rod at each joint. 8. Place haunching material, hand tamp both sides simultaneously to avoid shifting pipe. 9. Initial backfill to 12-inch above crown, compact in lifts. 10. Continue to next pipe section. 11. Final backfill in compacted lifts per spec. 12. Pressure test (water main) or mandrel and camera (sewer) before final backfill to subgrade.",
+      "url": "/resources.html#field-workflows",
+      "tags": [
+        "pipe installation",
+        "water main",
+        "sewer",
+        "field workflow",
+        "grade stake",
+        "haunching",
+        "backfill",
+        "laser grade",
+        "pressure test",
+        "mandrel test",
+        "installation sequence"
+      ]
+    },
+    {
+      "id": "pressure-testing-water-main",
+      "category": "Reference",
+      "title": "Water Main Pressure Testing -- AWWA Hydrostatic Test Procedure",
+      "content": "AWWA C600 pressure test requirements for water mains. Test pressure: 1.5 times working pressure, minimum 150 psi, held for 2 hours. Acceptable leakage formula: L = ND(P^0.5) / 7,400 where L = allowable leakage GPH, N = number of joints, D = nominal pipe diameter (inches), P = average test pressure (psi). Procedure: fill main slowly, bleed air at all high points through air release valves or open hydrants. Pressurize to test pressure with hand pump or pressure test pump. Monitor for 2 hours. Record pressure at start and end. Repair all visible leaks regardless of allowable leakage formula. Disinfection (AWWA C651): chlorinate at 25 ppm minimum, 24-hour contact time, then flush and test. Two consecutive passing bacteriological samples before placing in service.",
+      "url": "/resources.html#field-workflows",
+      "tags": [
+        "pressure test",
+        "hydrostatic test",
+        "AWWA C600",
+        "water main",
+        "leakage test",
+        "150 psi",
+        "disinfection",
+        "AWWA C651",
+        "chlorination",
+        "bacteriological test"
+      ]
+    },
+    {
+      "id": "sewer-testing-methods",
+      "category": "Reference",
+      "title": "Sewer Testing -- Mandrel, Air Test, and CCTV Inspection",
+      "content": "Gravity sewer testing requirements. Low-pressure air test (ASTM C828): pressurize to 4.0 psi, let stabilize 2 minutes, then monitor for pressure drop. Pass criteria: pressure must not drop more than 1.0 psi in the time specified by diameter and length. Infiltration test: measure flow into pipeline -- must not exceed specification (typically 200 gallons per inch-diameter per mile per day). Deflection (mandrel) test: 9-sided rigid mandrel pulled through pipe to verify roundness. Mandrel diameter typically 95% of nominal inside diameter. Must be performed 30 days after backfill to allow soil to consolidate. CCTV inspection: camera run through completed main, record condition and verify grade. Identifies deflection, offset joints, sags, root intrusion. All testing must pass before city acceptance.",
+      "url": "/resources.html#field-workflows",
+      "tags": [
+        "sewer testing",
+        "mandrel test",
+        "air test",
+        "CCTV",
+        "infiltration test",
+        "ASTM C828",
+        "gravity sewer",
+        "deflection test",
+        "sewer inspection",
+        "pipe testing"
+      ]
+    },
+    {
+      "id": "daily-production-tracking",
+      "category": "Reference",
+      "title": "Daily Production Tracking -- LF Installed vs Budget",
+      "content": "Track pipe installation daily: record start station, end station, and pipe size installed by end of shift. Calculate linear feet installed for the day. Compare to bid production rate. If bid assumed 300 LF/day and crew did 180, identify cause immediately (unexpected rock, extra fittings, dewatering delay, crew shortage). Daily foreman report should capture: LF installed by size, manholes set, service laterals, fittings installed, equipment hours, crew headcount, delays and causes. Weekly totals against schedule: are you on pace to hit milestone dates? Earned value simple metric: (LF installed / total bid LF) x total contract value = earned contract value. Compare to amount spent. A good crew should track within 10-15% of bid production in normal conditions. Deviations beyond that warrant a change order or schedule recovery plan.",
+      "url": "/resources.html#field-workflows",
+      "tags": [
+        "production tracking",
+        "daily report",
+        "LF installed",
+        "foreman report",
+        "schedule",
+        "earned value",
+        "change order",
+        "bid vs actual",
+        "field management",
+        "progress tracking"
+      ]
+    },
+    {
+      "id": "change-order-documentation",
+      "category": "Reference",
+      "title": "Change Order Documentation -- What to Capture and How to Price",
+      "content": "A change order documents and prices work outside the original contract scope. Key documentation triggers: owner-directed change, differing site conditions (DSC), unforeseen underground conflicts, design changes by engineer. Document in real time: daily log entries noting extra work, equipment deployed, crew hours, materials used. Photograph everything -- existing conditions before you disturb them, the obstruction, the conflict, the repair. Send written notice per contract requirements (often 24-48 hours for DSC, 7-14 days for other changes). T&M change order pricing: direct labor at payroll cost plus burden (typically 35-50% of base wage), equipment at ownership or rental rate, material at invoice cost. Markup: overhead 10-15%, profit 5-15%, bond and insurance 1-3%. Never do extra work without written authorization unless safety or emergency requires it.",
+      "url": "/resources.html#field-workflows",
+      "tags": [
+        "change order",
+        "CO documentation",
+        "differing site conditions",
+        "DSC",
+        "T&M",
+        "time and material",
+        "markup",
+        "overhead",
+        "claim",
+        "extra work",
+        "notice requirement"
+      ]
+    },
+    {
+      "id": "bluestakes-811-process",
+      "category": "Reference",
+      "title": "811 Bluestakes Process -- Step-by-Step for Utah and Western States",
+      "content": "Federal law requires calling 811 before any digging. Process: 1. Call 811 or submit online at utiliquest.com or call811.com at least 3 business days before digging. 2. Provide: excavation address, dig site description, start date, contact info, type of work, and depth if known. 3. Utilities receive notification and mark within 2 business days. 4. Locate marks appear on ground in APWA color codes. 5. Do not dig within 18-24 inches of any mark without potholing (vacuum excavate) to verify exact location and depth. 6. Locate marks are valid for 14 business days in Utah. Renew before expiration on long jobs. 7. If no marks appear by start date, call back for status before digging. 8. Positive response required: utilities must respond with marked, no conflict, or unable to locate. Emergency excavations: call 811 and can begin after 2 hours in life or safety emergency.",
+      "url": "/resources.html#bluestakes",
+      "tags": [
+        "811",
+        "bluestakes",
+        "blue stakes",
+        "call before you dig",
+        "utility locate",
+        "APWA",
+        "tolerance zone",
+        "pothole",
+        "Utah",
+        "locate marks",
+        "dig permit"
+      ]
+    },
+    {
+      "id": "rfi-submittal-process",
+      "category": "Reference",
+      "title": "RFI and Submittal Process -- Construction Documentation Workflow",
+      "content": "RFI (Request for Information) is a formal written question from contractor to engineer or owner asking for clarification on design, specifications, or conflicts. RFI best practices: number sequentially, describe the issue clearly, reference plan sheet and spec section, propose a solution if possible, state the cost and schedule impact. Owner or engineer typically has 14-21 days to respond per contract. Track all open RFIs by due date -- unanswered RFIs are a schedule risk. Submittals: contractor submits product data, shop drawings, or material samples for engineer approval before fabrication or delivery. Typical submittal lead time: 3-6 weeks. Submit early -- owner has 14-21 days to review. Re-submittals reset the clock. Procore, Autodesk ACC, PlanGrid, and Bluebeam Studio are common platforms. Document every RFI and submittal response -- they become part of the contract record and support future claims.",
+      "url": "/resources.html#field-workflows",
+      "tags": [
+        "RFI",
+        "request for information",
+        "submittal",
+        "shop drawing",
+        "engineer approval",
+        "Procore",
+        "Bluebeam",
+        "contract documentation",
+        "design clarification",
+        "claim support"
+      ]
+    },
+    {
+      "id": "proctor-compaction-test",
+      "category": "Reference",
+      "title": "Proctor Compaction Test -- Standard, Modified, and Field Testing",
+      "content": "Proctor compaction test determines maximum dry density (MDD) and optimum moisture content (OMC) for a given soil. Standard Proctor (ASTM D698): 3 lifts, 25 blows per lift with 5.5-lb hammer, 12-inch drop. Modified Proctor (ASTM D1557): 5 lifts, 25 blows with 10-lb hammer -- higher energy, higher MDD, lower OMC. Modified Proctor is required for most roadway and utility trench work. Relative compaction (RC) = (field dry density / MDD) x 100. Typical specs: 95% Modified Proctor under roadways, 90% in non-traffic areas, 92% in utility trench backfill zones. Field testing: nuclear density gauge (Troxler, Humboldt), sand cone (ASTM D1556), drive cylinder (ASTM D2937). Failing test: reduce lift thickness, adjust moisture, increase passes. Clay must be within plus or minus 2% of OMC to achieve target compaction.",
+      "url": "/resources.html#compaction",
+      "tags": [
+        "Proctor test",
+        "compaction test",
+        "Modified Proctor",
+        "Standard Proctor",
+        "relative compaction",
+        "nuclear gauge",
+        "sand cone",
+        "ASTM D1557",
+        "optimum moisture",
+        "density test"
+      ]
+    },
+    {
+      "id": "soil-volume-factors",
+      "category": "Reference",
+      "title": "Soil Volume Conversion -- Bank, Loose, and Compacted Measure",
+      "content": "Soil volume changes state when disturbed. Three states: Bank (in-place, undisturbed), Loose (excavated, loaded in truck), Compacted (placed and compacted fill). Conversion factors: Bank to Loose multiply by swell factor. Loose to Compacted multiply by shrinkage factor. Common swell factors: clay 25-35%, sandy clay 20-30%, sand 10-15%, gravel 5-10%, rock 35-50% (blasted). Common shrinkage factors (compacted vs bank): clay fill 5-15% shrinkage, granular fill 8-12% shrinkage, rock fill 25-35% shrinkage. Example: 1,000 CY bank measure clay becomes 1,300 CY loose (in trucks) and becomes 850 CY compacted in fill. Bid trench excavation in bank CY. Import fill in compacted CY. A 14 CY truck body holds 14 loose CY, which is only about 10-11 bank CY of clay.",
+      "url": "/resources.html#estimating",
+      "tags": [
+        "soil volume",
+        "bank measure",
+        "loose measure",
+        "compacted measure",
+        "swell factor",
+        "shrinkage factor",
+        "earthwork",
+        "excavation volume",
+        "truck capacity",
+        "CY calculation"
+      ]
+    },
+    {
+      "id": "unit-price-bid-structure",
+      "category": "Reference",
+      "title": "Unit Price Bid Structure -- How to Build a Bid Item",
+      "content": "Unit price contracts price each bid item per unit of work (LF, CY, EA, ton). Each unit price must cover all costs to complete that item. Build-up method: start with direct labor (crew hours x loaded wage rate), add equipment (ownership or rental rate x production time), add material (quantity x unit cost plus waste), add subcontractor cost, then apply overhead and profit markup. Overhead: job-specific (superintendent, PM, safety, small tools, fuel, mobilization) plus company overhead allocation. Overhead typically 15-25% of direct cost. Profit: 5-15% depending on competition, risk, and backlog. Bond: 1-2.5% of bid price. Example for 8-inch PVC water main: material $20/LF plus labor $18/LF plus equipment $15/LF = $53 direct cost, add 20% overhead ($10.60) plus 10% profit ($6.36) plus 1.5% bond ($1.05) = $71/LF bid price.",
+      "url": "/resources.html#estimating",
+      "tags": [
+        "unit price",
+        "bid item",
+        "estimating",
+        "markup",
+        "overhead",
+        "profit",
+        "bond",
+        "build-up method",
+        "direct cost",
+        "bid structure",
+        "water main bid price"
+      ]
+    },
+    {
+      "id": "crew-cost-calculation",
+      "category": "Reference",
+      "title": "Crew Cost Calculation -- Loaded Labor Rate and Daily Cost",
+      "content": "Loaded labor rate includes base wage plus all employer-paid costs. Burden components: FICA payroll tax (7.65%), FUTA and SUTA unemployment (varies, approximately 3%), workers compensation insurance (heavy civil: 12-25% of base wage depending on classification), general liability insurance (1-3%), health benefits, retirement match, vacation and holiday accrual, training. Total burden: 35-55% of base wage for underground utility work. Example: $35/hr base wage x 1.50 burden factor = $52.50/hr loaded rate. Crew composition for 8-inch water main: 1 foreman ($40/hr base, $62 loaded), 2 pipefitters ($35/hr, $52 loaded), 2 laborers ($28/hr, $44 loaded), 1 operator ($48/hr, $72 loaded). Total crew: $62 plus $104 plus $88 plus $72 = $326/hr crew cost. At 300 LF/day and 10-hr shift: $3,260/day crew labor, $10.87/LF labor cost.",
+      "url": "/resources.html#estimating",
+      "tags": [
+        "loaded labor rate",
+        "burden rate",
+        "crew cost",
+        "payroll burden",
+        "workers comp",
+        "FICA",
+        "labor rate",
+        "estimating",
+        "foreman",
+        "labor cost",
+        "underground utility"
+      ]
+    },
+    {
+      "id": "quantity-takeoff-basics",
+      "category": "Reference",
+      "title": "Quantity Takeoff -- Trench Excavation, Pipe, and Backfill",
+      "content": "Quantity takeoff for underground utility work. Pipe quantity: measure centerline length from plan, add LF for fittings (tees add pipe equivalent length). Add 3-5% for waste and couplings. Trench excavation: volume = trench width x average depth x length. Trench width: pipe OD plus 18 inches minimum each side for working room. Average depth: (start depth plus end depth) / 2 per run. Convert cubic feet to cubic yards: divide by 27. Add 10-15% for over-excavation and cleanup. Bedding quantity: bedding volume = width x bedding depth x length / 27. Import select backfill: total trench volume minus bedding, minus pipe volume, minus native re-use. Native re-use limited by spec -- usually only 3 ft below surface layer. Asphalt surface restoration: length x road width x thickness, convert using density factor (ton).",
+      "url": "/resources.html#estimating",
+      "tags": [
+        "quantity takeoff",
+        "trench excavation",
+        "pipe quantity",
+        "backfill quantity",
+        "bedding quantity",
+        "CY calculation",
+        "LF pipe",
+        "estimating",
+        "takeoff",
+        "surface restoration"
+      ]
+    },
+    {
+      "id": "pipe-flow-capacity-table",
+      "category": "Reference",
+      "title": "Pipe Flow Capacity -- GPM by Diameter at Common Velocities",
+      "content": "Water main flow capacity at common design velocities. Flow (GPM) = velocity (ft/s) x pipe area (SF) x 448.8. At 5 ft/s (normal design): 4-inch = 196 GPM, 6-inch = 441 GPM, 8-inch = 784 GPM, 10-inch = 1,225 GPM, 12-inch = 1,763 GPM, 16-inch = 3,134 GPM. At 8 ft/s (fire flow design): 8-inch = 1,254 GPM, 12-inch = 2,821 GPM, 16-inch = 5,015 GPM. Maximum velocity for water main: 10 ft/s to avoid water hammer. Minimum velocity for sewer (self-cleaning): 2.0 ft/s at design flow. Manning's equation for gravity flow: Q = (1.486/n) x A x R^(2/3) x S^(1/2). For PVC (n=0.010): 8-inch at 0.40% slope = 0.62 CFS = 278 GPM at half-full flow.",
+      "url": "/calculators.html#pipe-flow",
+      "tags": [
+        "pipe flow",
+        "GPM",
+        "flow capacity",
+        "velocity",
+        "water main sizing",
+        "Manning's equation",
+        "sewer flow",
+        "pipe diameter",
+        "fire flow",
+        "hydraulics"
+      ]
+    },
+    {
+      "id": "head-loss-friction",
+      "category": "Reference",
+      "title": "Head Loss and Friction -- Hazen-Williams and Darcy-Weisbach",
+      "content": "Pressure loss in water mains calculated by Hazen-Williams: hL = 10.67 x L x Q^1.852 / (C^1.852 x D^4.87), where hL = head loss (ft), L = pipe length (ft), Q = flow (CFS), C = Hazen-Williams coefficient, D = diameter (ft). C values: PVC new 150, ductile iron cement-lined 130, cast iron old 80-100. Darcy-Weisbach is more rigorous: hL = f x (L/D) x (V^2/2g), where f = friction factor from Moody diagram. Minor losses at fittings: gate valve (open) 0.1V^2/2g, 90-degree elbow 0.9V^2/2g, tee (branch) 1.8V^2/2g. Pressure drop rule of thumb: 2-5 psi per 1,000 ft in a well-designed distribution system at normal flow. Water hammer pressure spike: approximately 50-60 psi per ft/s of velocity for rapid valve closure.",
+      "url": "/calculators.html#pipe-flow",
+      "tags": [
+        "head loss",
+        "Hazen-Williams",
+        "Darcy-Weisbach",
+        "friction loss",
+        "pressure drop",
+        "C factor",
+        "water main",
+        "hydraulics",
+        "water hammer",
+        "pipe flow"
+      ]
+    },
+    {
+      "id": "stormwater-design-basics",
+      "category": "Reference",
+      "title": "Stormwater System Design -- Rational Method and Pipe Sizing",
+      "content": "Rational method for stormwater peak flow: Q = C x i x A. Q = peak flow (CFS), C = runoff coefficient (0.2 for lawn, 0.7 for paved surface, 0.9 for impervious), i = rainfall intensity (in/hr) from IDF curve at design storm return period (2, 10, 25, or 100-year), A = drainage area (acres). IDF curves are region-specific -- get from local jurisdiction or NOAA Atlas 14. For urban areas, 10-year storm is typical for storm drain sizing. 100-year storm for major culverts and detention sizing. Manning's equation for storm pipe sizing: at full-pipe flow, match Q from Rational Method. Storm drain velocity: 2.0 ft/s minimum (self-cleaning), 15 ft/s maximum (prevent scour). Retention vs detention: retention holds runoff permanently (pond infiltrates), detention holds temporarily and releases at controlled rate.",
+      "url": "/calculators.html#stormwater",
+      "tags": [
+        "stormwater",
+        "Rational Method",
+        "runoff coefficient",
+        "IDF curve",
+        "storm drain",
+        "Manning's equation",
+        "NOAA Atlas 14",
+        "detention",
+        "retention",
+        "pipe sizing",
+        "100-year storm"
+      ]
+    },
+    {
+      "id": "contract-types-construction",
+      "category": "Reference",
+      "title": "Construction Contract Types -- Lump Sum, Unit Price, T&M, and GMP",
+      "content": "Lump sum (fixed price): contractor agrees to complete defined scope for a set price. Contractor bears quantity risk. Unit price: contractor prices each bid item per unit (LF, CY, ton, EA). Owner bears quantity risk -- used when quantities are uncertain (underground utilities, earthwork). Time and materials (T&M): contractor paid for actual labor, equipment, and material plus agreed markup. Owner bears all risk. Used for emergency work, unforeseen conditions, or scope that cannot be defined. GMP (Guaranteed Maximum Price): cost-plus with an agreed ceiling. Contractor shares savings and bears overrun risk above GMP. Used in construction manager at-risk (CMAR) delivery. Design-Build (D-B): single entity responsible for both design and construction. Owner gets single point of responsibility. Progressive Design-Build (PDB): owner selects team early, design and construction proceed concurrently.",
+      "url": "/resources.html#contracts",
+      "tags": [
+        "contract types",
+        "lump sum",
+        "unit price",
+        "T&M",
+        "time and materials",
+        "GMP",
+        "cost plus",
+        "design-build",
+        "CMAR",
+        "construction contract",
+        "delivery method"
+      ]
+    },
+    {
+      "id": "subcontractor-bid-process",
+      "category": "Reference",
+      "title": "Subcontractor Bid Process -- Scope, Leveling, and Award",
+      "content": "Process for obtaining and evaluating subcontractor bids. Scope sheet: provide written scope document specifying exactly what is and is not included. Send to at least 3 qualified subs per trade. Request subs submit 24-48 hours before GC bid due time to allow leveling. Bid leveling: create apples-to-apples comparison spreadsheet. Check each sub's scope inclusion -- one may exclude traffic control, another may exclude restoration. Call subs to clarify gaps before plugging into estimate. Sub qualification: verify license, insurance (request certificate naming GC as additional insured), bonding capacity, and past work. Award: provide written subcontract with clear scope, schedule milestones, payment terms, and retainage. Flow-down clauses: prime contract risk provisions flow down to subcontract.",
+      "url": "/resources.html#contracts",
+      "tags": [
+        "subcontractor",
+        "bid process",
+        "scope sheet",
+        "bid leveling",
+        "award",
+        "subcontract",
+        "qualification",
+        "insurance",
+        "flow-down",
+        "GC",
+        "procurement"
+      ]
+    },
+    {
+      "id": "hdd-directional-drill-detail",
+      "category": "Reference",
+      "title": "Horizontal Directional Drilling -- HDD Planning and Execution",
+      "content": "HDD bores a curved path underground to install pipe without open cutting. Phases: pilot bore (steerable drill head follows planned path), pre-ream (enlarge hole in passes to pipe OD plus 25-50%), pullback (pipe pulled through). Entry angle: typically 8-16 degrees, exit angle similar. Radius of curvature: minimum radius depends on pipe material -- HDPE DR11 minimum radius is 1,200 x pipe OD, steel 40-50 x OD. Pilot bore tracking: walkover (magnetic beacon, less accurate), wireline (through drill string, more accurate for deep bores). Drilling fluid (mud): bentonite slurry keeps bore open, cools bit, lifts cuttings. Frac-out: drilling fluid breaks to surface -- contamination risk, stop and treat. HDD soil conditions: sand and gravel good, cobbles difficult, boulders can deflect bit. Existing utilities: maintain 2-ft minimum from bore path to any existing utility.",
+      "url": "/resources.html#construction-methods",
+      "tags": [
+        "HDD",
+        "directional drill",
+        "horizontal directional drilling",
+        "pilot bore",
+        "pre-ream",
+        "pullback",
+        "HDPE",
+        "frac-out",
+        "drilling fluid",
+        "trenchless",
+        "underground boring"
+      ]
+    },
+    {
+      "id": "microtunnel-pipe-jacking",
+      "category": "Reference",
+      "title": "Microtunneling and Pipe Jacking -- Trenchless Installation Method",
+      "content": "Microtunneling is a remote-controlled, guided boring method for installing pipe without entering the bore. A microtunnel boring machine (MTBM) is launched from a shaft and excavates while pipe is jacked from behind. Sizes: 6-inch through 120-inch diameter. Accuracy: can achieve plus or minus 0.1% grade over long runs -- used for gravity sewer where slope is critical. Pipe jacking forces increase with distance and soil friction -- large projects require intermediate jacking stations (IJS). Pipe materials: reinforced concrete jacking pipe, steel jacking pipe, HDPE with casing. Works in all soils including rock, groundwater, running sand (uses face pressure to control). Launch and reception shafts: typically 12-20 ft diameter. More expensive than open cut but eliminates traffic disruption, deep excavation, and surface impact. Common in road crossings, railroad crossings, waterway crossings, urban utility corridors.",
+      "url": "/resources.html#construction-methods",
+      "tags": [
+        "microtunnel",
+        "pipe jacking",
+        "MTBM",
+        "trenchless",
+        "gravity sewer",
+        "railroad crossing",
+        "road crossing",
+        "jacking shaft",
+        "boring",
+        "trenchless construction"
+      ]
+    },
+    {
+      "id": "construction-scheduling-cpm",
+      "category": "Reference",
+      "title": "Construction Scheduling -- CPM, Critical Path, and Schedule Types",
+      "content": "Critical Path Method (CPM) is the standard for construction scheduling. Activities are linked by dependencies; the critical path is the longest sequence of dependent activities from start to finish. Float (slack): non-critical activities have float -- days they can slip without delaying completion. Total float is shared among activities in the chain. Activity duration: estimated from production rates and crew size. Schedule types: baseline (original bid schedule), as-built (what actually happened), recovery schedule (revised plan after delay). Primavera P6 is the industry standard for large projects. Microsoft Project is common for smaller work. Short-interval schedule (3-week look-ahead): crew-level schedule updated weekly, drives daily work. Delay types: excusable compensable (owner-caused, contractor gets time and money), excusable non-compensable (weather, gets time but no money), inexcusable (contractor-caused, no relief).",
+      "url": "/resources.html#project-management",
+      "tags": [
+        "CPM",
+        "critical path",
+        "construction schedule",
+        "Primavera P6",
+        "Microsoft Project",
+        "float",
+        "schedule delay",
+        "look-ahead schedule",
+        "milestone",
+        "baseline schedule",
+        "delay claim"
+      ]
+    },
+    {
+      "id": "erosion-control-methods",
+      "category": "Reference",
+      "title": "Erosion and Sediment Control -- SWPPP and Common BMP Methods",
+      "content": "Stormwater Pollution Prevention Plan (SWPPP) is required for construction sites disturbing 1 or more acres under EPA NPDES Construction General Permit. Utah: apply to Utah Division of Water Quality for CGP coverage before land disturbance. Common BMPs: Silt fence: fabric staked along contour, traps sediment from sheet flow -- not for concentrated flow. Inlet protection: filter bags, sediment filters for catch basins. Fiber rolls (wattles): rolled straw or compost, laid on contour or in swale, slows flow. Rock check dams: in swales and ditches, spread flow and trap sediment. Stabilized construction entrance: 6-inch rock pad to knock mud off tires before exiting site. Slope matting or blanket: erosite or coconut fiber mat over seeded slopes. Hydroseeding: seed mixed in slurry, sprayed on disturbed slopes, must be applied within 14 days of final grade in Utah. Concrete washout: lined pit, never discharge concrete wash to ground.",
+      "url": "/resources.html#environment",
+      "tags": [
+        "SWPPP",
+        "erosion control",
+        "sediment control",
+        "silt fence",
+        "BMP",
+        "NPDES",
+        "storm water",
+        "inlet protection",
+        "wattle",
+        "hydroseeding",
+        "construction general permit"
+      ]
+    },
+    {
+      "id": "traffic-control-basics",
+      "category": "Reference",
+      "title": "Traffic Control -- MUTCD Standards for Construction Zones",
+      "content": "All temporary traffic control on public roads must comply with MUTCD (Manual on Uniform Traffic Control Devices). Key components: advance warning area, transition area, activity area (work zone), termination area. Taper length formula: L = WS^2/60 for speeds under 45 mph, L = WS for speeds 45 mph and above. L = taper length (ft), W = lateral shift (ft), S = posted speed (mph). Common devices: Type III barricades, channelizing drums, cones, arrow boards, temporary signs. Flaggers: must be trained and certified. Flagger uniform: Class 3 ANSI vest, hard hat, sign paddle (STOP and SLOW) or flag. Pilot car: used on two-lane roads with one-way alternating traffic through work zone. Traffic control plan (TCP): required by most agencies, signed by PE on arterial roads. Detour: when road must be fully closed, provide approved detour route and sign it completely from beginning to end.",
+      "url": "/resources.html#traffic-control",
+      "tags": [
+        "traffic control",
+        "MUTCD",
+        "work zone",
+        "flagger",
+        "taper length",
+        "channelizing",
+        "Type III barricade",
+        "arrow board",
+        "traffic control plan",
+        "construction zone",
+        "pilot car"
+      ]
+    },
+    {
+      "id": "manhole-installation-specs",
+      "category": "Reference",
+      "title": "Manhole Installation -- Precast Concrete Specs and Construction",
+      "content": "Precast concrete manholes per ASTM C478. Standard diameter: 48-inch for sewers up to 24-inch pipe, 60-inch for larger. Sections: base section (with integral bench and channels), riser sections (24-inch height typical), cone section or flat top, grade rings to final grade, frame and cover. Barrel joints: plastic or rubber gasket per ASTM C443. Infiltration test: 2,000 gallons per inch-diameter per mile per day allowable, or air test per ASTM C1244. Pipe connections: cored or cast-in-place, with flexible boot (ASTM C923) -- never rigid concrete at pipe-manhole joint. Benchwork: half-channels matching pipe diameter, smooth concrete bench sloped to channel. Setting: base on 6-inch granular bedding, plumb barrel, adjust grade rings to match final grade. Frame and cover: set in mortar or HDPE adjustment rings, traffic-rated (H-20) in roadways. Grout or plug all lift holes before backfilling.",
+      "url": "/resources.html#utility-specs",
+      "tags": [
+        "manhole",
+        "precast concrete",
+        "ASTM C478",
+        "sewer manhole",
+        "manhole installation",
+        "48-inch",
+        "bench",
+        "grade rings",
+        "frame and cover",
+        "infiltration test",
+        "pipe boot"
+      ]
+    },
+    {
+      "id": "equipment-ownership-cost",
+      "category": "Reference",
+      "title": "Equipment Ownership and Operating Cost -- Owning vs Renting",
+      "content": "Equipment ownership cost has two components: ownership (fixed) and operating (variable). Ownership cost: depreciation, interest, insurance, storage. Operating cost: fuel, lubrication, tires, maintenance and repair. The AED (Associated Equipment Distributors) Green Book publishes annual ownership and operating cost tables by equipment type. Rule of thumb: hourly ownership plus operating rate for a Cat 320 excavator is approximately $65-$90/hr at full utilization. Rental is often economic at utilization below 60% annually. Break-even example: if you rent at $1,200/day but own at $400/day all-in amortized, you need 60% or greater utilization to justify owning. Idle time kills ownership economics. On bids: use actual owned equipment cost from your records -- do not use rental rate for equipment you own.",
+      "url": "/resources.html#estimating",
+      "tags": [
+        "equipment cost",
+        "ownership cost",
+        "operating cost",
+        "AED Green Book",
+        "excavator cost",
+        "rent vs own",
+        "utilization",
+        "depreciation",
+        "fuel cost",
+        "equipment rates"
+      ]
+    },
+    {
+      "id": "bid-markup-strategy",
+      "category": "Reference",
+      "title": "Bid Markup Strategy -- Overhead, Profit, and Risk Factors",
+      "content": "Bid markup is applied on top of estimated direct costs to cover overhead and return profit. Markup varies by project type, competition, risk, and backlog. Factors to reduce markup: heavy competition, tight market, need for work. Factors to increase markup: sole source or limited bid, specialty work, high risk scope (rock, traffic, deep excavation), tight schedule, difficult owner or engineer. Overhead rate: calculate actual company overhead (office, management, insurance, vehicles, equipment ownership, bonding) as a percentage of direct field cost. If overhead runs 20% and you want 10% profit, total markup on direct cost is 33%. Common mistake: markup as percentage of bid price versus percentage of cost -- these are different. $100 cost x 1.33 = $133 bid. $33 markup is 33% of cost but only 25% of bid price. Bond cost: typically 1.0-2.5% depending on project size and contractor capacity.",
+      "url": "/resources.html#estimating",
+      "tags": [
+        "bid markup",
+        "overhead",
+        "profit margin",
+        "markup strategy",
+        "bid price",
+        "bonding",
+        "risk premium",
+        "estimating",
+        "competition",
+        "contingency"
+      ]
+    }
   ]
 }

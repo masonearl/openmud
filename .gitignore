@@ -8,6 +8,7 @@ node_modules/
 .env
 .env.local
 .env.vercel
+.env.signing
 *.env.local
 .venv/
 *.egg-info/

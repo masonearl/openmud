@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're subscribed – openmud</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>You're in</h1>
+                <p class="hero-sub">Thanks for subscribing. You now have full access.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <p><a href="/" class="btn-download">Open openmud</a></p>
+                <p><a href="/download" class="link">Download the desktop app</a> for cleanup tools and local automations.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var email = params.get('email');
+            if (email) {
+                try {
+                    localStorage.setItem('mudrag_subscriber_email', email);
+                    localStorage.setItem('mudrag_subscription_active', 'true');
+                } catch (e) {}
+                fetch('/api/subscription-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                }).then(function (r) { return r.json(); }).then(function (data) {
+                    try {
+                        localStorage.setItem('mudrag_subscription_active', (data && data.active) ? 'true' : 'false');
+                        localStorage.setItem('mudrag_subscription_tier', (data && data.tier) || 'free');
+                    } catch (e) {}
+                }).catch(function () {});
+            }
+        })();
+    </script>
+    <script src="assets/js/nav.js"></script>
+</body>
+</html>

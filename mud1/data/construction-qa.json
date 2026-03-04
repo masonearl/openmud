@@ -1,0 +1,512 @@
+[
+  {
+    "keywords": ["pipe cost", "pipe price", "sewer pipe cost", "waterline cost", "linear foot", "lf cost", "per foot", "material cost"],
+    "question": "How much does pipe cost per linear foot?",
+    "answer": "openmud pipe material rates: 4-in PVC $8.50/LF, 6-in PVC $12/LF, 8-in PVC $18/LF, 10-in PVC $26/LF, 12-in PVC $34/LF, 8-in DI $28/LF, 12-in DI $45/LF, 4-in HDPE $10/LF, 6-in HDPE $16/LF. Add 10% waste. For a full estimate, say 'Estimate [LF] of [size] [type] pipe.'"
+  },
+  {
+    "keywords": ["labor rate", "labor cost", "operator rate", "foreman", "laborer hourly", "crew cost", "hourly rate", "wage"],
+    "question": "What are typical labor rates?",
+    "answer": "openmud default labor rates (Utah/Intermountain West): Operator $85/hr, Foreman $55/hr, Laborer $35/hr, Electrician $65/hr, Ironworker $55/hr, Pipefitter $70/hr, Concrete finisher $50/hr. Prevailing wage (Davis-Bacon) jobs are higher — check your wage determination."
+  },
+  {
+    "keywords": ["equipment rate", "excavator cost", "rental", "daily rate", "auger", "compactor", "dozer", "equipment rental"],
+    "question": "What do equipment rentals cost?",
+    "answer": "openmud default equipment rates: Excavator (Cat 320) $400/day, Mini excavator $200/day, Dozer $500/day, Compactor/plate tamper $100/day, Auger $450/day, Pump $150/day, Saw $200/day, Shoring box $300/day. For full equipment cost in a bid, use the Estimate tool."
+  },
+  {
+    "keywords": ["markup", "overhead", "profit", "bid markup", "margin", "g&a"],
+    "question": "What markup should I use?",
+    "answer": "Standard construction markup: 10–20% for overhead and profit. openmud defaults to 15%. Public work (prevailing wage) often 12–18%. Sub work passed through a GC: 15–25% to cover bond, insurance, and overhead. Adjust in your estimate. Low bids win jobs but lose money — know your break-even."
+  },
+  {
+    "keywords": ["pipe bedding", "bedding", "class b", "embedment", "trench bedding", "gravel bedding", "native bedding"],
+    "question": "What is pipe bedding?",
+    "answer": "Pipe bedding is granular material placed under and around the pipe to support it and protect it from point loads. Class B (standard): 4 in crushed gravel under pipe, gravel to pipe springline, then native to surface. Class A: concrete encasement (used in rock or poor soil). Poor bedding causes settlement and joint failure. Bedding cost: $4–8/LF typically."
+  },
+  {
+    "keywords": ["clay soil", "clay cost", "trenching clay", "digging clay", "soil type", "hard soil"],
+    "question": "How does clay soil affect cost?",
+    "answer": "Clay adds 20–40% to labor and equipment time versus sandy native soil. Clay is sticky, hard to excavate, and difficult to compact as backfill. In estimates, select 'clay' soil type. Also check if owner spec allows clay as structural backfill — many don't. Import granular if required."
+  },
+  {
+    "keywords": ["rock excavation", "rock", "blasting", "hard dig", "rock cost", "rock trenching"],
+    "question": "How do I price rock excavation?",
+    "answer": "Rock excavation runs 3–5x soil cost. Options: mechanical (hoe ram/hydraulic hammer, rock wheel, ripper) or blasting (requires permit, contractor license). Ballpark: add $40–80/LF to trench cost for hard rock. Get a geotech report if rock is suspected. Always include a rock excavation unit price as an alternate in your bid."
+  },
+  {
+    "keywords": ["trench depth", "cover", "frost line", "minimum cover", "burial depth", "depth pipe"],
+    "question": "How deep should a trench be?",
+    "answer": "Minimum cover over pipe: water 4–6 ft (frost line, varies by state), sewer 3–8 ft typical (per slope and connections), gas 2–4 ft minimum. Utah frost depth: 36–48 in. Always check local code and project specs. Deeper = more cost (shoring, extra spoil haul, more bedding)."
+  },
+  {
+    "keywords": ["pvc", "ductile iron", "hdpe", "pipe material", "what pipe", "pipe type", "c900", "sdr"],
+    "question": "What pipe material for sewer or water?",
+    "answer": "Water main: PVC C900 (pressure-rated, most common), Ductile Iron (DI) for high pressure or restrained joint, HDPE for directional drill. Sewer: PVC SDR-35 (gravity, 4–15 in), HDPE (force main, HDD), Concrete (large diameter). Gas: PE plastic or steel. Always follow project spec — owner often specifies material."
+  },
+  {
+    "keywords": ["sewer vs waterline", "difference sewer water", "sanitary vs water", "gravity vs pressure"],
+    "question": "What's the difference between sewer and waterline?",
+    "answer": "Sewer (sanitary): gravity-flow waste to treatment plant, or pressurized force main. Needs minimum 0.5% slope for gravity. Waterline: potable water under pressure (40–120 psi). Both use similar trench/install methods but different specs, testing, and safety requirements. Sewer: mandrel test, video. Water: pressure test, chlorination."
+  },
+  {
+    "keywords": ["pipe size", "sizing", "8 inch", "6 inch", "diameter", "what size", "how to size", "flow", "gpm", "gpd"],
+    "question": "How do I size pipe for sewer or water?",
+    "answer": "Sewer sizing: by flow (GPD from fixture units or population). Residential: 6–8 in, commercial: 8–15 in, trunk: 15–36 in. Use Manning's equation for gravity (slope and diameter). Water sizing: by demand (GPM, fire flow). Residential service: 1–2 in, distribution main: 6–12 in. Always confirm with project engineer — undersizing is a design liability."
+  },
+  {
+    "keywords": ["storm drain", "storm sewer", "culvert", "drainage", "storm pipe", "catch basin", "inlet"],
+    "question": "How do I estimate storm drain?",
+    "answer": "Storm drain handles runoff — larger pipe, higher flows. Materials: RCP (concrete), HDPE, CMP. Sizing by rational method (Q = CiA). Install similar to sewer but often shallower. Add: inlets, manholes, end walls. Concrete pipe (RCP) costs 30–50% more than HDPE but is required by many municipalities. Use Quick estimate and note pipe size and LF."
+  },
+  {
+    "keywords": ["gas line", "gas pipe", "gas main", "gas utility", "natural gas", "gas estimate"],
+    "question": "How do I estimate gas line?",
+    "answer": "Gas mains: PE plastic (most common, 2–12 in) or steel (high pressure). Trenching similar to waterline. Key extras: pressure test to 1.5x MAOP, locating wire, tracer tape, yellow warning tape. Includes service lines to meters. Add utility coordination — gas lines need tight tolerances. Use 'Estimate [LF] gas main' in chat."
+  },
+  {
+    "keywords": ["concrete cost", "concrete price", "psi", "cubic yard", "CY", "ready mix"],
+    "question": "How much does concrete cost?",
+    "answer": "openmud concrete rates: 3000 psi $166/CY, 4000 psi $180/CY, 5000 psi $200/CY. Add 10% waste, formwork, finishing labor ($8–15/SF). Pump truck: $800–1,200 per pour. For encasement (pipe protection): calculate CY needed = (width × height - pipe area) × LF / 27. Use Quick estimate or ask 'estimate concrete for [project].'"
+  },
+  {
+    "keywords": ["manhole", "catch basin", "structure", "inlet", "manhole cost", "precast"],
+    "question": "What about manholes and structures?",
+    "answer": "Manholes: precast concrete, 4–6 ft diameter. Cost: $2,500–8,000 each installed (depth matters — add ~$200–400/VLF below 10 ft). Catch basins: $1,500–4,000 each. Inlets/curb boxes: $1,000–2,500 each. Always check owner spec for manhole frame and cover specs (H-20 rated for traffic). Add as lump sum or unit price per structure."
+  },
+  {
+    "keywords": ["bid", "bidding", "how to bid", "win a bid", "bid process", "submit bid"],
+    "question": "How do I put together a bid?",
+    "answer": "Bid process: 1) Read plans and specs fully. 2) Scope all work — LF, EA, CY. 3) Estimate materials, labor, equipment (use openmud Estimate). 4) Add markup (15% default). 5) Write proposal (openmud Proposal tool). 6) Submit on time. Key: check for alternates, bid bonds (usually 5%), and liquidated damages before you bid. Know your break-even rate before submitting."
+  },
+  {
+    "keywords": ["change order", "co", "change order cost", "change order process", "field change", "extra work", "change order pricing"],
+    "question": "How do I handle a change order?",
+    "answer": "Change order (CO) process: 1) Identify the change (owner direction, differing site condition, design change). 2) Document the work before it's done — photos, daily logs. 3) Price it: labor hours × rate, materials at cost + markup, equipment at day rate. 4) Submit written CO request with backup. 5) Get written approval before proceeding when possible. openmud can draft COs — say 'Draft a change order for [scope].'"
+  },
+  {
+    "keywords": ["pay app", "payment application", "schedule of values", "sov", "pay request", "billing", "payment"],
+    "question": "How do I prepare a pay application?",
+    "answer": "Pay app process: 1) Use your Schedule of Values (SOV) — list of all bid items with dollar values. 2) Track percent complete per line item each month. 3) Calculate: (% complete × original value) - prior billed = this pay request. 4) Subtract retainage (typically 5–10%). 5) Submit with lien waiver from subs. openmud can help draft — say 'Prepare a pay application.'"
+  },
+  {
+    "keywords": ["rfi", "request for information", "rfi process", "rfi response", "field rfi"],
+    "question": "What is an RFI and how do I write one?",
+    "answer": "RFI (Request for Information): formal written question from contractor to engineer/owner about plans, specs, or field conditions. Include: Project name, date, RFI number, description of issue, reference to plan sheet/spec section, proposed resolution (optional), date needed by. Keep it professional and factual — RFIs create a paper trail for claims. Say 'Draft an RFI for [issue]' and openmud will format it."
+  },
+  {
+    "keywords": ["submittal", "shop drawing", "submittal log", "submittal process", "material approval"],
+    "question": "How do I manage submittals?",
+    "answer": "Submittal process: 1) List all required submittals from spec — pipe, fittings, manholes, equipment. 2) Submit shop drawings, product data, and mix designs to engineer for approval. 3) Track status: submitted, under review, approved, revise and resubmit. 4) Never order or install without approved submittal. Typical review time: 2–4 weeks. Late submittals delay the job — submit early."
+  },
+  {
+    "keywords": ["daily report", "daily log", "field report", "site log", "construction diary", "daily"],
+    "question": "What goes in a daily report?",
+    "answer": "Daily report should include: Date, project name, weather (temp, precipitation), crew size and names, equipment on site, work performed today (by location and quantity), materials delivered, visitors/inspections, safety incidents (none if none), issues/delays. Daily reports are your legal record — write them every day, even if it's light. Say 'Write a daily report' and openmud will format it."
+  },
+  {
+    "keywords": ["punch list", "punchlist", "closeout", "substantial completion", "final walkthrough", "punch items"],
+    "question": "How do I manage a punch list?",
+    "answer": "Punch list: list of items to complete for substantial completion. Walk the site with owner/engineer, document each deficiency by location and description. Assign responsibility (prime, sub, owner). Set completion dates. Track until closed. Common items: restoration, seeding, cleanup, paint, final grading, manhole adjustments. Goal: get substantial completion certificate to start warranty period and release retainage."
+  },
+  {
+    "keywords": ["lien waiver", "lien release", "conditional", "unconditional", "waiver", "lien"],
+    "question": "What's the difference between conditional and unconditional lien waivers?",
+    "answer": "Conditional waiver: waives lien rights conditioned on payment actually being received. Use this when submitting with a pay app. Unconditional waiver: waives lien rights permanently, no conditions. Only sign this after payment clears. Never sign an unconditional waiver before payment. Subs should provide waivers to you matching what you pay them. Utah requires specific statutory language."
+  },
+  {
+    "keywords": ["retainage", "retention", "holdback", "retainage release", "final payment"],
+    "question": "What is retainage and when is it released?",
+    "answer": "Retainage: owner withholds 5–10% of each pay app as assurance of performance. Typically released after substantial completion and punch list closeout. Some contracts reduce retainage to 5% at 50% completion. Utah law: owner must release retainage within 30 days of substantial completion. Always track retainage balance — it's real money owed to you."
+  },
+  {
+    "keywords": ["davis bacon", "prevailing wage", "federal wage", "wage determination", "certified payroll"],
+    "question": "What is Davis-Bacon prevailing wage?",
+    "answer": "Davis-Bacon Act: federal law requiring prevailing wage on federally funded projects over $2,000. Prevailing wage = local area wage rate set by DOL, including fringe benefits. Requires certified payroll (weekly). Violations = back pay, debarment. Also applies to many state/local funded projects (Utah Little Davis-Bacon). Check wage determination before bidding — it significantly affects your labor cost."
+  },
+  {
+    "keywords": ["bond", "bid bond", "performance bond", "payment bond", "surety", "bonding"],
+    "question": "What bonds are required for construction?",
+    "answer": "Bid bond: submitted with bid, typically 5–10% of bid amount. Guarantees you'll sign contract if you win. Performance bond: 100% of contract value, guarantees you'll complete the work. Payment bond: 100% of contract value, guarantees you'll pay subs and suppliers. Federal work >$100k requires performance and payment bonds. Most public work requires bonding. Cost: 0.5–2% of contract value annually."
+  },
+  {
+    "keywords": ["insurance", "general liability", "workers comp", "builder's risk", "insurance cost", "certificate"],
+    "question": "What insurance is required for construction?",
+    "answer": "Required construction insurance: General Liability ($1M–2M per occurrence), Workers Comp (required in Utah for any employees), Auto ($1M), Umbrella ($5M+). Owner may require additional insured endorsement and specific coverage limits. Builder's risk: covers work in place during construction (usually owner provides, sometimes contractor). Budget 2–4% of contract for insurance."
+  },
+  {
+    "keywords": ["osha", "safety", "jobsite safety", "trenching safety", "excavation safety", "cave in", "sloping", "shoring"],
+    "question": "What are OSHA trenching safety requirements?",
+    "answer": "OSHA 29 CFR 1926.652: Any trench 5 ft+ deep requires protective system (slope, shore, or shield). Soil type determines slope: Type A (stable) = 3/4:1, Type B = 1:1, Type C (loose/wet) = 1.5:1. Or use a trench box/shield. Daily inspection by competent person. Ladder within 25 ft of workers. Never enter unprotected trench — OSHA fines up to $15,000/violation. Fatal incidents = $136,000/violation."
+  },
+  {
+    "keywords": ["osha violations", "osha fine", "osha inspection", "osha citation", "safety violation"],
+    "question": "What are common OSHA violations on construction sites?",
+    "answer": "Top OSHA violations in construction: Fall protection, scaffolding, ladders, hazard communication, powered industrial trucks, respiratory protection, lockout/tagout, trenching/excavation, electrical (GFCI), eye/face protection. Keep OSHA 300 log, train workers, conduct toolbox talks daily. OSHA penalty: up to $15,625/serious violation, $156,259/willful or repeat violation."
+  },
+  {
+    "keywords": ["pressure test", "water test", "hydrostatic test", "leakage test", "testing pipe", "pressure testing"],
+    "question": "How do I pressure test a water main?",
+    "answer": "AWWA C600: Hydrostatic pressure test at 1.5x working pressure (min 150 psi) for 2 hours. Allowable leakage: per formula (L = SD√P / 133,200, where S=pipe length, D=diameter, P=test pressure). Procedure: fill slowly, vent air, stabilize, record pressure drop. Fail = find and fix leak, retest. Test after all fittings are blocked and thrust blocks are cured (72 hrs min)."
+  },
+  {
+    "keywords": ["disinfection", "chlorinate", "chlorination", "new main", "flush", "bacteriological test", "water quality"],
+    "question": "How do I disinfect a new water main?",
+    "answer": "AWWA C651: Continuous-feed method most common. Flush pipe, apply chlorine (25–50 mg/L), hold 24 hrs, flush to drain, collect samples, send to lab. Must pass bacteriological test (two consecutive negatives) before placing in service. Keep records. Notify health department and water utility. Process takes 3–5 days minimum. Never short-cut — contaminated mains are a public health issue."
+  },
+  {
+    "keywords": ["compaction", "compaction test", "proctor", "density", "soil compaction", "nuclear gauge", "lift"],
+    "question": "What are compaction requirements for trench backfill?",
+    "answer": "Standard: 95% of Modified Proctor (AASHTO T-180) for structural areas (roads, parking). Non-structural: 90% is often acceptable. Lifts: 8–12 in loose, compact each lift. Under road: import select granular, no native clay. Test frequency: every 2 ft vertical, or per spec (often every 200 LF). Failing compaction test = dig up and redo. Use nuclear gauge or sand cone test. Keep all compaction reports."
+  },
+  {
+    "keywords": ["backfill", "trench backfill", "select fill", "import material", "native backfill", "structural fill"],
+    "question": "What should I use for trench backfill?",
+    "answer": "Structural zones (0–2 ft below surface under roads): imported granular fill, 3/4-in minus, clean. Native backfill: only if spec allows and material passes gradation test. Clay is often rejected as structural backfill. Bedding zone (around pipe): crushed stone or gravel per spec. Check contract spec Section 31 (earthwork) for exact requirements — each owner has different standards."
+  },
+  {
+    "keywords": ["traffic control", "flagging", "tccp", "lane closure", "road work", "flagger"],
+    "question": "What traffic control is required for road work?",
+    "answer": "MUTCD (Manual on Uniform Traffic Control Devices) governs. Requirements: signs (Road Work Ahead, Flagging Ahead, speed reduction), cones/delineators every 20–40 ft in taper, flaggers at each end of lane closure (ATSSA certified). For highway work: UDOT requires Traffic Control Supervisor (TCS) permit. Budget $500–2,000/day for full traffic control. Submit TCCP (Traffic Control Plan) for approval before work begins."
+  },
+  {
+    "keywords": ["permit", "building permit", "utility permit", "encroachment permit", "excavation permit", "right of way permit"],
+    "question": "What permits do I need for utility work?",
+    "answer": "Common permits for utility work: Right-of-Way (ROW) permit (city/county for work in public right-of-way), encroachment permit (UDOT for state road work), building permit (for structures), utility connection permit (water/sewer hookup fee + permit), environmental permits (SPCC, NPDES stormwater). Permit costs and timeline vary — plan 2–8 weeks for approvals. Never start work without permits."
+  },
+  {
+    "keywords": ["subcontractor", "sub", "subcontracting", "sub bid", "lower tier", "specialty sub"],
+    "question": "How do I work with subcontractors?",
+    "answer": "Get sub bids in writing before your bid day. Make sure subs have reviewed full plans/specs for their scope. Issue subcontract agreements before work starts — use AIA A401 or your own form. Key terms: scope, price, schedule, insurance requirements, change order process, retainage. Hold retainage from subs matching what owner holds from you. Pay subs per Utah Prompt Payment Act (7 days after you receive payment)."
+  },
+  {
+    "keywords": ["utah prompt payment", "payment law", "pay when paid", "late payment", "pay sub"],
+    "question": "What are Utah prompt payment rules?",
+    "answer": "Utah Prompt Payment Act: Contractor must pay subs within 7 days of receiving payment from owner. Owner must pay contractor within 30 days of pay app approval. Contractor can withhold only for: disputed work, subs' failure to pay lower-tier subs, defective work. Late payment = 2% per month interest penalty. 'Pay when paid' clauses in Utah are enforceable for disputed items but not as a general delay tactic."
+  },
+  {
+    "keywords": ["mobilization", "mob", "mob cost", "mobilization cost", "demobilization", "setup cost"],
+    "question": "How do I price mobilization?",
+    "answer": "Mobilization covers: moving equipment to site (trucking), temporary facilities (trailer, toilets, fencing), permits, safety setup, surveying/layout. Typical mob: 2–5% of total bid for large jobs, or a lump sum $5,000–50,000+ depending on distance and equipment. Most public contracts limit mob pay app to 2–5% at start. Demob: cost to move equipment off, restore site — include in your lump sum. Always list as separate line item."
+  },
+  {
+    "keywords": ["asbuilt", "as built", "as-built", "record drawing", "redline", "final drawing"],
+    "question": "What are as-built drawings and why do they matter?",
+    "answer": "As-built (record) drawings: marked-up plan sheets showing actual locations, depths, and dimensions of installed work versus original design. Required by most contracts and utility owners. Includes: pipe offsets, actual tie-in locations, valve/hydrant locations, depth at key points. Use field red-lines during construction, turn in at closeout. Failure to provide = withheld final payment or retainage. Also required for APCD, GIS, and system maps."
+  },
+  {
+    "keywords": ["schedule", "gantt", "cpm", "baseline schedule", "construction schedule", "project timeline", "phases"],
+    "question": "How do I build a construction schedule?",
+    "answer": "For most jobs: identify phases (mobilize, excavate, install pipe, backfill, test, restore, punch list). Assign durations in days. Link dependencies. Show on Gantt chart. For complex projects: CPM (Critical Path Method) in P6 or MS Project. Rule of thumb production rates: 100–300 LF/day pipe depending on size and soil. Submit baseline schedule within 10–14 days of NTP. Update monthly. openmud Schedule tool builds Gantt — say 'Build a schedule for [project].'"
+  },
+  {
+    "keywords": ["production rate", "daily production", "pipe production", "how fast", "linear feet per day"],
+    "question": "What are typical production rates for underground work?",
+    "answer": "Rough production rates: 8-in sewer/waterline 150–300 LF/day (good conditions), 12-in main 100–200 LF/day, 16-in+ main 50–150 LF/day. Hard rock: 25–75 LF/day. Trench depth 8–12 ft: reduce 20–30%. Directional drill: 200–500 LF/day for 4–8 in. Traffic conditions can cut production 30–50%. These are ballparks — use your own crew data when available."
+  },
+  {
+    "keywords": ["directional drill", "hdd", "horizontal directional drilling", "drill cost", "bore"],
+    "question": "How do I estimate directional drilling (HDD)?",
+    "answer": "HDD cost: $50–200/LF depending on diameter, soil, and length. Small bore (4–8 in): $50–80/LF. Large bore (12–24 in): $100–200/LF. Includes pilot hole, ream, pull back. Add: mud disposal, traffic control, entry/exit pits. Obstructions (other utilities) increase risk and cost. Get quotes from HDD subs — highly specialized. Add 15–20% contingency for unknown soil conditions."
+  },
+  {
+    "keywords": ["survey", "staking", "survey cost", "grade stakes", "construction survey", "elevation"],
+    "question": "How much does construction survey cost?",
+    "answer": "Construction survey costs: Initial staking $2,000–8,000 per project (size-dependent). Grade stakes: $1,500–4,000. As-built survey: $2,000–5,000. Monitoring (settlement, etc.): varies. Get 3 quotes. Surveyors need at least 1 week notice for mobilization. Without proper staking, you can't hit design grades — don't skip it to save money."
+  },
+  {
+    "keywords": ["seeding", "restoration", "revegetation", "topsoil", "landscape restoration"],
+    "question": "How do I price site restoration?",
+    "answer": "Restoration costs: Topsoil import and spread $15–30/CY placed. Seeding: hydroseed $0.15–0.30/SF, drill seed $0.08–0.15/SF. Sod $2–4/SF. Asphalt replacement: $3–8/SF (2-in to 4-in). Concrete sidewalk: $8–15/SF. Pavement markings: $1–3/LF striping. Always document existing conditions before work — photos protect you from claims. Restoration often 5–15% of total job cost."
+  },
+  {
+    "keywords": ["utility conflict", "existing utility", "utility coordination", "call before you dig", "811", "utility locates"],
+    "question": "How do I handle existing utility conflicts?",
+    "answer": "Utah 811: call or go online 2+ business days before digging. Locators will mark all known utilities. But marks aren't exact — pothole (hand dig or vacuum excavate) to verify depth and location before digging near marks. If you hit an unmarked utility, document immediately, stop work, notify owner and utility company. RFI the engineer for resolution. Add 'differing site condition' CO if schedule or cost is impacted."
+  },
+  {
+    "keywords": ["cost estimate", "estimating mistake", "bid mistake", "low bid", "underestimate"],
+    "question": "What are common estimating mistakes?",
+    "answer": "Common estimating mistakes: 1) Missing scope items (read full plans). 2) Wrong quantities (double-check takeoff). 3) Underestimating soil conditions (get geotech report). 4) Forgetting traffic control, permits, survey. 5) Not pricing existing utility conflicts. 6) Wrong pipe material (check spec). 7) Ignoring liquidated damages risk. 8) Low markup. 9) Bidding without subcontractor quotes. 10) Not walking the site. Use openmud Estimate as a checklist too."
+  },
+  {
+    "keywords": ["what is openmud", "mudrag app", "what does mudrag do"],
+    "question": "What is openmud?",
+    "answer": "openmud is a construction AI platform for all of construction — estimating, bidding, proposals, schedules, project management, and document management. The desktop app runs locally with mud1 (AI), works offline, and integrates with your Mac (email, calendar, notes). Web version has cloud AI and document storage. Ask me anything about your project or type / to see all commands."
+  },
+  {
+    "keywords": ["what is mud1", "who are you", "mud1", "about mud1"],
+    "question": "What is mud1?",
+    "answer": "I'm mud1, openmud's construction AI. I help with estimates, bids, proposals, change orders, pay apps, RFIs, schedules, and construction questions across all trades — underground utility, civil, residential, and commercial. I run locally via Ollama so your data stays private. What can I help with?"
+  },
+  {
+    "keywords": ["estimate", "how to estimate", "estimate project", "cost estimate", "quick estimate"],
+    "question": "How do I run an estimate?",
+    "answer": "Say: 'Estimate [quantity] of [item]' — for example: 'Estimate 1500 LF of 8 inch sewer in clay' or 'Estimate 200 CY of concrete.' I'll break down materials, labor, equipment, and markup. Or use the Quick estimate tool (Tools menu or /estimate command). For a full project bid with multiple line items, use 'Help me bid a [project type]' and I'll walk through it step by step."
+  },
+  {
+    "keywords": ["proposal", "quote", "scope", "bid document", "generate proposal", "create proposal"],
+    "question": "How do I create a proposal?",
+    "answer": "After running an estimate, say 'Generate a proposal' and I'll build a professional, PDF-ready proposal in the chat — including scope, bid items, inclusions, exclusions, assumptions, and a closing note. You can export it to PDF. Or use /proposal to go straight to the proposal tool. Add client name and project details first for the best result."
+  },
+  {
+    "keywords": ["schedule", "timeline", "phases", "gantt", "duration", "build schedule", "project schedule"],
+    "question": "How do I build a schedule?",
+    "answer": "Say 'Build a schedule for [project name]' or use /schedule. Tell me: project name, total duration (days or weeks), start date, and phases (mobilize, excavate, pipe, backfill, test, restore). I'll generate a Gantt-style schedule. For complex CPM schedules, export to PDF and import into P6 or MS Project. Use 'Create a schedule' command."
+  },
+  {
+    "keywords": ["what can you do", "capabilities", "what can you help", "commands", "tools"],
+    "question": "What can you do?",
+    "answer": "I can help with: estimates (materials, labor, equipment, markup), proposals (professional PDF-ready), schedules (Gantt), change orders, pay apps, RFIs, submittals, daily reports, punch lists, lien waivers, bid search, email search, calendar, reminders, notes, and any construction question. Type / to see all commands. What do you need?"
+  },
+  {
+    "keywords": ["how are you", "how's it going", "what's up", "hey", "hello", "hi", "howdy", "yo", "sup", "what is up"],
+    "question": "How are you?",
+    "answer": "Hey! Ready to work. What do you need?"
+  },
+  {
+    "keywords": ["dewatering", "pump", "groundwater", "water in trench", "wet conditions", "wellpoint"],
+    "question": "How do I price dewatering?",
+    "answer": "Dewatering: pump water from trench to maintain dry working conditions. Methods: submersible pump (small trench, low flow), wellpoint system (high groundwater, long runs). Costs: pump rental $150–400/day, wellpoint system $5,000–20,000/month, discharge permit and erosion control. Add dewatering as a contingency item if groundwater is uncertain — it can make or break your cost. Get geotech report first."
+  },
+  {
+    "keywords": ["asphalt", "paving", "asphalt cost", "AC", "hot mix", "HMA", "pavement"],
+    "question": "How do I estimate asphalt paving?",
+    "answer": "Asphalt cost: $100–180/ton for hot mix asphalt (HMA). Coverage: 1 ton covers roughly 80 SF at 2-in thickness (1 ton = 1 SY at 3 in). Base course: 3–4 in, surface course: 2 in typical. Add base prep (grading, compaction), tack coat. Typical road paving: $8–15/SF installed. Pavement markings: $1–3/LF. Milling old asphalt: $3–6/SY. Use 'Estimate [SF or SY] of asphalt paving.'"
+  },
+  {
+    "keywords": ["project kickoff", "notice to proceed", "NTP", "preconstruction meeting", "project start"],
+    "question": "What happens at project kickoff?",
+    "answer": "After award/NTP: 1) Preconstruction meeting with owner, engineer, and key subs. 2) Submit baseline schedule within 10–14 days. 3) Submit all required submittals early. 4) Get permits pulled. 5) Call 811 for utility locates. 6) Mobilize equipment. 7) Start daily reports from Day 1. 8) Set up job trailer, safety program, and site logistics. Getting this right sets the tone for the whole job."
+  },
+  {
+    "keywords": ["claims", "dispute", "contractor claim", "delay claim", "differing site condition", "dsc"],
+    "question": "How do I file a construction claim?",
+    "answer": "Construction claim steps: 1) Identify the basis (differing site condition, change in scope, owner delay, force majeure). 2) Give written notice within time required by contract (often 7–14 days of discovering the condition). 3) Document everything — daily logs, photos, costs incurred. 4) Quantify cost and time impact. 5) Submit written claim per contract dispute resolution process. Missing notice deadlines kills claims — always notice first, quantify later."
+  },
+  {
+    "keywords": ["closeout", "contract closeout", "project closeout", "final payment", "substantial completion"],
+    "question": "What is in project closeout?",
+    "answer": "Project closeout checklist: Punch list complete and signed off, as-built drawings submitted, operations and maintenance (O&M) manuals delivered, spare parts turned over, warranties registered, final lien waivers from all subs, certificate of substantial completion, final pay app submitted, retainage released, final inspection passed. Start closeout 60–90 days before planned completion — it always takes longer than expected."
+  },
+  {
+    "keywords": ["cost code", "job cost", "tracking cost", "cost tracking", "over budget", "budget tracking"],
+    "question": "How do I track job costs?",
+    "answer": "Job cost tracking: assign cost codes to each bid item (pipe, bedding, manholes, labor, equipment, etc.). Record all costs daily by code — labor hours, equipment hours, materials invoiced. Compare actual vs. budget weekly. If a code is running over, investigate immediately — don't wait until the end. Tools: HCSS HeavyJob, Procore, QuickBooks job costing. openmud exports estimates to CSV for import into your cost tracking system."
+  },
+  {
+    "keywords": ["estimate accuracy", "how accurate", "contingency", "allowance", "estimate risk"],
+    "question": "How accurate should my estimate be?",
+    "answer": "Estimate accuracy by phase: Conceptual (±30–50%), Schematic/preliminary (±20–30%), Design development (±10–20%), Construction documents (±5–10%). For bidding, target ±5–10%. Add contingency: 5% for well-defined work, 10–15% for unknown conditions, 20%+ for early-phase estimates. Never bid without contingency. openmud estimates are detailed (±10–15%) — adjust for your specific conditions."
+  },
+  {
+    "keywords": ["water main break", "main break", "emergency repair", "pipe break", "leak repair"],
+    "question": "How do I price an emergency water main repair?",
+    "answer": "Emergency repair costs more due to overtime, urgency, and disruption. Budget: labor 1.5x (overtime), after-hours extra equipment (emergency lighting, extra pumps), traffic control, utility notifications, permit (emergency), service restoration. Typical 8-in main break repair (cut out section, coupling repair): $8,000–25,000 all-in. Document everything for insurance or reimbursement claims."
+  },
+  {
+    "keywords": ["epoxy lining", "cipp", "pipe lining", "pipe rehab", "trenchless rehab", "sliplining"],
+    "question": "What pipe rehabilitation methods are available?",
+    "answer": "Trenchless rehab options: CIPP (Cured-In-Place Pipe) lining — resin-saturated liner cured in place, 25–50 year life, $30–100/LF. Sliplining — smaller pipe inserted inside existing pipe, lower cost, reduces capacity. Pipe bursting — new pipe pulled through while bursting old pipe, good for PVC and DI. Spot repair — excavate and repair isolated defect. CIPP most common for sewer rehab. Cost vs. open cut: often 60–80% of open cut, less disruption."
+  },
+  {
+    "keywords": ["fire hydrant", "hydrant", "fire flow", "hydrant cost", "hydrant installation"],
+    "question": "How much does a fire hydrant installation cost?",
+    "answer": "Fire hydrant install (complete): $3,500–7,000 each. Includes: hydrant (Muller A-423 or equal), 6-in branch line, gate valve, thrust block, painting. Fire flow test: $500–1,500. Spacing: per local fire code (typically 500 ft max in residential, 300 ft commercial). Requires water utility approval and coordination. Add to water main estimate as unit price per hydrant."
+  },
+  {
+    "keywords": ["water meter", "service connection", "tap", "corporation stop", "service line", "water service"],
+    "question": "How do I price a water service connection?",
+    "answer": "Water service connection (tap to meter): 3/4-in service $2,500–5,000, 1-in service $3,000–6,000, 2-in service $5,000–10,000. Includes: tap on main, corporation stop, service line, curb stop, meter setter, meter box. Plus water utility tap fee ($500–5,000+ depending on city). Meter size determined by flow demand. Price as unit cost per service in your bid."
+  },
+  {
+    "keywords": ["erosion control", "stormwater", "bmp", "silt fence", "swppp", "npdes"],
+    "question": "What erosion control is required?",
+    "answer": "NPDES Construction General Permit: required for disturbed area >1 acre. Requires SWPPP (Stormwater Pollution Prevention Plan). BMPs: silt fence at downslope, inlet protection on storm drains, stabilized construction entrance, rock check dams in channels. Utah DEQ administers. Inspection weekly and after 0.5-in rainfall. Non-compliance fines: up to $25,000/day. Budget $5,000–20,000 for SWPPP, BMPs, and inspection on a typical job."
+  },
+  {
+    "keywords": ["geotech", "soils report", "boring", "geotechnical investigation", "soil test", "subsurface"],
+    "question": "Why do I need a geotechnical report?",
+    "answer": "Geotech report (soils investigation): tells you what's underground before you dig. Includes: boring logs (soil type, depth, groundwater), bearing capacity, compaction recommendations, pipe bedding requirements, rock and cobble depth. Essential for: accurate trenching cost, bedding specification, shoring design, pavement design. Cost: $3,000–15,000. If owner doesn't provide one and soil is unknown, price in a contingency or request it before bidding. 'Differing site conditions' claims start with what the geotech said."
+  },
+  {
+    "keywords": ["video inspection", "cctv", "pipe inspection", "video pipe", "mandrel test", "deflection test"],
+    "question": "What testing is required after sewer installation?",
+    "answer": "Sewer testing requirements: 1) Mandrel test — pull a rigid mandrel through pipe to verify no deformation (PVC flexible pipe). 2) Low-pressure air test or hydrostatic test — check for leaks. 3) CCTV video inspection — camera through completed pipe, submitted as video and report. Some specs require TV inspection on all new pipe, others only on suspect areas. Confirm requirements with engineer before construction."
+  },
+  {
+    "keywords": ["what went wrong", "error", "mistake", "problem", "issue", "not working", "help me fix"],
+    "question": "Something went wrong on the project — what should I do?",
+    "answer": "Stop and assess: 1) Is there a safety hazard? Secure the area first. 2) Document the issue — photos, measurements, time, crew present. 3) Notify the engineer and owner in writing ASAP (same day). 4) Don't hide it — undisclosed problems compound. 5) Propose a solution with cost and time impact. 6) If a change order is warranted, submit one. 7) Update your schedule. For specific issues, describe what happened and I can help."
+  },
+  {
+    "keywords": ["how do i use mudrag", "how to use", "getting started", "new user", "first time"],
+    "question": "How do I get started with openmud?",
+    "answer": "Getting started: 1) Create a project in the sidebar (click + New Project). 2) Upload your plans and project docs. 3) Ask me to estimate, build a proposal, or answer construction questions. 4) Type / to see all commands. 5) Use mud1 (this AI) for construction questions — it runs locally so it's fast and private. For the full feature list, type 'what can you do.'"
+  },
+  {
+    "keywords": ["unit price", "unit cost", "unit price contract", "lump sum", "contract type", "t&m", "time and material"],
+    "question": "What's the difference between unit price, lump sum, and T&M contracts?",
+    "answer": "Contract types: Unit price — pay per unit of work ($/LF, $/CY, $/EA). Good when quantities are uncertain. Bid a unit price and get paid for actual quantities installed. Lump sum — fixed price for defined scope. Good for well-defined work. Any cost overrun is on contractor. Time and Materials (T&M) — pay actual labor hours + equipment + materials + markup. Good for unknowns and change orders. Most public work is unit price; most private commercial is lump sum."
+  },
+  {
+    "keywords": ["water hammer", "surge", "pressure surge", "transient pressure", "hydraulic shock"],
+    "question": "What is water hammer and how do I prevent it?",
+    "answer": "Water hammer: pressure surge from rapid valve closure or pump start/stop. Can crack pipe joints, blow out valves. Prevention: slow-close valves, pressure relief valves, surge tanks, air release valves at high points. Design consideration — not a field fix. If you're hearing banging in a water main, report to engineer. Surge analysis required on pumped systems. Factor surge pressure into pipe pressure rating selection."
+  },
+  {
+    "keywords": ["air release valve", "arv", "air valve", "combination air valve", "air relief"],
+    "question": "Where do I install air release valves?",
+    "answer": "Air release valves (ARV) at: high points on pressurized mains, ends of lines during filling, locations where air can accumulate during operation. Types: air release (small orifice for continuous air release), air/vacuum (large orifice for filling/draining), combination (both). Critical for pipeline startup — trapped air causes pressure spikes and reduces capacity. Owner's engineer specifies locations — install per design, don't skip them."
+  },
+  {
+    "keywords": ["thrust block", "thrust restraint", "restrained joint", "megalug", "pipe restraint", "fitting restraint"],
+    "question": "How do I size thrust blocks?",
+    "answer": "Thrust blocks resist hydraulic forces at bends, tees, and dead ends. Force = P × A (pressure × pipe area). Block area = Force / soil bearing capacity. Rule of thumb for 8-in at 150 psi, 45-deg bend: ~4 SF bearing area. Always get engineer approval for thrust block design. Use restrained joints (Mega-Lug, TR Flex) as alternative to concrete blocks — better in poor soil or tight areas. Cure concrete 72 hours before pressure testing."
+  },
+  {
+    "keywords": ["valves", "gate valve", "butterfly valve", "valve vault", "valve cost", "isolation valve"],
+    "question": "What valves are used on water mains?",
+    "answer": "Water main valves: Gate valve (resilient seated, 4–16 in, most common for isolation), Butterfly valve (12 in+, less expensive for large diameter), Ball valve (small services), Check valve (backflow prevention), Air release valve (high points). Valve vault: concrete box for below-grade valves. Spacing: isolation valves every 1,500 ft on 8-in, more frequently on distribution. Cost: 8-in gate valve $800–1,500 installed. Include in estimate as unit price per valve."
+  },
+  {
+    "keywords": ["HCSS", "heavybid", "heavy job", "procore", "software", "estimating software", "construction software"],
+    "question": "What construction software should I use?",
+    "answer": "Common construction software: Estimating: HCSS HeavyBid, Trimble Viewpoint, Sage Estimating, Bluebeam (takeoff). Project management: Procore, Buildertrend, Autodesk Build. Field: HCSS HeavyJob (field logs, cost tracking), Raken (daily reports). Scheduling: Primavera P6, MS Project. Accounting: Sage 300, QuickBooks. openmud integrates with most via CSV export. What are you trying to do? I can help with specific workflows."
+  },
+  {
+    "keywords": ["HCSS", "heavybid", "heavy bid", "HCSS estimate", "heavybid estimate", "bid estimate software", "HCSS how to"],
+    "question": "What is HCSS HeavyBid and how do I use it?",
+    "answer": "HCSS HeavyBid is the industry-leading estimating software for heavy civil contractors. Key workflow: 1) Create a new job (File > New Job), enter job info, owner, location. 2) Build your Work Breakdown Structure (WBS) — add bid items matching the bid schedule. 3) For each item, add cost detail: labor crews, equipment, materials, subcontractors, production rates. 4) Use the 'Detail' tab to break down each item cost by resource. 5) Set your markup in Job Settings (overhead, bond, profit). 6) Review the Bid Summary before submitting. Tips: Use 'Copy From' to pull items from past jobs. Set up your equipment and labor libraries in Master Data so rates auto-populate. Use HeavyBid's production rate database as a starting point — adjust for your crew size and site conditions."
+  },
+  {
+    "keywords": ["heavybid error", "HCSS not working", "heavybid won't open", "heavybid crash", "heavybid login issue", "HCSS troubleshoot"],
+    "question": "How do I troubleshoot HCSS HeavyBid issues?",
+    "answer": "Common HCSS HeavyBid issues and fixes: 1) Can't log in: verify you're connected to company network or VPN; contact your HCSS admin to reset password at my.hcss.com. 2) Job won't open: check if another user has it open (HeavyBid locks jobs); have them close it or have admin force-unlock. 3) Data not saving: confirm you have write access to the server path in Settings > Preferences > Paths. 4) Import fails: CSV/spreadsheet imports require exact column headers — download the HCSS import template first. 5) Software crashes on open: run as administrator, repair install via Windows Add/Remove Programs. 6) Slow performance: HeavyBid is server-based — check network speed to your file server. Move job to local drive temporarily for large estimates. Contact HCSS support at 800-HERE-HCSS or support.hcss.com."
+  },
+  {
+    "keywords": ["HCSS heavyjob", "heavy job", "field log", "daily report HCSS", "HCSS time entry", "cost tracking field"],
+    "question": "How does HCSS HeavyJob work?",
+    "answer": "HCSS HeavyJob is field management software that connects to HeavyBid estimates. Key features: 1) Daily logs — foremen enter crew, equipment, quantities produced each day on the app (iOS/Android) or web. 2) Cost codes — each entry ties to a budget cost code, automatically tracking budget vs actual. 3) Equipment hours — track machine hours for maintenance and billing. 4) Photos and notes — attach jobsite photos to daily entries. 5) Reports — labor cost to date, equipment utilization, job cost summary. Setup: import the estimate from HeavyBid (File > Export to HeavyJob), assign cost codes, set up employee and equipment lists. Foremen use the mobile app in the field. Office reviews in the web portal. Best practice: set a budget alert threshold (e.g., 80%) so you get notified before a cost code blows the budget."
+  },
+  {
+    "keywords": ["procore", "procore how to", "procore navigation", "procore tutorial", "procore project management"],
+    "question": "What is Procore and how do I navigate it?",
+    "answer": "Procore is a cloud-based construction project management platform. Main modules: 1) Project Home — dashboard with all project activity. 2) Drawings — upload and manage plan sheets; use markup tools; link RFIs and submittals directly to sheets. 3) Documents — project document storage. 4) RFIs — create, track, route, and close RFIs; set due dates; tracks ball-in-court. 5) Submittals — manage submittal log, route to engineer for approval. 6) Schedule — upload and view project schedule. 7) Daily Logs — field entry for weather, manpower, equipment, and observations. 8) Financials — prime contract, commitments (subcontracts/POs), change orders, billing. 9) Meetings — track meeting minutes. Navigation tip: use the left sidebar to switch modules. Use 'Filters' on lists to find items quickly. Search bar (Cmd+K) searches across all project data."
+  },
+  {
+    "keywords": ["procore error", "procore not loading", "procore upload failed", "procore drawing issue", "procore troubleshoot", "procore problem"],
+    "question": "How do I fix common Procore problems?",
+    "answer": "Common Procore issues and fixes: 1) Drawings won't upload: PDF must be under 500MB per file; split large plan sets using Bluebeam or Adobe. Supported formats: PDF, DWG, DXF. 2) Can't see a module: your admin hasn't granted you permission — contact your Procore admin to update your role. 3) RFI/submittal won't send: verify recipient email addresses are correct; check spam filters on the recipient's end. 4) Page loading slow: clear browser cache (Ctrl+Shift+Del), use Chrome for best compatibility. 5) Mobile app not syncing: force-close app, check wifi/cell signal, re-login. 6) Drawing revision not showing: after upload, publish the revision — it won't be visible to field until published. 7) Email notifications flooding: go to My Profile > Notification Settings to customize. Contact Procore support at 1-866-477-6267 or support.procore.com."
+  },
+  {
+    "keywords": ["procore change order", "PCO", "procore CO", "change order procore", "procore commitment", "procore billing"],
+    "question": "How do I process change orders in Procore?",
+    "answer": "Procore change order workflow: 1) Create a Potential Change Order (PCO) — Financials > Prime Contract > Change Orders > Create PCO. Enter scope, cost, days requested. 2) Get pricing — attach backup (quote, time ticket). 3) Submit to owner — create a Change Order Request (COR) from the PCO. 4) Owner approves — convert COR to an Approved Change Order (ACO), which updates the prime contract value. 5) For subs — go to Commitments, find the sub's contract, create a Commitment Change Order (CCO). Key: cost must flow through all tiers — prime CO > sub CO — to keep financials reconciled. Use Procore's budget tool to see real-time job cost vs contract value. Always attach documentation to each PCO before routing."
+  },
+  {
+    "keywords": ["autodesk build", "autodesk construction cloud", "ACC", "BIM 360", "autodesk docs", "autodesk project management"],
+    "question": "What is Autodesk Construction Cloud (Build) and how does it work?",
+    "answer": "Autodesk Construction Cloud (ACC) / Autodesk Build is the replacement for BIM 360. It's a cloud platform connecting design and construction. Key tools: 1) Docs — centralized document and drawing management. Upload, version, and share plans with the field. 2) Build — field management: RFIs, submittals, issues, daily logs, meetings. 3) Model Coordination — clash detection between structural, MEP, and civil models (Navisworks-style in browser). 4) Cost — budget tracking, change orders, pay apps. 5) Schedule — Gantt chart integration. Getting started: Hub Admin sets up the project and invites members. Each member gets role-based permissions (admin, project manager, field user). Field crews use the ACC mobile app for daily logs, photos, and punch items. Connect to Procore via ACC's data connector if your office uses both."
+  },
+  {
+    "keywords": ["autodesk build error", "ACC problem", "autodesk docs not uploading", "BIM 360 issue", "autodesk troubleshoot", "autodesk login"],
+    "question": "How do I troubleshoot Autodesk Build / ACC issues?",
+    "answer": "Common Autodesk Build / ACC issues and fixes: 1) Can't log in: go to accounts.autodesk.com to reset password. Use the same email your admin invited you with — accounts are email-specific. 2) Drawing upload fails: check file size (max 5GB per file), ensure PDF is not password-protected. 2) Sheet not showing in field: after upload, sheets must be published to the 'Field' folder — check sheet permissions. 3) Model won't open in viewer: try Chrome browser; clear cache; check if file is still processing (files can take 10-30 min after upload). 4) RFI not delivering: verify recipient's email is in the project directory. 5) Mobile app offline: ACC supports offline mode — drawings sync when back online. 6) Can't find a file: check folder permissions; your admin may have restricted access. Contact Autodesk support at construction.autodesk.com/support."
+  },
+  {
+    "keywords": ["autocad", "civil 3d", "autodesk CAD", "AutoCAD how to", "civil 3d tutorial", "CAD construction"],
+    "question": "How do I use AutoCAD and Civil 3D for construction?",
+    "answer": "AutoCAD is 2D drafting software; Civil 3D is AutoCAD with civil engineering tools. Key Civil 3D features for construction: 1) Surfaces — import survey data, build existing ground TIN surface for earthwork volumes. 2) Alignments — horizontal road/utility alignments with stationing. 3) Profiles — vertical alignment (grades) along an alignment. 4) Corridors — 3D model of road/pipeline using alignment, profile, and cross-sections. 5) Quantity Takeoff — earthwork cut/fill volumes from corridor or surface comparison. Common tasks: Measure pipe lengths with DIST command. Add drawing to Procore/ACC by exporting to PDF (Plot) or DWG. For takeoff: use 'Count' block for fittings, LENGTHEN for LF. Tip: always work in the correct project coordinate system (UTM or State Plane) so GPS stakeout matches plans."
+  },
+  {
+    "keywords": ["bid2win", "bid to win", "bid2win software", "bid to win estimate", "bid to win how to"],
+    "question": "What is Bid2Win and how do I use it?",
+    "answer": "Bid2Win (now part of Trimble) is a heavy civil estimating and project management platform, competing with HCSS. Key features: 1) Estimating — build detailed cost estimates with work items, crews, production rates, and resources. 2) Job Cost — track actual vs estimated costs from field data. 3) Crew Builder — define standard crew combinations (operator + laborer + equipment) and save them for reuse. 4) Proposal — generate formatted bid proposals from the estimate. Workflow: Create job > Add bid items > Assign crews and resources > Set production rates > Review bid summary > Export proposal. Bid2Win uses a 'Resource Based' approach — you define the resource (labor, equipment, material) once in the library, then assign to work items. Production rates drive cost automatically (lower production = higher cost). Common issue: if your totals look off, check that your crew hours per shift and shift cost are correctly set in the Crew Builder."
+  },
+  {
+    "keywords": ["sage 300", "sage estimating", "timberline", "sage accounting", "sage construction", "sage 100"],
+    "question": "What is Sage 300 Construction and Real Estate?",
+    "answer": "Sage 300 CRE (formerly Timberline) is construction accounting and project management software. Key modules: 1) Job Cost — tracks budget vs actual cost by cost code and cost type (labor, material, equipment, sub, other). 2) Accounts Payable — process vendor invoices, tie to job cost codes. 3) Accounts Receivable — billing, pay applications, T&M invoices. 4) Payroll — full payroll with certified payroll (Davis-Bacon) reporting. 5) Equipment — track equipment costs and maintenance. 6) Estimating (add-on) — detailed estimating with assembly library, connects to job cost. Getting started: your accountant/IT team sets up the chart of accounts and job cost structure. Field foremen use job cost reports to track burn rate per cost code. Common issue: journal entry errors — always post to a job AND cost code. Sage 300 is local software (server-based), not cloud, so you need VPN or terminal server access from the field."
+  },
+  {
+    "keywords": ["sage error", "sage 300 problem", "sage not opening", "sage job cost error", "sage troubleshoot", "timberline error"],
+    "question": "How do I troubleshoot Sage 300 / Timberline issues?",
+    "answer": "Common Sage 300 CRE issues and fixes: 1) Can't connect to server: check VPN connection; ping the server by name. If unreachable, contact IT. 2) 'File in use' error: another user has the file open — have them close it, or have IT check Pervasive Database Engine processes. 3) Reports won't run: verify your report path in Settings > File Locations. Re-register the report DLL if reports are missing. 4) Payroll tax tables out of date: download the latest update from Sage Customer Portal (partners.sagebusiness.com). 5) Job cost totals don't match: run the 'Recalculate Job Cost Totals' utility under File > Maintenance. 6) Can't post a batch: check for unbalanced transactions (debit must equal credit). Use the 'Proof List' to review before posting. 7) Data corruption: run File Repair utility; restore from backup if data is corrupted. Always keep current backups — Sage 300 is vulnerable to data corruption."
+  },
+  {
+    "keywords": ["bluebeam", "bluebeam revu", "bluebeam takeoff", "bluebeam markups", "bluebeam studio", "PDF takeoff"],
+    "question": "How do I use Bluebeam Revu for construction takeoff?",
+    "answer": "Bluebeam Revu is the standard PDF markup and takeoff tool in construction. Key uses: 1) Takeoff — use Measurements toolbar (Alt+M): Linear (LF), Area (SF), Count (EA), Volume. Set scale first (calibrate to a known dimension on the plan). 2) Markups — add clouds, arrows, text boxes to review sets. 3) Studio Sessions — real-time collaborative PDF review; multiple people markup the same PDF simultaneously from different locations. 4) Compare Documents — overlay two PDF versions to highlight changes (red/blue delta). 5) Batch Slip Sheet — replace individual sheets in a set with revised versions, preserving existing markups. 6) Hyperlinks — link title block to each sheet for easy navigation. Takeoff workflow: Open PDF > Set scale > Use Measurements tool > Export quantities to Excel (Toolbox > Export). Tip: use Spaces (region tool) to split takeoff by area or scope package."
+  },
+  {
+    "keywords": ["bluebeam error", "bluebeam not working", "bluebeam crash", "bluebeam studio problem", "bluebeam license issue", "bluebeam troubleshoot"],
+    "question": "How do I fix common Bluebeam Revu issues?",
+    "answer": "Common Bluebeam Revu issues and fixes: 1) License expired or won't activate: go to Help > License Manager. If subscription expired, renew at bluebeam.com. Ensure you're signed into your Bluebeam ID. 2) PDF won't open: file may be corrupted — try opening in Adobe to verify. Large files (500+ MB) may take time; split with Bluebeam's Split Pages tool. 3) Takeoff numbers reset after save: make sure you're saving the PDF (Ctrl+S), not just closing — Bluebeam saves markups to the PDF file itself. 4) Studio session won't sync: check internet connection; re-login to Bluebeam Studio (View > Studio). 5) Scale is wrong after calibration: right-click measurement, check 'Calibration' — recalibrate on a clearly dimensioned element. 6) Software is slow: close unused PDFs; increase memory allocation in Preferences > General. 7) Can't flatten markups: check file permissions — open file properties and remove read-only. Contact Bluebeam at support.bluebeam.com."
+  },
+  {
+    "keywords": ["primavera", "P6", "Primavera P6", "project schedule", "P6 schedule", "CPM schedule", "critical path"],
+    "question": "How do I use Primavera P6 for construction scheduling?",
+    "answer": "Primavera P6 (Oracle) is the industry standard for complex construction CPM schedules. Key concepts: 1) WBS — Work Breakdown Structure, hierarchical project scope. 2) Activities — individual schedule tasks with duration, resource, and relationship links. 3) Relationships — Finish-to-Start (FS), Start-to-Start (SS), Finish-to-Finish (FF) dependencies between activities. 4) Critical Path — the longest path through the schedule; any delay here delays the project finish. 5) Float — non-critical activities have float (slack time before they impact completion). Basic workflow: Create project > Set calendar > Import WBS > Add activities > Link relationships > Assign resources > Run Schedule (F9) > Baseline schedule > Update progress monthly. P6 can be professional (desktop/server) or cloud (P6 EPPM). Tip: always baseline before updating — baselines let you compare planned vs actual. Submit schedule in XER or PDF format per contract requirements."
+  },
+  {
+    "keywords": ["P6 error", "primavera problem", "P6 won't schedule", "primavera crash", "P6 login", "primavera troubleshoot", "schedule error"],
+    "question": "How do I troubleshoot Primavera P6 issues?",
+    "answer": "Common Primavera P6 issues and fixes: 1) Schedule doesn't calculate after F9: check for 'Out of Sequence' activities (progress entered in wrong order); also check for loops (circular relationships) — P6 will flag these. 2) Can't log in: if EPPM (cloud), contact your Oracle/P6 admin for credentials. If local, check database connection (Tools > Admin > Database). 3) XER import fails: the XER was exported from a different P6 version — import into matching version first, then use XML instead. 4) Activities showing 'Not Started' after update: make sure you've entered Actual Start date and % complete, then re-schedule (F9). 5) Layout not saving: check write permissions on your P6 installation folder. 6) Slow performance: limit open projects; archive completed projects. 7) Can't see float on bars: in Bar Chart, right-click > Bars > add 'Free Float' and 'Total Float' bars. P6 learning resources: oracle.com/construction, scheduling courses on Udemy. Ask 'help me read a P6 schedule' for more tips."
+  },
+  {
+    "keywords": ["trimble", "trimble viewpoint", "vista viewpoint", "trimble construction", "viewpoint accounting"],
+    "question": "What is Trimble Viewpoint (Vista) and how do I use it?",
+    "answer": "Trimble Viewpoint Vista is a comprehensive construction ERP — accounting, project management, HR, and field in one platform. Key modules: 1) Job Cost (JC) — tracks project costs vs budget by cost type and phase. 2) Accounts Payable (AP) — process subcontractor and vendor invoices, tie to job. 3) Payroll (PR) — weekly payroll, union rates, certified payroll reports. 4) Project Management (PM) — RFIs, submittals, change orders, daily reports, drawings. 5) Equipment (EM) — equipment cost tracking and maintenance schedules. 6) Field View (mobile app) — daily logs, timesheets, safety forms from the field. Setup: Vista is highly configurable — work with your implementation consultant to set up the chart of accounts, job cost structure, and approval workflows before go-live. Common workflow: AP invoice entry > coding to job/phase/cost type > approval routing > posting > job cost updated automatically. Reports: run 'Job Cost Detail' and 'Job Cost Summary' for project financial status."
+  },
+  {
+    "keywords": ["viewpoint error", "vista error", "trimble viewpoint problem", "viewpoint won't open", "vista troubleshoot", "viewpoint login"],
+    "question": "How do I troubleshoot Trimble Viewpoint Vista issues?",
+    "answer": "Common Viewpoint Vista issues and fixes: 1) Login fails: Vista uses Windows Authentication (domain login) or internal Vista credentials. If locked out, contact your system admin. 2) Can't post a batch: check for validation errors in the batch — open the batch detail and look for red flags (unbalanced GL, invalid GL accounts, missing required fields). 3) Payroll won't process: verify employee setup is complete — tax filing status, GL accounts, union info. Check pay period end date matches your payroll schedule. 4) Report is blank: ensure you're selecting the right date range and company. Some reports require you to 'Generate' before viewing. 5) Approval workflow stuck: check who has the approval in their queue (Admin > Workflow Monitor). If the approver is out, admin can reassign. 6) Slow performance: close unused panels; if server-based, check with IT for server load. 7) Database errors: Vista runs on SQL Server — your DBA should handle index rebuilds and backups. Contact Trimble support at viewpoint.com/support."
+  },
+  {
+    "keywords": ["planhub", "smartbid", "building connected", "bid solicitation", "bid invitation", "invite subs to bid", "sub solicitation"],
+    "question": "What are PlanHub, SmartBid, and BuildingConnected used for?",
+    "answer": "These are bid solicitation and subcontractor management platforms used by GCs and owners to solicit bids from subs and suppliers: 1) PlanHub — free plan room; GCs post projects, subs download plans and submit bids. Subs register free; GCs pay for premium features. Good for public/commercial work. 2) SmartBid (ConstructConnect) — GC-focused sub solicitation tool. GCs build a sub database, send bid invitations, track responses, compare sub bids side-by-side. Integrates with Sage and Procore. 3) BuildingConnected (Autodesk) — similar to SmartBid; very popular for commercial GCs. Subs receive invitations via email, submit bids through the portal. GCs use BC Pro for side-by-side bid leveling. As a sub: register on all three platforms and keep your trade and geography profile updated so GCs find you. As a GC: use one platform consistently and build your sub database — quality of sub list determines bid competitiveness."
+  },
+  {
+    "keywords": ["raken", "daily report app", "field daily report", "raken how to", "daily log app", "site report"],
+    "question": "How do I use Raken for daily reports?",
+    "answer": "Raken is a mobile-first daily reporting app for construction superintendents and foremen. Key features: 1) Daily Log — log manpower (crew count by trade), equipment on site, weather conditions, work performed. 2) Photos — add jobsite photos with captions tied to the daily log. 3) Safety — toolbox talks, safety observations, incident reports. 4) Time Cards — capture labor hours per employee and cost code (exports to payroll). 5) Subcontractor Reports — subs fill out their own daily reports through the same project, rolls up to GC's log. Setup: Company admin sets up the project and invites superintendents. Field users download the iOS or Android app. Reports auto-generate as PDF and email to the project team. Tip: complete your daily report same day — don't backfill. Courts use daily reports as primary documentation in construction disputes. Connect Raken to Procore for seamless sync."
+  },
+  {
+    "keywords": ["e-builder", "owner project management", "capital program management", "ebuilder", "owner software"],
+    "question": "What is e-Builder and who uses it?",
+    "answer": "e-Builder (Trimble) is a capital program management platform used by owners (not contractors) to manage large capital programs — hospitals, universities, municipalities, transportation agencies. Key features: 1) Cost Management — owner tracks project budget, commitments (contracts), change orders, and invoices. 2) Document Control — manages drawings, specs, submittals from all project designers and contractors. 3) Process Automation — configurable workflows for submittals, RFIs, change orders, pay apps. 4) Schedule — integrated schedule tracking against budget. As a contractor: if your owner uses e-Builder, you'll receive RFI and submittal routing through their portal. You'll submit pay applications through e-Builder rather than paper. Key tip: always check notification emails from e-Builder — they contain links to pending approvals or responses. If you can't access the portal, ask your owner's project manager for a re-invitation link."
+  },
+  {
+    "keywords": ["foundation software", "foundation accounting", "foundation payroll", "foundation construction accounting"],
+    "question": "What is Foundation Software for construction?",
+    "answer": "Foundation Software is a construction-specific accounting and project management platform (cloud and on-premise). Widely used by mid-size specialty contractors. Key modules: 1) Job Cost — real-time cost tracking vs estimate by cost code. 2) Payroll — union and non-union, certified payroll (LCP Tracker integration), multi-state. 3) Accounts Payable/Receivable — invoice processing, lien waivers, billing. 4) Equipment — depreciation, maintenance, cost allocation. 5) Service Work — work order management for service contractors. 6) Project Management — submittals, RFIs, daily logs. Integration: Foundation connects to HCSS HeavyBid for estimate import. Also connects to Procore for field data. Common tip: set up your cost code structure in Foundation before starting any jobs — re-coding later is painful. Run 'Work in Progress (WIP)' report monthly to catch over/under-billing."
+  },
+  {
+    "keywords": ["navisworks", "clash detection", "model coordination", "BIM", "3D model", "navisworks manage"],
+    "question": "How do I use Navisworks for clash detection?",
+    "answer": "Navisworks (Autodesk) is used to combine 3D models from multiple disciplines (civil, structural, mechanical, electrical) and run clash detection to find conflicts before construction. Workflow: 1) Append all models (File > Append) — combine architectural, structural, MEP, and civil models into one NWD/NWF file. 2) Set up Clash Detective (Tools > Clash Detective). Create clash tests: select two sets (e.g., HVAC ducts vs structural steel). 3) Run clashes — software finds all geometric intersections. 4) Review results — open each clash, classify as 'Active,' 'Approved,' or 'Resolved.' 5) Export clash report (PDF/HTML) for coordination meetings. As a contractor: use Navisworks to coordinate underground utilities before digging — catch conflicts between water, sewer, gas, and electric in the 3D model. The free viewer (Navisworks Freedom) lets field staff view models without a license. Clashes found in model = less rework in field."
+  },
+  {
+    "keywords": ["procore vs autodesk", "compare software", "procore or autodesk", "which is better procore autodesk", "software comparison"],
+    "question": "How does Procore compare to Autodesk Build?",
+    "answer": "Procore vs Autodesk Build (ACC): Both are cloud-based construction management platforms. Procore: stronger on financial workflows (change orders, billing, pay apps), very widely adopted by GCs, excellent sub/owner collaboration portal, strong RFI and submittal management. Autodesk Build (ACC): deeper BIM and model integration (connects natively to Revit, Civil 3D, Navisworks), better for design-build and BIM-heavy projects, stronger for owners managing capital programs with design data. Cost: both are subscription-based by seat or project; Procore prices by annual construction volume, ACC by seat count. Best fit: heavy civil contractors often prefer Procore. Design-build, commercial, and BIM-heavy projects lean toward ACC. Many large GCs use both and connect them via the ACC-Procore data connector. Ask what your owner/GC requires before choosing — platform interoperability matters."
+  },
+  {
+    "keywords": ["certified payroll", "davis bacon", "prevailing wage software", "LCP tracker", "certified payroll report"],
+    "question": "What software do I use for certified payroll and Davis-Bacon reporting?",
+    "answer": "Certified payroll (Davis-Bacon/SCA) reporting options: 1) LCP Tracker — most common cloud platform for submitting certified payroll on public works projects. Subs enter payroll weekly; GC and owner can verify compliance. Many state DOTs and transit agencies require it. 2) Elation Systems — similar to LCP Tracker, used on some federal and state projects. 3) DIR eCPR (California) — California DIR's online portal; required for all California public works. 4) Excel WH-347 form — federal standard form, acceptable on many jobs. Fill manually or export from payroll software. Integration: Sage 300, Foundation, and Viewpoint all produce certified payroll exports. HCSS HeavyJob can export timesheets. Workflow: run payroll in your accounting software > export to certified payroll format > upload to LCP Tracker or owner's portal > submit by Friday (usually). Common mistake: failing to include fringe benefit breakdown by classification — auditors will flag this."
+  },
+  {
+    "keywords": ["ineight", "InEight", "InEight estimate", "InEight how to", "InEight software"],
+    "question": "What is InEight and how does it work?",
+    "answer": "InEight is a project controls platform for large capital projects — widely used by ENR Top 400 contractors and owners on megaprojects (power plants, infrastructure, mining). Key modules: 1) Estimate — detailed cost estimating with quantity-based and resource-based methods. Strong for large, complex scopes with thousands of line items. 2) Schedule — CPM scheduling integrated with cost. 3) Field (Progress/Control) — real-time field progress, cost control, and forecasting. 4) Change — formal change management with impact analysis. 5) Plan — work packaging, constraint removal, look-ahead scheduling. Differentiator: InEight ties estimate, schedule, cost, and change into one unified data set — any scope change automatically updates cost and schedule simultaneously. Best for: projects over $50M with dedicated project controls teams. Smaller contractors typically use HCSS or Bid2Win instead. Setup requires significant configuration — use InEight's implementation services for initial deployment."
+  },
+  {
+    "keywords": ["weather delay", "rain day", "weather clause", "force majeure", "excusable delay"],
+    "question": "How do I handle weather delays?",
+    "answer": "Weather delays: most contracts allow time extension for unusually severe weather, but not cost recovery. Document daily: record high/low temp, precipitation, whether work was stopped and why. Compare to historical averages (NOAA data for the area). Submit weather day notices monthly. What you can't do work in: frozen ground, rain over 0.5 in/day, extreme wind. Don't just assume you'll get credit — notice the engineer in writing and get agreement."
+  }
+]

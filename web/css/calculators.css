@@ -1,0 +1,615 @@
+/* Calculators page — redesigned layout */
+:root {
+    --earth: #bb9871;
+    --earth-dark: #8f7457;
+    --earth-light: #d3b48f;
+    --earth-subtle: rgba(187, 152, 113, 0.15);
+}
+
+/* ─── Page layout ───────────────────────────────────────────── */
+.calc-layout {
+    display: grid;
+    grid-template-columns: 188px minmax(0, 1fr);
+    flex: 1;
+    min-height: calc(100vh - 52px - 52px);
+    align-items: start;
+    width: 100%;
+}
+
+/* ─── Sidebar ───────────────────────────────────────────────── */
+.calc-sidebar {
+    grid-column: 1;
+    background: var(--bg-alt);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 52px);
+    z-index: 2;
+}
+
+.calc-sidebar-inner {
+    padding: 14px 8px 40px;
+}
+
+.calc-sidebar-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--earth-dark);
+    margin: 18px 0 4px;
+    padding: 0 8px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 700;
+}
+
+.calc-sidebar-label:first-child { margin-top: 4px; }
+
+.calc-nav-link {
+    display: block;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 5px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.3;
+    transition: color 0.12s, background 0.12s;
+}
+
+.calc-nav-link:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+}
+
+.calc-nav-link.active {
+    color: var(--text);
+    background: var(--earth-subtle);
+    font-weight: 500;
+}
+
+/* ─── Main area ─────────────────────────────────────────────── */
+.calc-main {
+    grid-column: 2;
+    width: 100%;
+    max-width: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 0 80px;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* ─── Panel ─────────────────────────────────────────────────── */
+.calc-panel {
+    display: none;
+    padding: 28px 32px;
+    width: 100%;
+    max-width: 960px;
+}
+
+.calc-panel.active { display: block; }
+
+.calc-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+.calc-desc {
+    color: var(--text-secondary);
+    margin: 0 0 24px;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    max-width: 600px;
+}
+
+/* ─── Two-column layout: form | results ─────────────────────── */
+.calc-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* ─── Input card ─────────────────────────────────────────────── */
+.calc-inputs {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 16px 16px;
+}
+
+/* Stacked 2-column input grid */
+.calc-inputs .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.calc-inputs .input-grid.single-col {
+    grid-template-columns: 1fr;
+}
+
+/* Each field block: label on top, input below */
+.calc-inputs .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Span full width when needed */
+.calc-inputs .form-row.span-2 {
+    grid-column: 1 / -1;
+}
+
+.calc-inputs label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+}
+
+.calc-inputs input[type="number"],
+.calc-inputs input[type="text"],
+.calc-inputs select {
+    width: 100%;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.15s, background 0.15s;
+    box-sizing: border-box;
+    /* Prevent overflow */
+    min-width: 0;
+    text-overflow: ellipsis;
+}
+
+.calc-inputs input[type="number"]:focus,
+.calc-inputs input[type="text"]:focus,
+.calc-inputs select:focus {
+    border-color: var(--earth);
+    background: rgba(255,255,255,0.04);
+}
+
+/* ─── Calculate button ───────────────────────────────────────── */
+.calc-btn {
+    width: 100%;
+    padding: 10px 14px;
+    margin-top: 4px;
+    background: var(--earth);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.875rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    letter-spacing: 0.01em;
+}
+
+.calc-btn:hover { opacity: 0.85; }
+
+.calc-btn-secondary {
+    width: 100%;
+    padding: 7px 10px;
+    margin-top: 6px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.775rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    cursor: pointer;
+    transition: color 0.12s, border-color 0.12s;
+}
+
+.calc-btn-secondary:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+}
+
+/* ─── Results panel ──────────────────────────────────────────── */
+.calc-results {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 18px;
+    min-height: 120px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.calc-results:empty::before {
+    content: 'Results will appear here.';
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    opacity: 0.6;
+}
+
+/* Primary hero result at top */
+.result-hero {
+    padding: 14px 0 16px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+}
+
+.result-hero-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.result-hero-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.result-hero-unit {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+/* Individual result rows */
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: 12px;
+}
+
+.result-row:last-child { border-bottom: none; }
+
+.result-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    flex: 1;
+    line-height: 1.3;
+}
+
+.result-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.result-value.result-primary {
+    font-size: 1rem;
+    color: var(--earth-light);
+}
+
+.result-value.result-warn  { color: #f59e0b; }
+.result-value.result-ok    { color: #6ee7b7; }
+.result-value.result-bad   { color: #f87171; }
+
+.result-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.result-section-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+
+.result-note {
+    font-size: 0.775rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 5px;
+    margin-top: 8px;
+}
+
+.result-note.warn {
+    background: rgba(245,158,11,0.08);
+    border-left: 3px solid #f59e0b;
+    color: #f59e0b;
+}
+
+.result-note.ok {
+    background: rgba(110,231,183,0.07);
+    border-left: 3px solid #6ee7b7;
+    color: #6ee7b7;
+}
+
+/* ─── Notes bar ──────────────────────────────────────────────── */
+.calc-notes {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 0.775rem;
+    color: var(--text-secondary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+}
+
+.calc-notes strong { color: var(--text); }
+
+/* ─── Tabs ───────────────────────────────────────────────────── */
+.calc-tabs {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 14px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 3px;
+}
+
+.calc-tab {
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 0.775rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.calc-tab.active {
+    background: rgba(255,255,255,0.1);
+    color: var(--text);
+    font-weight: 500;
+}
+
+/* ─── Reference tables ───────────────────────────────────────── */
+.calc-table-wrap {
+    overflow-x: auto;
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.calc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.calc-table th {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.675rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.02);
+}
+
+.calc-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+    vertical-align: top;
+}
+
+.calc-table tbody tr:last-child td { border-bottom: none; }
+.calc-table tr:hover td { background: rgba(255,255,255,0.025); }
+
+.table-section-header {
+    background: rgba(255,255,255,0.04) !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.675rem !important;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.calc-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.calc-filter-row select {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--text);
+    font-size: 0.8125rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ─── Project tools: estimator rows ─────────────────────────── */
+.est-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 90px 20px;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: center;
+}
+
+.est-row select,
+.est-row input {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 7px 8px;
+    color: var(--text);
+    font-size: 0.8125rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.est-row select:focus,
+.est-row input:focus {
+    outline: none;
+    border-color: var(--earth);
+}
+
+/* Schedule results table */
+.sched-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    margin-top: 4px;
+}
+
+.sched-table th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.675rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+    background: rgba(255,255,255,0.02);
+}
+
+.sched-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+}
+
+.sched-table tr:last-child td { border-bottom: none; }
+.sched-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* ─── Crew day rows ──────────────────────────────────────────── */
+.crew-row {
+    display: grid;
+    grid-template-columns: 1fr 52px 72px 20px;
+    gap: 5px;
+    margin-bottom: 5px;
+    align-items: center;
+}
+
+.crew-row input {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 6px 8px;
+    color: var(--text);
+    font-size: 0.8125rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.crew-row input:focus {
+    outline: none;
+    border-color: var(--earth);
+}
+
+.crew-remove {
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    text-align: center;
+    transition: color 0.12s;
+}
+
+.crew-remove:hover { color: #f87171; }
+
+.form-section-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--earth-dark);
+    margin: 12px 0 6px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+}
+
+/* Mobile calculator navigator (shown only on mobile) */
+.calc-mobile-nav {
+    display: none;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-alt);
+}
+
+.calc-mobile-select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8278' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .calc-grid {
+        grid-template-columns: 1fr;
+    }
+    .calc-inputs .input-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .calc-layout { grid-template-columns: 1fr; }
+    .calc-sidebar { display: none; }
+    .calc-mobile-nav { display: block; }
+    .calc-main { grid-column: 1; }
+    .calc-panel { padding: 14px 16px; }
+    .calc-title { font-size: 1.125rem; }
+}
+
+@media (max-width: 480px) {
+    .calc-inputs .input-grid { grid-template-columns: 1fr; }
+    .calc-inputs .form-row.span-2 { grid-column: 1; }
+    .calc-panel { padding: 12px; }
+    .calc-grid { gap: 12px; }
+}

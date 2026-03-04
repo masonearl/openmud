@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Search Setup – openmud</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
+    <main class="landing-simple" style="padding: 40px 24px 80px;">
+        <div class="container" style="max-width: 640px;">
+            <h1>Email Search Setup</h1>
+            <p>openmud can search your emails and open them in Mail.app. This uses your Mac's built-in Mail app—no iCloud API or separate login required.</p>
+
+            <h2>Requirements</h2>
+            <ul>
+                <li><strong>macOS</strong> with Mail.app</li>
+                <li><strong>Mail.app</strong> with at least one email account added</li>
+            </ul>
+
+            <h2>Setup Steps</h2>
+
+            <h3>1. Open Mail.app</h3>
+            <p>Launch Mail from Applications or Spotlight.</p>
+
+            <h3>2. Add Your Email Accounts</h3>
+            <ol>
+                <li>Go to <strong>Mail → Settings</strong> (or <strong>Mail → Preferences</strong> on older macOS)</li>
+                <li>Click the <strong>Accounts</strong> tab</li>
+                <li>Click the <strong>+</strong> button to add an account</li>
+                <li>Choose your provider:
+                    <ul>
+                        <li><strong>iCloud</strong> – Sign in with your Apple ID. Mail will sync your iCloud mail.</li>
+                        <li><strong>Google</strong> – Sign in with your Gmail. Grant access when prompted.</li>
+                        <li><strong>Exchange / Microsoft 365</strong> – Enter your work email and credentials.</li>
+                        <li><strong>Other</strong> – For IMAP/POP3 (e.g., custom domains)</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>3. Let Mail Sync</h3>
+            <p>After adding an account, Mail will download your emails. Wait for the initial sync to complete (check the status in the bottom of the Mail window).</p>
+
+            <h3>4. Use Email Search in openmud</h3>
+            <p>Once Mail has synced, you can ask mud1 things like:</p>
+            <ul>
+                <li><em>"Find the email from Granite about material and aggregate pricing"</em></li>
+                <li><em>"Search my email for invoices from PlanHub"</em></li>
+                <li><em>"Find emails from City of Salt Lake about the bid"</em></li>
+                <li><em>"Look up emails from last week about change orders"</em></li>
+            </ul>
+            <p>openmud will search your Mail database and show results. Click <strong>Open in Mail</strong> on any result to open that email directly in Mail.app.</p>
+
+            <h2>How It Works</h2>
+            <p>openmud reads from Mail.app's local SQLite database. Your emails stay on your Mac—nothing is sent to openmud's servers. Search runs entirely on your machine.</p>
+
+            <h2>Troubleshooting</h2>
+            <p><strong>"Mail database not found"</strong> – Make sure Mail.app is installed and you've added at least one account. Open Mail and let it sync.</p>
+            <p><strong>"No emails found"</strong> – Try broader search terms.</p>
+            <p><strong>"Open in Mail" doesn't work</strong> – Ensure Mail.app is installed and try opening Mail manually first.</p>
+
+            <p><a href="/try" class="btn-primary">Back to Try</a></p>
+        </div>
+    </main>
+</body>
+</html>

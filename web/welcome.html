@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome – openmud</title>
+    <meta name="description" content="Sign up for openmud. AI for construction.">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Welcome to openmud</h1>
+                <p class="hero-sub">Sign up to get started. Choose your AI model, then download the app.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container narrow">
+                <div id="welcome-signed-out" class="settings-card">
+                    <h2 class="settings-card-title">Sign up</h2>
+                    <p class="settings-auth-hint">Create an account to use openmud. We'll send you a magic link—no password needed.</p>
+                    <form class="settings-auth-form" id="form-sign-in">
+                        <input type="email" id="auth-email" placeholder="your@email.com" required>
+                        <button type="submit" class="btn-primary">Send magic link</button>
+                    </form>
+                    <p class="settings-auth-divider"><span>or continue with</span></p>
+                    <div class="settings-auth-providers">
+                        <button type="button" class="btn-oauth btn-oauth-google" id="btn-google">
+                            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                            Sign in with Google
+                        </button>
+                        <button type="button" class="btn-oauth btn-oauth-apple" id="btn-apple">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-1.18 1.35-2.15 2.7-4.05 2.7-1.95-.01-2.78-.95-4.08-.95zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                            Sign in with Apple
+                        </button>
+                    </div>
+                    <span id="auth-status" class="settings-auth-status" hidden></span>
+                </div>
+
+                <div id="welcome-signed-in" class="settings-card" hidden>
+                    <h2 class="settings-card-title">You're signed in</h2>
+                    <p class="settings-auth-email" id="welcome-email"></p>
+                    <h3 class="settings-card-subtitle">Choose your AI model</h3>
+                    <p class="settings-auth-hint">You can change this later in the app.</p>
+                    <div class="welcome-model-grid" id="model-grid">
+                        <button type="button" class="welcome-model-btn" data-value="mud1">mud1 (Recommended)</button>
+                        <button type="button" class="welcome-model-btn" data-value="gpt-4o-mini">GPT-4o mini</button>
+                        <button type="button" class="welcome-model-btn" data-value="claude-3-haiku-20240307">Claude Haiku 3 (cheapest)</button>
+                        <button type="button" class="welcome-model-btn" data-value="claude-haiku-4-5-20251001">Claude Haiku 4.5</button>
+                        <button type="button" class="welcome-model-btn" data-value="claude-sonnet-4-6">Claude Sonnet 4.6</button>
+                    </div>
+                    <p class="welcome-cta-wrap">
+                        <button type="button" class="btn-open-app" id="btn-open-app">Open openmud</button>
+                    </p>
+                    <p class="welcome-app-link" id="open-app-status" hidden></p>
+                    <p class="welcome-app-link">
+                        <a href="/download.html" class="link">Don't have the app?</a>
+                        <span class="welcome-app-fallback"> · <a href="/try" class="link">Open in browser</a></span>
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        (function () {
+            var STORAGE_MODEL = 'mudrag_model';
+            var signedOut = document.getElementById('welcome-signed-out');
+            var signedIn = document.getElementById('welcome-signed-in');
+            var emailDisplay = document.getElementById('welcome-email');
+            var form = document.getElementById('form-sign-in');
+            var emailInput = document.getElementById('auth-email');
+            var status = document.getElementById('auth-status');
+            var btnGoogle = document.getElementById('btn-google');
+            var btnApple = document.getElementById('btn-apple');
+            var modelGrid = document.getElementById('model-grid');
+            var redirectedAfterAuth = false;
+            var nextRaw = '';
+            try {
+                nextRaw = new URLSearchParams(window.location.search || '').get('next') || '';
+            } catch (e) {
+                nextRaw = '';
+            }
+            if (!nextRaw) {
+                try {
+                    nextRaw = localStorage.getItem('mudrag_auth_next') || '';
+                } catch (e) {
+                    nextRaw = '';
+                }
+            }
+
+            function getSafeNextPath(value) {
+                if (!value || value.charAt(0) !== '/' || value.indexOf('//') === 0) return '';
+                if (/^\/welcome(?:\.html)?(?:[?#]|$)/i.test(value)) return '';
+                return value;
+            }
+            var nextPath = getSafeNextPath(nextRaw);
+
+            function maybeRedirectAfterAuth(session) {
+                if (!nextPath || redirectedAfterAuth || !(session && session.user)) return;
+                redirectedAfterAuth = true;
+                try { localStorage.removeItem('mudrag_auth_next'); } catch (e) {}
+                window.setTimeout(function () {
+                    window.location.replace(nextPath);
+                }, 150);
+            }
+
+            function showStatus(msg, isError) {
+                status.textContent = msg;
+                status.hidden = false;
+                status.className = 'settings-auth-status' + (isError ? ' settings-auth-status-error' : '');
+            }
+
+            function renderAuth(session) {
+                if (session && session.user) {
+                    signedOut.hidden = true;
+                    signedIn.hidden = false;
+                    emailDisplay.textContent = 'Signed in as ' + (session.user.email || '');
+                    maybeRedirectAfterAuth(session);
+                    var saved = localStorage.getItem(STORAGE_MODEL);
+                    modelGrid.querySelectorAll('.welcome-model-btn').forEach(function (btn) {
+                        btn.classList.toggle('selected', btn.getAttribute('data-value') === (saved || 'mud1'));
+                    });
+                } else {
+                    signedOut.hidden = false;
+                    signedIn.hidden = true;
+                }
+            }
+
+            mudragAuth.getSession().then(function (r) {
+                renderAuth(r.data && r.data.session);
+            });
+
+            if (form && emailInput && status) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var email = emailInput.value.trim();
+                    if (!email) return;
+                    status.hidden = true;
+                    mudragAuth.signInWithEmail(email).then(function (result) {
+                        if (result.error) showStatus(result.error.message || 'Sign in failed', true);
+                        else showStatus('Check your email for the magic link.', false);
+                    }).catch(function (err) {
+                        showStatus(err.message || 'Sign in failed', true);
+                    });
+                });
+            }
+
+            if (btnGoogle) {
+                btnGoogle.addEventListener('click', function () {
+                    status.hidden = true;
+                    mudragAuth.signInWithGoogle().then(function (result) {
+                        if (result.error) showStatus(result.error.message || 'Sign in failed', true);
+                    }).catch(function (err) {
+                        showStatus(err.message || 'Sign in failed', true);
+                    });
+                });
+            }
+
+            if (btnApple) {
+                btnApple.addEventListener('click', function () {
+                    status.hidden = true;
+                    mudragAuth.signInWithApple().then(function (result) {
+                        if (result.error) showStatus(result.error.message || 'Sign in failed', true);
+                    }).catch(function (err) {
+                        showStatus(err.message || 'Sign in failed', true);
+                    });
+                });
+            }
+
+            if (modelGrid) {
+                modelGrid.addEventListener('click', function (e) {
+                    var btn = e.target.closest('.welcome-model-btn');
+                    if (!btn) return;
+                    var val = btn.getAttribute('data-value');
+                    localStorage.setItem(STORAGE_MODEL, val);
+                    modelGrid.querySelectorAll('.welcome-model-btn').forEach(function (b) {
+                        b.classList.toggle('selected', b.getAttribute('data-value') === val);
+                    });
+                });
+            }
+
+            mudragAuth.onAuthStateChange(function (event, session) {
+                renderAuth(session);
+            });
+
+            var btnOpenApp = document.getElementById('btn-open-app');
+            var openAppStatus = document.getElementById('open-app-status');
+
+            function setOpenStatus(msg) {
+                if (openAppStatus) {
+                    openAppStatus.textContent = msg;
+                    openAppStatus.hidden = !msg;
+                }
+            }
+
+            if (btnOpenApp) {
+                btnOpenApp.addEventListener('click', function () {
+                    // If already inside the desktop app, just navigate
+                    if (/mudrag-desktop/i.test(navigator.userAgent || '')) {
+                        window.location.href = '/try?toolPort=3847&useDesktopApi=1';
+                        return;
+                    }
+                    // Get the current session and pass tokens via deep link so the
+                    // desktop app can sign the user in automatically.
+                    mudragAuth.getSession().then(function (r) {
+                        var session = r.data && r.data.session;
+                        var url;
+                        if (session && session.access_token && session.refresh_token) {
+                            url = 'openmud://auth?access_token=' + encodeURIComponent(session.access_token)
+                                + '&refresh_token=' + encodeURIComponent(session.refresh_token);
+                        } else {
+                            url = 'openmud://try';
+                        }
+                        window.location.href = url;
+                        setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
+                    }).catch(function () {
+                        window.location.href = 'openmud://try';
+                        setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
+                    });
+                });
+            }
+        })();
+    </script>
+    <script src="assets/js/nav.js"></script>
+    <style>
+        .welcome-model-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1rem 0; }
+        .welcome-model-btn {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--border, #444);
+            border-radius: 6px;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .welcome-model-btn:hover { border-color: var(--accent, #666); }
+        .welcome-model-btn.selected { border-color: var(--accent, #888); background: rgba(255,255,255,0.05); }
+        .settings-card-subtitle { font-size: 1rem; margin: 1.5rem 0 0.25rem; }
+        .welcome-cta-wrap { margin: 1.5rem 0 0.625rem; }
+        .btn-open-app {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: var(--accent, #e8d5b7);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .btn-open-app:hover { opacity: 0.85; }
+        .welcome-app-link { margin-top: 0.625rem; font-size: 0.9rem; opacity: 0.8; }
+        .welcome-app-fallback { font-size: 0.9em; }
+    </style>
+</body>
+</html>

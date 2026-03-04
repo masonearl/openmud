@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/meta/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/meta/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/meta/apple-touch-icon.png">
+    <link rel="manifest" href="/assets/meta/site.webmanifest">
+    <meta name="theme-color" content="#15120f">
+    
+    
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Resources – openmud</title>
+    <meta name="description" content="Free construction resources: OSHA trenching and excavation standards, 811 Blue Stakes guide, best construction YouTube channels, AI in construction news, and open-source tool directory.">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/css/resources.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800" rel="stylesheet">
+    <!-- Vercel Analytics -->
+    <script defer src="/_vercel/insights/script.js"></script>
+    <!-- Vercel Speed Insights -->
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</head>
+<body>
+    <nav class="lp-nav">
+        <details class="lp-brand-menu">
+            <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="lp-brand-menu-panel">
+                <a href="/">Homepage</a>
+                <a href="/try">AI Chat</a>
+                <a href="/about.html">About</a>
+                <a href="/download.html">Download</a>
+                <a href="/settings.html">Settings</a>
+            </div>
+        </details>
+    </nav>
+
+    <!-- Mobile resources navigator (hidden on desktop) -->
+    <div class="res-mobile-nav">
+        <select class="res-mobile-select" onchange="if(this.value) showSection(this.value)">
+            <optgroup label="Safety &amp; Compliance">
+                <option value="osha-excavation">OSHA Trenching &amp; Excavation</option>
+                <option value="osha-ppe">OSHA PPE Requirements</option>
+                <option value="bluestakes">811 / Blue Stakes Guide</option>
+                <option value="confined-space">Confined Space Entry</option>
+            </optgroup>
+            <optgroup label="Industry Knowledge">
+                <option value="youtube">YouTube Channels</option>
+                <option value="news">News &amp; AI Updates</option>
+                <option value="podcasts">Podcasts</option>
+                <option value="standards">Standards &amp; Codes</option>
+            </optgroup>
+            <optgroup label="Open Source">
+                <option value="opensource">Open-Source Tools</option>
+                <option value="datasets">Public Datasets</option>
+            </optgroup>
+            <optgroup label="AI in Construction">
+                <option value="ai-guide">What AI Is &amp; How It Works</option>
+                <option value="ai-workflows">Workflows &amp; Prompt Templates</option>
+                <option value="ai-autonomy">Autonomy, Equipment &amp; Drones</option>
+            </optgroup>
+            <optgroup label="Industry Software">
+                <option value="software-design">Design &amp; CAD</option>
+                <option value="software-estimating">Estimating &amp; Takeoff</option>
+                <option value="software-field">Field &amp; Project Management</option>
+                <option value="software-architecture">Software Architecture Deep Dive</option>
+                <option value="software-safety">Safety Training</option>
+                <option value="software-training">Training &amp; Community</option>
+            </optgroup>
+            <optgroup label="Software Dev Basics">
+                <option value="dev-concepts">Core Concepts</option>
+                <option value="dev-stack">Frontend / Backend / DB</option>
+                <option value="dev-apis">APIs, SDKs &amp; Webhooks</option>
+                <option value="dev-contech">Dev Concepts for Contech</option>
+            </optgroup>
+            <optgroup label="Reference">
+                <option value="soil-types">Soil Classification</option>
+                <option value="color-codes">Utility Color Codes</option>
+                <option value="pipe-specs">Pipe Specifications</option>
+                <option value="glossary">Construction Glossary</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <div class="res-layout">
+        <!-- Sidebar -->
+        <aside class="res-sidebar">
+            <div class="res-sidebar-inner">
+                <details class="res-sidebar-group">
+                    <summary class="res-sidebar-label">Safety &amp; Compliance <span class="res-sidebar-caret">▾</span></summary>
+                    <div class="res-sidebar-links">
+                        <a href="#osha-excavation" class="res-nav-link active" data-section="osha-excavation">OSHA Trenching & Excavation</a>
+                        <a href="#osha-ppe" class="res-nav-link" data-section="osha-ppe">OSHA PPE Requirements</a>
+                        <a href="#bluestakes" class="res-nav-link" data-section="bluestakes">811 / Blue Stakes Guide</a>
+                        <a href="#confined-space" class="res-nav-link" data-section="confined-space">Confined Space Entry</a>
+                    </div>
+                </details>
+
+                <details class="res-sidebar-group">
+                    <summary class="res-sidebar-label">Industry Knowledge <span class="res-sidebar-caret">▾</span></summary>
+                    <div class="res-sidebar-links">
+                        <a href="#youtube" class="res-nav-link" data-section="youtube">YouTube Channels</a>
+                        <a href="#news" class="res-nav-link" data-section="news">News & AI Updates</a>
+                        <a href="#podcasts" class="res-nav-link" data-section="podcasts">Podcasts</a>
+                        <a href="#standards" class="res-nav-link" data-section="standards">Standards & Codes</a>
+                    </div>
+                </details>
+
+                <details class="res-sidebar-group">
+                    <summary class="res-sidebar-label">Open Source <span class="res-sidebar-caret">▾</span></summary>
+                    <div class="res-sidebar-links">
+                        <a href="#opensource" class="res-nav-link" data-section="opensource">Open-Source Tools</a>
+                        <a href="#datasets" class="res-nav-link" data-section="datasets">Public Datasets</a>
+                    </div>
+                </details>
+
+                <details class="res-sidebar-group">
+                    <summary class="res-sidebar-label">AI in Construction <span class="res-sidebar-caret">▾</span></summary>
+                    <div class="res-sidebar-links">
+                        <a href="#ai-guide" class="res-nav-link" data-section="ai-guide">What AI Is &amp; How It Works</a>
+                        <a href="#ai-workflows" class="res-nav-link" data-section="ai-workflows">Workflows &amp; Prompt Templates</a>
+                        <a href="#ai-autonomy" class="res-nav-link" data-section="ai-autonomy">Autonomy, Equipment &amp; Drones</a>
+                    </div>
+                </details>
+
+                <details class="res-sidebar-group">
+                    <summary class="res-sidebar-label">Industry Software <span class="res-sidebar-caret">▾</span></summary>
+                    <div class="res-sidebar-links">
+                        <a href="#software-design" class="res-nav-link" data-section="software-design">Design &amp; CAD</a>
+                        <a href="#software-estimating" class="res-nav-link" data-section="software-estimating">Estimating &amp; Takeoff</a>
+                        <a href="#software-field" class="res-nav-link" data-section="software-field">Field &amp; Project Management</a>
+                        <a href="#software-architecture" class="res-nav-link" data-section="software-architecture">Software Architecture Deep Dive</a>
+                        <a href="#software-safety" class="res-nav-link" data-section="software-safety">Safety Training</a>
+                        <a href="#software-training" class="res-nav-link" data-section="software-training">Training &amp; Community</a>
+                    </div>
+                </details>
+
+                <details class="res-sidebar-group">
+                    <summary class="res-sidebar-label">Software Dev Basics <span class="res-sidebar-caret">▾</span></summary>
+                    <div class="res-sidebar-links">
+                        <a href="#dev-concepts" class="res-nav-link" data-section="dev-concepts">Core Concepts</a>
+                        <a href="#dev-stack" class="res-nav-link" data-section="dev-stack">Frontend / Backend / DB</a>
+                        <a href="#dev-apis" class="res-nav-link" data-section="dev-apis">APIs, SDKs &amp; Webhooks</a>
+                        <a href="#dev-contech" class="res-nav-link" data-section="dev-contech">Dev Concepts for Contech</a>
+                    </div>
+                </details>
+
+                <details class="res-sidebar-group">
+                    <summary class="res-sidebar-label">Reference <span class="res-sidebar-caret">▾</span></summary>
+                    <div class="res-sidebar-links">
+                        <a href="#soil-types" class="res-nav-link" data-section="soil-types">Soil Classification</a>
+                        <a href="#color-codes" class="res-nav-link" data-section="color-codes">Utility Color Codes</a>
+                        <a href="#pipe-specs" class="res-nav-link" data-section="pipe-specs">Pipe Specifications</a>
+                        <a href="#glossary" class="res-nav-link" data-section="glossary">Construction Glossary</a>
+                    </div>
+                </details>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="res-main">
+
+            <!-- OSHA Excavation -->
+            <section class="res-section active" id="section-osha-excavation">
+                <h1 class="res-title">OSHA Trenching & Excavation Standards</h1>
+                <p class="res-desc">29 CFR 1926 Subpart P — the federal standard for all open excavations. Public domain. Applies to every trench over 5 feet deep (and shallower trenches if hazardous conditions exist).</p>
+
+                <div class="res-callout res-callout-warn">
+                    <strong>Legal requirement:</strong> Any excavation deeper than 5 feet requires a protective system (sloping, benching, shoring, or shielding). Any excavation deeper than 20 feet requires a PE-designed system. This is federal law, not a suggestion.
+                </div>
+
+                <h2 class="res-h2">Soil Classification (OSHA Appendix A)</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Soil Type</th><th>Description</th><th>Test Method</th><th>Unconfined Strength</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Type A</strong></td><td>Cohesive, stable. Stiff clay, hardpan, caliche. No fissuring, no prior disturbance, no water seepage.</td><td>Thumb penetration: &lt;0.25"; Pocket penetrometer: ≥1.5 tsf</td><td>≥ 1.5 tsf</td></tr>
+                            <tr><td><strong>Type B</strong></td><td>Cohesive or granular. Angular gravel, silty clay, previously disturbed Type A, fissured soils, dry rock not hard enough for Type A.</td><td>Thumb penetration: 0.25"–1"; Penetrometer: 0.5–1.5 tsf</td><td>0.5 – 1.5 tsf</td></tr>
+                            <tr><td><strong>Type C</strong></td><td>Cohesive &lt;0.5 tsf, granular (sand, gravel), submerged soil, soil subject to water, layered systems sloping into excavation.</td><td>Thumb penetration: &gt;1"; crumbles easily. Water present.</td><td>&lt; 0.5 tsf</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Required Sloping Angles (OSHA Appendix B)</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Soil Type</th><th>Max Slope</th><th>H:V Ratio</th><th>Setback per foot of depth</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Type A</strong></td><td>53°</td><td>3/4 : 1</td><td>0.75 ft each side</td></tr>
+                            <tr><td><strong>Type B</strong></td><td>45°</td><td>1 : 1</td><td>1.0 ft each side</td></tr>
+                            <tr><td><strong>Type C</strong></td><td>34°</td><td>1.5 : 1</td><td>1.5 ft each side</td></tr>
+                            <tr><td><strong>Stable Rock</strong></td><td>90°</td><td>Vertical</td><td>0</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Competent Person Daily Checklist</h2>
+                <div class="res-checklist">
+                    <div class="checklist-item">— Soil type classified before workers enter</div>
+                    <div class="checklist-item">— Utilities located and protected (811 called ≥ 3 days prior)</div>
+                    <div class="checklist-item">— Surface encumbrances removed or supported</div>
+                    <div class="checklist-item">— Spoil placed minimum 2 ft from trench edge</div>
+                    <div class="checklist-item">— Protective system (slope / bench / shield / shore) in place</div>
+                    <div class="checklist-item">— Access and egress within 25 LF of all workers</div>
+                    <div class="checklist-item">— Water accumulation evaluated — dewatering if needed</div>
+                    <div class="checklist-item">— Atmospheric testing if depth &gt;4 ft (confined space risk)</div>
+                    <div class="checklist-item">— Adjacent structures evaluated for stability</div>
+                    <div class="checklist-item">— Inspection after rain, freeze-thaw, or any hazard change</div>
+                </div>
+
+                <h2 class="res-h2">Trench Shield (Box) Requirements</h2>
+                <ul class="res-list">
+                    <li>Permitted in all soil types as an alternative to sloping or shoring</li>
+                    <li>Must extend ≥ 18 inches above top of unstable soil, or within 2 ft of surface in stable soil</li>
+                    <li>Workers must not be in the shield during movement or repositioning</li>
+                    <li>Must be designed by a PE or meet manufacturer tabulated data</li>
+                    <li>Spoil minimum 2 ft from trench edge regardless of shield use</li>
+                    <li>Maximum 2 ft of unprotected trench in front of and behind the shield</li>
+                </ul>
+
+                <h2 class="res-h2">Key Regulations</h2>
+                <div class="res-links">
+                    <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.650" target="_blank" rel="noopener" class="res-ext-link">1926.650 — Scope and definitions ↗</a>
+                    <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.651" target="_blank" rel="noopener" class="res-ext-link">1926.651 — Specific excavation requirements ↗</a>
+                    <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.652" target="_blank" rel="noopener" class="res-ext-link">1926.652 — Requirements for protective systems ↗</a>
+                    <a href="https://www.osha.gov/etools/construction/trenching" target="_blank" rel="noopener" class="res-ext-link">OSHA Trenching eTool ↗</a>
+                    <a href="https://www.osha.gov/sites/default/files/publications/osha2226.pdf" target="_blank" rel="noopener" class="res-ext-link">OSHA 2226 — Trenching and Excavation Safety (Public Domain PDF) ↗</a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Use our OSHA calculator →</strong> The <a href="/calculators.html#trench-safety" class="link">Trench Safety Calculator</a> walks through protective system requirements by soil type, depth, and method.
+                </div>
+            </section>
+
+            <!-- OSHA PPE -->
+            <section class="res-section" id="section-osha-ppe">
+                <h1 class="res-title">OSHA PPE Requirements — Construction</h1>
+                <p class="res-desc">29 CFR 1926 Subpart E — Personal Protective Equipment requirements for construction sites. Applies to all contractors on federal projects and most state equivalents.</p>
+
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>PPE Item</th><th>When Required</th><th>Standard</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>Hard hat</td><td>All areas where head injury risk from falling objects, bumping, electrical</td><td>1926.100 / ANSI Z89.1</td><td>Class E for electrical work. Replace after impact.</td></tr>
+                            <tr><td>Safety glasses / goggles</td><td>Grinding, chipping, drilling, concrete work, chemical exposure</td><td>1926.102 / ANSI Z87.1</td><td>Side shields required for flying debris</td></tr>
+                            <tr><td>High-visibility vest</td><td>Work near moving vehicles or equipment (MUTCD / ANSI 107)</td><td>MUTCD / 23 CFR 634</td><td>Class 2 min near traffic; Class 3 on highway right-of-way</td></tr>
+                            <tr><td>Steel-toe boots</td><td>Heavy equipment operation, material handling</td><td>1926.96 / ASTM F2413</td><td>EH-rated for electrical hazards</td></tr>
+                            <tr><td>Gloves</td><td>Handling sharp materials, chemicals, concrete, hot surfaces</td><td>1926.28 (general duty)</td><td>Cut-resistant for pipe handling; chemical-resistant for solvents</td></tr>
+                            <tr><td>Hearing protection</td><td>Noise ≥ 85 dBA TWA (jackhammers, compactors, excavators)</td><td>1926.52 / 1910.95</td><td>Earplugs: ~33 NRR. Earmuffs: ~25–30 NRR</td></tr>
+                            <tr><td>Fall protection</td><td>Leading edges, excavations, elevated platforms ≥ 6 ft</td><td>1926.502</td><td>Harness + lanyard OR guardrail + safety net system</td></tr>
+                            <tr><td>Respiratory protection</td><td>Silica dust, confined spaces, spray-applied coatings</td><td>1926.1153 / 1910.134</td><td>Silica PEL: 50 μg/m³ TWA. N95 minimum for silica.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-callout res-callout-warn">
+                    <strong>Silica Rule (1926.1153):</strong> Effective 2017. Employers must have a written exposure control plan, limit worker exposure to 50 μg/m³ (action level: 25 μg/m³), and provide medical surveillance. Applies to grinding, cutting, or drilling concrete, stone, or mortar.
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.osha.gov/personal-protective-equipment" target="_blank" rel="noopener" class="res-ext-link">OSHA PPE Overview ↗</a>
+                    <a href="https://www.osha.gov/silica-crystalline" target="_blank" rel="noopener" class="res-ext-link">OSHA Silica Standard ↗</a>
+                </div>
+            </section>
+
+            <!-- Blue Stakes -->
+            <section class="res-section" id="section-bluestakes">
+                <h1 class="res-title">811 / Blue Stakes — Call Before You Dig</h1>
+                <p class="res-desc">811 is the national "call before you dig" number. Blue Stakes of Utah administers the program for Utah. Required by law before any excavation. Not optional.</p>
+
+                <div class="res-callout res-callout-warn">
+                    <strong>Utah law (Utah Code 54-8a):</strong> Every excavator must notify Blue Stakes at least 3 business days (72 hours) before digging. Failure to notify can result in fines and full liability for damage to underground facilities.
+                </div>
+
+                <h2 class="res-h2">The 5 Steps to Safer Digging</h2>
+                <div class="res-steps">
+                    <div class="res-step"><span class="step-num">1</span><div><strong>Call or click 811</strong> at least 3 business days before digging. Provide exact location, type of work, and dig depth. Online: <a href="https://www.bluestakes.org" target="_blank" rel="noopener" class="link">bluestakes.org</a></div></div>
+                    <div class="res-step"><span class="step-num">2</span><div><strong>Wait the full time.</strong> Facility operators have 3 business days to locate and mark utilities. Don't dig early — even if you think you know where lines are.</div></div>
+                    <div class="res-step"><span class="step-num">3</span><div><strong>Confirm all markings.</strong> Check Electronic Positive Response (EPR) to see which utilities responded. If a utility hasn't responded, submit a No Response Notice before digging.</div></div>
+                    <div class="res-step"><span class="step-num">4</span><div><strong>Respect the marks.</strong> Protect markings throughout excavation. Re-notify if marks are destroyed before work is complete or if work extends beyond 20 days.</div></div>
+                    <div class="res-step"><span class="step-num">5</span><div><strong>Hand dig within the tolerance zone.</strong> 24 inches on either side of any marking. No power equipment in the tolerance zone until utilities are hand-exposed and confirmed.</div></div>
+                </div>
+
+                <h2 class="res-h2">Utility Marking Color Codes (APWA Standard)</h2>
+                <div class="color-code-grid">
+                    <div class="color-chip" style="background:#ff0000"><span>Red</span><span>Electric power, lighting, cables, conduit</span></div>
+                    <div class="color-chip" style="background:#ffa500"><span>Orange</span><span>Communication, alarm, fiber optic, signal lines</span></div>
+                    <div class="color-chip" style="background:#ffff00;color:#222"><span>Yellow</span><span>Gas, oil, steam, petroleum, gaseous materials</span></div>
+                    <div class="color-chip" style="background:#00aa00"><span>Green</span><span>Sewer, storm drain, drain tile</span></div>
+                    <div class="color-chip" style="background:#0055ff"><span>Blue</span><span>Potable water</span></div>
+                    <div class="color-chip" style="background:#9900cc"><span>Purple</span><span>Reclaimed water, irrigation, slurry lines</span></div>
+                    <div class="color-chip" style="background:#ff69b4"><span>Pink</span><span>Temporary survey markings</span></div>
+                    <div class="color-chip" style="background:#ffffff;color:#222;border:1px solid #444"><span>White</span><span>Proposed excavation area (your markings)</span></div>
+                </div>
+
+                <h2 class="res-h2">What Blue Stakes Does NOT Cover</h2>
+                <ul class="res-list">
+                    <li>Private service lines (from meter to building) — these are the property owner's responsibility</li>
+                    <li>Abandoned lines — may still be present and energized</li>
+                    <li>Non-member utilities — some small utilities may not be registered</li>
+                    <li>Accuracy within the tolerance zone — 24" either side of marks is your responsibility to hand dig</li>
+                </ul>
+
+                <div class="res-links">
+                    <a href="https://www.bluestakes.org" target="_blank" rel="noopener" class="res-ext-link">Blue Stakes of Utah — bluestakes.org ↗</a>
+                    <a href="https://www.bluestakes.org/excavators-guide/" target="_blank" rel="noopener" class="res-ext-link">Blue Stakes Excavator's Guide ↗</a>
+                    <a href="https://www.bluestakes.org/pdfs/ExcavatorsGuide.pdf" target="_blank" rel="noopener" class="res-ext-link">Excavator's Guide PDF ↗</a>
+                    <a href="https://811.com" target="_blank" rel="noopener" class="res-ext-link">National 811 Center ↗</a>
+                    <a href="https://commongroundalliance.com/best-practices" target="_blank" rel="noopener" class="res-ext-link">CGA Best Practices ↗</a>
+                </div>
+            </section>
+
+            <!-- Confined Space -->
+            <section class="res-section" id="section-confined-space">
+                <h1 class="res-title">Confined Space Entry — Construction</h1>
+                <p class="res-desc">29 CFR 1926.1200–1213 — Confined spaces in construction. Covers manholes, vaults, tanks, excavations deeper than 4 ft with limited access. One of the most dangerous activities in underground utility work.</p>
+
+                <div class="res-callout res-callout-warn">
+                    <strong>Fatality risk:</strong> More than 60% of confined space fatalities are would-be rescuers. Never enter a confined space to rescue a downed worker without proper equipment and training. Call 911 first.
+                </div>
+
+                <h2 class="res-h2">Permit-Required Confined Space (PRCS) Criteria</h2>
+                <p class="res-text">A space is permit-required if it has one or more of:</p>
+                <ul class="res-list">
+                    <li>Hazardous atmosphere (or potential for one) — oxygen-deficient (&lt;19.5%), oxygen-enriched (&gt;23.5%), flammable &gt;10% LEL, toxic at or above PEL</li>
+                    <li>Material that could engulf an entrant (water, soil, grain)</li>
+                    <li>Internal configuration that could trap or asphyxiate</li>
+                    <li>Any other recognized serious safety or health hazard</li>
+                </ul>
+
+                <h2 class="res-h2">Atmospheric Testing Order (Always in this sequence)</h2>
+                <div class="res-steps">
+                    <div class="res-step"><span class="step-num">1</span><div><strong>Oxygen content</strong> — must be 19.5%–23.5% before entry</div></div>
+                    <div class="res-step"><span class="step-num">2</span><div><strong>Flammable gases/vapors</strong> — must be &lt;10% LEL</div></div>
+                    <div class="res-step"><span class="step-num">3</span><div><strong>Toxic contaminants</strong> — CO, H₂S, etc. below PEL (CO &lt;25 ppm, H₂S &lt;1 ppm for 8-hr TWA)</div></div>
+                </div>
+
+                <h2 class="res-h2">Common Confined Spaces in Underground Utility Work</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Space</th><th>Primary Hazards</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>Manholes</td><td>Oxygen deficiency, H₂S, methane, engulfment</td><td>Always treat as PRCS until tested. Sewer gas is heavier than air — pools at bottom.</td></tr>
+                            <tr><td>Valve vaults</td><td>Oxygen deficiency, gas leaks</td><td>Test all corners. Purge if O₂ low.</td></tr>
+                            <tr><td>Trenches &gt;4 ft</td><td>Cave-in, oxygen deficiency (near gas lines)</td><td>Atmospheric monitoring required if risk of gas infiltration.</td></tr>
+                            <tr><td>Wet wells / lift stations</td><td>H₂S, methane, oxygen deficiency, electrocution</td><td>Highest H₂S risk. Immediately dangerous to life at 100 ppm.</td></tr>
+                            <tr><td>Storage tanks</td><td>Flammable vapors, toxic residue, O₂ deficiency</td><td>Hot work permit required. Inert atmosphere possible.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.osha.gov/confined-spaces/construction" target="_blank" rel="noopener" class="res-ext-link">OSHA Confined Spaces in Construction ↗</a>
+                    <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1200" target="_blank" rel="noopener" class="res-ext-link">29 CFR 1926.1200 ↗</a>
+                </div>
+            </section>
+
+            <!-- YouTube -->
+            <section class="res-section" id="section-youtube">
+                <h1 class="res-title">Best Construction YouTube Channels</h1>
+                <p class="res-desc">The best free education in construction is on YouTube. These are the channels worth following — field knowledge, equipment, business, and industry news.</p>
+
+                <h2 class="res-h2">Heavy Civil & Underground Utility</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.youtube.com/@HCAchannel" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Heavy Construction Academy</div>
+                        <div class="res-card-desc">Equipment operation, site management, and heavy civil fundamentals. One of the most educational channels in the space. Covers excavators, graders, scrapers, and more.</div>
+                        <div class="res-card-tag">Equipment · Operations</div>
+                    </a>
+                    <a href="https://www.youtube.com/channel/UCfTxKG43eo2gSqObNLjW_Ng" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Premier Underground Construction</div>
+                        <div class="res-card-desc">Real underground utility construction work — pipe installation, trench work, water and sewer. Authentic field footage from an active contractor.</div>
+                        <div class="res-card-tag">Underground · Pipe · Field work</div>
+                    </a>
+                    <a href="https://www.youtube.com/@StanleyGenadek" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Stanley "Dirt Monkey" Genadek</div>
+                        <div class="res-card-desc">Excavation, landscaping, and field operations from a hands-on contractor. Great for understanding production rates, equipment selection, and running a crew.</div>
+                        <div class="res-card-tag">Excavation · Equipment · Business</div>
+                    </a>
+                    <a href="https://www.youtube.com/user/TrimbleConstruction" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Trimble Civil Construction</div>
+                        <div class="res-card-desc">Machine control, GPS grade technology, and field layout for heavy civil. If you're using or evaluating machine control systems, start here.</div>
+                        <div class="res-card-tag">Technology · Machine control · Grade</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">Business & Leadership</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.youtube.com/@BuildWitt" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BuildWitt</div>
+                        <div class="res-card-desc">Aaron Witt's channel on workforce development, culture, and the future of heavy civil. Excellent for PMs, supers, and anyone building a construction company.</div>
+                        <div class="res-card-tag">Leadership · Culture · Workforce</div>
+                    </a>
+                    <a href="https://www.youtube.com/@constructionleadershippodcast" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Leading Edge</div>
+                        <div class="res-card-desc">Business systems, project management, and leadership for construction company owners. Practical and no-fluff.</div>
+                        <div class="res-card-tag">PM · Business · Systems</div>
+                    </a>
+                    <a href="https://www.youtube.com/@MattRisinger" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Matt Risinger — Build Show</div>
+                        <div class="res-card-desc">Deep dives on building science, materials, and methods. More residential/commercial but excellent for anyone who values understanding WHY things are built the way they are.</div>
+                        <div class="res-card-tag">Building science · Materials · Methods</div>
+                    </a>
+                    <a href="https://www.youtube.com/@theconstructer" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">The Constructer</div>
+                        <div class="res-card-desc">Civil engineering concepts, structural design, and construction methods explained clearly. Good for field engineers and PMs wanting to understand the engineering behind the work.</div>
+                        <div class="res-card-tag">Civil engineering · Structures · Education</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">Equipment & Field Operations</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.youtube.com/@CaterpillarInc" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Caterpillar</div>
+                        <div class="res-card-desc">Equipment operation, maintenance, and machine innovation straight from Cat. Good for operator training reference and keeping up with new machine technology.</div>
+                        <div class="res-card-tag">Equipment · Maintenance · Technology</div>
+                    </a>
+                    <a href="https://www.youtube.com/@komatsu_official" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Komatsu</div>
+                        <div class="res-card-desc">Smart Construction, machine control, and equipment operation. Particularly strong on autonomous and semi-autonomous equipment — the future of heavy civil.</div>
+                        <div class="res-card-tag">Equipment · Autonomous · Smart construction</div>
+                    </a>
+                    <a href="https://www.youtube.com/@caseconstructionequipment" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Case Construction Equipment</div>
+                        <div class="res-card-desc">Backhoe, excavator, and compact equipment operation and maintenance. Useful for training operators and understanding equipment specs.</div>
+                        <div class="res-card-tag">Equipment · Operation · Training</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Missing a channel?</strong> <a href="https://github.com/masonearl/openmud/issues/new?template=feature_request.md&title=%5BFEATURE%5D+Add+YouTube+channel:+..." target="_blank" rel="noopener" class="link">Open a GitHub issue</a> and suggest it. We want this list to be community-maintained.
+                </div>
+            </section>
+
+            <!-- News -->
+            <section class="res-section" id="section-news">
+                <h1 class="res-title">News, AI in Construction & Industry Updates</h1>
+                <p class="res-desc">Where to stay current on what's happening in construction and how AI is changing it. No paywalls where possible.</p>
+
+                <h2 class="res-h2">Daily / Weekly News</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.constructiondive.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Dive</div>
+                        <div class="res-card-desc">The best free daily construction news. Covers industry, technology, labor, policy, and major project awards. Free newsletter — subscribe and actually read it.</div>
+                        <div class="res-card-tag">Daily news · Free · Industry</div>
+                    </a>
+                    <a href="https://www.enr.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Engineering News-Record (ENR)</div>
+                        <div class="res-card-desc">The industry paper of record. ENR Top 400, Top 100 Design Firms, regional lists. Some content behind paywall but headlines and rankings are accessible.</div>
+                        <div class="res-card-tag">Industry rankings · Paywalled · Authoritative</div>
+                    </a>
+                    <a href="https://www.constructionexec.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Executive</div>
+                        <div class="res-card-desc">Business-focused construction news — finance, risk, technology, workforce. Aimed at owners and executives but useful for anyone wanting to understand the business side.</div>
+                        <div class="res-card-tag">Business · Finance · Leadership</div>
+                    </a>
+                    <a href="https://www.constructionbusinessowner.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Business Owner</div>
+                        <div class="res-card-desc">Field operations, estimating, project management, and running a construction company. Practical articles for contractors at all levels.</div>
+                        <div class="res-card-tag">Operations · Estimating · Business</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">AI in Construction</h2>
+                <div class="res-card-grid">
+                    <a href="https://www.constructionindustryai.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Industry AI</div>
+                        <div class="res-card-desc">The best dedicated source for AI in construction. Monthly roundups, tool reviews, and guides on how contractors are actually using AI. Some content is paid but free tier is solid.</div>
+                        <div class="res-card-tag">AI · Contech · Tools</div>
+                    </a>
+                    <a href="https://www.constructiondive.com/topic/technology/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Dive — Technology</div>
+                        <div class="res-card-desc">The tech section of Construction Dive covers AI, robotics, drones, BIM, and software. Heavy coverage in 2025 — best free option for AI-in-construction news.</div>
+                        <div class="res-card-tag">AI · Robotics · BIM · Free</div>
+                    </a>
+                    <a href="https://openmud.ai" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">openmud ← you're here</div>
+                        <div class="res-card-desc">Open-source AI tools for heavy civil. The only free, open-source construction AI project built by contractors for contractors. Contribute, fork, use it.</div>
+                        <div class="res-card-tag">Open source · Free · Heavy civil</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">Podcasts</h2>
+                <div class="res-card-grid">
+                    <a href="https://podcasts.apple.com/us/podcast/the-civil-engineering-podcast/id1159895675" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">The Civil Engineering Podcast</div>
+                        <div class="res-card-desc">Anthony Fasano interviews civil engineers and contractors on career, projects, and industry trends. Good for field engineers wanting to grow.</div>
+                        <div class="res-card-tag">Civil engineering · Career · Industry</div>
+                    </a>
+                    <a href="https://www.buildwitt.com/podcast" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">The Dirt World Podcast (BuildWitt)</div>
+                        <div class="res-card-desc">Aaron Witt interviews contractors, equipment operators, and industry leaders. One of the best pods for understanding the culture and future of heavy civil.</div>
+                        <div class="res-card-tag">Culture · Leadership · Heavy civil</div>
+                    </a>
+                    <a href="https://constructionleadingedge.com/podcast/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Leading Edge Podcast</div>
+                        <div class="res-card-desc">Systems, project management, and business operations for construction companies. Matt Verderamo interviews contractors building better companies.</div>
+                        <div class="res-card-tag">Business · Systems · PM</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Podcasts (redirect to news) -->
+            <section class="res-section" id="section-podcasts">
+                <h1 class="res-title">Podcasts</h1>
+                <p class="res-desc">The best podcasts for heavy civil, construction business, and industry news. See the full list in the <a href="#news" class="link" onclick="showSection('news')">News & AI Updates</a> section.</p>
+            </section>
+
+            <!-- Standards -->
+            <section class="res-section" id="section-standards">
+                <h1 class="res-title">Standards & Codes Reference</h1>
+                <p class="res-desc">Key standards for underground utility and heavy civil construction. Know which ones apply to your work.</p>
+
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Standard</th><th>What it covers</th><th>Who publishes</th><th>Applies to</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>29 CFR 1926 Subpart P</strong></td><td>Excavation and trenching safety</td><td>OSHA</td><td>All construction excavations</td></tr>
+                            <tr><td><strong>29 CFR 1926 Subpart E</strong></td><td>Personal Protective Equipment</td><td>OSHA</td><td>All construction workers</td></tr>
+                            <tr><td><strong>29 CFR 1926.1200</strong></td><td>Confined spaces in construction</td><td>OSHA</td><td>Manholes, vaults, tanks</td></tr>
+                            <tr><td><strong>AWWA C900</strong></td><td>PVC pressure pipe for water distribution</td><td>AWWA</td><td>Waterline, 4"–60"</td></tr>
+                            <tr><td><strong>AWWA C151</strong></td><td>Ductile iron pipe specifications</td><td>AWWA</td><td>Waterline, DIP</td></tr>
+                            <tr><td><strong>AWWA C200</strong></td><td>Steel water pipe specifications</td><td>AWWA</td><td>Large diameter steel pipe</td></tr>
+                            <tr><td><strong>ASTM D3034</strong></td><td>PVC sewer pipe (SDR 35)</td><td>ASTM</td><td>Gravity sewer, storm</td></tr>
+                            <tr><td><strong>ASTM D3035</strong></td><td>HDPE pipe for pressure applications</td><td>ASTM</td><td>Force mains, directional drill</td></tr>
+                            <tr><td><strong>ASTM C76</strong></td><td>Reinforced concrete pipe</td><td>ASTM</td><td>Storm drain, culverts</td></tr>
+                            <tr><td><strong>ASCE MOP 36</strong></td><td>Design and construction of sanitary sewers</td><td>ASCE</td><td>Sewer system design</td></tr>
+                            <tr><td><strong>MUTCD</strong></td><td>Manual on Uniform Traffic Control Devices</td><td>FHWA</td><td>All work zone traffic control</td></tr>
+                            <tr><td><strong>APWA Color Code</strong></td><td>Underground utility marking colors</td><td>APWA</td><td>All utility locates</td></tr>
+                            <tr><td><strong>CGA Best Practices</strong></td><td>Damage prevention for underground utilities</td><td>Common Ground Alliance</td><td>All excavators</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.osha.gov/laws-regs" target="_blank" rel="noopener" class="res-ext-link">OSHA Standards ↗</a>
+                    <a href="https://www.awwa.org/Standards-Research-Technology/Standards" target="_blank" rel="noopener" class="res-ext-link">AWWA Standards ↗</a>
+                    <a href="https://www.astm.org" target="_blank" rel="noopener" class="res-ext-link">ASTM International ↗</a>
+                    <a href="https://mutcd.fhwa.dot.gov" target="_blank" rel="noopener" class="res-ext-link">MUTCD (Free Online) ↗</a>
+                    <a href="https://commongroundalliance.com/best-practices" target="_blank" rel="noopener" class="res-ext-link">CGA Best Practices ↗</a>
+                </div>
+            </section>
+
+            <!-- Open Source -->
+            <section class="res-section" id="section-opensource">
+                <h1 class="res-title">Open-Source Construction Tools</h1>
+                <p class="res-desc">A curated directory of open-source tools for construction, civil engineering, and estimating. All free to use, fork, and contribute to.</p>
+
+                <h2 class="res-h2">Apps built for the field</h2>
+                <div class="res-card-grid">
+                    <a href="https://apps.apple.com/us/app/swift-stakes-blue-stakes-utah/id6753661160" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Swift Stakes — Blue Stakes Automation</div>
+                        <div class="res-card-desc">Automates 811 Blue Stakes ticket submission for Utah and surrounding states. Pull job info, generate the ticket, submit — without manually filling the state portal. Built for utility contractors who call in multiple locates a day.</div>
+                        <div class="res-card-tag">iOS · 811 · Bluestakes · Utah · Automation</div>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/construction-takeoff/id6751007895?mt=12" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Takeoff</div>
+                        <div class="res-card-desc">PDF editor and markup tool for construction plan takeoffs on Mac. Measure linear footage, area, and counts directly on plan sheets. Built for estimators who work from digital plan sets.</div>
+                        <div class="res-card-tag">macOS · PDF · Takeoff · Estimating · Plans</div>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/construction-docs/id6753770840?mt=12" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Docs</div>
+                        <div class="res-card-desc">Estimates and bid documents on Mac. Generate formatted proposals, track project costs, and produce professional bid packages without a subscription-based platform.</div>
+                        <div class="res-card-tag">macOS · Estimates · Bid docs · Proposals</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">Open source</h2>
+                <div class="res-card-grid">
+                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">openmud ⭐</div>
+                        <div class="res-card-desc">AI chat, 18 calculators, Python tools for estimating, hydraulics, trench takeoff, OSHA safety, bid math, and unit conversion. MIT license. This is the project you're on.</div>
+                        <div class="res-card-tag">Python · JavaScript · MIT · Heavy civil</div>
+                    </a>
+                    <a href="https://github.com/xvanov/truecost" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">TrueCost</div>
+                        <div class="res-card-desc">AI-powered construction estimation engine using 7 specialized agents to analyze CAD plans and generate risk-adjusted cost estimates with Monte Carlo simulation.</div>
+                        <div class="res-card-tag">Python · AI · Estimation · CAD analysis</div>
+                    </a>
+                    <a href="https://github.com/madil4/awatif" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Awatif</div>
+                        <div class="res-card-desc">Web-based parametric structural engineering platform with FEM analysis and meshing. MIT license. Good for structural design calculations embedded in web tools.</div>
+                        <div class="res-card-tag">JavaScript · FEM · Structural · MIT</div>
+                    </a>
+                    <a href="https://github.com/mzjensen/Camber" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Camber</div>
+                        <div class="res-card-desc">Open-source Dynamo package for Autodesk Civil 3D. Extends Civil 3D functionality for heavy civil workflows. Good for firms using Civil 3D wanting automation.</div>
+                        <div class="res-card-tag">C# · Civil 3D · Dynamo · AutoCAD</div>
+                    </a>
+                    <a href="https://github.com/priyanshi0609/buildwise" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BuildWise</div>
+                        <div class="res-card-desc">AI-powered construction cost estimation with real-time calculations, material/labor optimization, and dashboards. React + Firebase + Gemini API.</div>
+                        <div class="res-card-tag">React · Firebase · AI · Estimation</div>
+                    </a>
+                    <a href="https://github.com/ara3d/connect" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Ara 3D Connect</div>
+                        <div class="res-card-desc">Open-source tracking, reviewing, and versioning for BIM data built on Git. Version-control your BIM models the way developers version-control code.</div>
+                        <div class="res-card-tag">BIM · Version control · .NET</div>
+                    </a>
+                    <a href="https://qgis.org" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">QGIS</div>
+                        <div class="res-card-desc">Free, full-featured GIS platform — the open-source alternative to ArcGIS. Used by civil contractors for site mapping, right-of-way review, utility corridor analysis, and grading plan overlays. Runs on Windows, Mac, and Linux with no license cost.</div>
+                        <div class="res-card-tag">GIS · Mapping · Site work · Free · Cross-platform</div>
+                    </a>
+                    <a href="https://engineeringpaper.xyz" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">EngineeringPaper.xyz</div>
+                        <div class="res-card-desc">Browser-based engineering calculation tool. Create, save, and share hydraulic and structural calculations with proper units. Good for field engineers documenting slope checks, thrust block sizing, or flow calcs — no install, no license.</div>
+                        <div class="res-card-tag">Engineering calcs · Browser · Shareable · MIT</div>
+                    </a>
+                    <a href="https://calcpad.eu" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Calcpad</div>
+                        <div class="res-card-desc">Free, open-source software for mathematical and engineering calculations with full unit support. Useful for estimators building custom calculation sheets for trench quantities, pipe sizing, or material takeoffs.</div>
+                        <div class="res-card-tag">Math · Engineering calcs · Estimating · Free</div>
+                    </a>
+                    <a href="https://github.com/opensource-construction/osc-directory" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">AEC Open Source Directory</div>
+                        <div class="res-card-desc">Curated directory of 40+ open-source projects for Architecture, Engineering, and Construction. Run by the opensource-construction community. Good starting point if you're looking for BIM, IFC, or structural analysis tools.</div>
+                        <div class="res-card-tag">Directory · AEC · BIM · Community · MIT</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Know an open-source construction tool that should be here?</strong> <a href="https://github.com/masonearl/openmud/issues/new?template=feature_request.md&title=%5BFEATURE%5D+Add+to+open-source+directory:+..." target="_blank" rel="noopener" class="link">Open a GitHub issue</a> and we'll add it.
+                </div>
+            </section>
+
+            <!-- Datasets -->
+            <section class="res-section" id="section-datasets">
+                <h1 class="res-title">Public Construction Datasets</h1>
+                <p class="res-desc">Free, publicly available data sources for construction research, pricing, and analysis.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.bls.gov/oes/current/oes_nat.htm" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BLS Occupational Employment Statistics</div>
+                        <div class="res-card-desc">Federal wage data by occupation and region. The best source for construction labor rates by trade, region, and union/non-union status. Updated annually.</div>
+                        <div class="res-card-tag">Labor rates · Federal data · Free</div>
+                    </a>
+                    <a href="https://www.bls.gov/ppi/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BLS Producer Price Index — Construction</div>
+                        <div class="res-card-desc">Material price indices for construction materials: concrete, steel, pipe, lumber. The authoritative source for tracking material cost inflation over time.</div>
+                        <div class="res-card-tag">Material costs · Inflation · Free</div>
+                    </a>
+                    <a href="https://lni.wa.gov/licensing-permits/public-works-projects/prevailing-wage-rates/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">WA State L&I Prevailing Wages</div>
+                        <div class="res-card-desc">Washington State prevailing wage rates by trade and county. If you bid public works in WA, these are the rates. Updated quarterly.</div>
+                        <div class="res-card-tag">Labor · Prevailing wage · Washington</div>
+                    </a>
+                    <a href="https://laborcommission.utah.gov/divisions/uosh/prevailing-wage/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Utah Prevailing Wage Rates</div>
+                        <div class="res-card-desc">Utah Labor Commission prevailing wage rates for public works projects by county and trade. Required for public contracts in Utah.</div>
+                        <div class="res-card-tag">Labor · Prevailing wage · Utah</div>
+                    </a>
+                    <a href="https://www.census.gov/construction/c30/c30index.html" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Census Bureau — Value of Construction Put in Place</div>
+                        <div class="res-card-desc">Monthly construction spending data by sector: residential, commercial, infrastructure, utilities. The macro view of where construction money is flowing.</div>
+                        <div class="res-card-tag">Market data · Spending · Monthly</div>
+                    </a>
+                    <a href="https://www.ecfr.gov/current/title-29/part-1926" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">eCFR — 29 CFR Part 1926 (OSHA Construction)</div>
+                        <div class="res-card-desc">The complete OSHA construction standard in searchable, linkable format. Public domain. The primary source for all OSHA compliance questions.</div>
+                        <div class="res-card-tag">OSHA · Public domain · Searchable</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Soil Types -->
+            <section class="res-section" id="section-soil-types">
+                <h1 class="res-title">Soil Classification Reference</h1>
+                <p class="res-desc">Field identification methods and engineering properties of common soil types encountered in underground utility work.</p>
+
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Soil Type</th><th>Description</th><th>Field Test</th><th>Swell Factor</th><th>Shrink Factor</th><th>Bearing (PSF)</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Sand (clean)</strong></td><td>Loose to dense granular, no cohesion, drains freely</td><td>Falls apart in hand when dry. No ribbon forms when wet.</td><td>10–15%</td><td>5–10%</td><td>1,500–3,000</td></tr>
+                            <tr><td><strong>Gravel</strong></td><td>Coarse granular, excellent drainage, stable when compacted</td><td>Individual particles visible. No plasticity.</td><td>10–20%</td><td>5–10%</td><td>3,000–6,000</td></tr>
+                            <tr><td><strong>Silty clay</strong></td><td>Medium cohesion, moderate plasticity, slow drainage</td><td>Ribbon 1–2" before breaking. Thumb penetration 0.5"–1".</td><td>20–30%</td><td>10–15%</td><td>1,000–2,000</td></tr>
+                            <tr><td><strong>Stiff clay</strong></td><td>High cohesion, low permeability, stable excavation walls</td><td>Ribbon 2"+ before breaking. Thumb barely penetrates. Penetrometer ≥1.5 tsf.</td><td>25–35%</td><td>15–20%</td><td>2,000–4,000</td></tr>
+                            <tr><td><strong>Soft clay</strong></td><td>Low strength, high plasticity, unstable in excavation</td><td>Thumb penetrates easily. Oozes when squeezed.</td><td>30–40%</td><td>20–25%</td><td>500–1,000</td></tr>
+                            <tr><td><strong>Rock (soft)</strong></td><td>Shale, limestone, weak sandstone. Can be ripped.</td><td>Scratches with knife. Breaks with hammer blow.</td><td>25–40%</td><td>0%</td><td>10,000–50,000</td></tr>
+                            <tr><td><strong>Rock (hard)</strong></td><td>Granite, basalt, hard sandstone. Requires blasting or rock saw.</td><td>Cannot scratch with knife. Rings when struck.</td><td>30–50%</td><td>0%</td><td>50,000+</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="res-note">Swell factor: volume increase when excavated (BCY → LCY). Shrink factor: volume decrease when compacted (BCY → CCY). Always verify with actual soil testing for design.</p>
+            </section>
+
+            <!-- Color Codes -->
+            <section class="res-section" id="section-color-codes">
+                <h1 class="res-title">Utility Marking Color Codes</h1>
+                <p class="res-desc">APWA Uniform Color Code for underground utility markings. The national standard used by all 811 programs.</p>
+                <div class="color-code-grid" style="margin-top:24px">
+                    <div class="color-chip" style="background:#ff0000"><span>Red</span><span>Electric power lines, cables, conduit, lighting cables</span></div>
+                    <div class="color-chip" style="background:#ffa500"><span>Orange</span><span>Telecommunication, alarm/signal lines, cable TV, fiber optic</span></div>
+                    <div class="color-chip" style="background:#ffff00;color:#222"><span>Yellow</span><span>Gas/oil distribution, steam, petroleum, gaseous materials</span></div>
+                    <div class="color-chip" style="background:#00aa00"><span>Green</span><span>Sewers, drain lines, culverts</span></div>
+                    <div class="color-chip" style="background:#0055ff"><span>Blue</span><span>Potable water, irrigation, slurry lines</span></div>
+                    <div class="color-chip" style="background:#9900cc"><span>Purple</span><span>Reclaimed water, irrigation, slurry lines (non-potable)</span></div>
+                    <div class="color-chip" style="background:#ff69b4"><span>Pink</span><span>Temporary survey markings, unknown/unidentified</span></div>
+                    <div class="color-chip" style="background:#ffffff;color:#222;border:1px solid #444"><span>White</span><span>Proposed excavation limits (you mark your dig area in white)</span></div>
+                    <div class="color-chip" style="background:#666"><span>Gray</span><span>Temporary dewatering/pumping lines</span></div>
+                </div>
+                <p class="res-note" style="margin-top:20px">Source: APWA Uniform Color Code. Used by all 811 One-Call programs nationwide. Marks are typically flags, paint, or stakes. Respect all marks — even if you know where a line is.</p>
+            </section>
+
+            <!-- Pipe Specs -->
+            <section class="res-section" id="section-pipe-specs">
+                <h1 class="res-title">Pipe Specifications Quick Reference</h1>
+                <p class="res-desc">Common pipe materials, their typical applications, pressure ratings, and standards. Use the <a href="/calculators.html#pipe-reference" class="link">full pipe reference table in the Calculators</a> for OD, wall thickness, and weight.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Material</th><th>Typical Use</th><th>Size Range</th><th>Joint Type</th><th>Standard</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>PVC C900</strong></td><td>Water distribution, pressure pipe</td><td>4"–60"</td><td>Push-on gasket</td><td>AWWA C900</td><td>DR18 = 165 PSI, DR14 = 200 PSI. Most common water pipe.</td></tr>
+                            <tr><td><strong>PVC SDR 35</strong></td><td>Gravity sewer, storm drain</td><td>4"–15"</td><td>Push-on gasket</td><td>ASTM D3034</td><td>Gravity only. Not for pressure. Flexible ring-tight joints.</td></tr>
+                            <tr><td><strong>HDPE (DR11)</strong></td><td>Force mains, directional drill, gas</td><td>½"–63"</td><td>Butt fusion, electrofusion</td><td>ASTM D3035</td><td>200 PSI. Fully restrained joint. Excellent for DD crossings.</td></tr>
+                            <tr><td><strong>HDPE (DR17)</strong></td><td>Low-pressure water, reclaimed water</td><td>½"–63"</td><td>Butt fusion</td><td>ASTM D3035</td><td>100 PSI. Lighter wall, lower cost.</td></tr>
+                            <tr><td><strong>Ductile Iron (DIP)</strong></td><td>Water, sewer under pressure, harsh soils</td><td>3"–64"</td><td>Push-on or mechanical</td><td>AWWA C151</td><td>Restrained joints (TR Flex, Megalug) required at fittings and long runs.</td></tr>
+                            <tr><td><strong>RCP (Class III)</strong></td><td>Storm drain, culverts</td><td>12"–144"</td><td>Bell and spigot, O-ring</td><td>ASTM C76</td><td>Gravity only. Class I–V by wall strength. Class III most common.</td></tr>
+                            <tr><td><strong>Steel</strong></td><td>Water transmission, large diameter</td><td>4"–252"</td><td>Welded, flanged, mechanical</td><td>AWWA C200</td><td>Requires interior/exterior coating. Good for large diameter, high pressure.</td></tr>
+                            <tr><td><strong>VCP (Vitrified Clay)</strong></td><td>Sanitary sewer (existing systems)</td><td>4"–42"</td><td>Push-on, compression</td><td>ASTM C700</td><td>Chemically inert, common in older sewer systems. Brittle.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ═══ AI IN CONSTRUCTION ═══ -->
+
+            <!-- Section 1: What AI Is & History -->
+            <section class="res-section" id="section-ai-guide">
+                <h1 class="res-title">AI in Construction — What It Is &amp; Where It Came From</h1>
+                <p class="res-desc">Construction is one of the least digitized industries in the world — and one of the most data-rich. AI is changing that fast. This guide covers the history, the tools, and the real-world workflows that the sharpest people in the industry are using right now.</p>
+
+                <div class="res-callout">
+                    <strong>The bottom line for contractors:</strong> AI won't replace you. But a contractor who knows how to use AI will replace a contractor who doesn't. The productivity gap between users and non-users is already measurable and growing.
+                </div>
+
+                <h2 class="res-h2">A Brief History of AI</h2>
+                <p class="res-text">You don't need a computer science degree to use AI effectively, but knowing where it came from helps you understand what it's actually good at — and what it's not.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Era</th><th>What Happened</th><th>Relevance to Construction</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>1950s–60s</strong></td><td>Alan Turing asks "Can machines think?" Early symbolic AI: programs follow explicit rules coded by humans. Chess-playing programs.</td><td>Early expert systems tried to encode engineering knowledge as if/then rules. Limited and brittle.</td></tr>
+                            <tr><td><strong>1980s–90s</strong></td><td>Expert systems peak and fall. Neural networks are studied but too computationally expensive. The "AI winter."</td><td>Estimating software and scheduling tools (P6, Timberline) emerge — rule-based, not AI.</td></tr>
+                            <tr><td><strong>2012</strong></td><td>Deep learning breaks through. AlexNet wins ImageNet by a huge margin using convolutional neural networks on GPUs. AI can now "see."</td><td>Computer vision becomes viable — drones, cameras, safety detection all become possible.</td></tr>
+                            <tr><td><strong>2017</strong></td><td>Google publishes "Attention Is All You Need" — the Transformer architecture. AI can now process language in context, not just word by word.</td><td>The foundation for every modern AI text tool. This paper changed everything.</td></tr>
+                            <tr><td><strong>2020–21</strong></td><td>GPT-3 (OpenAI) demonstrates that large language models trained on huge text datasets can write, reason, and code at a surprisingly high level.</td><td>First practical AI writing tools. Estimators and PMs start experimenting with drafting.</td></tr>
+                            <tr><td><strong>Nov 2022</strong></td><td>ChatGPT launches. 1 million users in 5 days. 100 million in 2 months. AI becomes a mainstream conversation.</td><td>Every GC, sub, and owner starts asking "what do we do with this?"</td></tr>
+                            <tr><td><strong>2023–24</strong></td><td>GPT-4, Claude 2/3, Gemini — multimodal models that can read images, PDFs, spreadsheets. Context windows expand to 200,000+ tokens (entire project files).</td><td>AI can now read drawings, specs, and RFIs directly. Document review becomes a real use case.</td></tr>
+                            <tr><td><strong>2025–26</strong></td><td>AI agents: models that don't just answer questions but take actions — searching the web, running code, sending emails, calling APIs autonomously.</td><td>Agentic workflows: AI that drafts the RFI <em>and</em> emails it. Autonomous equipment hitting real job sites.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">How Large Language Models Actually Work</h2>
+                <p class="res-text">LLMs (like ChatGPT, Claude, and Gemini) are trained on enormous amounts of text — books, websites, code, technical papers. Through a process called self-supervised learning, the model learns to predict what comes next in a sequence. Do this billions of times with billions of parameters, and the model develops something that looks a lot like understanding: the ability to reason, summarize, translate, and generate.</p>
+                <p class="res-text">What the model actually stores is patterns in weights — it doesn't "know" facts the way a database does. This is why it can be confidently wrong (hallucination). For construction, this means: always verify specific numbers, code citations, and material specs. Use AI for reasoning and drafting. Use authoritative sources (OSHA, ASTM, AWWA) for specifications you'll build or bid from.</p>
+
+                <h2 class="res-h2">The Main AI Tools Right Now</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Tool</th><th>Made By</th><th>Best For in Construction</th><th>Access</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>ChatGPT (GPT-5.3)</strong></td><td>OpenAI</td><td>Fast drafting, bid-language cleanup, image/spec interpretation, and day-to-day PM writing. Best "default" model for mixed office/field work.</td><td><a href="https://chatgpt.com" target="_blank" rel="noopener" class="link">chatgpt.com</a> (free tier + paid plans)</td></tr>
+                            <tr><td><strong>OpenAI Codex</strong></td><td>OpenAI</td><td>Code and workflow automation: script generation, repo changes, test fixes, and tool orchestration. Best when you want AI to execute technical tasks end-to-end.</td><td><a href="https://openai.com/codex/" target="_blank" rel="noopener" class="link">openai.com/codex</a> · <a href="https://platform.openai.com/signup" target="_blank" rel="noopener" class="link">API signup</a></td></tr>
+                            <tr><td><strong>Claude (Sonnet 4.6 / Opus 4.6)</strong></td><td>Anthropic</td><td>Long subcontracts, spec books, RFI narratives, and nuanced owner communication. Sonnet for speed, Opus for highest-quality deep reasoning.</td><td><a href="https://claude.ai" target="_blank" rel="noopener" class="link">claude.ai</a> · <a href="https://console.anthropic.com/" target="_blank" rel="noopener" class="link">Anthropic Console</a></td></tr>
+                            <tr><td><strong>Gemini (2.0 Flash/Pro)</strong></td><td>Google</td><td>Google Workspace integration: Gmail triage, Docs drafting, Sheets formulas, and meeting recap workflows.</td><td><a href="https://gemini.google.com" target="_blank" rel="noopener" class="link">gemini.google.com</a></td></tr>
+                            <tr><td><strong>Copilot</strong></td><td>Microsoft</td><td>Embedded in Excel, Word, Outlook, and Teams. Best for organizations already operating in Microsoft 365.</td><td><a href="https://copilot.microsoft.com/" target="_blank" rel="noopener" class="link">copilot.microsoft.com</a></td></tr>
+                            <tr><td><strong>Cursor</strong></td><td>Anysphere</td><td>Agentic AI coding workflows for building automation fast: codebase edits, test fixes, and multi-step implementation in one loop. Useful when construction teams need custom internal tools and integrations quickly.</td><td><a href="https://cursor.com" target="_blank" rel="noopener" class="link">cursor.com</a></td></tr>
+                            <tr><td><strong>OpenClaw</strong></td><td>Open source community</td><td>Open-source agentic patterns and runtime ideas that became popular because teams can self-host, inspect, and customize agent behavior for production workflows.</td><td>Open-source project (GitHub ecosystem)</td></tr>
+                            <tr><td><strong>openmud / mud1</strong></td><td>Open source</td><td>Construction-specific calculations and workflows: trench calcs, pipe sizing, OSHA references, estimating, scheduling, and proposal output.</td><td><a href="https://openmud.ai/chat.html" target="_blank" rel="noopener" class="link">openmud.ai/chat</a> · <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="link">GitHub</a></td></tr>
+                            <tr><td><strong>Local models (Ollama)</strong></td><td>Community</td><td>Privacy-sensitive projects where data cannot leave your machine: confidential bids, payroll-adjacent files, internal pricing sheets.</td><td><a href="https://ollama.com" target="_blank" rel="noopener" class="link">ollama.com</a></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">How to Use These Tools (Quick Start)</h2>
+                <ul class="res-list">
+                    <li><strong>ChatGPT (GPT-5.3):</strong> Start with scoped prompts: project type, location, crew, constraints, requested output format.</li>
+                    <li><strong>Codex:</strong> Use it for implementation tasks: "change these files, run tests, and summarize deltas."</li>
+                    <li><strong>Claude Sonnet/Opus:</strong> Paste long specs/contracts and request: risk list, missing scope, and explicit action items.</li>
+                    <li><strong>Gemini/Copilot:</strong> Use when the work already lives in Gmail/Docs/Sheets or Outlook/Excel/Word.</li>
+                    <li><strong>Cursor:</strong> Use it when you need agentic coding help to build or ship internal contech automations quickly.</li>
+                    <li><strong>OpenClaw-style open source agents:</strong> Use these patterns when you need transparent, self-hostable agent workflows you can customize.</li>
+                    <li><strong>openmud:</strong> Use for heavy civil context and estimator workflows before sending client-facing docs.</li>
+                </ul>
+
+                <h2 class="res-h2">Where the Industry Is Right Now</h2>
+                <ul class="res-list">
+                    <li>37% of construction firms reported using AI or machine learning in 2024, up from 26% the year before — growing fast</li>
+                    <li>75% of organizations are still in exploratory or pilot stages — early adopters have a real window right now</li>
+                    <li>Only 16% have reached consistent operational usage — the companies in that group are pulling ahead</li>
+                    <li>The AI construction market is growing at 24% CAGR — from $4B in 2024 to $12B by 2029</li>
+                    <li>Labor shortages are the primary driver — AI lets smaller crews do more, and helps newer workers access institutional knowledge</li>
+                    <li>The biggest barrier isn't the technology — it's data quality. Bad data gives bad AI output. Disciplined project documentation pays off.</li>
+                </ul>
+
+                <div class="res-callout">
+                    <strong>openmud is built for this moment.</strong> The AI here is tuned for heavy civil and underground utility work — not generic responses. <a href="/chat.html" class="link">Try the AI chat →</a> Ask about pipe sizing, OSHA requirements, change order pricing, or anything else you'd ask an experienced PE or estimator.
+                </div>
+            </section>
+
+            <!-- Section 2: Workflows & Prompts -->
+            <section class="res-section" id="section-ai-workflows">
+                <h1 class="res-title">AI Workflows &amp; Prompt Templates for Construction</h1>
+                <p class="res-desc">The single biggest factor in how useful AI is for you is how you talk to it. A vague prompt gets a vague answer. A specific, structured prompt gets something you can actually use. Below are the workflows that experienced users in heavy civil are getting real value from — with actual prompt templates you can copy, modify, and use today.</p>
+
+                <h2 class="res-h2">1. Email: Searching, Triaging, and Drafting Responses</h2>
+                <p class="res-text">Construction email is out of control. Most PMs and supers get 100+ emails a day — change order requests, RFI responses, owner updates, supplier quotes, subcontractor questions. AI can triage, summarize, and draft responses in minutes.</p>
+
+                <p class="res-text"><strong>Search your email with AI:</strong> In Gmail + Gemini, or Outlook + Copilot, you can ask: "Find all emails from [subcontractor] about the water main delay" or "Summarize all emails about the change order for rock excavation." You get a summary instead of digging through a thread.</p>
+
+                <p class="res-text"><strong>Draft responses:</strong> Copy the email thread into ChatGPT or Claude and say:</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Email Response</div>
+                    <pre class="ai-prompt-code">You are a project manager at a heavy civil construction company.
+Read this email thread and draft a professional response that:
+- Acknowledges the issue clearly
+- States our position without overcommitting
+- Asks for any information we still need
+- Ends with a clear next step or request for a meeting
+
+Keep it under 150 words. Tone: direct, professional, not confrontational.
+
+[Paste email thread here]</pre>
+                </div>
+
+                <h2 class="res-h2">2. RFI Drafting</h2>
+                <p class="res-text">A good RFI is specific, includes a proposed solution, and identifies schedule/cost impact. AI drafts these in under 5 minutes when you give it the right inputs. A well-written RFI gets answered faster and protects you on change orders.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — RFI Draft</div>
+                    <pre class="ai-prompt-code">You are an expert construction project manager writing an RFI.
+Draft a professional, concise RFI using this information:
+
+Project: [Project name]
+Contract: [Contract # or type]
+Location: [Grid / station / area]
+Specification section or drawing reference: [e.g., Section 02320 or Sheet C-4]
+Issue / conflict / missing information: [Describe the problem clearly]
+Proposed solution or options: [What do you think the answer should be, or offer options]
+Schedule impact if not answered by [date]: [e.g., 5 work days, crew reassignment required]
+Cost impact: [Yes/No, and if yes, estimate magnitude]
+
+Format it as a formal RFI with numbered sections. Keep it under 300 words.</pre>
+                </div>
+
+                <h2 class="res-h2">3. Daily Reports &amp; Progress Summaries</h2>
+                <p class="res-text">Daily reports are a legal record and a project management tool — but they take time. AI can turn rough field notes into a professional daily report, or summarize a week of reports into an owner progress update.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Daily Report</div>
+                    <pre class="ai-prompt-code">Turn these field notes into a professional construction daily report.
+
+Date: [Date]
+Weather: [Conditions, temp, wind]
+Crew: [Who was on site, count]
+Equipment: [What equipment was operating]
+Work completed today: [Rough notes — don't worry about formatting]
+Issues / delays: [Any problems, even minor]
+Visitors / inspections: [Owner, inspector, anyone on site]
+Plan for tomorrow: [What's next]
+
+Format with clear sections. Use professional language. Flag any safety issues in a separate callout. Keep it under 400 words.</pre>
+                </div>
+
+                <h2 class="res-h2">4. Change Order Narratives</h2>
+                <p class="res-text">Winning a change order often comes down to the quality of the narrative — not just the numbers. AI drafts a compelling, professional CO narrative that tells the story clearly and supports your cost claim.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Change Order Narrative</div>
+                    <pre class="ai-prompt-code">Write a change order narrative for a construction contract.
+The narrative should:
+1. State what changed and why it is outside the original contract scope
+2. Reference the specific drawing, spec section, or owner direction that caused the change
+3. Describe the additional work required
+4. State the cost and schedule impact clearly
+5. Reference any relevant contract clause or change order provision
+
+Change type: [Owner-directed / Differing site condition / Design conflict]
+Original scope: [What the contract required]
+What changed: [What actually happened or was directed]
+Reference: [Drawing #, RFI #, email from owner dated X]
+Cost impact: $[Amount] — breakdown: [Labor / material / equipment]
+Schedule impact: [X days, reason]
+
+Tone: factual, professional, not adversarial. Under 350 words.</pre>
+                </div>
+
+                <h2 class="res-h2">5. Specification &amp; Contract Review</h2>
+                <p class="res-text">Upload a spec section or contract clause to Claude or ChatGPT and ask it to identify risk items, ambiguous language, and missing submittals. This used to take a lawyer or senior PM. Now it takes minutes.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Spec / Contract Review</div>
+                    <pre class="ai-prompt-code">Review this construction specification section and identify:
+1. Any requirements that are unclear, ambiguous, or contradictory
+2. Submittals required (list each one)
+3. Testing and inspection requirements
+4. Any requirements that are unusual or could be a source of cost risk
+5. Any conflicts with standard practice that I should flag to the engineer
+
+For each item, state the section number and explain the issue in plain language.
+
+[Paste specification section text here]</pre>
+                </div>
+
+                <h2 class="res-h2">6. Estimating Assistance &amp; Bid Review</h2>
+                <p class="res-text">AI doesn't replace your estimator, but it can sanity-check unit prices, fill gaps in productivity data, and help you think through risk items you might have missed.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Bid Sanity Check</div>
+                    <pre class="ai-prompt-code">I'm bidding a heavy civil project in [region/state]. Review my unit prices below and flag any that look out of range based on current market conditions. Also identify any scope items I may have missed.
+
+Project type: [e.g., 8" water main installation, urban, open cut]
+Soil conditions: [Type B clay, 6-8 ft depth]
+My unit prices:
+- 8" PVC C900 installed: $[$/LF]
+- Trench excavation (machine): $[$/LF]
+- Select import backfill: $[$/LF]
+- Asphalt restoration, 3": $[$/SF]
+- [Add your items]
+
+Flag anything outside typical range. Note what typical range is and why.</pre>
+                </div>
+
+                <h2 class="res-h2">7. OSHA &amp; Code Research</h2>
+                <p class="res-text">AI can answer OSHA questions faster than searching PDF regulations, but always verify with the actual standard before making compliance decisions. Use AI to understand the framework, then confirm the specifics.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Regulatory Research</div>
+                    <pre class="ai-prompt-code">I have a specific question about OSHA 29 CFR 1926 Subpart P (Excavations).
+
+Question: [e.g., "Do we need a competent person inspection after it rains? What exactly does the inspection need to cover?"]
+
+Please:
+1. Answer the question clearly in plain language
+2. Cite the specific regulation section (e.g., 1926.651(k)(2))
+3. Flag any conditions where the requirement changes
+4. Note if this varies by state (OSHA state plan states)
+5. Tell me what I should verify with an actual OSHA consultant or attorney
+
+I am a superintendent/PM, not a safety professional. Write for a field audience.</pre>
+                </div>
+
+                <h2 class="res-h2">8. Automating Repetitive Tasks with Scripts</h2>
+                <p class="res-text">This is the next level. If you have a task you do the same way every week — weekly owner report, subcontractor pay app summary, job cost summary from your accounting system — AI can write a Python or Excel script to automate it.</p>
+                <p class="res-text">You don't need to know how to code. Describe what you want in plain English:</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Automate a Task</div>
+                    <pre class="ai-prompt-code">I need a Python script that does the following:
+1. Reads a CSV file exported from my accounting software. The file has columns: [list your columns]
+2. Filters rows where the "Job" column matches a specific job number I provide
+3. Groups costs by cost code and calculates total budget, actual cost, and variance
+4. Outputs a clean Excel file with that summary
+5. Emails the Excel file to [recipient] with a subject line of "Weekly Job Cost Report — [Job Name] — [Date]"
+
+I will run this script manually each Friday. I'm on a Mac. Write the full script, explain what each section does, and list any libraries I need to install.</pre>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Prompt engineering 101:</strong> The best prompts have four parts — <strong>Role</strong> (who the AI is), <strong>Context</strong> (what's happening), <strong>Task</strong> (what you want), and <strong>Format</strong> (how you want it delivered). Give it constraints: word count, audience, tone. The more specific, the better the output.
+                </div>
+
+                <h2 class="res-h2">9. AI-Assisted Scheduling</h2>
+                <p class="res-text">Feed AI your project scope and it can generate a draft CPM schedule with logic ties, durations, and critical path — in minutes. Use it as a starting point, not a final product. Then apply your experience.</p>
+                <div class="ai-prompt-block">
+                    <div class="ai-prompt-label">Prompt Template — Schedule Generation</div>
+                    <pre class="ai-prompt-code">Create a construction schedule in table format for the following project.
+List each activity, estimated duration (working days), predecessor activities, and responsible party.
+
+Project: [Description — e.g., "Install 2,000 LF of 8-inch water main along a city street. Includes traffic control, potholing, open cut excavation, pipe installation, backfill, compaction, and asphalt restoration."]
+Constraints: [e.g., "Owner requires 30-day substantial completion. Work hours 7am–5pm, no weekend work. City requires one lane open at all times."]
+Crew: [e.g., "One pipeline crew: 1 operator, 1 foreman, 2 laborers. Production rate: approximately 200 LF/day."]
+
+Output as a table with: Activity ID, Activity Name, Duration (days), Predecessors, Notes</pre>
+                </div>
+            </section>
+
+            <!-- Section 3: Autonomy, Equipment & Drones -->
+            <section class="res-section" id="section-ai-autonomy">
+                <h1 class="res-title">Autonomous Equipment, Drones &amp; AI Vision in Construction</h1>
+                <p class="res-desc">The most visible and capital-intensive AI applications in construction are happening at the machine level — autonomous haul trucks, GPS-guided dozers, drone-based survey, and computer vision safety monitoring. These aren't science fiction. They're on job sites now.</p>
+
+                <h2 class="res-h2">Autonomous Heavy Equipment</h2>
+                <p class="res-text">The two biggest equipment manufacturers in the world are both in. The productivity gains are real and already documented.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Company / System</th><th>What It Does</th><th>Documented Results</th><th>Where It's Working</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Caterpillar Autonomous</strong></td><td>Full autonomous haul trucks, excavators, dozers, and compactors. Uses AI, machine learning, computer vision, edge computing. 30+ years of R&amp;D culminating in 2026 fleet launch.</td><td>~30% productivity increase vs. manned operations in North American trials. 11 billion tonnes moved, 380 million km traveled autonomously (mining fleet).</td><td>Mining, large earthwork. Rolling to construction sites through 2025–26.</td></tr>
+                            <tr><td><strong>Komatsu + Pronto Smart Quarry</strong></td><td>Retrofittable autonomy for haul trucks. Camera, GPS/GNSS, edge AI. Works on existing Komatsu and third-party trucks. All-day operation with minimal human input.</td><td>Up to 20% productivity improvement through reduced idle time, better routing, lower unplanned maintenance.</td><td>Quarries, aggregate operations. Expanding to earthwork.</td></tr>
+                            <tr><td><strong>GPS Machine Control (all OEMs)</strong></td><td>Not fully autonomous but AI-guided. Dozer blade and motor grader blade controlled to within 0.1 ft of design grade using GPS, total station, or laser. Operator focuses on production; machine handles precision.</td><td>2–3x grade accuracy vs. stakes. Eliminates most grade checking. Cuts finish grading time 30–50%.</td><td>Widely adopted — most large earthwork contractors have machine control on dozers and graders.</td></tr>
+                            <tr><td><strong>Volvo / Built Robotics</strong></td><td>Autonomous excavator and compactor systems. Built Robotics retrofits existing machines with autonomy kits. Volvo building autonomous wheel loaders and compactors.</td><td>24/7 operation on repetitive compaction and hauling tasks. Eliminates fatigue-related safety incidents on night shifts.</td><td>Large site prep, utility trenching, compaction runs.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Drone Survey &amp; Photogrammetry</h2>
+                <p class="res-text">Drones with photogrammetry software have replaced survey crews for many earthwork quantity and progress tasks. What used to take a survey crew two days now takes a drone pilot two hours — and gives you a 3D point cloud, not just elevation data.</p>
+                <ul class="res-list">
+                    <li><strong>Quantity verification:</strong> Fly a cut/fill site before and after, compare point clouds. DroneDeploy, Pix4D, and Propeller Aero calculate volumes automatically. Accurate to ±0.5% on well-controlled sites.</li>
+                    <li><strong>Progress monitoring:</strong> Weekly or bi-weekly drone flights create a visual and quantitative record of earthwork progress. Owners love it. Helps resolve disputes.</li>
+                    <li><strong>As-built documentation:</strong> Drone orthomosaics create a searchable, measurable record of buried utilities, structural work, and site conditions at any point during construction.</li>
+                    <li><strong>Infrastructure inspection:</strong> Bridges, culverts, pipe outfalls, retaining walls — drones with high-resolution cameras get into areas that require lane closures or rappelling for human inspectors. AI vision flags cracks, spalling, and corrosion.</li>
+                    <li><strong>AI-powered analysis:</strong> DroneDeploy's AI annotates anomalies automatically. Skydio's AI navigation avoids obstacles. ROCK Robotic LiDAR drones give survey-grade point clouds without the survey crew.</li>
+                </ul>
+
+                <h2 class="res-h2">AI Vision — Safety &amp; Site Monitoring</h2>
+                <p class="res-text">Fixed cameras with AI vision are monitoring construction sites for safety violations, equipment proximity, and production tracking — in real time.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Application</th><th>How It Works</th><th>Tools / Companies</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>PPE compliance detection</strong></td><td>Camera on site detects workers without hard hats, high-vis vests, or safety glasses. Sends alert to super in real time.</td><td>Smartvid.io, Voxel51, Protex AI</td></tr>
+                            <tr><td><strong>Equipment proximity alerts</strong></td><td>Cameras or radar detect workers entering equipment exclusion zones. Alerts operator and super before a strike occurs.</td><td>SmartSite, Spot-r, Guardhat</td></tr>
+                            <tr><td><strong>Daily progress tracking</strong></td><td>Fixed cameras take periodic photos. AI measures concrete placed, pipe installed, structure erected. Auto-generates progress report.</td><td>OpenSpace, Reconstruct, Buildots</td></tr>
+                            <tr><td><strong>OSHA inspection AI</strong></td><td>Mobile robots or drones conduct safety walkthroughs using vision-language models (VLMs) that understand OSHA standards. Generate written inspection reports automatically.</td><td>Research stage — MIT, Stanford, Buildcheck</td></tr>
+                            <tr><td><strong>Defect detection</strong></td><td>AI reviews inspection photos and flags cracks, settlement, improper installation, misaligned joints. Faster than manual review at scale.</td><td>Scope.AI, OpenSpace QA</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Digital Twins &amp; LLM-Powered BIM</h2>
+                <p class="res-text">The next frontier: a live, queryable model of your project that ingests real-time data from sensors, cameras, and field reports — and that you can talk to in plain English.</p>
+                <ul class="res-list">
+                    <li><strong>What a digital twin is:</strong> A connected digital replica of the physical project. Not just a BIM model — a live model that receives data from IoT sensors (compaction, concrete cure, structural strain), equipment telematics, and weather feeds.</li>
+                    <li><strong>LLM interface:</strong> Instead of navigating Revit or Civil 3D, you ask: "What's the compaction status in the Zone 3 subgrade?" or "Show me all RFIs affecting the Storm Drain Phase 2 alignment." The model answers.</li>
+                    <li><strong>Autodesk Construction Cloud + AI:</strong> Autodesk's platform already uses AI for clash detection, schedule risk prediction, and document linking. Natural language query is coming.</li>
+                    <li><strong>Trimble + AI:</strong> Trimble's WorksOS platform integrates machine control, survey, and field data into a unified model. AI assists in identifying discrepancies between design and built conditions.</li>
+                    <li><strong>Safety geofencing:</strong> When the digital twin knows where every machine and worker is in real time, it can halt machines automatically when a worker enters a proximity zone. This is already deployed on some large projects.</li>
+                </ul>
+
+                <h2 class="res-h2">What's Coming (And How Fast)</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Capability</th><th>Current Status</th><th>Timeline</th></tr></thead>
+                        <tbody>
+                            <tr><td>Fully autonomous excavation (urban, unstructured)</td><td>Research / prototype</td><td>5–10 years for general use</td></tr>
+                            <tr><td>AI-generated project schedules from scope documents</td><td>Early commercial (Buildsy, Alice Technologies)</td><td>Usable now with supervision</td></tr>
+                            <tr><td>AI-reviewed submittals and shop drawings</td><td>Early commercial</td><td>Usable now for first pass</td></tr>
+                            <tr><td>Voice-to-daily-report (field → finished report)</td><td>Available now (Grain + AI, Otter.ai + GPT)</td><td>Now</td></tr>
+                            <tr><td>Autonomous haul trucks on earthwork sites</td><td>Commercial at quarries, expanding</td><td>Large sites: 2–3 years. Smaller sites: 5+ years</td></tr>
+                            <tr><td>AI that handles RFI submission end-to-end</td><td>Possible with current tools + automation</td><td>Now, with setup</td></tr>
+                            <tr><td>AI field superintendent (monitors, advises, logs)</td><td>Research</td><td>5+ years</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-callout">
+                    <strong>The honest take:</strong> Most of the transformative stuff at the machine level requires capital, large sites, and structured environments. What's available to every contractor right now — regardless of company size — is the language AI layer: drafting, summarizing, researching, calculating, and automating document workflows. Start there. The ROI is immediate and the barrier to entry is a browser tab.
+                </div>
+
+                <h2 class="res-h2">Resources for Going Deeper</h2>
+                <div class="res-links">
+                    <a href="https://www.autodesk.com/blogs/construction/top-2025-ai-construction-trends-according-to-the-experts/" target="_blank" rel="noopener" class="res-ext-link">Autodesk — Top 2025 AI Construction Trends ↗</a>
+                    <a href="https://www.caterpillar.com/en/news/corporate-press-releases/h/next-era-autonomy.html" target="_blank" rel="noopener" class="res-ext-link">Caterpillar — Next Era of Autonomy in Construction ↗</a>
+                    <a href="https://www.equipmentworld.com/technology/article/15753104/komatsu-launches-autonomous-haul-truck-collaboration-with-pronto" target="_blank" rel="noopener" class="res-ext-link">Komatsu + Pronto — Smart Quarry Autonomous ↗</a>
+                    <a href="https://alice.build" target="_blank" rel="noopener" class="res-ext-link">Alice Technologies — AI Schedule Optimization ↗</a>
+                    <a href="https://www.dronedeploy.com/industries/construction/" target="_blank" rel="noopener" class="res-ext-link">DroneDeploy — Construction Drone Platform ↗</a>
+                    <a href="https://openspace.ai" target="_blank" rel="noopener" class="res-ext-link">OpenSpace — AI-Powered Site Documentation ↗</a>
+                    <a href="https://ryangaiss.substack.com/p/the-5-minute-rfi-using-ai-to-draft" target="_blank" rel="noopener" class="res-ext-link">The 5-Minute RFI — AI Drafting Guide ↗</a>
+                </div>
+            </section>
+
+            <!-- Glossary -->
+            <section class="res-section" id="section-glossary">
+                <h1 class="res-title">Construction Glossary</h1>
+                <p class="res-desc">Common terms in heavy civil and underground utility construction. From field slang to engineering terminology.</p>
+                <div class="glossary-search-wrap">
+                    <input type="text" id="glossary-search" placeholder="Search terms..." oninput="filterGlossary()" class="glossary-search">
+                </div>
+                <div class="glossary-grid" id="glossary-grid"></div>
+            </section>
+
+            <!-- Industry Software: Design & CAD -->
+            <section class="res-section" id="section-software-design">
+                <h1 class="res-title">Design &amp; CAD Software</h1>
+                <p class="res-desc">The software heavy civil engineers and contractors use to design, review, and mark up construction documents. Most of the industry runs on one of a few dominant platforms.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.autodesk.com/products/civil-3d/overview" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">AutoCAD Civil 3D</div>
+                        <div class="res-card-desc">The industry-standard design platform for heavy civil — roads, grading, underground utilities, drainage, and corridors. Produced by Autodesk. Used by virtually every DOT, engineering firm, and larger GC for design deliverables. Outputs DWG files, plan and profile sheets, quantity reports, and alignment data. Subscription-based (expensive). Most field teams receive PDFs exported from Civil 3D and never open the DWG directly.</div>
+                        <div class="res-card-tag">Autodesk · Civil design · DWG · Roads · Utilities · Subscription</div>
+                    </a>
+                    <a href="https://www.bluebeam.com" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Bluebeam Revu</div>
+                        <div class="res-card-desc">The de facto standard for PDF markup and collaboration in commercial and heavy civil construction. Estimators use it for digital takeoffs. PMs use it for RFI markups and submittals. The Studio feature lets multiple people mark up the same set simultaneously. Most plan sets, RFIs, and submittals you receive are marked up in Bluebeam. If your office doesn't have it, you're at a disadvantage in most bid environments.</div>
+                        <div class="res-card-tag">PDF markup · Takeoff · Collaboration · RFI · Submittals · Industry standard</div>
+                    </a>
+                    <a href="https://www.autodesk.com/products/autocad/overview" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">AutoCAD (base)</div>
+                        <div class="res-card-desc">The base AutoCAD product — 2D and 3D drafting without Civil 3D's civil-specific toolset. Used for as-built drawings, shop drawings, and simple site layouts. More common in smaller operations that don't need the full Civil 3D suite. Also used for custom detail sheets and utility diagrams.</div>
+                        <div class="res-card-tag">Autodesk · 2D/3D drafting · DWG · As-builts · Shop drawings</div>
+                    </a>
+                    <a href="https://www.bentley.com/software/openroads-designer/" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">OpenRoads Designer (Bentley)</div>
+                        <div class="res-card-desc">Bentley Systems' equivalent to Civil 3D for transportation and civil infrastructure. Dominant in highway and DOT work in certain regions and internationally. Uses DGN file format instead of DWG. If you bid DOT work in states that use Bentley standards, you'll encounter OpenRoads files.</div>
+                        <div class="res-card-tag">Bentley · DOT · Highway · DGN · Civil design</div>
+                    </a>
+                    <a href="https://www.carlsonsw.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Carlson Software</div>
+                        <div class="res-card-desc">Civil design and survey software popular with smaller contractors and surveyors. Runs inside AutoCAD or standalone. Good for site grading, lot design, and survey data processing. More affordable than Civil 3D. Common in land development and utility work for firms that don't need the full DOT-grade Civil 3D toolset.</div>
+                        <div class="res-card-tag">Civil design · Survey · Grade · Affordable · AutoCAD-based</div>
+                    </a>
+                    <a href="https://www.agisoft.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Agisoft Metashape</div>
+                        <div class="res-card-desc">Photogrammetry software used to process drone imagery into 3D models, point clouds, and orthomosaics. Pairs with DJI or other construction drones. Outputs can be imported into Civil 3D or GIS tools for earthwork calculations, cut/fill analysis, and progress documentation. Increasingly used for stockpile measurement and site verification.</div>
+                        <div class="res-card-tag">Drone · Photogrammetry · 3D model · Earthwork · Stockpile</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>How AI fits in:</strong> AI can read exported PDFs from Civil 3D and Bluebeam — extracting quantities, stationing, pipe sizes, and elevations through OCR. openmud is building document extraction tools to pull structured data from plan sheets directly.
+                    <br><br><a href="#software-architecture" class="link" onclick="showSection('software-architecture'); return false;">Go deeper: software architecture, APIs, and integration layers.</a>
+                </div>
+            </section>
+
+            <!-- Industry Software: Estimating & Takeoff -->
+            <section class="res-section" id="section-software-estimating">
+                <h1 class="res-title">Estimating &amp; Takeoff Software</h1>
+                <p class="res-desc">Estimating is where heavy civil companies win or lose. The software here handles quantity takeoff from plan sheets, labor and equipment pricing, bid assembly, and subcontractor leveling.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.hcss.com/heavybid" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">HCSS HeavyBid</div>
+                        <div class="res-card-desc">The dominant estimating platform for heavy civil and highway construction. Built specifically for this market — not adapted from commercial or residential tools. Handles bid item setup, crew pricing, equipment rates, subcontractor bids, and bid schedule assembly. Integrates with HeavyJob for budget-to-actual tracking. If you're bidding DOT or municipal work over $5M consistently, most of your competitors are on HeavyBid. Industry standard. Expensive.</div>
+                        <div class="res-card-tag">HCSS · Heavy civil · DOT bids · Crew pricing · Industry standard</div>
+                    </a>
+                    <a href="https://www.stackct.com" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Stack CT</div>
+                        <div class="res-card-desc">Cloud-based takeoff and estimating platform. Strong for digital plan takeoff — measure linear footage, area, and count items directly on uploaded PDFs. Good interface for teams sharing plan sets and coordinating takeoffs across multiple estimators. More accessible price point than HCSS. Used across commercial, civil, and specialty trades. Competes directly with Bluebeam for the takeoff workflow.</div>
+                        <div class="res-card-tag">Cloud · Takeoff · PDF · Multi-user · Accessible price</div>
+                    </a>
+                    <a href="https://www.trimble.com/en/products/b2w-software/track" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">B2W Software</div>
+                        <div class="res-card-desc">Integrated platform for heavy civil estimating, scheduling, and field tracking. Competes with HCSS. Used by large civil contractors for end-to-end workflow from bid to closeout. Estimate module integrates with their scheduling and daily reporting tools. Fewer users than HCSS but strong in certain markets.</div>
+                        <div class="res-card-tag">Heavy civil · Estimating · Scheduling · Field tracking · Integrated</div>
+                    </a>
+                    <a href="https://www.bid2win.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Bid2Win</div>
+                        <div class="res-card-desc">Estimating software for heavy civil and infrastructure. Strong in highway, pipeline, and utility work. Used by mid-to-large civil contractors as an alternative to HCSS HeavyBid. Good bid item library functionality and subcontractor management. Competes on workflow customization.</div>
+                        <div class="res-card-tag">Heavy civil · Pipeline · Highway · Estimating · Subcontractor mgmt</div>
+                    </a>
+                    <a href="https://www.planswift.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">PlanSwift</div>
+                        <div class="res-card-desc">Desktop takeoff software. Widely used across trades for measuring from digital plan sets. Simpler than Stack CT, less expensive. Good for smaller operations doing their own quantity takeoff without a full estimating system. Outputs to Excel.</div>
+                        <div class="res-card-tag">Takeoff · Desktop · Excel export · Smaller contractors · Affordable</div>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/construction-takeoff/id6751007895?mt=12" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Construction Takeoff (Mac)</div>
+                        <div class="res-card-desc">Mac-native PDF editor and markup tool for construction plan takeoffs. Measure linear footage, area, and item counts directly on plan sheets. No subscription, no cloud account required. Works offline. Built for estimators who work from digital plan sets on Mac.</div>
+                        <div class="res-card-tag">macOS · PDF · Takeoff · No subscription · Offline</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>Where AI is being applied:</strong> The biggest opportunity in estimating is document reading — AI that can open a set of plans, read pipe schedules and quantities, and pre-populate a bid item list. OCR + GPT-4o can do this today with the right pipeline. openmud is building toward this. For now: use AI to sense-check your math, draft your scope narratives, and write your sub bid requests.
+                    <br><br><a href="#software-architecture" class="link" onclick="showSection('software-architecture'); return false;">Go deeper: HeavyBid, Bid2Win, and data architecture patterns.</a>
+                </div>
+            </section>
+
+            <!-- Industry Software: Field & Project Management -->
+            <section class="res-section" id="section-software-field">
+                <h1 class="res-title">Field &amp; Project Management Software</h1>
+                <p class="res-desc">Field management tools handle daily production reporting, cost tracking, schedule, RFIs, submittals, and communication between field and office. The gap between companies that use these well and those that don't is significant.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.hcss.com/heavyjob" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">HCSS HeavyJob</div>
+                        <div class="res-card-desc">Field management built specifically for heavy civil. Foremen enter daily production quantities, labor hours, and equipment hours from the field. Office sees real-time cost vs. budget by bid item. Integrates directly with HeavyBid so your estimate becomes your budget without re-keying. The benchmark for production tracking in heavy civil. If you're doing DOT work or large utility projects and not tracking production by item, you're leaving money and information on the table.</div>
+                        <div class="res-card-tag">HCSS · Daily reports · Production tracking · Budget vs actual · Heavy civil</div>
+                    </a>
+                    <a href="https://www.procore.com" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Procore</div>
+                        <div class="res-card-desc">The dominant cloud-based construction management platform. Strong in commercial and GC work, increasingly common in heavy civil. Manages RFIs, submittals, drawings, punch lists, daily logs, and financials in one platform. Most large owners and GCs now require subs to access Procore for document management. Worth knowing even if you don't own a license — you'll likely be invited to a project.</div>
+                        <div class="res-card-tag">Cloud · RFI · Submittals · Drawings · PM · Industry standard for GCs</div>
+                    </a>
+                    <a href="https://www.trimble.com/en/products/software/trimble-viewpoint" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Trimble Viewpoint / Vista</div>
+                        <div class="res-card-desc">ERP (enterprise resource planning) platform built for construction. Handles accounting, payroll, equipment management, project management, and field reporting in one system. Common in mid-to-large civil and specialty contractors. Viewpoint Spectrum and Vista are different products under the same brand — both heavy-duty, implementation-intensive systems.</div>
+                        <div class="res-card-tag">ERP · Accounting · Payroll · Equipment · Project management</div>
+                    </a>
+                    <a href="https://www.fieldwire.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Fieldwire</div>
+                        <div class="res-card-desc">Field management tool strong in plan management, punch lists, and task assignment. Works offline on mobile — good for areas with poor cell coverage. Popular with supers and foremen who need a clean interface in the field. Competes with Procore but at a lower price point and less complexity.</div>
+                        <div class="res-card-tag">Mobile · Plans · Punch list · Tasks · Offline · Foreman-friendly</div>
+                    </a>
+                    <a href="https://www.samsara.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Samsara</div>
+                        <div class="res-card-desc">Fleet and equipment telematics platform. GPS tracking, engine hours, fuel consumption, driver behavior, and ELD compliance in one system. Used by civil contractors to manage truck fleets, track equipment location, and monitor operator performance. Real-time visibility into where your equipment is and whether it's running. Strong ROI on idle reduction and equipment utilization.</div>
+                        <div class="res-card-tag">Telematics · GPS · Fleet · Equipment · ELD · Fuel tracking</div>
+                    </a>
+                    <a href="https://www.tenna.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Tenna</div>
+                        <div class="res-card-desc">Equipment tracking built specifically for construction. Tracks everything from heavy iron to small tools and attachments. Uses GPS, Bluetooth, and cellular depending on the asset type. Connects to HCSS for equipment hour reporting. Good for contractors with large mixed fleets who need to know where every piece of equipment is and how many hours it's running.</div>
+                        <div class="res-card-tag">Equipment tracking · GPS · Small tools · HCSS integration · Construction-specific</div>
+                    </a>
+                </div>
+
+                <h2 class="res-h2">How AI is changing field management</h2>
+                <ul class="res-list">
+                    <li>AI can read daily report narratives and extract production quantities — reducing manual data entry from the field</li>
+                    <li>Anomaly detection in cost-vs-budget data — AI flags when a bid item is tracking 20%+ over budget before it becomes a problem</li>
+                    <li>RFI drafting — give the AI the drawing issue and it writes the RFI. Takes 20 minutes of PM time down to 2.</li>
+                    <li>Email triage — AI reads incoming project emails, classifies them (owner directive, sub question, inspection notice), and drafts responses</li>
+                    <li>Meeting summaries — AI transcribes and summarizes OAC meetings, extracts action items and responsible parties</li>
+                </ul>
+                <p class="res-text"><a href="#software-architecture" class="link" onclick="showSection('software-architecture'); return false;">Go deeper: project management API, webhook, and integration architecture.</a></p>
+            </section>
+
+            <!-- Industry Software: Architecture Deep Dive -->
+            <section class="res-section" id="section-software-architecture">
+                <h1 class="res-title">Construction Software Architecture Deep Dive</h1>
+                <p class="res-desc">A technical map of the software stack used in heavy civil: Excel, Bluebeam, AutoCAD/Civil 3D, HCSS, Bid2Win/B2W/InEight, and project management platforms. Focus: architecture layers, APIs, languages, and integration patterns used in real contractor workflows.</p>
+
+                <div class="res-callout">
+                    <strong>Scope and accuracy note:</strong> This section prioritizes publicly documented interfaces. Internal proprietary implementation details are either marked as inferred patterns or intentionally omitted when not documented by the vendor.
+                </div>
+
+                <h2 class="res-h2">Cross-Stack Architecture Matrix</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table res-matrix">
+                        <thead>
+                            <tr>
+                                <th>Platform</th>
+                                <th>Primary Runtime Layer</th>
+                                <th>Typical Data Artifacts</th>
+                                <th>Automation + API Surface</th>
+                                <th>Practical Integration Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Excel</strong></td>
+                                <td>Desktop and web workbook engine + formula recalculation graph</td>
+                                <td>XLSX, tables, Pivot models, CSV exports, Power Query definitions</td>
+                                <td>Formulas, VBA, Office Scripts, Excel JS Add-ins, Power Query M</td>
+                                <td>Cost model host, estimate normalization, handoff to ERP/BI</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bluebeam Revu + Studio</strong></td>
+                                <td>Desktop PDF markup client + Studio cloud collaboration services</td>
+                                <td>PDF, markup sets, Studio Session logs, Project document sets</td>
+                                <td>Studio API (OAuth), Revu JavaScript, Revu script engine commands</td>
+                                <td>Plan review, takeoff markups, review traceability, document routing</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AutoCAD/Civil 3D</strong></td>
+                                <td>DWG-based CAD host + Civil object model extensions</td>
+                                <td>DWG, alignments, profiles, corridors, surfaces, quantity outputs</td>
+                                <td>AutoLISP, .NET API, ObjectARX SDK, APS endpoints</td>
+                                <td>Design source of truth feeding plan production and quantities</td>
+                            </tr>
+                            <tr>
+                                <td><strong>HCSS (HeavyBid + HeavyJob)</strong></td>
+                                <td>Estimating and field operations applications with shared domain schema</td>
+                                <td>Bid items, crews, production rates, cost codes, daily production data</td>
+                                <td>HCSS Developer APIs (HeavyBid, HeavyJob, Estimate Insights)</td>
+                                <td>Budget-to-actual chain from estimate assumptions to field execution</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bid2Win/B2W/InEight</strong></td>
+                                <td>Heavy civil estimating workflows across legacy and modern product lines</td>
+                                <td>Estimate structures, resources, bid items, historical estimate datasets</td>
+                                <td>InEight Estimate + Explore API documentation and integration endpoints</td>
+                                <td>Alternative estimating stack with reporting and enterprise integration</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PM Platforms (Procore, ACC, Primavera)</strong></td>
+                                <td>Cloud project records + workflow/state engines</td>
+                                <td>RFIs, submittals, issues, schedules, transmittals, change events</td>
+                                <td>REST APIs, webhooks/events, identity/scoped auth models</td>
+                                <td>System-of-record layer coordinating field, office, owner, and finance</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Reference Architecture — Typical Construction Data Plane</h2>
+                <div class="flow-diag">
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            <div class="flow-node-title">Design Systems</div>
+                            <ul class="flow-node-items">
+                                <li>Civil 3D / CAD authoring</li>
+                                <li>As-built revisions</li>
+                                <li>Corridor, surface, and alignment data</li>
+                            </ul>
+                        </div>
+                        <div class="flow-node">
+                            <div class="flow-node-title">Document Layer</div>
+                            <ul class="flow-node-items">
+                                <li>PDF plans + specs</li>
+                                <li>OCR / extraction pipeline</li>
+                                <li>Markup + review history</li>
+                            </ul>
+                        </div>
+                        <div class="flow-node">
+                            <div class="flow-node-title">Commercial Core</div>
+                            <ul class="flow-node-items">
+                                <li>Estimating — HeavyBid / Bid2Win / Excel</li>
+                                <li>Budget baselines</li>
+                                <li>Field tracking — HeavyJob / PM</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flow-down">
+                        <div class="flow-down-line"></div>
+                        <div class="flow-down-arrow">▼</div>
+                        <div class="flow-down-label">daily quantities + costs, document routing, change events</div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node flow-node-primary">
+                            <div class="flow-node-title">Project Management — System of Record</div>
+                            <ul class="flow-node-items">
+                                <li>Procore / ACC / Primavera</li>
+                                <li>RFIs, submittals, change events, schedule state</li>
+                                <li>Owner, GC, subcontractor coordination</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flow-down">
+                        <div class="flow-down-line"></div>
+                        <div class="flow-down-arrow">▼</div>
+                        <div class="flow-down-label">API + webhook + exports</div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node flow-node-accent">
+                            <div class="flow-node-title">ERP / BI / Data Warehouse</div>
+                            <ul class="flow-node-items">
+                                <li>Financial reporting + payroll</li>
+                                <li>Cost-vs-budget variance analytics</li>
+                                <li>Forecast updates + executive dashboards</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="res-h2">Excel Architecture (Deep)</h2>
+                <p class="res-text">Excel is not just a spreadsheet UI. It is a layered computation platform with a dependency graph, calculation chain, query language surface, and multiple automation runtimes.</p>
+                <ul class="res-list">
+                    <li><strong>Grid + formula layer:</strong> cell formulas define directed dependencies; recalc uses dependency trees and calculation chains, with multithreaded recalculation for eligible paths.</li>
+                    <li><strong>Data shaping layer:</strong> Power Query uses the <strong>M language</strong> for extraction and transformation before data reaches reporting models.</li>
+                    <li><strong>Automation layer:</strong> VBA (legacy but dominant), Office Scripts (TypeScript-flavored JS in Excel on the web), and Office Add-ins (Excel JavaScript API).</li>
+                    <li><strong>Integration layer:</strong> Power Automate orchestration, connectors, ODBC/OData and API-driven workflows through add-ins/scripts.</li>
+                </ul>
+                <div class="res-table-wrap">
+                    <table class="res-table res-matrix">
+                        <thead><tr><th>Excel Layer</th><th>Primary Language</th><th>Best Use in Construction</th><th>Limitations to Manage</th></tr></thead>
+                        <tbody>
+                            <tr><td>Formulas + named ranges</td><td>Excel formula language</td><td>Rapid estimate math, production factors, bid alternates</td><td>Hard to govern at scale without strong template discipline</td></tr>
+                            <tr><td>Macros</td><td>VBA</td><td>Legacy automation inside estimator workflows</td><td>Desktop dependency, security policy friction</td></tr>
+                            <tr><td>Power Query</td><td>M</td><td>Importing vendor exports and normalizing cost data</td><td>Can become opaque without documented query steps</td></tr>
+                            <tr><td>Office Scripts</td><td>JavaScript/TypeScript model</td><td>Repeatable web-based workbook automations</td><td>Feature parity differs from desktop VBA patterns</td></tr>
+                            <tr><td>Office Add-ins</td><td>JavaScript API</td><td>Custom estimate assistants and API-connected side panels</td><td>Requires web app hosting + deployment governance</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Bluebeam Architecture (Deep)</h2>
+                <p class="res-text">Bluebeam is best understood as two cooperating layers: <strong>Revu desktop</strong> for authoring/markup and <strong>Studio cloud</strong> for controlled collaboration and workflow automation.</p>
+                <div class="flow-diag">
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            <div class="flow-node-title">Revu Desktop</div>
+                            <ul class="flow-node-items">
+                                <li>PDF rendering + markup authoring</li>
+                                <li>Measurement + takeoff workflows</li>
+                                <li>JavaScript for forms / stamps</li>
+                                <li>Script engine for batch actions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flow-down">
+                        <div class="flow-down-line"></div>
+                        <div class="flow-down-arrow">▼</div>
+                        <div class="flow-down-label">sync / auth</div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node flow-node-primary">
+                            <div class="flow-node-title">Studio Cloud</div>
+                            <ul class="flow-node-items">
+                                <li>Sessions — real-time review context</li>
+                                <li>Projects — document repositories</li>
+                                <li>Jobs — automated project file operations</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flow-down">
+                        <div class="flow-down-line"></div>
+                        <div class="flow-down-arrow">▼</div>
+                        <div class="flow-down-label">OAuth 2.0 + scoped access</div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node flow-node-accent">
+                            <div class="flow-node-title">Studio API Integrations</div>
+                            <ul class="flow-node-items">
+                                <li>External document pipelines</li>
+                                <li>Reporting + workflow bridges</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <ul class="res-list">
+                    <li><strong>Studio API model:</strong> Sessions, Projects, and Jobs are the major functional groups in official docs.</li>
+                    <li><strong>Identity/security:</strong> OAuth-based authorization and explicit scopes. Integration governance matters for enterprise rollouts.</li>
+                    <li><strong>Desktop automation boundary:</strong> Revu JavaScript + ScriptEngine support local document automation; Studio API handles cloud-integrated actions.</li>
+                    <li><strong>Construction implication:</strong> treat Bluebeam as a controlled document workflow engine, not just a PDF editor.</li>
+                </ul>
+
+                <h2 class="res-h2">AutoCAD + Civil 3D Architecture (Deep)</h2>
+                <p class="res-text">Civil 3D is a domain layer built on top of AutoCAD. In practical terms, teams use DWG as the exchange artifact, while extension developers work through AutoCAD/Civil APIs at different abstraction levels.</p>
+                <ul class="res-list">
+                    <li><strong>Base CAD host:</strong> AutoCAD command/runtime environment and DWG object ecosystem.</li>
+                    <li><strong>Civil domain objects:</strong> alignments, profiles, corridors, pipe networks, surfaces, and labels.</li>
+                    <li><strong>Extension stack:</strong> AutoLISP for task automation, .NET APIs for managed plugins, ObjectARX SDK for lower-level extensions.</li>
+                    <li><strong>Cloud adjacency:</strong> Autodesk Platform Services (APS) and Construction Cloud APIs expose integration surfaces beyond desktop plugins.</li>
+                </ul>
+                <div class="res-callout">
+                    <strong>Operational rule:</strong> if your estimating or PM tools consume Civil output, define a strict exchange contract (file naming, sheet metadata, object export standards, version stamps). Integration failures are usually process contract failures, not geometry failures.
+                </div>
+
+                <h2 class="res-h2">HCSS HeavyBid + HeavyJob Architecture (Deep)</h2>
+                <p class="res-text">The core HCSS value is continuity: estimate intent to field execution to variance analysis. Architecturally, it is a domain-specific production and cost system rather than a generic PM shell.</p>
+                <div class="flow-diag">
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            <div class="flow-node-title">HeavyBid — Preconstruction</div>
+                            <ul class="flow-node-items">
+                                <li>Bid items</li>
+                                <li>Crews / resources / rates</li>
+                                <li>Production assumptions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flow-down">
+                        <div class="flow-down-line"></div>
+                        <div class="flow-down-arrow">▼</div>
+                        <div class="flow-down-label">baseline mapping</div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node flow-node-primary">
+                            <div class="flow-node-title">HeavyJob — Field Capture + Control</div>
+                            <ul class="flow-node-items">
+                                <li>Daily quantities</li>
+                                <li>Labor / equipment hours</li>
+                                <li>Production against bid items</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flow-down">
+                        <div class="flow-down-line"></div>
+                        <div class="flow-down-arrow">▼</div>
+                        <div class="flow-down-label">analytics APIs / exports</div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node flow-node-accent">
+                            <div class="flow-node-title">Estimate Insights + External BI / ERP</div>
+                            <ul class="flow-node-items">
+                                <li>Cost-vs-budget variance reporting</li>
+                                <li>Production trend analytics</li>
+                                <li>Forecast + decision support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <ul class="res-list">
+                    <li><strong>API surface:</strong> HCSS developer portal exposes product-specific APIs and scopes; integration design should map least-privilege scope to each service.</li>
+                    <li><strong>Key data contract:</strong> stable bid-item/cost-code identity across systems is required for meaningful budget-vs-actual reporting.</li>
+                    <li><strong>Failure mode:</strong> if field data is aggregated too coarsely, estimate-level diagnostics collapse and corrective action arrives too late.</li>
+                </ul>
+
+                <h2 class="res-h2">Bid2Win, B2W, and InEight — Architecture Clarification</h2>
+                <p class="res-text">Naming in this market can be confusing. Depending on organization and deployment history, teams may reference legacy Bid2Win/B2W workflows and/or current InEight Estimate capabilities. Treat this as a lineage and integration continuity problem.</p>
+                <ul class="res-list">
+                    <li><strong>System reality:</strong> organizations often retain historical estimate structures while modernizing reporting/integration interfaces.</li>
+                    <li><strong>Integration anchor:</strong> model around stable estimate entities (resources, bid items, cost accounts), not around UI-specific terminology.</li>
+                    <li><strong>API direction:</strong> InEight documentation provides API integration patterns and Explore/self-service reporting endpoints for downstream analytics.</li>
+                    <li><strong>Migration advice:</strong> keep a canonical mapping dictionary from legacy estimate IDs to enterprise reporting IDs before replacing tools.</li>
+                </ul>
+                <div class="res-callout">
+                    <strong>Practical takeaway:</strong> do not start integration work by asking which product name is current. Start by inventorying the estimate entities your operations and finance teams depend on every week.
+                </div>
+
+                <h2 class="res-h2">Project Management Platform Architecture Patterns</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table res-matrix">
+                        <thead><tr><th>Platform</th><th>Core Model</th><th>API/Event Pattern</th><th>Where It Fits in Heavy Civil</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Procore</strong></td>
+                                <td>Cloud project records for RFIs, submittals, logs, financial workflows</td>
+                                <td>REST APIs + webhook model + OAuth app ecosystem</td>
+                                <td>Owner/GC-facing collaboration and compliance records</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Autodesk Construction Cloud</strong></td>
+                                <td>Project/document and model-centered collaboration stack</td>
+                                <td>APS/ACC APIs across data, models, issues, and integrations</td>
+                                <td>Design-to-construction continuity and model-centric coordination</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Oracle Primavera (P6)</strong></td>
+                                <td>Schedule-first enterprise planning and controls</td>
+                                <td>REST endpoints for programmatic schedule/project operations</td>
+                                <td>Complex schedule governance and owner program controls</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ERP-coupled PM stacks</strong></td>
+                                <td>Finance-led project controls tied to payroll/equipment/accounting</td>
+                                <td>API + ETL + file-based bridges depending on deployment</td>
+                                <td>Cost accountability and accounting integration depth</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Integration Blueprint — Estimate to Field to Finance</h2>
+                <div class="flow-diag">
+                    <div class="flow-timeline">
+                        <div class="flow-tl-item">
+                            <div class="flow-tl-num">1</div>
+                            <div class="flow-tl-content">
+                                <div class="flow-tl-title">Design + document inputs</div>
+                                <div class="flow-tl-desc">Civil files, plan PDFs, specs, addenda</div>
+                            </div>
+                        </div>
+                        <div class="flow-tl-item">
+                            <div class="flow-tl-num">2</div>
+                            <div class="flow-tl-content">
+                                <div class="flow-tl-title">Quantity + estimate layer</div>
+                                <div class="flow-tl-desc">Bluebeam / takeoff + HeavyBid / Bid2Win / Excel model</div>
+                            </div>
+                        </div>
+                        <div class="flow-tl-item">
+                            <div class="flow-tl-num">3</div>
+                            <div class="flow-tl-content">
+                                <div class="flow-tl-title">Baseline publication</div>
+                                <div class="flow-tl-desc">Approved bid items + production assumptions + cost code map</div>
+                            </div>
+                        </div>
+                        <div class="flow-tl-item">
+                            <div class="flow-tl-num">4</div>
+                            <div class="flow-tl-content">
+                                <div class="flow-tl-title">Field execution layer</div>
+                                <div class="flow-tl-desc">HeavyJob / PM daily logs / telematics</div>
+                            </div>
+                        </div>
+                        <div class="flow-tl-item">
+                            <div class="flow-tl-num">5</div>
+                            <div class="flow-tl-content">
+                                <div class="flow-tl-title">Controls + governance</div>
+                                <div class="flow-tl-desc">PM system — RFIs, submittals, change events, schedule state</div>
+                            </div>
+                        </div>
+                        <div class="flow-tl-item">
+                            <div class="flow-tl-num">6</div>
+                            <div class="flow-tl-content">
+                                <div class="flow-tl-title">Financial + analytics layer</div>
+                                <div class="flow-tl-desc">ERP posting + BI variance views + forecast updates</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flow-note">Critical control point: one canonical dictionary for bid item IDs, cost codes, and phase codes.</div>
+                </div>
+
+                <h2 class="res-h2">Implementation Checklist (for Contractors Building Integrations)</h2>
+                <ol class="res-list">
+                    <li>Define a canonical data model first (bid item ID, cost code, crew code, equipment code, phase).</li>
+                    <li>Assign system-of-record ownership per entity (estimate, field quantity, cost, schedule, document).</li>
+                    <li>Document API auth + scopes by integration service and enforce least privilege.</li>
+                    <li>Choose event-triggered vs batch synchronization per data type (urgent controls vs historical reporting).</li>
+                    <li>Instrument variance alerts where the business acts: daily production and weekly cost forecast cycles.</li>
+                    <li>Version every exchange contract (schema + transformation rules) before scaling to more projects.</li>
+                </ol>
+
+                <h2 class="res-h2">Primary Technical Sources</h2>
+                <div class="res-link-groups">
+                    <div class="res-link-group">
+                        <div class="res-link-group-title">Excel</div>
+                        <div class="res-links">
+                            <a href="https://learn.microsoft.com/en-us/office/client-developer/excel/excel-recalculation" target="_blank" rel="noopener" class="res-ext-link">Excel Recalculation Architecture</a>
+                            <a href="https://learn.microsoft.com/en-us/office/client-developer/excel/multithreaded-recalculation-in-excel" target="_blank" rel="noopener" class="res-ext-link">Excel Multithreaded Recalculation</a>
+                            <a href="https://learn.microsoft.com/en-us/office/dev/add-ins/reference/overview/excel-add-ins-reference-overview" target="_blank" rel="noopener" class="res-ext-link">Excel JavaScript API Overview</a>
+                            <a href="https://learn.microsoft.com/en-us/office/dev/scripts/" target="_blank" rel="noopener" class="res-ext-link">Office Scripts Documentation</a>
+                            <a href="https://learn.microsoft.com/en-us/powerquery-m/power-query-m-language-specification" target="_blank" rel="noopener" class="res-ext-link">Power Query M Language Specification</a>
+                        </div>
+                    </div>
+
+                    <div class="res-link-group">
+                        <div class="res-link-group-title">Bluebeam</div>
+                        <div class="res-links">
+                            <a href="https://developers.bluebeam.com/articles/getting-started/" target="_blank" rel="noopener" class="res-ext-link">Bluebeam Developer Network — Getting Started</a>
+                            <a href="https://developers.bluebeam.com/articles/studio-api-functionality/" target="_blank" rel="noopener" class="res-ext-link">Studio API Functionality</a>
+                            <a href="https://support.bluebeam.com/developer/authentication-guide.html" target="_blank" rel="noopener" class="res-ext-link">Studio API Authentication Guide</a>
+                            <a href="https://support.bluebeam.com/developer/javascript/api-reference.html" target="_blank" rel="noopener" class="res-ext-link">Revu JavaScript API Reference</a>
+                            <a href="https://support.bluebeam.com/revu/resources/script-reference-guide.html" target="_blank" rel="noopener" class="res-ext-link">Revu Script Reference Guide</a>
+                        </div>
+                    </div>
+
+                    <div class="res-link-group">
+                        <div class="res-link-group-title">AutoCAD / Civil 3D / ACC</div>
+                        <div class="res-links">
+                            <a href="https://forge.autodesk.com/developer/overview/civil-3d" target="_blank" rel="noopener" class="res-ext-link">Civil 3D API Overview</a>
+                            <a href="https://aps.autodesk.com/developer/overview/objectarx-autocad-sdk" target="_blank" rel="noopener" class="res-ext-link">ObjectARX SDK Overview</a>
+                            <a href="https://aps.autodesk.com/developer/overview/autodesk-construction-cloud" target="_blank" rel="noopener" class="res-ext-link">Autodesk Construction Cloud APIs</a>
+                        </div>
+                    </div>
+
+                    <div class="res-link-group">
+                        <div class="res-link-group-title">HCSS + InEight + PM Platforms</div>
+                        <div class="res-links">
+                            <a href="https://developer.hcssapps.com/products/heavyjob/overview/" target="_blank" rel="noopener" class="res-ext-link">HCSS HeavyJob API Overview</a>
+                            <a href="https://developer.hcssapps.com/products/heavybid-pre-construction/overview" target="_blank" rel="noopener" class="res-ext-link">HCSS HeavyBid API Overview</a>
+                            <a href="https://developer.hcssapps.com/hcss/docs/api-scopes" target="_blank" rel="noopener" class="res-ext-link">HCSS API Scopes</a>
+                            <a href="https://learn.ineight.com/Estimate/Content/12-API-Integration/11-1-1-APIIntegration.htm" target="_blank" rel="noopener" class="res-ext-link">InEight Estimate API Integration</a>
+                            <a href="https://developers.procore.com/documentation/webhooks-api" target="_blank" rel="noopener" class="res-ext-link">Procore Webhooks API</a>
+                            <a href="https://docs.oracle.com/cd/G18294_01/English/Integration_Documentation/rest_api/index.html" target="_blank" rel="noopener" class="res-ext-link">Oracle Primavera P6 REST API</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Industry Software: Safety Training -->
+            <section class="res-section" id="section-software-safety">
+                <h1 class="res-title">Safety Training Software</h1>
+                <p class="res-desc">Safety training is federally mandated and practically critical. The tools here handle crew training, competency documentation, incident management, and safety observation programs.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.tyfoom.com" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">Tyfoom</div>
+                        <div class="res-card-desc">Video-based micro-training platform built for construction crews. Short daily safety videos (2-4 minutes) delivered to crews' phones — no classroom required. Workers watch, pass a quick quiz, and the completion is logged and documented. Covers OSHA topics, company-specific procedures, equipment safety, and trade-specific hazards. Particularly effective for non-English-speaking crews — content available in multiple languages. OSHA documentation is automatic. Used by some of the largest heavy civil contractors in the country.</div>
+                        <div class="res-card-tag">Safety training · Mobile · Video · OSHA · Multi-language · Crew-facing</div>
+                    </a>
+                    <a href="https://www.safetyculture.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">SafetyCulture (iAuditor)</div>
+                        <div class="res-card-desc">Mobile inspection and audit platform. Build custom safety inspection checklists, conduct site inspections from a phone, and automatically generate reports. Used for daily toolbox talks, job hazard analysis (JHA) documentation, equipment pre-start inspections, and incident reporting. Good integration with photo documentation — inspectors photo a hazard, it's logged with location and timestamp.</div>
+                        <div class="res-card-tag">Inspections · JHA · Toolbox talks · Mobile · Photo documentation · Reports</div>
+                    </a>
+                    <a href="https://www.predictivesolutions.com" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">Predictive Solutions</div>
+                        <div class="res-card-desc">Safety analytics and leading indicator tracking. Analyzes observation data to predict where incidents are likely to occur before they happen. Used by large GCs and owners to move from reactive (incident investigation) to proactive (hazard prediction) safety programs. Integrates with Procore and other PM platforms.</div>
+                        <div class="res-card-tag">Analytics · Predictive · Leading indicators · Enterprise · Safety program</div>
+                    </a>
+                    <a href="https://www.hcss.com/safety" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">HCSS Safety</div>
+                        <div class="res-card-desc">Safety management module from HCSS — the same company behind HeavyBid and HeavyJob. Handles near-miss reporting, incident tracking, safety observations, and training documentation. Integrates with the rest of the HCSS platform, so safety data ties directly to project data. Logical choice for contractors already running HCSS for estimating and field tracking.</div>
+                        <div class="res-card-tag">HCSS · Incident tracking · Observations · Training docs · Integrated</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>OSHA requirement reminder:</strong> Training documentation is not optional — it is a federal record-keeping requirement under 29 CFR 1926. Software that auto-generates completion records protects you in an OSHA inspection. Keeping paper sign-in sheets in a job box is legally sufficient but practically fragile. Digital documentation survives audits better.
+                </div>
+            </section>
+
+            <!-- Industry Software: Training & Community -->
+            <section class="res-section" id="section-software-training">
+                <h1 class="res-title">Training &amp; Community</h1>
+                <p class="res-desc">The best resource in heavy civil has always been people who've done the work. These platforms make that knowledge accessible — from safety fundamentals to machine operation to business strategy.</p>
+
+                <div class="res-card-grid">
+                    <a href="https://www.buildwitt.com/training" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">BuildWitt Training</div>
+                        <div class="res-card-desc">Video training platform built specifically for heavy civil and underground construction crews. Founded by Aaron Witt. Content covers machine operation, pipe installation, safety, leadership, and business. Videos are made on real job sites by people who actually do the work — not actors in a studio. Available in English and Spanish. Crews watch on their phones. Operators, laborers, and foremen all have relevant content. One of the most practical training investments a heavy civil contractor can make. Substantial library, continuously growing.</div>
+                        <div class="res-card-tag">Heavy civil · Crew training · Video · Machine operation · Spanish · Field-made</div>
+                    </a>
+                    <a href="https://www.buildwitt.com/community" target="_blank" rel="noopener" class="res-card res-card-featured">
+                        <div class="res-card-title">BuildWitt Community</div>
+                        <div class="res-card-desc">Online community for people in dirt work, heavy civil, and underground construction. Owners, operators, foremen, and estimators sharing what works. Active discussion on equipment, business, hiring, and operations. Aaron Witt and the BuildWitt team are active participants. Good signal-to-noise ratio compared to general construction forums. If you're building a career or a company in heavy civil and you're not tapped into this community, you're missing real value.</div>
+                        <div class="res-card-tag">Community · Heavy civil · Dirt work · Networking · Business · Operators</div>
+                    </a>
+                    <a href="https://www.youtube.com/@BuildWitt" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">BuildWitt — YouTube</div>
+                        <div class="res-card-desc">Free video content from BuildWitt on YouTube — job site footage, equipment walkthroughs, business interviews, and culture content. Good for getting a feel for the BuildWitt approach before committing to a training subscription. One of the most-watched channels in the heavy civil space.</div>
+                        <div class="res-card-tag">YouTube · Free · Heavy civil · Equipment · Culture</div>
+                    </a>
+                    <a href="https://www.nccer.org" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">NCCER — National Center for Construction Education</div>
+                        <div class="res-card-desc">The primary credentialing body for construction craft training in the US. NCCER certifications are recognized nationally and often required for public works projects and union/open-shop training programs. Covers pipeline, utility, heavy equipment, electrical, concrete, and dozens of other trades. Assessments and transcripts are portable — workers carry their record with them regardless of employer.</div>
+                        <div class="res-card-tag">Certification · Credentials · Craft training · Portable · Public works</div>
+                    </a>
+                    <a href="https://www.agc.org" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">AGC — Associated General Contractors</div>
+                        <div class="res-card-desc">The primary trade association for general contractors in the US. AGC chapters provide training, industry data, legislative advocacy, and networking. Their Constructor certification program and project management courses are industry-respected. State chapters often have connections to DOT pre-qualification and workforce development programs. Membership pays back for contractors engaged in public works.</div>
+                        <div class="res-card-tag">Trade association · Training · Certification · Advocacy · Networking · Public works</div>
+                    </a>
+                    <a href="https://www.apwa.net" target="_blank" rel="noopener" class="res-card">
+                        <div class="res-card-title">APWA — American Public Works Association</div>
+                        <div class="res-card-desc">Association for public works professionals — the people who own and maintain the infrastructure you build. Strong resource for utility color codes, standards, and public works project procedures. APWA publishes the uniform color code standard for underground utility marking (the one on the resources page). Connecting with your local public works agencies through APWA is good for pipeline and relationship development.</div>
+                        <div class="res-card-tag">Public works · Standards · Utility colors · Networking · Owners</div>
+                    </a>
+                </div>
+
+                <div class="res-callout">
+                    <strong>The real competitive edge in 2025-26:</strong> Companies pulling ahead in heavy civil are doing two things simultaneously — investing in their people (BuildWitt Training, NCCER, mentorship programs) and investing in their systems (HCSS, production tracking, digital takeoff). The companies standing still on both fronts are losing bids and losing people to the companies doing both.
+                </div>
+            </section>
+
+            <!-- ─── Software Dev Basics: Core Concepts ────────────────── -->
+            <section class="res-section" id="section-dev-concepts">
+                <h1 class="res-title">Software Development — Core Concepts</h1>
+                <p class="res-desc">You don't need to code to work with software developers, buy software, or evaluate contech products. But understanding the vocabulary changes every conversation. These are the essential concepts.</p>
+
+                <div class="res-callout">
+                    <strong>Why this matters in construction:</strong> Software is eating the industry. Estimating, scheduling, field reporting, drone data, machine control, and now AI — all of it runs on the same underlying concepts. Contractors who understand the vocabulary negotiate better contracts, ask better questions, and avoid expensive integration mistakes.
+                </div>
+
+                <h2 class="res-h2">The Essential Vocabulary</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Term</th><th>Plain English</th><th>Construction Example</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Algorithm</strong></td><td>A step-by-step set of rules a computer follows to solve a problem</td><td>Manning's equation solved by your pipe flow calculator — same inputs, same output, every time</td></tr>
+                            <tr><td><strong>API</strong></td><td>Application Programming Interface — a structured way for two software programs to talk to each other</td><td>Procore sending project data to your accounting software without you exporting a spreadsheet</td></tr>
+                            <tr><td><strong>SDK</strong></td><td>Software Development Kit — a toolkit that lets developers build on top of an existing platform</td><td>Trimble's SDK lets developers write custom apps that use Trimble's GPS data and coordinate systems</td></tr>
+                            <tr><td><strong>Database (DB)</strong></td><td>Organized storage for structured data — think of it as a spreadsheet that millions of rows can query instantly</td><td>HCSS stores every time entry, every piece of equipment, every job — queried in real time by reports</td></tr>
+                            <tr><td><strong>Frontend</strong></td><td>The part of software you see and click — the UI</td><td>The web page in your browser when you open Procore or openmud.ai</td></tr>
+                            <tr><td><strong>Backend</strong></td><td>The server-side code that processes data, runs logic, and communicates with the database</td><td>When you hit "Submit" on an RFI, the backend validates it, saves it, notifies the engineer, and logs the timestamp</td></tr>
+                            <tr><td><strong>Server</strong></td><td>A computer (or virtual computer) that runs software and serves data to other computers</td><td>When you open HCSS in the field, your phone talks to HCSS's servers to load your jobs</td></tr>
+                            <tr><td><strong>Cloud</strong></td><td>Someone else's servers, rented by the hour — no hardware to own or maintain</td><td>AWS, Google Cloud, and Azure host most construction software. "Cloud-based" = data lives on the internet, not your office server</td></tr>
+                            <tr><td><strong>Integration</strong></td><td>Connecting two software systems so they share data automatically</td><td>Your takeoff software pushing quantities into your estimating software without a manual export</td></tr>
+                            <tr><td><strong>Webhook</strong></td><td>An automatic notification from one system to another when something happens</td><td>Procore sending a webhook to your Slack channel whenever a submittal is approved</td></tr>
+                            <tr><td><strong>Authentication / Auth</strong></td><td>Verifying who you are before letting you in</td><td>Your username + password, or SSO ("Sign in with Google")</td></tr>
+                            <tr><td><strong>Permission / Role</strong></td><td>Rules about what each user is allowed to do</td><td>Field crews can log time but can't see financials — different roles, different access</td></tr>
+                            <tr><td><strong>Version Control</strong></td><td>Tracking every change to code over time, so you can see what changed and revert if needed</td><td>Git — the system that runs GitHub. Every change to openmud's code is tracked commit by commit</td></tr>
+                            <tr><td><strong>Open Source</strong></td><td>Software whose code is publicly available — anyone can read it, use it, and contribute to it</td><td>openmud is MIT-licensed open source. The Python tools, API, and frontend are all public</td></tr>
+                            <tr><td><strong>SaaS</strong></td><td>Software as a Service — you pay a subscription, the vendor runs everything</td><td>Procore, HCSS, Autodesk Construction Cloud — you never install anything, just log in via browser</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">How Software Gets Built</h2>
+                <p class="res-text">Understanding the development process helps you set realistic timelines and know when a vendor's promise is believable.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Phase</th><th>What happens</th><th>Who's involved</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Requirements</strong></td><td>Define what the software needs to do in plain language</td><td>You, your team, and a product manager or developer</td></tr>
+                            <tr><td><strong>Design / Architecture</strong></td><td>How will the system be structured? What database? What APIs?</td><td>Senior developers, architects</td></tr>
+                            <tr><td><strong>Development</strong></td><td>Writing the actual code</td><td>Developers (frontend, backend, or full-stack)</td></tr>
+                            <tr><td><strong>Testing / QA</strong></td><td>Does it work? Does it break? Edge cases?</td><td>QA engineers, automated test suites</td></tr>
+                            <tr><td><strong>Deployment</strong></td><td>Putting the code on a server where users can access it</td><td>DevOps engineers, CI/CD pipelines</td></tr>
+                            <tr><td><strong>Maintenance</strong></td><td>Bug fixes, performance improvements, new features</td><td>Ongoing — never really "done"</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://developer.mozilla.org/en-US/docs/Learn" target="_blank" rel="noopener" class="res-ext-link">MDN Web Docs — Free web dev learning ↗</a>
+                    <a href="https://www.freecodecamp.org" target="_blank" rel="noopener" class="res-ext-link">freeCodeCamp — Free coding curriculum ↗</a>
+                    <a href="https://roadmap.sh" target="_blank" rel="noopener" class="res-ext-link">roadmap.sh — Visual dev career paths ↗</a>
+                </div>
+            </section>
+
+            <!-- ─── Software Dev Basics: Frontend / Backend / DB ──────── -->
+            <section class="res-section" id="section-dev-stack">
+                <h1 class="res-title">Frontend, Backend &amp; Database — The Three-Layer Stack</h1>
+                <p class="res-desc">Every software application — from Procore to openmud — is built on three layers. Understanding how they relate to each other changes how you evaluate software, plan integrations, and talk to developers.</p>
+
+                <h2 class="res-h2">The Three Layers</h2>
+                <div class="res-arch-diagram" style="font-family:'Inter',monospace;margin:20px 0;">
+<pre style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;color:var(--text);font-size:0.8125rem;line-height:1.8;">
+  ┌─────────────────────────────────────────────────────┐
+  │                  FRONTEND (Client)                  │
+  │         HTML · CSS · JavaScript · React             │
+  │   What the user sees and clicks in their browser    │
+  │   or mobile app. Runs on the user's device.         │
+  └───────────────────────┬─────────────────────────────┘
+                          │  HTTP Requests (API calls)
+                          │
+  ┌───────────────────────▼─────────────────────────────┐
+  │                   BACKEND (Server)                  │
+  │         Node.js · Python · Java · Go · C#           │
+  │   Business logic, data processing, authentication.  │
+  │   Runs on servers (usually in the cloud).           │
+  └───────────────────────┬─────────────────────────────┘
+                          │  Database Queries (SQL / ORM)
+                          │
+  ┌───────────────────────▼─────────────────────────────┐
+  │                  DATABASE (Storage)                 │
+  │      PostgreSQL · MySQL · MongoDB · Redis           │
+  │   Persistent storage for all data. The source of    │
+  │   truth. Lives on secure servers, backed up.        │
+  └─────────────────────────────────────────────────────┘</pre>
+                </div>
+
+                <h2 class="res-h2">Each Layer in Detail</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Layer</th><th>What it does</th><th>Common tools</th><th>Construction analogy</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Frontend</strong></td>
+                                <td>Renders UI. Captures user input. Makes API calls to the backend. Handles display logic.</td>
+                                <td>HTML, CSS, JavaScript, React, Vue, mobile apps (iOS/Android)</td>
+                                <td>The field office — where the crew interacts with the project. A nice layout and clear labels matter, but the foreman doesn't build the pipe from the office.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Backend</strong></td>
+                                <td>Processes requests. Runs business rules. Talks to databases and third-party services. Sends responses back to frontend.</td>
+                                <td>Node.js, Python (Django/FastAPI), Java, Go, Ruby on Rails, C# (.NET)</td>
+                                <td>The project manager's office — receives field data, applies the rules, coordinates with accounting, sends back the answers.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Database</strong></td>
+                                <td>Stores and retrieves structured data. Handles relationships between records. Ensures consistency.</td>
+                                <td>PostgreSQL, MySQL, SQLite, MongoDB, Redis, DynamoDB</td>
+                                <td>The job cost ledger and document archive — every transaction, every record, organized and retrievable. The source of truth.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Types of Databases</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Type</th><th>How it stores data</th><th>Best for</th><th>Examples</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Relational (SQL)</strong></td><td>Tables with rows and columns, linked by relationships (like spreadsheets that reference each other)</td><td>Structured business data: jobs, employees, equipment, costs</td><td>PostgreSQL, MySQL, SQL Server (used by HCSS, most ERP systems)</td></tr>
+                            <tr><td><strong>Document (NoSQL)</strong></td><td>Flexible JSON-like documents — each record can have different fields</td><td>Variable-structure data, content, logs</td><td>MongoDB, Firestore (used by many SaaS startups)</td></tr>
+                            <tr><td><strong>Key-Value Store</strong></td><td>Simple lookup: key → value. Extremely fast reads.</td><td>Caching, sessions, real-time data</td><td>Redis, DynamoDB (used for speed-critical lookups)</td></tr>
+                            <tr><td><strong>Time-Series</strong></td><td>Optimized for data that changes over time (timestamps are a first-class concept)</td><td>Equipment telemetry, sensor data, GPS tracks</td><td>InfluxDB, TimescaleDB (used by fleet/GPS systems)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Infrastructure Terms</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Term</th><th>What it means</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Server</strong></td><td>A computer that runs software and responds to requests. Physical (in a data center) or virtual (cloud).</td></tr>
+                            <tr><td><strong>Cloud Provider</strong></td><td>AWS (Amazon), Google Cloud (GCP), Microsoft Azure — they rent compute, storage, and databases by the hour</td></tr>
+                            <tr><td><strong>CDN</strong></td><td>Content Delivery Network — copies of your files distributed geographically so users get fast load times wherever they are. openmud uses Vercel's CDN.</td></tr>
+                            <tr><td><strong>Serverless</strong></td><td>Backend functions that run on demand — you don't manage servers, you just write code. openmud's API runs serverless on Vercel.</td></tr>
+                            <tr><td><strong>Container / Docker</strong></td><td>A packaged, self-contained environment for running software — same behavior on any machine or server</td></tr>
+                            <tr><td><strong>CI/CD</strong></td><td>Continuous Integration / Continuous Deployment — automated testing and deployment pipeline. Every push to GitHub runs tests and deploys openmud automatically.</td></tr>
+                            <tr><td><strong>Latency</strong></td><td>The time it takes for a request to travel from client to server and back. Measured in milliseconds. Matters for field apps on slow connections.</td></tr>
+                            <tr><td><strong>Uptime / SLA</strong></td><td>What percentage of time the system is available. 99.9% uptime = 8.7 hours of downtime per year. Critical for safety-of-work systems.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://aws.amazon.com/what-is/full-stack/" target="_blank" rel="noopener" class="res-ext-link">AWS — What is full-stack development? ↗</a>
+                    <a href="https://www.postgresql.org/about/" target="_blank" rel="noopener" class="res-ext-link">PostgreSQL — the most used open-source relational DB ↗</a>
+                    <a href="https://vercel.com/docs" target="_blank" rel="noopener" class="res-ext-link">Vercel Docs — how openmud's infrastructure works ↗</a>
+                </div>
+            </section>
+
+            <!-- ─── Software Dev Basics: APIs, SDKs & Webhooks ────────── -->
+            <section class="res-section" id="section-dev-apis">
+                <h1 class="res-title">APIs, SDKs &amp; Webhooks</h1>
+                <p class="res-desc">These three concepts are the backbone of software integration — how systems talk to each other. In construction, this is how your estimating software feeds your accounting system, how your GPS data gets into your project management platform, and how openmud's tools work.</p>
+
+                <div class="res-callout">
+                    <strong>The integration problem in construction:</strong> The average mid-size contractor uses 8-12 different software platforms. Each one stores data in its own silo. APIs, SDKs, and webhooks are the plumbing that connects them — or should.
+                </div>
+
+                <h2 class="res-h2">API — Application Programming Interface</h2>
+                <p class="res-text">An API is a defined contract between two software systems: "Send me a request in this format, and I'll send back a response in this format." Think of it as a menu at a restaurant — you order from a fixed menu, and the kitchen (the server) prepares exactly what you ordered.</p>
+                <div class="res-arch-diagram" style="font-family:'Inter',monospace;margin:16px 0;">
+<pre style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;color:var(--text);font-size:0.8125rem;line-height:1.8;">
+  Your App                  openmud API              Python Engine
+  ─────────────────         ─────────────────        ─────────────
+  POST /api/python/estimate ──────────────────────►  estimate_project_cost()
+  { "materials": [...],                              RATE_TABLES["utah"]
+    "labor": [...],                                  calculate labor...
+    "region": "utah" }                               calculate materials...
+                            ◄──────────────────────  return totals
+  ◄── Response:
+  { "total": 94500,
+    "region_label": "Utah",
+    "breakdown": {...} }</pre>
+                </div>
+
+                <h2 class="res-h2">REST vs GraphQL — Two API Styles</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Style</th><th>How it works</th><th>Strengths</th><th>Used by</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>REST</strong></td>
+                                <td>URLs map to resources (GET /jobs, POST /estimates). HTTP verbs define the action (GET=read, POST=create, PUT=update, DELETE=remove).</td>
+                                <td>Simple, widely understood, easy to test in a browser or curl</td>
+                                <td>Procore, HCSS, openmud, most construction software APIs</td>
+                            </tr>
+                            <tr>
+                                <td><strong>GraphQL</strong></td>
+                                <td>One endpoint, client specifies exactly what data it needs in a query language</td>
+                                <td>Efficient for complex data needs, reduces over-fetching</td>
+                                <td>GitHub, Shopify, some modern SaaS platforms</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">HTTP Methods — The Verbs</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Method</th><th>Purpose</th><th>Construction example</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>GET</strong></td><td>Read / retrieve data</td><td>Fetching a list of open RFIs from Procore</td></tr>
+                            <tr><td><strong>POST</strong></td><td>Create a new record or submit data</td><td>Submitting a new daily report</td></tr>
+                            <tr><td><strong>PUT / PATCH</strong></td><td>Update an existing record</td><td>Updating the status of a submittal from "In Review" to "Approved"</td></tr>
+                            <tr><td><strong>DELETE</strong></td><td>Remove a record</td><td>Deleting a draft change order before it's sent</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">SDK — Software Development Kit</h2>
+                <p class="res-text">An SDK is a package of pre-built code, tools, and documentation that lets developers build applications on top of a platform faster. Instead of figuring out how to call an API from scratch, the SDK gives you pre-built functions in your language of choice.</p>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>SDK</th><th>What it gives you</th><th>Used by</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Procore SDK</strong></td><td>Pre-built functions for creating projects, uploading drawings, managing submittals — without writing raw API calls</td><td>Developers building Procore integrations</td></tr>
+                            <tr><td><strong>Trimble SDK</strong></td><td>Access to Trimble's positioning data, coordinate systems, and survey instruments from custom applications</td><td>Field data collection apps, machine control integrations</td></tr>
+                            <tr><td><strong>DJI SDK</strong></td><td>Control DJI drones programmatically — flight paths, camera, telemetry — from a custom app</td><td>Construction site monitoring, inspection automation</td></tr>
+                            <tr><td><strong>OpenAI SDK</strong></td><td>Call GPT-4o, embeddings, and other AI models from Python or JavaScript without writing raw HTTP requests</td><td>openmud's chat API uses the OpenAI Python and Node.js SDKs</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Webhooks — Push vs Pull</h2>
+                <p class="res-text">APIs are <em>pull</em>: your system asks another system for data. Webhooks are <em>push</em>: the other system notifies yours the moment something happens.</p>
+                <div class="res-arch-diagram" style="font-family:'Inter',monospace;margin:16px 0;">
+<pre style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;color:var(--text);font-size:0.8125rem;line-height:1.8;">
+  Pull (API polling — inefficient):
+  Your App ──► Procore API: "Any new approvals?" ──► "No."  (every 5 min)
+  Your App ──► Procore API: "Any new approvals?" ──► "No."
+  Your App ──► Procore API: "Any new approvals?" ──► "Yes, 1 approval."
+
+  Push (Webhook — efficient):
+  Procore: "A submittal was just approved."
+  ──────────────────────────────────────────────► Your App receives event instantly
+                                                  Your App updates automatically</pre>
+                </div>
+
+                <h2 class="res-h2">API Authentication Methods</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Method</th><th>How it works</th><th>Where you see it</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>API Key</strong></td><td>A secret string passed in the request header. Simple. Good for server-to-server calls.</td><td>OpenAI API key, openmud's OPENMUD_API_KEY, most simple SaaS APIs</td></tr>
+                            <tr><td><strong>OAuth 2.0</strong></td><td>"Sign in with Google/GitHub" — your app gets a token after the user authorizes it. Token expires and refreshes.</td><td>Procore OAuth, Google, GitHub, Autodesk Platform Services</td></tr>
+                            <tr><td><strong>JWT</strong></td><td>JSON Web Token — a signed, self-contained token that carries user identity. The server doesn't need to look up every request.</td><td>Most modern web apps after login</td></tr>
+                            <tr><td><strong>Basic Auth</strong></td><td>Username + password encoded in the header. Simple but less secure unless combined with HTTPS.</td><td>Some older APIs, internal tools</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-links">
+                    <a href="https://www.postman.com/learning-center/what-is-an-api/" target="_blank" rel="noopener" class="res-ext-link">Postman — What is an API? ↗</a>
+                    <a href="https://developers.procore.com/documentation/introduction" target="_blank" rel="noopener" class="res-ext-link">Procore Developer Documentation ↗</a>
+                    <a href="https://platform.autodesk.com" target="_blank" rel="noopener" class="res-ext-link">Autodesk Platform Services (APS) ↗</a>
+                    <a href="https://developer.trimble.com" target="_blank" rel="noopener" class="res-ext-link">Trimble Developer Portal ↗</a>
+                    <a href="https://platform.openai.com/docs" target="_blank" rel="noopener" class="res-ext-link">OpenAI API Documentation ↗</a>
+                </div>
+            </section>
+
+            <!-- ─── Software Dev Basics: Dev Concepts for Contech ─────── -->
+            <section class="res-section" id="section-dev-contech">
+                <h1 class="res-title">Software Dev Concepts Applied to Contech</h1>
+                <p class="res-desc">How the core development concepts apply specifically to construction technology — evaluating software, building integrations, and understanding what vendors are actually selling you.</p>
+
+                <h2 class="res-h2">The openmud Stack — A Real Example</h2>
+                <p class="res-text">openmud is a working example of a full software stack built for construction. Everything here applies to any construction software you evaluate or build.</p>
+                <div class="res-arch-diagram" style="font-family:'Inter',monospace;margin:16px 0;">
+<pre style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;color:var(--text);font-size:0.8125rem;line-height:1.8;">
+  openmud Full Stack (open source — all of this is in GitHub)
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │  FRONTEND  (public/)                                         │
+  │  HTML + CSS + Vanilla JavaScript                             │
+  │  Runs in your browser — no framework, no build step          │
+  │  Chat UI · Calculators · Resources · Search                  │
+  └────────────────────────────┬─────────────────────────────────┘
+                               │ fetch('/api/...')
+  ┌────────────────────────────▼─────────────────────────────────┐
+  │  BACKEND  (api/)                                             │
+  │  Node.js serverless functions on Vercel                      │
+  │  /api/chat.js     — OpenAI + Anthropic routing               │
+  │  /api/search.js   — RAG search with caching                  │
+  │  /api/python/estimate.py — Python estimating engine          │
+  │  /api/python/schedule.py — Python schedule builder           │
+  └────────────────────────────┬─────────────────────────────────┘
+                               │ calls Python tools
+  ┌────────────────────────────▼─────────────────────────────────┐
+  │  PYTHON ENGINE  (tools/)                                     │
+  │  Pure Python — no web framework                              │
+  │  estimating_tools.py — regional rate tables                  │
+  │  schedule_tools.py   — phase date calculation                │
+  │  proposal_tools.py   — HTML generation                       │
+  │  hydraulics.py       — Manning's equation                    │
+  └────────────────────────────┬─────────────────────────────────┘
+                               │ reads
+  ┌────────────────────────────▼─────────────────────────────────┐
+  │  DATA  (data/)                                               │
+  │  site-content.json — RAG knowledge base (75+ chunks)         │
+  │  RATE_TABLES dict  — 6 regional rate sets in Python          │
+  │  No database — static JSON + in-memory Python dicts          │
+  └──────────────────────────────────────────────────────────────┘</pre>
+                </div>
+
+                <h2 class="res-h2">Questions to Ask When Evaluating Contech Software</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Question</th><th>What it reveals</th><th>Red flags</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>"Do you have a public API?"</strong></td><td>Whether you can get your data out and connect other systems</td><td>"We're working on it" after 3+ years. "API access is Enterprise tier only."</td></tr>
+                            <tr><td><strong>"What's your data export format?"</strong></td><td>Whether you own your data or are locked in</td><td>No CSV/JSON export. "Contact support to export." Proprietary formats only.</td></tr>
+                            <tr><td><strong>"What does your uptime SLA look like?"</strong></td><td>Reliability guarantee and what happens when it goes down</td><td>No SLA. "We try our best." SLA below 99.5% for production systems.</td></tr>
+                            <tr><td><strong>"Where is my data stored?"</strong></td><td>Data sovereignty, security, compliance</td><td>Vague answers. "Overseas." No SOC 2 or ISO certification for enterprise software.</td></tr>
+                            <tr><td><strong>"What's your webhook or event notification system?"</strong></td><td>Real-time integration capability</td><td>No webhooks — means polling only, which means delayed data and brittle integrations.</td></tr>
+                            <tr><td><strong>"Is there a sandbox / test environment?"</strong></td><td>Whether you can test integrations without affecting live data</td><td>No sandbox — you have to test in production, which is a serious risk.</td></tr>
+                            <tr><td><strong>"What does a typical integration take in developer hours?"</strong></td><td>Real integration cost vs. vendor marketing claims</td><td>"It's plug and play!" (it never is). No integration documentation.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Common Integration Patterns in Construction</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Pattern</th><th>How it works</th><th>Example</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Bidirectional Sync</strong></td><td>Data flows both ways — changes in system A appear in system B, and vice versa</td><td>Procore project data syncing with Viewpoint Vista accounting</td></tr>
+                            <tr><td><strong>One-Way Push</strong></td><td>Source system pushes data to destination on a trigger or schedule</td><td>HCSS field logs pushing to payroll at end of day</td></tr>
+                            <tr><td><strong>ETL Pipeline</strong></td><td>Extract-Transform-Load — data is pulled from source, cleaned/transformed, and loaded into destination</td><td>GPS fleet data → cleaned → loaded into job cost reports</td></tr>
+                            <tr><td><strong>Event-Driven</strong></td><td>An event in one system triggers immediate action in another via webhook</td><td>Submittal approved in Procore → document auto-filed in SharePoint → team notified in Teams</td></tr>
+                            <tr><td><strong>API Aggregator</strong></td><td>A middleware layer that connects multiple systems through one integration point</td><td>Zapier, Make (Integromat), or a custom middleware that sits between your ERP and field apps</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="res-h2">Key Roles — Who Does What</h2>
+                <div class="res-table-wrap">
+                    <table class="res-table">
+                        <thead><tr><th>Role</th><th>What they build</th><th>What to ask them</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Frontend Developer</strong></td><td>UI — what users see and interact with. Web pages, mobile screens.</td><td>"How will the field crew interact with this on a tablet in the sun?"</td></tr>
+                            <tr><td><strong>Backend Developer</strong></td><td>Server logic, data processing, API endpoints, integrations with third parties.</td><td>"How does the data get from the field to the report?"</td></tr>
+                            <tr><td><strong>Full-Stack Developer</strong></td><td>Both frontend and backend — can build an entire feature end to end.</td><td>Good for small teams and prototypes. Specialists are faster at scale.</td></tr>
+                            <tr><td><strong>DevOps / SRE</strong></td><td>Infrastructure, deployment pipelines, uptime, monitoring. Makes sure it doesn't fall over.</td><td>"What's your on-call rotation when the system goes down at 5am on a Monday?"</td></tr>
+                            <tr><td><strong>Data Engineer</strong></td><td>Pipelines that move and transform data between systems. ETL, warehouses, reporting.</td><td>"Can I get a weekly production vs. budget report automatically?"</td></tr>
+                            <tr><td><strong>Product Manager</strong></td><td>Defines what gets built and why. The bridge between users (you) and developers.</td><td>"What's on the roadmap? How do you prioritize feature requests?"</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="res-callout">
+                    <strong>The contractor's advantage:</strong> You know what the field actually needs. Most software developers building construction tools have never run a crew, never bid a public works project, and never stood at the bottom of a trench at 6am trying to figure out if the grade is right. When you can describe your workflow in detail — inputs, outputs, edge cases — you become the most valuable person in any software conversation.
+                </div>
+
+                <div class="res-links">
+                    <a href="https://developers.procore.com" target="_blank" rel="noopener" class="res-ext-link">Procore Developer Portal ↗</a>
+                    <a href="https://github.com/masonearl/openmud" target="_blank" rel="noopener" class="res-ext-link">openmud on GitHub — read the actual code ↗</a>
+                    <a href="https://www.constructconnect.com/blog/construction-technology" target="_blank" rel="noopener" class="res-ext-link">ConstructConnect Contech Coverage ↗</a>
+                    <a href="https://zapier.com/learn/apis/chapter-1-introduction-to-apis/" target="_blank" rel="noopener" class="res-ext-link">Zapier's Plain-English API Guide ↗</a>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> openmud · <a href="https://github.com/masonearl/openmud" class="link" target="_blank" rel="noopener">Open source on GitHub</a> · <a href="/chat.html" class="link">AI chat →</a></p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+    <script src="/js/resources.js"></script>
+</body>
+</html>
