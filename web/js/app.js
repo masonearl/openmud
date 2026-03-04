@@ -2,6 +2,7 @@
     'use strict';
 
     var API_BASE = '/api';
+    var STORAGE_PROVIDER_KEYS = 'mudrag_provider_keys_v1';
     var STORAGE_PROJECTS = 'rockmud_projects';
     var STORAGE_ACTIVE = 'rockmud_activeProject';
     var STORAGE_MESSAGES = 'rockmud_messages';
@@ -17,6 +18,53 @@
             return 'UTC';
         }
     })();
+
+    function readProviderKeys() {
+        try {
+            var raw = localStorage.getItem(STORAGE_PROVIDER_KEYS);
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) { return {}; }
+    }
+
+    function getOpenClawSettings() {
+        var keys = readProviderKeys();
+        var enabled = !!(keys.openclawEnabled || (keys.openclawApiKey && keys.openclawBaseUrl));
+        return {
+            enabled: enabled,
+            apiKey: keys.openclawApiKey || '',
+            baseUrl: (keys.openclawBaseUrl || '').replace(/\/+$/, ''),
+            model: keys.openclawModel || 'gpt-4.1-mini'
+        };
+    }
+
+    var OPENCLAW_SYSTEM_PROMPT = 'You are OpenClaw, an agentic assistant for openmud. You execute tasks — you do not just answer questions.\n\nEXECUTION RULES (follow strictly):\n- Execute immediately. Do NOT ask for confirmation before acting.\n- If you can infer the intent, act with sensible defaults. Ask at most ONE question only if truly critical info is missing.\n- Calendar events: if you know who/when/where — create it. Default 1 hour, 15 min reminder, Work calendar.\n- Emails: if you know recipient and message — send it.\n- State what you are doing in one line, then do it. Never say "I need approval".\n\nYou are connected to the user\'s Mac via OpenClaw nodes. You can run osascript to control Apple Calendar, Apple Mail, and other apps. Use your tools to complete tasks directly.\n\nBe direct, concise, action-first.';
+
+    function sendToOpenClaw(messages, ocSettings) {
+        var url = ocSettings.baseUrl + '/chat/completions';
+        var body = {
+            model: ocSettings.model,
+            messages: [{ role: 'system', content: OPENCLAW_SYSTEM_PROMPT }].concat(messages),
+            temperature: 0.3,
+            max_tokens: 1024
+        };
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + ocSettings.apiKey
+            },
+            body: JSON.stringify(body)
+        }).then(function (r) {
+            return r.json().then(function (data) {
+                if (!r.ok) {
+                    var err = (data && (data.error || data.message)) ? (data.error || data.message) : 'OpenClaw error ' + r.status;
+                    throw new Error(typeof err === 'object' ? (err.message || JSON.stringify(err)) : String(err));
+                }
+                var content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+                return content || 'No response from OpenClaw.';
+            });
+        });
+    }
 
     var WELCOME_MSG = "Hi, I'm the openmud assistant. Ask me about cost estimates, project types (waterline, sewer, storm, gas, electrical), or anything construction—e.g. \"Estimate 1500 LF of 8 inch sewer in clay.\" You can also use /addevent to create a calendar event with Apple/Google/.ics buttons. Use the Tools menu to open Quick estimate, Proposal, or Schedule—you can edit them right here and refine through chat.";
 
@@ -1699,6 +1747,43 @@
 
             var addeventCommand = /^\/addevent\b/i.test(text);
             var useTools = mode === 'agent' || addeventCommand;
+
+            // Route directly to the user's local OpenClaw gateway from the browser.
+            // Vercel servers cannot reach localhost — only the browser can.
+            var ocSettings = getOpenClawSettings();
+            var useOpenClaw = ocSettings.enabled && ocSettings.apiKey && ocSettings.baseUrl && model === 'openclaw';
+            if (!useOpenClaw && ocSettings.enabled && ocSettings.apiKey && ocSettings.baseUrl) {
+                // OpenClaw enabled but user didn't explicitly pick the model — still route to it
+                useOpenClaw = true;
+            }
+
+            if (useOpenClaw) {
+                var timeoutId = setTimeout(function () {
+                    addMessage('assistant', 'OpenClaw request timed out. Check that your gateway is running at ' + ocSettings.baseUrl);
+                    setLoading(false);
+                    scrollToLatest();
+                }, 90000);
+                sendToOpenClaw(history, ocSettings)
+                    .then(function (reply) {
+                        clearTimeout(timeoutId);
+                        addMessage('assistant', reply);
+                    })
+                    .catch(function (err) {
+                        clearTimeout(timeoutId);
+                        var msg = err.message || 'Unknown error';
+                        if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('networkerror') || msg.toLowerCase().includes('load')) {
+                            addMessage('assistant', 'Cannot reach OpenClaw gateway at ' + ocSettings.baseUrl + '. Make sure OpenClaw is running on your Mac (run: openclaw gateway start).');
+                        } else {
+                            addMessage('assistant', 'OpenClaw error: ' + msg);
+                        }
+                    })
+                    .then(function () {
+                        setLoading(false);
+                        scrollToLatest();
+                    });
+                return;
+            }
+
             var payload = {
                 messages: history,
                 model: model,
