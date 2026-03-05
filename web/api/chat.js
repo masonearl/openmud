@@ -1234,7 +1234,7 @@ module.exports = async function handler(req, res) {
       } else if (smartReplyIntent) {
         // Two-step: read messages → draft reply → send
         try {
-          const replyIntent = await resolveSmartReplyIntentViaModel(msgHistory, relayApiKey, relayModel);
+          const replyIntent = await resolveSmartReplyIntentViaModel(lastMsg, relayApiKey, relayModel);
           if (replyIntent?.to) {
             // Step 1: read last messages from contact
             const readResult = await relayRun({ type: 'read_messages', to: replyIntent.to, count: 8 }, 30);
@@ -1277,11 +1277,13 @@ module.exports = async function handler(req, res) {
         } catch (err) {
           return res.status(200).json({ response: 'Error during smart reply: ' + err.message });
         }
-      } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage/i.test(lastMsg)) {
-        const imsgData = await resolveiMessageIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+      } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage|send.*message.*to\s+\w|text\s+\w|^text\s/i.test(lastMsg)) {
+        // Use only the current message for intent extraction — not full history —
+        // so the AI cannot pick up contact names from earlier in the conversation.
+        const imsgData = await resolveiMessageIntentViaModel(lastMsg, relayApiKey, undefined, relayModel);
         if (imsgData) command = { type: 'imessage_send', to: imsgData.to, message: imsgData.message };
       } else if (sendEmailIntent || /send.*email|email.*to|write.*email/i.test(lastMsg)) {
-        const emailData = await resolveEmailIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+        const emailData = await resolveEmailIntentViaModel(lastMsg, relayApiKey, undefined, relayModel);
         if (emailData) command = { type: 'email_send', to: emailData.to, subject: emailData.subject, body: emailData.body };
       }
 
@@ -1469,11 +1471,11 @@ module.exports = async function handler(req, res) {
         } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
           const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
           if (delData) command = { type: 'calendar_delete', title: delData.title, date: delData.date, calendarName: delData.calendarName };
-        } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage/i.test(lastMsg)) {
-          const imsgData = await resolveiMessageIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+        } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage|send.*message.*to\s+\w|text\s+\w|^text\s/i.test(lastMsg)) {
+          const imsgData = await resolveiMessageIntentViaModel(lastMsg, relayApiKey, undefined, relayModel);
           if (imsgData) command = { type: 'imessage_send', to: imsgData.to, message: imsgData.message };
         } else if (sendEmailIntent || /send.*email|email.*to|write.*email/i.test(lastMsg)) {
-          const emailData = await resolveEmailIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+          const emailData = await resolveEmailIntentViaModel(lastMsg, relayApiKey, undefined, relayModel);
           if (emailData) command = { type: 'email_send', to: emailData.to, subject: emailData.subject, body: emailData.body };
         }
 

@@ -18,7 +18,7 @@
 
 // Bump this string whenever you push a meaningful change to GitHub.
 // Format: YYYY.MM.DD.N  — the agent only updates when remote > local.
-const AGENT_VERSION = '2026.03.05.1';
+const AGENT_VERSION = '2026.03.05.2';
 
 const { WebSocket } = require('ws');
 const { execFile, exec, spawn } = require('child_process');
@@ -476,7 +476,8 @@ async function dispatch(msg) {
     case 'calendar_add':    return await handleCalendarAdd(msg);
     case 'calendar_delete': return await handleCalendarDelete(msg);
     case 'email_send':      return await handleEmailSend(msg);
-    case 'imessage_send':   return await handleiMessageSend(msg);
+    case 'imessage_send':
+    case 'send_message':    return await handleiMessageSend(msg);
     case 'read_messages':   return await handleReadMessages(msg);
     case 'run':             return await handleRun(msg);
     case 'ping':            return 'pong';
