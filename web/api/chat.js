@@ -1227,10 +1227,10 @@ module.exports = async function handler(req, res) {
 
       if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
         const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel, clientDate);
-        if (eventData) command = { type: 'calendar_add', ...eventData, requestId: undefined };
+        if (eventData) command = { type: 'calendar_add', title: eventData.title, date: eventData.date, time: eventData.time, durationMinutes: eventData.durationMinutes, location: eventData.location, calendarName: eventData.calendarName, reminderMinutes: eventData.reminderMinutes };
       } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
         const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
-        if (delData) command = { type: 'calendar_delete', ...delData, requestId: undefined };
+        if (delData) command = { type: 'calendar_delete', title: delData.title, date: delData.date, calendarName: delData.calendarName };
       } else if (smartReplyIntent) {
         // Two-step: read messages → draft reply → send
         try {
@@ -1273,10 +1273,10 @@ module.exports = async function handler(req, res) {
         }
       } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage/i.test(lastMsg)) {
         const imsgData = await resolveiMessageIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
-        if (imsgData) command = { type: 'imessage_send', ...imsgData, requestId: undefined };
+        if (imsgData) command = { type: 'imessage_send', to: imsgData.to, message: imsgData.message };
       } else if (sendEmailIntent || /send.*email|email.*to|write.*email/i.test(lastMsg)) {
         const emailData = await resolveEmailIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
-        if (emailData) command = { type: 'email_send', ...emailData, requestId: undefined };
+        if (emailData) command = { type: 'email_send', to: emailData.to, subject: emailData.subject, body: emailData.body };
       }
 
       if (command) {
@@ -1443,16 +1443,16 @@ module.exports = async function handler(req, res) {
         let command = null;
         if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
           const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel, clientDate);
-          if (eventData) command = { type: 'calendar_add', ...eventData, requestId: undefined };
+          if (eventData) command = { type: 'calendar_add', title: eventData.title, date: eventData.date, time: eventData.time, durationMinutes: eventData.durationMinutes, location: eventData.location, calendarName: eventData.calendarName, reminderMinutes: eventData.reminderMinutes };
         } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
           const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
-          if (delData) command = { type: 'calendar_delete', ...delData, requestId: undefined };
+          if (delData) command = { type: 'calendar_delete', title: delData.title, date: delData.date, calendarName: delData.calendarName };
         } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage/i.test(lastMsg)) {
           const imsgData = await resolveiMessageIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
-          if (imsgData) command = { type: 'imessage_send', ...imsgData, requestId: undefined };
+          if (imsgData) command = { type: 'imessage_send', to: imsgData.to, message: imsgData.message };
         } else if (sendEmailIntent || /send.*email|email.*to|write.*email/i.test(lastMsg)) {
           const emailData = await resolveEmailIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
-          if (emailData) command = { type: 'email_send', ...emailData, requestId: undefined };
+          if (emailData) command = { type: 'email_send', to: emailData.to, subject: emailData.subject, body: emailData.body };
         }
 
         if (command) {

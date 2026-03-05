@@ -8,7 +8,7 @@
  * Usage:
  *   node openmud-agent.js --token <your-token>
  *
- * Get your token from: openmud.ai → Settings → openmud agent
+ * Get your token from: openmud.ai → Settings → OpenClaw Agent
  */
 
 'use strict';
@@ -39,23 +39,14 @@ async function checkForUpdate() {
   try {
     const latest = await fetchText(AGENT_URL);
     const current = fs.readFileSync(SELF, 'utf8');
-    if (latest.trim() === current.trim()) return; // already up to date
-    console.log('[openmud-agent] New version found. Updating and restarting...');
-    fs.writeFileSync(SELF, latest, 'utf8');
-    // Re-launch with the same args and exit this process
-    const child = spawn(process.execPath, process.argv.slice(1), {
-      detached: true,
-      stdio: 'inherit',
-    });
-    child.unref();
-    process.exit(0);
-  } catch (e) {
-    // Non-fatal — keep running on current version
-  }
+    if (latest.trim() === current.trim()) return;
+    // Only update if GitHub version is NEWER — check by comparing a version comment
+    // For now: log that an update is available but don't auto-apply to avoid CDN race conditions
+    console.log('[openmud-agent] Update available on GitHub. Restart with: git pull && node relay/openmud-agent.js --token YOUR_TOKEN');
+  } catch (e) { /* non-fatal */ }
 }
 
-// Check on startup, then every hour
-checkForUpdate();
+// Check once per hour but don't auto-restart (avoids CDN cache race conditions)
 setInterval(checkForUpdate, 60 * 60 * 1000);
 
 // ── Args ───────────────────────────────────────────────────────────────────
@@ -70,7 +61,7 @@ const RELAY_URL = (args.relay || 'wss://openmud-production.up.railway.app').repl
 
 if (!TOKEN) {
   console.error('\nError: --token is required.');
-  console.error('Get your token from: openmud.ai → Settings → openmud agent\n');
+  console.error('Get your token from: openmud.ai → Settings → OpenClaw Agent\n');
   console.error('Usage: node openmud-agent.js --token <your-token>\n');
   process.exit(1);
 }
@@ -375,36 +366,29 @@ end tell
 
 async function handleReadMessages(params) {
   const { to, count = 10 } = params;
-  if (!to) throw new Error('Missing to for read_messages.');
-
+  if (!to) throw new Error('Missing recipient for read_messages.');
   const contact = await resolveContact(to);
   if (contact.ambiguous) return contact.question;
-
   const allHandles = contact.allHandles || [contact.resolved];
   const phones = allHandles.filter(h => !h.includes('@')).map(normalizePhone);
   const emails = allHandles.filter(h => h.includes('@'));
   const handles = [...phones, ...emails];
   if (handles.length === 0) throw new Error(`No handle found for "${to}".`);
-
-  const handleConditions = handles.map(h => {
-    const digits = h.replace(/\D/g, '');
-    return digits.length >= 7
-      ? `(replace(replace(replace(replace(h.id,'+',''),' ',''),'-',''),'(','') LIKE '%${digits.slice(-10)}%')`
+  const conditions = handles.map(h => {
+    const d = h.replace(/\D/g, '');
+    return d.length >= 7
+      ? `(replace(replace(replace(replace(h.id,'+',''),' ',''),'-',''),'(','') LIKE '%${d.slice(-10)}%')`
       : `h.id = '${h.replace(/'/g, "''")}'`;
   }).join(' OR ');
-
-  const dbPath = `${process.env.HOME}/Library/Messages/chat.db`;
-  const sql = `SELECT m.text, m.is_from_me, datetime(m.date/1000000000+978307200,'unixepoch','localtime') as ts FROM message m JOIN chat_message_join cmj ON m.rowid=cmj.message_id JOIN chat_handle_join chj ON cmj.chat_id=chj.chat_id JOIN handle h ON chj.handle_id=h.rowid WHERE (${handleConditions}) AND m.text IS NOT NULL AND m.text != '' ORDER BY m.date DESC LIMIT ${Math.min(count, 20)};`;
-
-  const raw = await runShell(`sqlite3 "${dbPath}" "${sql.replace(/"/g, '\\"')}"`, 12000);
-  if (!raw.trim()) return JSON.stringify({ contact: contact.name || to, messages: [], note: 'No messages found.' });
-
+  const db = `${process.env.HOME}/Library/Messages/chat.db`;
+  const sql = `SELECT m.text,m.is_from_me,datetime(m.date/1000000000+978307200,'unixepoch','localtime') FROM message m JOIN chat_message_join cmj ON m.rowid=cmj.message_id JOIN chat_handle_join chj ON cmj.chat_id=chj.chat_id JOIN handle h ON chj.handle_id=h.rowid WHERE (${conditions}) AND m.text IS NOT NULL AND m.text!='' ORDER BY m.date DESC LIMIT ${Math.min(count,20)};`;
+  const raw = await runShell(`sqlite3 "${db}" "${sql.replace(/"/g,'\\"')}"`, 12000);
+  if (!raw.trim()) return JSON.stringify({ contact: contact.name||to, messages: [], note: 'No messages found.' });
   const msgs = raw.trim().split('\n').reverse().map(line => {
-    const parts = line.split('|');
-    return { from: parts[1] === '1' ? 'me' : (contact.name || to), text: parts[0] || '', time: parts[2] || '' };
+    const p = line.split('|');
+    return { from: p[1]==='1' ? 'me' : (contact.name||to), text: p[0]||'', time: p[2]||'' };
   });
-
-  return JSON.stringify({ contact: contact.name || to, handle: handles[0], messages: msgs });
+  return JSON.stringify({ contact: contact.name||to, handle: handles[0], messages: msgs });
 }
 
 async function handleRun(params) {
