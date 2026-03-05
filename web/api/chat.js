@@ -1094,6 +1094,59 @@ module.exports = async function handler(req, res) {
         tools_used: [],
       });
     }
+    // ── Relay path (any model) ────────────────────────────────────────────
+    // If the user has a local openmud-agent connected and the message looks like
+    // an automation (email, calendar), execute it directly — no model switch needed.
+    const relayTokenAny = getHeader(req, 'x-openmud-relay-token');
+    if (relayTokenAny && !isOpenClaw) {
+      const RELAY_HTTP_UNIVERSAL = process.env.OPENMUD_RELAY_URL || 'https://openmud-production.up.railway.app';
+      const lastMsg = lastUserMsg?.content || '';
+      const relayApiKey = process.env.OPENAI_API_KEY;
+      const relayModel = 'gpt-4o-mini';
+      const msgHistory = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
+
+      let command = null;
+      if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
+        const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+        if (eventData) command = { type: 'calendar_add', ...eventData, requestId: undefined };
+      } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
+        const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+        if (delData) command = { type: 'calendar_delete', ...delData, requestId: undefined };
+      } else if (sendEmailIntent || /send.*email|email.*to|write.*email|send.*message.*to|text.*to|message.*to\s+\w/i.test(lastMsg)) {
+        const emailData = await resolveEmailIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+        if (emailData) command = { type: 'email_send', ...emailData, requestId: undefined };
+      }
+
+      if (command) {
+        const requestId = 'srv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        command.requestId = requestId;
+        try {
+          const sendRes = await fetch(`${RELAY_HTTP_UNIVERSAL}/relay/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: relayTokenAny, requestId, ...command, messages: [] }),
+          });
+          const sendData = await sendRes.json();
+          if (!sendData.ok) {
+            return res.status(503).json({ error: 'No agent connected. Open Settings and make sure openmud-agent is running on your Mac.', response: null });
+          }
+          for (let i = 0; i < 60; i++) {
+            await new Promise(r => setTimeout(r, 1000));
+            const pollRes = await fetch(`${RELAY_HTTP_UNIVERSAL}/relay/status/${requestId}`);
+            const pollData = await pollRes.json();
+            if (pollData.ready) {
+              if (pollData.error) return res.status(200).json({ response: 'Error from your Mac: ' + pollData.error });
+              return res.status(200).json({ response: pollData.response });
+            }
+          }
+          return res.status(504).json({ error: 'Mac took too long to respond. Check that openmud-agent is running.', response: null });
+        } catch (err) {
+          return res.status(502).json({ error: 'Relay error: ' + err.message, response: null });
+        }
+      }
+      // No automation command detected — fall through to normal AI response
+    }
+
     // mud1: True RAG — retrieve from knowledge base → GPT-4o generates grounded response
     if (isMud1) {
       const apiKey = openaiKeyOverride || process.env.OPENAI_API_KEY;
