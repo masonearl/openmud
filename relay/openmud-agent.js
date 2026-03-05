@@ -273,46 +273,63 @@ async function resolveContact(name) {
   const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(name) || name.includes('@');
   if (isPhoneOrEmail) return { resolved: name };
 
-  const lookupScript = `
+  const nameParts = name.trim().split(/\s+/);
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+
+  function contactScript(filter) {
+    return `
 tell application "Contacts"
   set out to ""
-  set matches to (every person whose name contains "${name.replace(/"/g, '\\"')}")
-  repeat with p in matches
+  repeat with p in (every person whose ${filter})
     set pname to name of p
     set allHandles to ""
-    -- collect all phones
     repeat with ph in phones of p
-      set allHandles to allHandles & value of ph & ";"
+      set allHandles to allHandles & (value of ph) & ";"
     end repeat
-    -- collect all emails
     repeat with em in emails of p
-      set allHandles to allHandles & value of em & ";"
+      set allHandles to allHandles & (value of em) & ";"
     end repeat
-    if allHandles is not "" then
-      set out to out & pname & "|" & allHandles & "\\n"
-    end if
+    if allHandles is not "" then set out to out & pname & "|" & allHandles & "\\n"
   end repeat
   return out
 end tell`;
+  }
 
-  let contactsRaw = '';
-  try { contactsRaw = await runAppleScript(lookupScript, 10000); } catch (e) {}
+  function parseContacts(raw) {
+    return raw.trim().split('\n').filter(Boolean).map(line => {
+      const parts = line.split('|');
+      return { name: (parts[0] || '').trim(), handles: (parts[1] || '').split(';').map(h => h.trim()).filter(Boolean) };
+    }).filter(c => c.handles.length > 0);
+  }
 
-  const contacts = contactsRaw.trim().split('\n').filter(Boolean).map(line => {
-    const parts = line.split('|');
-    const cname = (parts[0] || '').trim();
-    const handles = (parts[1] || '').split(';').map(h => h.trim()).filter(Boolean);
-    return { name: cname, handles };
-  }).filter(c => c.handles.length > 0);
+  // Run two fast, focused queries — no merging in AppleScript
+  let contacts = [];
+
+  // Query 1: full display name
+  try {
+    const raw = await runAppleScript(contactScript(`name contains "${name.replace(/"/g, '\\"')}"`), 8000);
+    contacts = parseContacts(raw);
+  } catch (e) {}
+
+  // Query 2: first name match (catches "Emma 🐻" when you search "Emma Bell")
+  if (contacts.length === 0 && firstName) {
+    try {
+      const filter = lastName
+        ? `first name contains "${firstName.replace(/"/g, '\\"')}" and last name contains "${lastName.replace(/"/g, '\\"')}"`
+        : `first name contains "${firstName.replace(/"/g, '\\"')}"`;
+      const raw = await runAppleScript(contactScript(filter), 8000);
+      contacts = parseContacts(raw);
+    } catch (e) {}
+  }
 
   if (contacts.length === 0) throw new Error(`No contact found for "${name}". Ask for their phone number or email.`);
   if (contacts.length === 1) return { resolved: contacts[0].handles[0], allHandles: contacts[0].handles, name: contacts[0].name };
 
-  // Multiple contacts — ask immediately, no hanging
   return {
     ambiguous: true,
     options: contacts,
-    question: `Found ${contacts.length} people named "${name}": ${contacts.map((c, i) => `${i + 1}. ${c.name}`).join(', ')}. Which one did you mean?`,
+    question: `Found ${contacts.length} people named "${name}": ${contacts.map((c, i) => `${i + 1}. ${c.name}`).join(', ')}. Which one?`,
   };
 }
 
@@ -340,69 +357,20 @@ async function handleiMessageSend(params) {
   const emails = allHandles.filter(h => h.includes('@'));
   const tryOrder = [...phones, ...emails];
 
-  let lastErr = null;
-  for (const handle of tryOrder) {
-    const sendScript = `
+  // Use the first phone handle — Messages.app resolves iMessage vs SMS automatically
+  const handle = tryOrder[0];
+  if (!handle) throw new Error(`No phone or email found for ${contact.name || to}.`);
+
+  const sendScript = `
 tell application "Messages"
   set targetService to first service whose service type = iMessage
   set targetBuddy to buddy "${handle.replace(/"/g, '\\"')}" of targetService
   send "${message.replace(/"/g, '\\"').replace(/\n/g, '\\n')}" to targetBuddy
 end tell
 "sent"`;
-    try {
-      await runAppleScript(sendScript, 20000);
-      return `iMessage sent.\nTo: ${contact.name || to} (${handle})\nMessage: ${message}`;
-    } catch (e) {
-      lastErr = e;
-    }
-  }
-  throw new Error(`Could not send iMessage to ${contact.name || to}. Tried: ${tryOrder.join(', ')}. Error: ${lastErr?.message}`);
-}
 
-/**
- * Read the last N messages from a contact.
- * Uses sqlite3 against ~/Library/Messages/chat.db.
- * Returns a JSON string with the message thread.
- */
-async function handleReadMessages(params) {
-  const { to, count = 10 } = params;
-  if (!to) throw new Error('Missing to for read_messages.');
-
-  // Resolve contact to get their phone/email handle
-  const contact = await resolveContact(to);
-  if (contact.ambiguous) return contact.question;
-
-  const allHandles = contact.allHandles || [contact.resolved];
-  const phones = allHandles.filter(h => !h.includes('@')).map(normalizePhone);
-  const emails = allHandles.filter(h => h.includes('@'));
-  const handles = [...phones, ...emails];
-
-  if (handles.length === 0) throw new Error(`No handle found for "${to}".`);
-
-  // Build WHERE clause to match any of the contact's handles
-  const handleConditions = handles.map(h => {
-    const digits = h.replace(/\D/g, '');
-    return digits.length >= 7
-      ? `(replace(replace(replace(replace(h.id,'+',''),' ',''),'-',''),'(','') LIKE '%${digits.slice(-10)}%')`
-      : `h.id = '${h.replace(/'/g, "''")}'`;
-  }).join(' OR ');
-
-  const dbPath = `${process.env.HOME}/Library/Messages/chat.db`;
-  const sql = `SELECT m.text, m.is_from_me, datetime(m.date/1000000000+978307200,'unixepoch','localtime') as ts FROM message m JOIN chat_message_join cmj ON m.rowid=cmj.message_id JOIN chat_handle_join chj ON cmj.chat_id=chj.chat_id JOIN handle h ON chj.handle_id=h.rowid WHERE (${handleConditions}) AND m.text IS NOT NULL AND m.text != '' ORDER BY m.date DESC LIMIT ${Math.min(count, 20)};`;
-
-  const raw = await runShell(`sqlite3 "${dbPath}" "${sql.replace(/"/g, '\\"')}"`, 12000);
-  if (!raw.trim()) return JSON.stringify({ contact: contact.name || to, messages: [], note: 'No messages found.' });
-
-  const msgs = raw.trim().split('\n').reverse().map(line => {
-    const parts = line.split('|');
-    return {
-      from: parts[1] === '1' ? 'me' : (contact.name || to),
-      text: parts[0] || '',
-      time: parts[2] || '',
-    };
-  });
-
-  return JSON.stringify({ contact: contact.name || to, handle: handles[0], messages: msgs });
+  await runAppleScript(sendScript, 15000);
+  return `iMessage sent.\nTo: ${contact.name || to} (${handle})\nMessage: ${message}`;
 }
 
 async function handleRun(params) {
@@ -427,7 +395,6 @@ async function dispatch(msg) {
     case 'calendar_delete': return await handleCalendarDelete(msg);
     case 'email_send':      return await handleEmailSend(msg);
     case 'imessage_send':   return await handleiMessageSend(msg);
-    case 'read_messages':   return await handleReadMessages(msg);
     case 'run':             return await handleRun(msg);
     case 'ping':            return 'pong';
     default:

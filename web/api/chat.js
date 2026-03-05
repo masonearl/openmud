@@ -1192,7 +1192,7 @@ module.exports = async function handler(req, res) {
     // If the user has a local openmud-agent connected and the message looks like
     // an automation (email, calendar), execute it directly — no model switch needed.
     const relayTokenAny = getHeader(req, 'x-openmud-relay-token');
-    if (relayTokenAny && !isOpenClaw) {
+    if (relayTokenAny) {
       const RELAY_HTTP_UNIVERSAL = process.env.OPENMUD_RELAY_URL || 'https://openmud-production.up.railway.app';
       const lastMsg = lastUserMsg?.content || '';
       const relayApiKey = process.env.OPENAI_API_KEY;
