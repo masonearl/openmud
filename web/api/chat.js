@@ -1225,10 +1225,39 @@ module.exports = async function handler(req, res) {
       let command = null;
       let smartReplyIntent = /text.*back|reply.*to\s+\w|respond.*to\s+\w|text\s+\w+.*back/i.test(lastMsg);
 
-      if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
+      // ── Contact ambiguity resolution ──────────────────────────────────────
+      // When the previous assistant turn asked "Which one?" (contact disambiguation),
+      // the user's reply is a name selection — not a fresh command. Detect this by
+      // checking the conversation history and re-build the original command with the
+      // selected contact name. Without this, the plain name reply falls through to
+      // the AI which fabricates a "sent" response without actually sending anything.
+      const lastAssistant = [...messages].reverse().find(m => m && m.role === 'assistant');
+      const isAmbiguityReply = lastAssistant &&
+        /which one\?|contacts matching|found \d+ contact/i.test(String(lastAssistant.content || ''));
+
+      if (isAmbiguityReply && !smartReplyIntent) {
+        // Find the last user message that was an iMessage or email request (the original intent)
+        const userMsgs = messages.filter(m => m && m.role === 'user');
+        const originalImsgMsg = [...userMsgs].reverse().slice(1).find(m =>
+          /imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage|send.*message.*to\s+\w|text\s+\w|^text\s/i.test(String(m.content || ''))
+        );
+        const originalEmailMsg = !originalImsgMsg && [...userMsgs].reverse().slice(1).find(m =>
+          /send.*email|email.*to|write.*email/i.test(String(m.content || ''))
+        );
+
+        if (originalImsgMsg) {
+          const origData = await resolveiMessageIntentViaModel(String(originalImsgMsg.content), relayApiKey, undefined, relayModel);
+          if (origData) command = { type: 'imessage_send', to: lastMsg.trim(), message: origData.message };
+        } else if (originalEmailMsg) {
+          const origData = await resolveEmailIntentViaModel(String(originalEmailMsg.content), relayApiKey, undefined, relayModel);
+          if (origData) command = { type: 'email_send', to: lastMsg.trim(), subject: origData.subject, body: origData.body };
+        }
+      }
+
+      if (!command && (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg))) {
         const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel, clientDate);
         if (eventData) command = { type: 'calendar_add', title: eventData.title, date: eventData.date, time: eventData.time, durationMinutes: eventData.durationMinutes, location: eventData.location, calendarName: eventData.calendarName, reminderMinutes: eventData.reminderMinutes };
-      } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
+      } else if (!command && (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg))) {
         const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
         if (delData) command = { type: 'calendar_delete', title: delData.title, date: delData.date, calendarName: delData.calendarName };
       } else if (smartReplyIntent) {
@@ -1298,9 +1327,13 @@ module.exports = async function handler(req, res) {
             const msgPayload = command.type === 'email_send'
               ? command.subject || ''
               : command.message || '';
+            const names = resultParsed.names || [];
+            // Include the names as a plain-text list so the user can type a reply
+            // even if the choice buttons fail to render on their client.
+            const nameList = names.map(n => `• ${n}`).join('\n');
             return res.status(200).json({
-              response: resultParsed.question,
-              _choices: (resultParsed.names || []).map(name => ({
+              response: `${resultParsed.question}\n\n${nameList}\n\nJust reply with the name and I'll send it.`,
+              _choices: names.map(name => ({
                 label: name,
                 message: `${actionLabel} ${name}${msgPayload ? ': ' + msgPayload : ''}`,
               })),
