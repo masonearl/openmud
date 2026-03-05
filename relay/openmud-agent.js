@@ -303,14 +303,23 @@ end tell`;
     contacts = parseContacts(raw);
   } catch (e) {}
 
-  // Query 2: first name match (catches "Emma 🐻" when you search "Emma Bell")
+  // Query 2: first name + last name (standard case)
+  if (contacts.length === 0 && firstName && lastName) {
+    try {
+      const raw = await runAppleScript(contactScript(`first name contains "${firstName.replace(/"/g, '\\"')}" and last name contains "${lastName.replace(/"/g, '\\"')}"`), 8000);
+      contacts = parseContacts(raw);
+    } catch (e) {}
+  }
+
+  // Query 3: first name only — handles emoji last names, nicknames, etc.
+  // If only one result, trust it (e.g. "Emma 🐻" when you say "Emma Bell")
   if (contacts.length === 0 && firstName) {
     try {
-      const filter = lastName
-        ? `first name contains "${firstName.replace(/"/g, '\\"')}" and last name contains "${lastName.replace(/"/g, '\\"')}"`
-        : `first name contains "${firstName.replace(/"/g, '\\"')}"`;
-      const raw = await runAppleScript(contactScript(filter), 8000);
-      contacts = parseContacts(raw);
+      const raw = await runAppleScript(contactScript(`first name contains "${firstName.replace(/"/g, '\\"')}"`), 8000);
+      const firstNameMatches = parseContacts(raw);
+      // If exactly one person with that first name, use them regardless of last name mismatch
+      if (firstNameMatches.length === 1) contacts = firstNameMatches;
+      else contacts = firstNameMatches; // let ambiguity handler below deal with it
     } catch (e) {}
   }
 
