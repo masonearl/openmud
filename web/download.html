@@ -34,7 +34,8 @@
                     <img src="/assets/logo.png" alt="openmud" class="dl-icon-img">
                 </div>
                 <h1 class="dl-title">openmud</h1>
-                <p class="dl-sub">Desktop app for macOS — coming soon</p>
+                <p class="dl-sub">Desktop app for macOS</p>
+                <div class="dl-divider" aria-hidden="true"></div>
                 <p class="dl-badge">Coming soon</p>
                 <p class="dl-note">A native macOS desktop app is in development. Check back or use the web version in the meantime.</p>
                 <a href="/try" class="dl-btn dl-btn-alt">Try the web app</a>
@@ -43,6 +44,20 @@
     </main>
 
     <style>
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes icon-pop {
+            0%   { opacity: 0; transform: scale(0.78); }
+            60%  { transform: scale(1.06); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes badge-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(187, 152, 113, 0); }
+            50%       { box-shadow: 0 0 0 6px rgba(187, 152, 113, 0.08); }
+        }
+
         .dl-hero {
             display: flex;
             align-items: center;
@@ -50,84 +65,115 @@
             min-height: calc(100vh - 60px);
             padding: 40px 20px;
         }
+
         .dl-card {
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            gap: 0;
-            width: min(560px, 100%);
-            padding: 28px 24px;
-            background: rgba(29, 25, 20, 0.72);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+            width: min(480px, 100%);
+            padding: 48px 40px 44px;
+            background: rgba(22, 19, 15, 0.82);
+            border: 1px solid rgba(187, 152, 113, 0.18);
+            border-radius: 18px;
+            box-shadow: 0 24px 56px rgba(0, 0, 0, 0.44), 0 1px 0 rgba(255,255,255,0.04) inset;
+            backdrop-filter: blur(12px);
         }
+
+        /* staggered entrance */
+        .dl-icon      { animation: icon-pop  0.55s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .dl-title     { animation: fade-up   0.45s 0.12s ease both; }
+        .dl-sub       { animation: fade-up   0.45s 0.20s ease both; }
+        .dl-divider   { animation: fade-up   0.45s 0.26s ease both; }
+        .dl-badge     { animation: fade-up   0.45s 0.30s ease both; }
+        .dl-note      { animation: fade-up   0.45s 0.38s ease both; }
+        .dl-btn       { animation: fade-up   0.45s 0.44s ease both; }
+
         .dl-icon {
-            width: 88px;
-            height: 88px;
-            border-radius: 20px;
-            background: rgba(187, 152, 113, 0.12);
-            border: 1px solid rgba(187, 152, 113, 0.28);
+            width: 96px;
+            height: 96px;
+            border-radius: 22px;
+            background: rgba(187, 152, 113, 0.10);
+            border: 1px solid rgba(187, 152, 113, 0.24);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.28);
         }
         .dl-icon-img {
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
             object-fit: contain;
         }
+
         .dl-title {
             font-size: 2rem;
             font-weight: 700;
-            margin: 0 0 6px;
-            letter-spacing: -0.01em;
+            margin: 0 0 8px;
+            letter-spacing: -0.02em;
         }
         .dl-sub {
             font-size: 0.9375rem;
             color: var(--text-secondary, #999);
             margin: 0 0 28px;
+            line-height: 1.4;
         }
+
+        .dl-divider {
+            width: 40px;
+            height: 1px;
+            background: rgba(187, 152, 113, 0.22);
+            margin: 0 auto 28px;
+        }
+
         .dl-badge {
             display: inline-block;
-            padding: 5px 14px;
-            background: rgba(187, 152, 113, 0.12);
-            border: 1px solid rgba(187, 152, 113, 0.35);
-            border-radius: 20px;
-            font-size: 0.8125rem;
+            padding: 6px 16px;
+            background: rgba(187, 152, 113, 0.10);
+            border: 1px solid rgba(187, 152, 113, 0.32);
+            border-radius: 99px;
+            font-size: 0.75rem;
             font-weight: 600;
-            color: var(--text-secondary, #aaa);
-            letter-spacing: 0.04em;
+            color: rgba(187, 152, 113, 0.85);
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            animation: fade-up 0.45s 0.30s ease both, badge-pulse 3s 1s ease-in-out infinite;
         }
+
+        .dl-note {
+            font-size: 0.875rem;
+            color: var(--text-secondary, #888);
+            margin: 0 0 32px;
+            line-height: 1.65;
+            max-width: 320px;
+        }
+
         .dl-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 11px 22px;
-            background: rgba(187, 152, 113, 0.16);
-            color: var(--text);
-            border: 1px solid rgba(187, 152, 113, 0.45);
+            padding: 12px 28px;
+            background: rgba(187, 152, 113, 0.14);
+            color: var(--text, #f0ede8);
+            border: 1px solid rgba(187, 152, 113, 0.40);
             font-size: 0.9375rem;
             font-weight: 600;
             text-decoration: none;
-            border-radius: 8px;
-            transition: border-color 0.15s, background 0.15s, color 0.15s;
-            margin-top: 8px;
+            border-radius: 10px;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
         }
         .dl-btn:hover {
-            background: rgba(187, 152, 113, 0.26);
-            border-color: rgba(187, 152, 113, 0.64);
-            color: var(--text);
+            background: rgba(187, 152, 113, 0.22);
+            border-color: rgba(187, 152, 113, 0.60);
+            color: var(--text, #f0ede8);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.22);
         }
-        .dl-note {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin: 0 0 20px;
-            line-height: 1.5;
+        .dl-btn:active {
+            transform: translateY(0);
+            box-shadow: none;
         }
     </style>
 </body>
