@@ -5841,7 +5841,7 @@
                 '- Base URL: ' + (next.openclawBaseUrl || 'not set'),
                 '- Model: ' + (next.openclawModel || 'openclaw')
             ].join('\n');
-            addMessage('assistant', savedSummary + '\n\nI set your model to OpenClaw Agent when enabled. Send your next task and I will route through OpenClaw.');
+            addMessage('assistant', savedSummary + '\n\nI set your model to openmud agent when enabled. Send your next task and I will route through your local agent.');
             return true;
         }
 
@@ -6131,7 +6131,7 @@
 
                 var openclawEnabled = !!(providerConfig.openclawEnabled || (providerConfig.openclawApiKey && providerConfig.openclawBaseUrl));
                 if (!openclawEnabled) {
-                    addMessage('assistant', 'OpenClaw is not linked yet. Go to Settings → OpenClaw Agent and follow the setup steps to connect your Mac.');
+                    addMessage('assistant', 'openmud agent is not linked yet. Go to Settings → openmud agent and follow the setup steps to connect your Mac.');
                     setLoading(false);
                     return;
                 }
