@@ -1001,7 +1001,7 @@ module.exports = async function handler(req, res) {
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Openmud-Dev-Key, X-OpenAI-Api-Key, X-Anthropic-Api-Key, X-Grok-Api-Key, X-OpenRouter-Api-Key, X-OpenClaw-Api-Key, X-OpenClaw-Base-Url, X-OpenClaw-Model');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Openmud-Dev-Key, X-OpenAI-Api-Key, X-Anthropic-Api-Key, X-Grok-Api-Key, X-OpenRouter-Api-Key, X-OpenClaw-Api-Key, X-OpenClaw-Base-Url, X-OpenClaw-Model, X-Openmud-Relay-Token');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -1227,11 +1227,80 @@ module.exports = async function handler(req, res) {
     }
 
     if (isOpenClaw) {
+      // ── Relay path (no OpenClaw required) ──────────────────────────────
+      // If the browser passes a relay token, route through the openmud relay
+      // server to the user's local openmud-agent.js. The server figures out
+      // the intent, sends a structured command, and waits for the result.
+      const relayToken = getHeader(req, 'x-openmud-relay-token');
+      const RELAY_HTTP = process.env.OPENMUD_RELAY_URL || 'https://openmud-relay.up.railway.app';
+
+      if (relayToken) {
+        const lastMsg = lastUserMsg?.content || '';
+
+        // Resolve intent → structured command via AI
+        let command = null;
+        if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
+          const eventData = await resolveCalendarIntentViaModel(messages);
+          if (eventData) command = { type: 'calendar_add', ...eventData, requestId: undefined };
+        } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
+          const delData = await resolveDeleteCalendarIntentViaModel(messages);
+          if (delData) command = { type: 'calendar_delete', ...delData, requestId: undefined };
+        } else if (sendEmailIntent || /send.*email|email.*to|write.*email/i.test(lastMsg)) {
+          const emailData = await resolveEmailIntentViaModel(messages);
+          if (emailData) command = { type: 'email_send', ...emailData, requestId: undefined };
+        }
+
+        if (command) {
+          const requestId = 'srv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+          command.requestId = requestId;
+
+          // Send to relay
+          try {
+            const sendRes = await fetch(`${RELAY_HTTP}/relay/send`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: relayToken, requestId, ...command, messages: [] }),
+            });
+            const sendData = await sendRes.json();
+            if (!sendData.ok) {
+              return res.status(503).json({ error: 'No agent connected. Make sure openmud-agent is running on your Mac (see Settings → OpenClaw Agent).', response: null });
+            }
+
+            // Poll relay for response (up to 60s)
+            for (let i = 0; i < 60; i++) {
+              await new Promise(r => setTimeout(r, 1000));
+              const pollRes = await fetch(`${RELAY_HTTP}/relay/status/${requestId}`);
+              const pollData = await pollRes.json();
+              if (pollData.ready) {
+                if (pollData.error) return res.status(200).json({ response: 'Error from your Mac: ' + pollData.error });
+                return res.status(200).json({ response: pollData.response });
+              }
+            }
+            return res.status(504).json({ error: 'Your Mac took too long to respond. Check that openmud-agent is running.', response: null });
+          } catch (err) {
+            return res.status(502).json({ error: 'Relay error: ' + err.message, response: null });
+          }
+        }
+
+        // No specific command — fall through to regular AI chat with OpenClaw system prompt
+        {
+          const ocSystemPrompt = getSystemPrompt('openclaw');
+          const ocMessages = messages[0]?.role === 'system'
+            ? [{ role: 'system', content: ocSystemPrompt + '\n\n' + messages[0].content }, ...messages.slice(1)]
+            : [{ role: 'system', content: ocSystemPrompt }, ...messages];
+          const ocClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+          const ocCompletion = await ocClient.chat.completions.create({ model: 'gpt-4o-mini', messages: ocMessages, temperature: 0.5, max_tokens: 1024 });
+          const ocReply = ocCompletion.choices?.[0]?.message?.content || 'No response.';
+          return res.status(200).json({ response: ocReply });
+        }
+      }
+
+      // ── Legacy OpenClaw gateway path ────────────────────────────────────
       const apiKey = openclawKeyOverride || process.env.OPENCLAW_API_KEY;
       const baseURL = normalizeOpenClawBaseUrl(openclawBaseUrlOverride || process.env.OPENCLAW_BASE_URL);
       if (!apiKey || !baseURL) {
         return res.status(500).json({
-          error: 'OpenClaw is not configured. Enable it in Settings and add key/base URL, or set OPENCLAW_API_KEY and OPENCLAW_BASE_URL.',
+          error: 'OpenClaw agent not linked. Go to Settings → OpenClaw Agent and follow setup to connect your Mac.',
           response: null,
         });
       }

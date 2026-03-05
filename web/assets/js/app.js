@@ -59,6 +59,10 @@
             if (cfg.openclawApiKey) h['X-OpenClaw-Api-Key'] = String(cfg.openclawApiKey).trim();
             if (cfg.openclawBaseUrl) h['X-OpenClaw-Base-Url'] = String(cfg.openclawBaseUrl).trim();
             if (cfg.openclawModel) h['X-OpenClaw-Model'] = String(cfg.openclawModel).trim();
+            // Relay token — always send if present so the server can route to the user's local agent
+            var relayToken = '';
+            try { relayToken = localStorage.getItem('openmud_oc_relay_token') || ''; } catch (e) {}
+            if (relayToken && cfg.openclawRelayConnected) h['X-Openmud-Relay-Token'] = relayToken;
         } catch (e) {}
         return h;
     }
