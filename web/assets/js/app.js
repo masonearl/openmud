@@ -2553,26 +2553,69 @@
                         var existing = document.getElementById('msg-context-menu');
                         if (existing) existing.remove();
 
+                        var rawMd = typeof message.content === 'string' ? message.content : '';
+                        var plainText = (el.querySelector('.msg-content') || el).textContent || rawMd;
+                        var hasProject = !!(window.mudrag && window.mudrag.getActiveProjectId());
+
                         var menu = document.createElement('div');
                         menu.id = 'msg-context-menu';
                         menu.className = 'project-context-menu';
                         menu.innerHTML =
                             '<button type="button" class="project-context-item" data-action="copy-text">Copy message</button>' +
-                            '<button type="button" class="project-context-item" data-action="copy-md">Copy as markdown</button>';
+                            '<button type="button" class="project-context-item" data-action="copy-md">Copy as markdown</button>' +
+                            '<div class="project-context-divider"></div>' +
+                            '<button type="button" class="project-context-item" data-action="add-to-chat">Add to chat</button>' +
+                            (hasProject
+                                ? '<button type="button" class="project-context-item" data-action="add-to-docs">Add to documents</button>'
+                                : '');
 
-                        var textContent = typeof message.content === 'string' ? message.content : (el.textContent || '');
-
+                        // Copy plain text
                         menu.querySelector('[data-action="copy-text"]').addEventListener('click', function () {
-                            navigator.clipboard.writeText(el.querySelector('.msg-content') ? el.querySelector('.msg-content').textContent : textContent).catch(function () {});
-                            menu.remove();
-                        });
-                        menu.querySelector('[data-action="copy-md"]').addEventListener('click', function () {
-                            navigator.clipboard.writeText(textContent).catch(function () {});
+                            navigator.clipboard.writeText(plainText).catch(function () {});
                             menu.remove();
                         });
 
-                        menu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
-                        menu.style.top = Math.min(e.clientY, window.innerHeight - 80) + 'px';
+                        // Copy raw markdown
+                        menu.querySelector('[data-action="copy-md"]').addEventListener('click', function () {
+                            navigator.clipboard.writeText(rawMd).catch(function () {});
+                            menu.remove();
+                        });
+
+                        // Add to chat input
+                        menu.querySelector('[data-action="add-to-chat"]').addEventListener('click', function () {
+                            var chatInput = document.getElementById('chat-input');
+                            if (chatInput) {
+                                chatInput.value = (chatInput.value ? chatInput.value + '\n\n' : '') + rawMd;
+                                chatInput.dispatchEvent(new Event('input'));
+                                chatInput.focus();
+                                chatInput.selectionStart = chatInput.selectionEnd = chatInput.value.length;
+                            }
+                            menu.remove();
+                        });
+
+                        // Save as markdown document in active project
+                        var addDocsBtn = menu.querySelector('[data-action="add-to-docs"]');
+                        if (addDocsBtn) {
+                            addDocsBtn.addEventListener('click', function () {
+                                var projectId = window.mudrag && window.mudrag.getActiveProjectId();
+                                if (!projectId) { menu.remove(); return; }
+                                var ts = new Date();
+                                var pad = function (n) { return String(n).padStart(2, '0'); };
+                                var docName = 'AI response ' + ts.getFullYear() + '-' + pad(ts.getMonth() + 1) + '-' + pad(ts.getDate()) + ' ' + pad(ts.getHours()) + pad(ts.getMinutes()) + '.md';
+                                var blob = new Blob([rawMd], { type: 'text/markdown' });
+                                var file = new File([blob], docName, { type: 'text/markdown' });
+                                window.mudrag.saveDocument(projectId, file, null, { source: 'ai-message' }).then(function () {
+                                    if (window.mudrag.renderDocuments) window.mudrag.renderDocuments();
+                                    showToast('"' + docName + '" added to project');
+                                }).catch(function () {
+                                    showToast('Could not save document.');
+                                });
+                                menu.remove();
+                            });
+                        }
+
+                        menu.style.left = Math.min(e.clientX, window.innerWidth - 210) + 'px';
+                        menu.style.top = Math.min(e.clientY, window.innerHeight - 120) + 'px';
                         document.body.appendChild(menu);
 
                         function dismiss(ev) {
