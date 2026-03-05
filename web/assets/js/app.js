@@ -112,6 +112,11 @@
         try {
             if (localStorage.getItem('mudrag_dev_unlimited') === 'true') h['X-Openmud-Dev-Key'] = DEV_KEY;
         } catch (e) {}
+        // Send the browser's local date so the server resolves "today/tonight" correctly
+        // instead of using the UTC date on the Vercel server.
+        try {
+            h['X-Client-Date'] = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+        } catch (e) {}
         return h;
     }
 

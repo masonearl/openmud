@@ -732,10 +732,18 @@ function parseCalendarIntent(userText) {
  * Returns { title, date, time, durationMinutes, location, calendarName, reminderMinutes } or null.
  * date is "YYYY-MM-DD", time is "HH:MM" (24h).
  */
-async function resolveCalendarIntentViaModel(userText, apiKey, baseURL, modelName) {
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  const todayDay = today.toLocaleDateString('en-US', { weekday: 'long' });
+async function resolveCalendarIntentViaModel(userText, apiKey, baseURL, modelName, clientDate) {
+  // Use client-supplied date (browser local time) to avoid UTC timezone drift on the server.
+  let todayStr, todayDay;
+  if (clientDate && /^\d{4}-\d{2}-\d{2}$/.test(clientDate)) {
+    todayStr = clientDate;
+    const d = new Date(clientDate + 'T12:00:00'); // noon to avoid any DST edge
+    todayDay = d.toLocaleDateString('en-US', { weekday: 'long' });
+  } else {
+    const today = new Date();
+    todayStr = today.toISOString().split('T')[0];
+    todayDay = today.toLocaleDateString('en-US', { weekday: 'long' });
+  }
   try {
     const client = new OpenAI({ apiKey, baseURL });
     const response = await client.chat.completions.create({
@@ -1026,7 +1034,7 @@ module.exports = async function handler(req, res) {
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Openmud-Dev-Key, X-OpenAI-Api-Key, X-Anthropic-Api-Key, X-Grok-Api-Key, X-OpenRouter-Api-Key, X-OpenClaw-Api-Key, X-OpenClaw-Base-Url, X-OpenClaw-Model, X-Openmud-Relay-Token');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Openmud-Dev-Key, X-OpenAI-Api-Key, X-Anthropic-Api-Key, X-Grok-Api-Key, X-OpenRouter-Api-Key, X-OpenClaw-Api-Key, X-OpenClaw-Base-Url, X-OpenClaw-Model, X-Openmud-Relay-Token, X-Client-Date');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -1101,6 +1109,9 @@ module.exports = async function handler(req, res) {
     }
 
     const lastUserMsg = [...messages].reverse().find((m) => m && m.role === 'user');
+    // Client sends their local date (YYYY-MM-DD) so calendar resolution uses the right day,
+    // not the UTC date on the Vercel server (which can be a day ahead of US timezones).
+    const clientDate = getHeader(req, 'x-client-date') || null;
     const quickEstimate = parseQuickEstimateIntent(lastUserMsg && lastUserMsg.content);
     const openClawSetupHelp = isOpenClawSetupHelpIntent(lastUserMsg && lastUserMsg.content);
     const sendEmailIntent = parseSendEmailIntent(lastUserMsg && lastUserMsg.content);
@@ -1132,7 +1143,7 @@ module.exports = async function handler(req, res) {
 
       let command = null;
       if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
-        const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+        const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel, clientDate);
         if (eventData) command = { type: 'calendar_add', ...eventData, requestId: undefined };
       } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
         const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
@@ -1327,7 +1338,7 @@ module.exports = async function handler(req, res) {
         // Resolve intent → structured command via AI
         let command = null;
         if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
-          const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+          const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel, clientDate);
           if (eventData) command = { type: 'calendar_add', ...eventData, requestId: undefined };
         } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
           const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
@@ -1624,7 +1635,7 @@ module.exports = async function handler(req, res) {
         const lastUserContent = lastUserMsg?.content ? String(lastUserMsg.content) : '';
         // Combine full conversation context so model can resolve "yes", "this Thursday", follow-up answers
         const allUserContent = messages.filter(m => m.role === 'user').map(m => String(m.content || '')).join('\n');
-        const calDetails = await resolveCalendarIntentViaModel(allUserContent || lastUserContent, apiKey, baseURL, effectiveModelCal);
+        const calDetails = await resolveCalendarIntentViaModel(allUserContent || lastUserContent, apiKey, baseURL, effectiveModelCal, clientDate);
 
         if (!calDetails) {
           return sendTextResponse(res, 'Could not parse the calendar event details. Please include the date, time, and what the event is for.', ['openclaw_calendar'], stream && !use_tools);
