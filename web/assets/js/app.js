@@ -6504,7 +6504,8 @@
                 project_data: projectDataForPayload && Object.keys(projectDataForPayload).length ? projectDataForPayload : undefined,
                 project_name: activeProject && activeProject.name ? activeProject.name : undefined,
                 project_id: activeProjectId || undefined,
-                file_reference_context: getFileReferenceContext()
+                file_reference_context: getFileReferenceContext(),
+                company_logo: (function () { try { return localStorage.getItem('mudrag_company_logo') || undefined; } catch (e) {} })()
             };
             if (useTools && lastEstimatePayload && lastEstimateResult) {
                 payload.estimate_context = {

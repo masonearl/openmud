@@ -1396,9 +1396,10 @@ module.exports = async function handler(req, res) {
             const match = raw.match(/\{[\s\S]*\}/);
             if (match) {
               const params = JSON.parse(match[0]);
-              // Pull company profile forwarded from the client
+              // Pull company profile and logo forwarded from the client
               let companyProfile = {};
               try { companyProfile = JSON.parse(getHeader(req, 'x-company-profile') || '{}'); } catch (_) {}
+              if (body.company_logo) companyProfile.company_logo = body.company_logo;
               // Match theme to user's UI preference
               const theme = getHeader(req, 'x-ui-theme') === 'dark' ? 'dark' : 'light';
               const result = buildProposal({ ...params, ...companyProfile, theme });

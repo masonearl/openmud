@@ -189,6 +189,20 @@
                     <p class="st-hint st-hint-tight">Used when generating proposals, change orders, and other documents from chat.</p>
 
                     <div class="st-keys-list">
+                        <div class="st-key-row st-key-row-logo">
+                            <span class="st-key-label">Logo</span>
+                            <div class="st-logo-field">
+                                <div class="st-logo-preview-wrap" id="logo-preview-wrap" hidden>
+                                    <img id="logo-preview" class="st-logo-preview" src="" alt="Logo">
+                                    <button type="button" class="st-logo-remove" id="btn-remove-logo" title="Remove logo">×</button>
+                                </div>
+                                <label class="st-logo-upload-btn" id="logo-upload-label">
+                                    Upload logo
+                                    <input type="file" id="company-logo-file" accept="image/*" style="display:none;">
+                                </label>
+                                <span class="st-hint" style="font-size:0.75rem;margin:0;">PNG, JPG, SVG — shown on proposals</span>
+                            </div>
+                        </div>
                         <div class="st-key-row">
                             <span class="st-key-label">Company name</span>
                             <div class="st-key-field">
@@ -587,6 +601,74 @@
                 });
             }
 
+            // ── Company logo upload ────────────────────────────────────────────
+            var STORAGE_LOGO = 'mudrag_company_logo';
+            var logoFileInput = document.getElementById('company-logo-file');
+            var logoPreviewWrap = document.getElementById('logo-preview-wrap');
+            var logoPreviewImg = document.getElementById('logo-preview');
+            var logoUploadLabel = document.getElementById('logo-upload-label');
+            var btnRemoveLogo = document.getElementById('btn-remove-logo');
+
+            function renderLogoPreview(dataUrl) {
+                if (dataUrl) {
+                    logoPreviewImg.src = dataUrl;
+                    logoPreviewWrap.hidden = false;
+                    logoUploadLabel.textContent = 'Replace logo';
+                    // re-attach file input inside label
+                    logoUploadLabel.appendChild(logoFileInput);
+                } else {
+                    logoPreviewImg.src = '';
+                    logoPreviewWrap.hidden = true;
+                    logoUploadLabel.textContent = 'Upload logo';
+                    logoUploadLabel.appendChild(logoFileInput);
+                }
+            }
+
+            function resizeLogo(file, cb) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var img = new Image();
+                    img.onload = function () {
+                        var maxH = 120, maxW = 240;
+                        var ratio = Math.min(1, maxH / img.naturalHeight, maxW / img.naturalWidth);
+                        var canvas = document.createElement('canvas');
+                        canvas.width  = Math.round(img.naturalWidth  * ratio);
+                        canvas.height = Math.round(img.naturalHeight * ratio);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        cb(canvas.toDataURL('image/png', 0.88));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            if (logoFileInput) {
+                logoFileInput.addEventListener('change', function () {
+                    var file = logoFileInput.files && logoFileInput.files[0];
+                    if (!file) return;
+                    resizeLogo(file, function (dataUrl) {
+                        try { localStorage.setItem(STORAGE_LOGO, dataUrl); } catch (e) {}
+                        renderLogoPreview(dataUrl);
+                        logoFileInput.value = '';
+                    });
+                });
+            }
+
+            if (btnRemoveLogo) {
+                btnRemoveLogo.addEventListener('click', function () {
+                    try { localStorage.removeItem(STORAGE_LOGO); } catch (e) {}
+                    renderLogoPreview(null);
+                });
+            }
+
+            // Load saved logo on page open
+            (function () {
+                try {
+                    var saved = localStorage.getItem(STORAGE_LOGO);
+                    if (saved) renderLogoPreview(saved);
+                } catch (e) {}
+            })();
+
             // ── Company profile save / load ────────────────────────────────────
             var STORAGE_COMPANY = 'mudrag_company_profile';
             var companyInputs = {
@@ -785,6 +867,16 @@
             padding: 0.5rem 0.65rem;
             font-size: 0.875rem;
         }
+
+        /* ── Logo upload field ─────────────────────────────────────────── */
+        .st-key-row-logo { align-items: flex-start; padding-top: 4px; }
+        .st-logo-field { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+        .st-logo-preview-wrap { position: relative; display: inline-flex; align-items: flex-start; }
+        .st-logo-preview { max-height: 52px; max-width: 180px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); background: #fff; padding: 4px; }
+        .st-logo-remove { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-secondary, #1e1e1e); color: var(--text-secondary); font-size: 13px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+        .st-logo-remove:hover { background: var(--bg-hover, #2a2a2a); color: var(--text); }
+        .st-logo-upload-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8125rem; color: var(--text-secondary); cursor: pointer; background: transparent; transition: border-color 0.15s, color 0.15s; }
+        .st-logo-upload-btn:hover { border-color: var(--accent, #c9a87c); color: var(--text); }
 
         /* ── Per-field copy button ─────────────────────────────────────── */
         .st-key-copy {

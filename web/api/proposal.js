@@ -23,6 +23,7 @@ function buildProposal(params) {
     company_phone   = '',
     company_email   = '',
     company_url     = '',
+    company_logo    = '',   // base64 data URL or https URL
     theme        = 'light',
   } = params;
 
@@ -112,8 +113,13 @@ function buildProposal(params) {
   </div>
 </div>`;
 
+  const logoHtml = company_logo
+    ? `<img src="${company_logo}" style="display:block;max-height:48px;max-width:160px;object-fit:contain;margin-bottom:10px;" alt="${escHtml(company_name || 'Logo')}">`
+    : '';
+
   const headerHtml = `
 <div style="background:${hdrBg};border:1px solid ${hdrBdr};border-radius:4px;padding:12px 18px 14px;margin-bottom:20px;box-sizing:border-box;">
+  ${logoHtml}
   ${companyLine}
   <div style="font-size:20px;font-weight:700;color:${text};margin:0 0 2px;line-height:1.2;">Proposal</div>
   ${metaGrid}
@@ -321,6 +327,7 @@ async function proposalHandler(req, res) {
       company_phone:   body.company_phone || '',
       company_email:   body.company_email || '',
       company_url:     body.company_url || '',
+      company_logo:    body.company_logo || '',
       theme:           body.theme === 'dark' ? 'dark' : 'light',
     });
     return res.status(200).json(result);
