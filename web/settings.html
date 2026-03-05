@@ -35,7 +35,7 @@
                 <div class="settings-card st-card st-anim-1" id="auth-wrap">
                     <h2 class="settings-card-title st-card-title">Account</h2>
 
-                    <div id="auth-signed-out">
+                    <div id="auth-signed-out" hidden>
                         <p class="st-hint">Sign in to sync your subscription and access your account across devices.</p>
                         <form class="settings-auth-form" id="form-sign-in">
                             <input type="email" id="auth-email" placeholder="your@email.com" required>
@@ -597,6 +597,12 @@
     </script>
 
     <style>
+        /* ── Auth panel — hidden until session resolves, then fades in ─── */
+        #auth-signed-out:not([hidden]),
+        #auth-signed-in:not([hidden]) {
+            animation: st-fade-up 0.2s ease both;
+        }
+
         /* ── Page entrance animations ──────────────────────────────────── */
         @keyframes st-fade-up {
             from { opacity: 0; transform: translateY(14px); }
