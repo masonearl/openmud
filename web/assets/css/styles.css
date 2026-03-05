@@ -6378,3 +6378,42 @@ body.page-try .ctx-item:hover {
     background: rgba(187, 152, 113, 0.12);
     color: var(--text);
 }
+
+/* Contact choice buttons (shown when agent needs to clarify which contact) */
+.contact-choices-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 0 4px 0;
+    margin-left: 4px;
+}
+
+.contact-choice-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    padding: 6px 16px;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+
+.contact-choice-btn:hover {
+    background: rgba(187, 152, 113, 0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+body.page-try .contact-choice-btn {
+    border-color: rgba(187, 152, 113, 0.35);
+    color: #c9a87c;
+}
+
+body.page-try .contact-choice-btn:hover {
+    background: rgba(187, 152, 113, 0.15);
+    border-color: #c9a87c;
+    color: #d9b790;
+}

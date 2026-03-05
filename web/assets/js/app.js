@@ -2482,6 +2482,47 @@
         revealNode();
     }
 
+    /**
+     * Render contact selection buttons after an ambiguity response.
+     * choices = [{ label: 'Emma 🐻', message: 'Text Emma 🐻 back' }, ...]
+     * When clicked, auto-sends the choice.message as a new user message.
+     */
+    function renderContactChoices(choices) {
+        // Remove any existing choice row first
+        var existing = document.getElementById('contact-choices-row');
+        if (existing) existing.remove();
+
+        var row = document.createElement('div');
+        row.id = 'contact-choices-row';
+        row.className = 'contact-choices-row';
+
+        choices.forEach(function (choice) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'contact-choice-btn';
+            btn.textContent = choice.label;
+            btn.addEventListener('click', function () {
+                row.remove();
+                // Auto-send as a new user message
+                var input = document.getElementById('chat-input');
+                if (input) {
+                    input.value = choice.message;
+                    var sendBtn = document.getElementById('send-btn');
+                    if (sendBtn) sendBtn.click();
+                    else {
+                        // Fallback: dispatch Enter keypress
+                        var e = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+                        input.dispatchEvent(e);
+                    }
+                }
+            });
+            row.appendChild(btn);
+        });
+
+        messagesEl.appendChild(row);
+        scrollToLatest();
+    }
+
     function renderMessages() {
         messagesEl.innerHTML = '';
         var msgs = activeProjectId ? getMessages(activeProjectId) : [];
@@ -6542,6 +6583,10 @@
                                 txt += buildCitationsBlock(data.rag);
                             }
                             addMessage('assistant', txt || 'Done.');
+                            // Contact ambiguity: render choice buttons as a follow-up UI element
+                            if (data && data._choices && data._choices.length > 0) {
+                                renderContactChoices(data._choices);
+                            }
                             if (data && data.tools_used && data.tools_used.length > 0) {
                                 updateActiveToolPills(data.tools_used);
                             }
@@ -7217,19 +7262,19 @@
     }
 
     function isRightPanelVisible() {
-        // Prefer the actual DOM state so that opening a document (which shows the
-        // canvas without touching localStorage) is reflected immediately.
-        if (mainWrapper) return !mainWrapper.classList.contains('right-panel-hidden');
         var raw = localStorage.getItem(STORAGE_RIGHT_PANEL_VISIBLE);
         return raw === 'true';
     }
 
     function applyRightPanelVisibility() {
         if (!mainWrapper || !toggleRightPanelBtn) return;
-        var visible = isRightPanelVisible();
-        mainWrapper.classList.toggle('right-panel-hidden', !visible);
-        toggleRightPanelBtn.classList.toggle('dropdown-item-active', visible);
-        toggleRightPanelBtn.textContent = (visible ? '✓ ' : '') + 'Canvas';
+        var stored = isRightPanelVisible();
+        mainWrapper.classList.toggle('right-panel-hidden', !stored);
+        // For the checkmark, use actual DOM state — a document can open the canvas
+        // without updating localStorage, so DOM is the source of truth for display.
+        var actuallyVisible = !mainWrapper.classList.contains('right-panel-hidden');
+        toggleRightPanelBtn.classList.toggle('dropdown-item-active', actuallyVisible);
+        toggleRightPanelBtn.textContent = (actuallyVisible ? '✓ ' : '') + 'Canvas';
     }
 
     window.addEventListener('mudrag-main-view-change', function () {

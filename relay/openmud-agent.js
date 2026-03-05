@@ -213,7 +213,7 @@ async function handleEmailSend(params) {
   const isEmail = to.includes('@');
   if (!isEmail) {
     const contact = await resolveContact(to);
-    if (contact.ambiguous) return contact.question;
+    if (contact.ambiguous) return JSON.stringify({ _ambiguous: true, question: contact.question, names: contact.names, action: 'email_send', originalMessage: params.body });
     // For email, we need an email address specifically — re-check if handle is a phone
     if (contact.resolved && contact.resolved.includes('@')) {
       recipient = contact.resolved;
@@ -339,10 +339,13 @@ async function resolveContact(name) {
   const unique = matches.filter((c, i, arr) => arr.findIndex(x => x.name === c.name) === i);
   if (unique.length === 1) return { resolved: unique[0].handles[0], allHandles: unique[0].handles, name: unique[0].name };
 
+  // Return structured ambiguity so the frontend can render selection buttons
   return {
     ambiguous: true,
     options: unique,
-    question: `Found ${unique.length} contacts matching "${name}": ${unique.map((c, i) => `${i + 1}. ${c.name}`).join(', ')}. Which one did you mean?`,
+    _ambiguous: true,
+    question: `Found ${unique.length} contacts matching "${name}". Which one?`,
+    names: unique.map(c => c.name),
   };
 }
 
@@ -362,7 +365,7 @@ async function handleiMessageSend(params) {
   if (!to || !message) throw new Error('Missing to or message for iMessage.');
 
   const contact = await resolveContact(to);
-  if (contact.ambiguous) return contact.question;
+  if (contact.ambiguous) return JSON.stringify({ _ambiguous: true, question: contact.question, names: contact.names, action: 'imessage_send', originalMessage: message });
 
   // Build a list of handles to try: normalized phones first, then emails
   const allHandles = contact.allHandles || [contact.resolved];
@@ -390,7 +393,7 @@ async function handleReadMessages(params) {
   const { to, count = 10 } = params;
   if (!to) throw new Error('Missing recipient for read_messages.');
   const contact = await resolveContact(to);
-  if (contact.ambiguous) return contact.question;
+  if (contact.ambiguous) return JSON.stringify({ _ambiguous: true, question: contact.question, names: contact.names, action: 'read_messages' });
   const allHandles = contact.allHandles || [contact.resolved];
   const phones = allHandles.filter(h => !h.includes('@')).map(normalizePhone);
   const emails = allHandles.filter(h => h.includes('@'));

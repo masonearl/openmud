@@ -1240,16 +1240,22 @@ module.exports = async function handler(req, res) {
             const readResult = await relayRun({ type: 'read_messages', to: replyIntent.to, count: 8 }, 30);
             let thread = [];
             let contactHandle = replyIntent.to;
-            try {
-              const parsed = JSON.parse(readResult);
-              thread = parsed.messages || [];
-              contactHandle = parsed.handle || replyIntent.to;
-            } catch (e) { /* readResult might be a plain string like ambiguity question */ }
+            let readParsed = null;
+            try { readParsed = JSON.parse(readResult); } catch {}
 
-            if (typeof readResult === 'string' && !readResult.startsWith('{')) {
-              // Agent returned an ambiguity question or error
-              return res.status(200).json({ response: readResult });
+            // Contact ambiguity — ask user to pick with buttons
+            if (readParsed?._ambiguous) {
+              return res.status(200).json({
+                response: readParsed.question,
+                _choices: (readParsed.names || []).map(name => ({
+                  label: name,
+                  message: `Text ${name} back`,
+                })),
+              });
             }
+
+            thread = readParsed?.messages || [];
+            contactHandle = readParsed?.handle || replyIntent.to;
 
             if (thread.length === 0) {
               return res.status(200).json({ response: `No recent messages found with ${replyIntent.to}.` });
@@ -1282,6 +1288,22 @@ module.exports = async function handler(req, res) {
       if (command) {
         try {
           const result = await relayRun(command, 60);
+          // Check if agent returned a contact ambiguity response
+          let resultParsed = null;
+          try { resultParsed = JSON.parse(result); } catch {}
+          if (resultParsed?._ambiguous) {
+            const actionLabel = command.type === 'email_send' ? 'Email' : 'Text';
+            const msgPayload = command.type === 'email_send'
+              ? command.subject || ''
+              : command.message || '';
+            return res.status(200).json({
+              response: resultParsed.question,
+              _choices: (resultParsed.names || []).map(name => ({
+                label: name,
+                message: `${actionLabel} ${name}${msgPayload ? ': ' + msgPayload : ''}`,
+              })),
+            });
+          }
           return res.status(200).json({ response: result });
         } catch (err) {
           return res.status(200).json({ response: 'Error from your Mac: ' + err.message });
