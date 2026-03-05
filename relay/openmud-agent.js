@@ -252,84 +252,102 @@ end tell
   return `Email sent.\nTo: ${resolvedName}${recipient !== resolvedName ? ' <' + recipient + '>' : ''}\nSubject: ${subject}\nBody: ${body.slice(0, 120)}${body.length > 120 ? '...' : ''}`;
 }
 
+// Cache all contacts for 5 minutes so we don't repeat the slow AppleScript
+let _contactsCache = null;
+let _contactsCacheTs = 0;
+const CONTACTS_CACHE_TTL = 5 * 60 * 1000;
+
+async function getAllContacts() {
+  if (_contactsCache && Date.now() - _contactsCacheTs < CONTACTS_CACHE_TTL) return _contactsCache;
+  // Single AppleScript call — fetch everyone who has at least one phone or email.
+  // Filtering by name happens in JS, not AppleScript, so there's no slow WHERE clause.
+  const script = `tell application "Contacts"
+  set out to ""
+  repeat with p in every person
+    set fn to first name of p
+    if fn is missing value then set fn to ""
+    set ln to last name of p
+    if ln is missing value then set ln to ""
+    set dn to name of p
+    if dn is missing value then set dn to ""
+    set allH to ""
+    repeat with ph in phones of p
+      set allH to allH & (value of ph) & ";"
+    end repeat
+    repeat with em in emails of p
+      set allH to allH & (value of em) & ";"
+    end repeat
+    if allH is not "" then
+      set out to out & fn & "\\t" & ln & "\\t" & dn & "\\t" & allH & "\\n"
+    end if
+  end repeat
+  return out
+end tell`;
+  const raw = await runAppleScript(script, 30000);
+  const contacts = raw.trim().split('\n').filter(Boolean).map(line => {
+    const [fn, ln, dn, handles] = line.split('\t');
+    return {
+      firstName: (fn || '').trim(),
+      lastName: (ln || '').trim(),
+      name: (dn || '').trim(),
+      handles: (handles || '').split(';').map(h => h.trim()).filter(Boolean),
+    };
+  }).filter(c => c.handles.length > 0);
+  _contactsCache = contacts;
+  _contactsCacheTs = Date.now();
+  return contacts;
+}
+
 /**
- * Resolve a name to the best matching contact handle (phone or email).
- * Strategy:
- *   1. If input already looks like a phone/email → use as-is.
- *   2. Search Contacts for all people whose name contains the query.
- *   3. If exactly one match → use it.
- *   4. If multiple → ask the user immediately (no hanging DB queries).
+ * Resolve a name to the best matching contact handle.
+ * Loads all contacts once (cached), then filters in JS — no slow AppleScript WHERE clauses.
+ * Priority: exact display name > first+last > first-name-only (uses best single match).
  */
 async function resolveContact(name) {
   const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(name) || name.includes('@');
   if (isPhoneOrEmail) return { resolved: name };
 
-  const nameParts = name.trim().split(/\s+/);
-  const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
+  const query = name.trim().toLowerCase();
+  const qParts = query.split(/\s+/);
+  const qFirst = qParts[0] || '';
+  const qLast = qParts.slice(1).join(' ') || '';
 
-  function contactScript(filter) {
-    return `
-tell application "Contacts"
-  set out to ""
-  repeat with p in (every person whose ${filter})
-    set pname to name of p
-    set allHandles to ""
-    repeat with ph in phones of p
-      set allHandles to allHandles & (value of ph) & ";"
-    end repeat
-    repeat with em in emails of p
-      set allHandles to allHandles & (value of em) & ";"
-    end repeat
-    if allHandles is not "" then set out to out & pname & "|" & allHandles & "\\n"
-  end repeat
-  return out
-end tell`;
+  const all = await getAllContacts();
+
+  // Exact display name match
+  let matches = all.filter(c => c.name.toLowerCase() === query);
+
+  // Partial display name contains
+  if (!matches.length) matches = all.filter(c => c.name.toLowerCase().includes(query));
+
+  // First + last name (useful when display name has emoji like "Emma 🐻" but first=Emma last=🐻)
+  if (!matches.length && qFirst && qLast) {
+    matches = all.filter(c =>
+      c.firstName.toLowerCase().includes(qFirst) &&
+      c.lastName.toLowerCase().includes(qLast)
+    );
   }
 
-  function parseContacts(raw) {
-    return raw.trim().split('\n').filter(Boolean).map(line => {
-      const parts = line.split('|');
-      return { name: (parts[0] || '').trim(), handles: (parts[1] || '').split(';').map(h => h.trim()).filter(Boolean) };
-    }).filter(c => c.handles.length > 0);
+  // First name only — if exactly one person has this first name, trust it
+  if (!matches.length && qFirst) {
+    const firstOnly = all.filter(c => c.firstName.toLowerCase() === qFirst);
+    if (firstOnly.length === 1) matches = firstOnly;
+    else if (firstOnly.length > 1) matches = firstOnly; // will hit ambiguity below
+    else {
+      // Partial first name
+      const partial = all.filter(c => c.firstName.toLowerCase().startsWith(qFirst));
+      if (partial.length) matches = partial;
+    }
   }
 
-  // Run two fast, focused queries — no merging in AppleScript
-  let contacts = [];
+  if (matches.length === 0) throw new Error(`No contact found for "${name}". Ask for their phone number or email.`);
+  if (matches.length === 1) return { resolved: matches[0].handles[0], allHandles: matches[0].handles, name: matches[0].name };
 
-  // Query 1: full display name
-  try {
-    const raw = await runAppleScript(contactScript(`name contains "${name.replace(/"/g, '\\"')}"`), 8000);
-    contacts = parseContacts(raw);
-  } catch (e) {}
-
-  // Query 2: first name + last name (standard case)
-  if (contacts.length === 0 && firstName && lastName) {
-    try {
-      const raw = await runAppleScript(contactScript(`first name contains "${firstName.replace(/"/g, '\\"')}" and last name contains "${lastName.replace(/"/g, '\\"')}"`), 8000);
-      contacts = parseContacts(raw);
-    } catch (e) {}
-  }
-
-  // Query 3: first name only — handles emoji last names, nicknames, etc.
-  // If only one result, trust it (e.g. "Emma 🐻" when you say "Emma Bell")
-  if (contacts.length === 0 && firstName) {
-    try {
-      const raw = await runAppleScript(contactScript(`first name contains "${firstName.replace(/"/g, '\\"')}"`), 8000);
-      const firstNameMatches = parseContacts(raw);
-      // If exactly one person with that first name, use them regardless of last name mismatch
-      if (firstNameMatches.length === 1) contacts = firstNameMatches;
-      else contacts = firstNameMatches; // let ambiguity handler below deal with it
-    } catch (e) {}
-  }
-
-  if (contacts.length === 0) throw new Error(`No contact found for "${name}". Ask for their phone number or email.`);
-  if (contacts.length === 1) return { resolved: contacts[0].handles[0], allHandles: contacts[0].handles, name: contacts[0].name };
-
+  // Multiple matches — return ambiguity for the AI to clarify
   return {
     ambiguous: true,
-    options: contacts,
-    question: `Found ${contacts.length} people named "${name}": ${contacts.map((c, i) => `${i + 1}. ${c.name}`).join(', ')}. Which one?`,
+    options: matches,
+    question: `Found ${matches.length} contacts matching "${name}": ${matches.map((c, i) => `${i + 1}. ${c.name}`).join(', ')}. Which one?`,
   };
 }
 
