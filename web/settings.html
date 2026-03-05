@@ -105,7 +105,7 @@
                         <div class="provider-key-row" id="openclaw-setup-view">
                             <span class="provider-key-label" style="align-self:flex-start;padding-top:6px;">Setup</span>
                             <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
-                                <p style="margin:0;font-size:13px;color:var(--color-muted,#888);">Link your Mac's OpenClaw agent to use calendar, email, and system commands from chat.</p>
+                                <p style="margin:0;font-size:13px;color:var(--color-muted,#888);">Link your Mac to use calendar, email, iMessage, and system commands from chat.</p>
                                 <p style="margin:0;font-size:13px;color:var(--color-muted,#888);">1. Copy your token below.<br>2. Run the command on your Mac.<br>3. Come back — status updates automatically.</p>
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <input id="openclaw-relay-token" type="text" class="provider-key-input" readonly style="font-family:monospace;font-size:12px;cursor:pointer;" placeholder="Generating token...">
@@ -468,7 +468,7 @@
                         openclawModel: keyOpenClawModel ? String(keyOpenClawModel.value || '').trim() : ''
                     };
                     if (next.openclawBaseUrl && !/^https?:\/\//i.test(next.openclawBaseUrl)) {
-                        showKeyStatus('OpenClaw base URL must start with http:// or https://', true);
+                        showKeyStatus('Base URL must start with http:// or https://', true);
                         return;
                     }
                     if (next.openclawBaseUrl && !/\/v\d+\/?$/i.test(next.openclawBaseUrl)) {
@@ -478,7 +478,7 @@
                         next.openclawModel = 'openclaw';
                     }
                     if (next.openclawEnabled && (!next.openclawApiKey || !next.openclawBaseUrl)) {
-                        showKeyStatus('To enable OpenClaw, add both OpenClaw API key and base URL.', true);
+                        showKeyStatus('To enable the openmud agent, add both API key and base URL.', true);
                         return;
                     }
                     if (!writeKeyStore(next)) {

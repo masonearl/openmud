@@ -8,7 +8,7 @@
  * Usage:
  *   node openmud-agent.js --token <your-token>
  *
- * Get your token from: openmud.ai → Settings → OpenClaw Agent
+ * Get your token from: openmud.ai → Settings → openmud agent
  */
 
 'use strict';
@@ -70,7 +70,7 @@ const RELAY_URL = (args.relay || 'wss://openmud-production.up.railway.app').repl
 
 if (!TOKEN) {
   console.error('\nError: --token is required.');
-  console.error('Get your token from: openmud.ai → Settings → OpenClaw Agent\n');
+  console.error('Get your token from: openmud.ai → Settings → openmud agent\n');
   console.error('Usage: node openmud-agent.js --token <your-token>\n');
   process.exit(1);
 }

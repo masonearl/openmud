@@ -59,7 +59,7 @@ function openClawGatewayBaseUrl(baseURL) {
 async function invokeOpenClawTool({ apiKey, baseURL, tool, action, args, sessionKey }) {
   const gatewayBase = openClawGatewayBaseUrl(baseURL);
   if (!gatewayBase) {
-    return { ok: false, error: 'OpenClaw base URL is missing or invalid.' };
+    return { ok: false, error: 'openmud relay URL is missing or invalid.' };
   }
   const endpoint = `${gatewayBase}/tools/invoke`;
   const payload = { tool, action, args: args || {} };
@@ -85,7 +85,7 @@ async function invokeOpenClawTool({ apiKey, baseURL, tool, action, args, session
     }
     return { ok: true, status: resp.status, data: data || {} };
   } catch (e) {
-    return { ok: false, error: e.message || 'Failed to reach OpenClaw tools endpoint.' };
+    return { ok: false, error: e.message || 'Failed to reach openmud relay.' };
   }
 }
 
@@ -193,7 +193,7 @@ function runOpenClawNodeCommand(nodeId, command, args, timeoutMs = 30000) {
         execFile('/bin/sh', ['-c', 'which openclaw 2>/dev/null || command -v openclaw 2>/dev/null'], {}, (_err, out) => {
           const resolved = (out || '').trim();
           if (resolved) return invokeWithBin(resolved);
-          return resolve({ ok: false, error: 'openclaw binary not found. Ensure OpenClaw is installed: npm install -g openclaw' });
+          return resolve({ ok: false, error: 'openmud-agent not found. Run the install command from Settings → openmud agent' });
         });
         return;
       }
@@ -257,25 +257,25 @@ function buildOpenClawEmailTroubleshootMessage({ linkCheck, nodeCheck, nodeDescr
   ];
 
   if (!linkCheck.ok) {
-    lines.push('- Verify OpenClaw base URL points to your gateway and token matches that gateway.');
+    lines.push('- Verify your openmud relay URL and token in Settings → openmud agent.');
   } else if (!nodeCheck.ok) {
-    lines.push('- Ensure the `nodes` tool is allowed in your OpenClaw tool policy (not blocked/deny-listed).');
-    lines.push('- Ensure your Mac node is paired and online in OpenClaw.');
+    lines.push('- openmud agent is connected but not responding.');
+    lines.push('- Make sure openmud-agent is running on your Mac.');
   } else if (analysis.iosOnlyNodes) {
     lines.push('- Your only paired node is an iPhone (iOS). Email sending via osascript requires a Mac node.');
-    lines.push('- Install OpenClaw on your Mac and pair it as a node (Settings -> Nodes -> Add This Computer).');
+    lines.push('- Run the install command from Settings → openmud agent to connect your Mac.');
     lines.push('- Once a macOS node is paired and connected, retry the send.');
   } else if (analysis.allDisconnected) {
     lines.push('- Your Mac node is paired but not currently connected.');
-    lines.push('- Open the OpenClaw app on your Mac to bring the node online, then retry.');
+    lines.push('- Restart openmud-agent on your Mac, then retry.');
   } else if (!analysis.hasMacNode) {
-    lines.push('- No macOS node detected. Install OpenClaw on your Mac and pair it as a node.');
+    lines.push('- No Mac agent detected. Run the install command from Settings → openmud agent.');
     lines.push('- Apple Mail and osascript only run on macOS.');
   } else if (osascriptProbe && !osascriptProbe.ok) {
-    lines.push('- The Mac node cannot execute osascript. Enable command execution for the node in OpenClaw settings.');
+    lines.push('- The Mac node cannot execute osascript. Check openmud-agent is running and has permissions.');
   } else if (mailProbe && !mailProbe.ok) {
     lines.push('- Apple Mail is not accessible from the OpenClaw node.');
-    lines.push('- On that Mac: System Settings -> Privacy & Security -> Automation -> allow the OpenClaw node process.');
+    lines.push('- On that Mac: System Settings -> Privacy & Security -> Automation -> allow Terminal or node in Automation permissions.');
     lines.push('- Open Mail.app once and confirm an account is configured and can send.');
   } else {
     lines.push('- Ensure Apple Mail is configured on the target Mac and can send normally.');
@@ -284,7 +284,7 @@ function buildOpenClawEmailTroubleshootMessage({ linkCheck, nodeCheck, nodeDescr
 
   if (analysis.nodes.length > 0) {
     lines.push('');
-    lines.push('Nodes visible to OpenClaw:');
+    lines.push('Mac agents connected:');
     analysis.nodes.forEach(n => {
       const status = n.connected ? 'connected' : 'not connected';
       lines.push(`- ${n.displayName || n.nodeId || 'unknown'} (${n.platform || 'unknown platform'}) — ${status}`);
@@ -301,7 +301,7 @@ function buildOpenClawEmailTroubleshootMessage({ linkCheck, nodeCheck, nodeDescr
   lines.push(buildDebugLine('exec(osascript)', execAttempt || {}));
   lines.push(buildDebugLine('nodes.run(osascript return)', osascriptProbe || {}));
   lines.push(buildDebugLine('nodes.run(mail accessibility)', mailProbe || {}));
-  lines.push('Re-run: "verify openclaw connection status" after fixing, then retry the send.');
+  lines.push('Re-run: "verify openmud agent status" after fixing, then retry the send.');
   return lines.join('\n');
 }
 
@@ -1079,7 +1079,7 @@ function buildOpenClawSetupHelpResponse() {
     'Quick chat setup (after gateway is running):',
     '/openclaw enable key=YOUR_TOKEN url=http://YOUR_IP:18789/v1 model=gpt-4.1-mini',
     '',
-    'Verify it works: "verify openclaw connection status"',
+    'Verify it works: "verify openmud agent status"',
     'Then try: "send an email to someone@example.com saying hello"'
   ].join('\n');
 }
@@ -1468,7 +1468,7 @@ module.exports = async function handler(req, res) {
             });
             const sendData = await sendRes.json();
             if (!sendData.ok) {
-              return res.status(503).json({ error: 'No agent connected. Make sure openmud-agent is running on your Mac (see Settings → OpenClaw Agent).', response: null });
+              return res.status(503).json({ error: 'No agent connected. Make sure openmud-agent is running on your Mac (see Settings → openmud agent).', response: null });
             }
 
             // Poll relay for response (up to 60s)
@@ -1505,7 +1505,7 @@ module.exports = async function handler(req, res) {
       const baseURL = normalizeOpenClawBaseUrl(openclawBaseUrlOverride || process.env.OPENCLAW_BASE_URL);
       if (!apiKey || !baseURL) {
         return res.status(500).json({
-          error: 'OpenClaw agent not linked. Go to Settings → OpenClaw Agent and follow setup to connect your Mac.',
+          error: 'OpenClaw agent not linked. Go to Settings → openmud agent and follow setup to connect your Mac.',
           response: null,
         });
       }
@@ -1558,14 +1558,14 @@ module.exports = async function handler(req, res) {
         if (linkOk && nodeOk && verifyNodeAnalysis && verifyNodeAnalysis.hasConnectedMac) {
           return sendTextResponse(
             res,
-            [`OpenClaw pairing check passed.`, `- Gateway/auth: ok (${sessionMsg})`, `- Computer/node pairing: ok (${nodeMsg})`, ...nodeListLines, '', 'You can send: "using my apple email send an email to hi@masonearl.com saying hello"'].join('\n'),
+            [`openmud agent connected.`, `- Gateway/auth: ok (${sessionMsg})`, `- Computer/node pairing: ok (${nodeMsg})`, ...nodeListLines, '', 'You can send: "using my apple email send an email to hi@masonearl.com saying hello"'].join('\n'),
             ['openclaw_verify', 'openclaw_nodes_status'],
             stream && !use_tools
           );
         }
 
         const failLines = [
-          'OpenClaw pairing check — action needed.',
+          'openmud agent — action needed.',
           `- Gateway/auth: ${linkOk ? `ok (${sessionMsg})` : summarizeOpenClawFailure(verify)}`,
           `- Computer/node pairing: ${nodeOk ? `ok (${nodeMsg})` : nodeMsg}`,
           ...nodeListLines,
@@ -1573,17 +1573,17 @@ module.exports = async function handler(req, res) {
           'What to fix:',
         ];
         if (!linkOk) {
-          failLines.push('- In web Settings, verify OpenClaw base URL and token match the same gateway.');
+          failLines.push('- In web Settings, verify your relay URL and token in Settings → openmud agent.');
         } else if (!nodeOk) {
-          failLines.push('- Pair your Mac node to OpenClaw and confirm it is online.');
-          failLines.push('- Allow the `nodes` tool in OpenClaw tool policy.');
+          failLines.push('- Make sure openmud-agent is running on your Mac.');
+          failLines.push('- openmud-agent connected but not responding to commands.');
         } else if (verifyNodeAnalysis && verifyNodeAnalysis.iosOnlyNodes) {
           failLines.push('- Your only paired node is an iPhone. Email and osascript require a Mac node.');
-          failLines.push('- Install OpenClaw on your Mac and add it as a node (Settings -> Nodes -> Add This Computer).');
+          failLines.push('- Run the install from Settings → openmud agent to connect your Mac.');
         } else if (verifyNodeAnalysis && verifyNodeAnalysis.allDisconnected) {
-          failLines.push('- Your node is paired but not connected. Open OpenClaw on your Mac to bring the node online.');
+          failLines.push('- Your node is paired but not connected. Restart openmud-agent on your Mac.');
         }
-        failLines.push('- Re-run: "verify openclaw connection status" in web chat.');
+        failLines.push('- Re-run: "verify openmud agent status" in web chat.');
         return sendTextResponse(
           res,
           failLines.join('\n'),
@@ -1732,7 +1732,7 @@ module.exports = async function handler(req, res) {
         const macNodeId = connectedMacNode?.nodeId;
 
         if (!macNodeId) {
-          return sendTextResponse(res, 'Cannot create the calendar event — no connected Mac node found. Run "verify openclaw connection status" to diagnose.', ['openclaw_calendar'], stream && !use_tools);
+          return sendTextResponse(res, 'Cannot create the calendar event — no connected Mac node found. Run "verify openmud agent status" to diagnose.', ['openclaw_calendar'], stream && !use_tools);
         }
 
         const effectiveModelCal = sanitizeOpenClawModel(openclawModelOverride) || OPENCLAW_MODELS[model] || OPENCLAW_MODELS.openclaw;
@@ -1784,7 +1784,7 @@ module.exports = async function handler(req, res) {
         const macNodeId = connectedMacNode?.nodeId;
 
         if (!macNodeId) {
-          return sendTextResponse(res, 'Cannot delete the calendar event — no connected Mac node. Run "verify openclaw connection status" to diagnose.', ['openclaw_calendar_delete'], stream && !use_tools);
+          return sendTextResponse(res, 'Cannot delete the calendar event — no connected Mac node. Run "verify openmud agent status" to diagnose.', ['openclaw_calendar_delete'], stream && !use_tools);
         }
 
         const effectiveModelDel = sanitizeOpenClawModel(openclawModelOverride) || OPENCLAW_MODELS[model] || OPENCLAW_MODELS.openclaw;
