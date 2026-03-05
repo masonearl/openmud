@@ -179,18 +179,42 @@ async function handleEmailSend(params) {
   const { to, subject, body } = params;
   if (!to || !subject || !body) throw new Error('Missing to, subject, or body for email.');
 
+  // If `to` is a name (not an email address), look up the email in Contacts
+  let recipient = to;
+  const isEmail = to.includes('@');
+  if (!isEmail) {
+    const lookupScript = `
+tell application "Contacts"
+  set matches to (every person whose name contains "${to.replace(/"/g, '\\"')}")
+  if (count of matches) > 0 then
+    set p to item 1 of matches
+    if (count of emails of p) > 0 then
+      return value of item 1 of emails of p
+    end if
+  end if
+  return ""
+end tell`;
+    try {
+      const found = await runAppleScript(lookupScript, 10000);
+      if (found && found.trim()) recipient = found.trim();
+      else throw new Error(`No email address found for "${to}" in your Contacts. Ask the user for the email address.`);
+    } catch (e) {
+      throw new Error(`Could not find email for "${to}": ${e.message}`);
+    }
+  }
+
   const script = `
 tell application "Mail"
   set newMsg to make new outgoing message with properties {subject:"${subject.replace(/"/g, '\\"')}", content:"${body.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"}
   tell newMsg
-    make new to recipient at end of to recipients with properties {address:"${to.replace(/"/g, '\\"')}"}
+    make new to recipient at end of to recipients with properties {address:"${recipient.replace(/"/g, '\\"')}"}
   end tell
   send newMsg
 end tell
 "sent"`;
 
   await runAppleScript(script, 30000);
-  return `Email sent.\nTo: ${to}\nSubject: ${subject}\nBody: ${body.slice(0, 120)}${body.length > 120 ? '...' : ''}`;
+  return `Email sent.\nTo: ${recipient}${recipient !== to ? ' (' + to + ')' : ''}\nSubject: ${subject}\nBody: ${body.slice(0, 120)}${body.length > 120 ? '...' : ''}`;
 }
 
 async function handleiMessageSend(params) {
