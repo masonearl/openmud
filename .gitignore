@@ -16,6 +16,17 @@ dist/
 build/
 .pytest_cache/
 
+# Secrets — never commit these
+*.key
+*.pem
+*.p12
+*.pfx
+*.token
+secrets/
+credentials/
+relay/.token
+relay/token.txt
+
 # Large media — store externally, not in git
 video/
 *.mp4

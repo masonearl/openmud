@@ -222,6 +222,51 @@ Full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ---
 
+## Security and sensitive data
+
+**This is a public open-source repo. Nothing sensitive should ever be committed here.**
+
+### What must stay out of this repo
+
+| Type | Examples | Where it lives instead |
+|---|---|---|
+| API keys | `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` | Vercel environment variables (server) or browser `localStorage` (user's own key) |
+| Relay token | The token that links openmud-agent to your account | Passed as `--token` CLI argument only — never hardcoded |
+| Personal phone numbers | Contacts, your own number | Only accessed at runtime from your local Contacts/Messages DB — never sent to the repo |
+| Personal email addresses (private) | Work email, personal accounts beyond public contact | Not in code |
+| Credentials or secrets | `.env` files with real values, auth tokens, private keys | `.gitignore` blocks all `.env*` files |
+| Database files | `chat.db`, `AddressBook-v22.abcddb` | Local macOS only — never uploaded |
+| Private keys / certs | `*.pem`, `*.p12`, `*.key` | `.gitignore` blocks all of these |
+
+### What is intentionally public
+
+- `hi@masonearl.com` — public contact email listed on the site and in CODE_OF_CONDUCT.md
+- `masonearl.com` — public URL used in proposal templates and resource links
+- `openmud-production.up.railway.app` — public relay server URL (no secrets exposed by knowing the URL)
+- All API keys in `.env.example` files are placeholders (`sk-...`) — not real keys
+
+### How secrets are handled
+
+**Server-side (Vercel):** API keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) are set in Vercel's environment variable dashboard — never in source code. They are only readable by the serverless functions at runtime.
+
+**Client-side (user keys):** When users bring their own API keys (BYOK), those keys are stored in the browser's `localStorage` only — they go directly from the browser to the model provider, never through openmud servers and never persisted anywhere.
+
+**Relay token:** The openmud-agent token authenticates your local Mac to the relay server. It is passed as a CLI argument (`node openmud-agent.js --token YOUR_TOKEN`) and is never written to any file in this repo.
+
+**Contacts and messages:** The local agent reads your macOS Contacts and Messages databases at runtime to resolve names and read/send messages. This data stays on your machine — it is used to execute the command you requested and is not stored, logged, or transmitted beyond what is needed for that specific action.
+
+### Before you commit — checklist
+
+- [ ] No real API keys in any file
+- [ ] No personal phone numbers, home addresses, or private emails in code or comments
+- [ ] No `.env` files with real values (only `.env.example` with placeholders is OK)
+- [ ] No auth tokens or session secrets hardcoded
+- [ ] `git diff --staged` reviewed before every commit
+
+If you accidentally commit a secret: rotate it immediately, then remove it from git history with `git filter-repo` or contact GitHub support to purge the commit.
+
+---
+
 ## Quality gates
 
 - CI quality checklist: [docs/QUALITY_CHECKLIST.md](docs/QUALITY_CHECKLIST.md)
