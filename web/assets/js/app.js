@@ -62,7 +62,7 @@
             // Relay token — always send if present so the server can route to the user's local agent
             var relayToken = '';
             try { relayToken = localStorage.getItem('openmud_oc_relay_token') || ''; } catch (e) {}
-            if (relayToken && cfg.openclawRelayConnected) h['X-Openmud-Relay-Token'] = relayToken;
+            if (relayToken) h['X-Openmud-Relay-Token'] = relayToken;
         } catch (e) {}
         return h;
     }
@@ -6086,15 +6086,11 @@
             var providerConfig = getProviderConfig();
             if (model === 'openclaw') {
                 var ocRelayToken = '';
-                var ocRelayConnected = false;
-                try {
-                    ocRelayToken = localStorage.getItem('openmud_oc_relay_token') || '';
-                    ocRelayConnected = !!(providerConfig.openclawRelayConnected && ocRelayToken);
-                } catch (e) {}
+                try { ocRelayToken = localStorage.getItem('openmud_oc_relay_token') || ''; } catch (e) {}
 
-                // Route through /api/chat (Vercel) with relay token header.
-                // Vercel detects intent, builds structured command, sends to relay → Mac agent.
-                if (ocRelayConnected && ocRelayToken) {
+                // Route through /api/chat with relay token if a token exists — no need for
+                // the explicit "connected" flag. Server will return a clear error if no agent is connected.
+                if (ocRelayToken) {
                     var ocHeaders = getChatHeaders();
                     ocHeaders['X-Openmud-Relay-Token'] = ocRelayToken;
                     var ocController = new AbortController();

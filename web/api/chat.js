@@ -1232,21 +1232,27 @@ module.exports = async function handler(req, res) {
       // server to the user's local openmud-agent.js. The server figures out
       // the intent, sends a structured command, and waits for the result.
       const relayToken = getHeader(req, 'x-openmud-relay-token');
-      const RELAY_HTTP = process.env.OPENMUD_RELAY_URL || 'https://openmud-relay.up.railway.app';
+      const RELAY_HTTP = process.env.OPENMUD_RELAY_URL || 'https://openmud-production.up.railway.app';
 
       if (relayToken) {
         const lastMsg = lastUserMsg?.content || '';
+        // Use server's hosted key for relay intent resolution
+        const relayApiKey = process.env.OPENAI_API_KEY;
+        const relayModel = 'gpt-4o-mini';
+
+        // Combine message history into a single string for intent resolution
+        const msgHistory = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
 
         // Resolve intent → structured command via AI
         let command = null;
         if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
-          const eventData = await resolveCalendarIntentViaModel(messages);
+          const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
           if (eventData) command = { type: 'calendar_add', ...eventData, requestId: undefined };
         } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
-          const delData = await resolveDeleteCalendarIntentViaModel(messages);
+          const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
           if (delData) command = { type: 'calendar_delete', ...delData, requestId: undefined };
-        } else if (sendEmailIntent || /send.*email|email.*to|write.*email/i.test(lastMsg)) {
-          const emailData = await resolveEmailIntentViaModel(messages);
+        } else if (sendEmailIntent || /send.*email|email.*to|write.*email|send.*message.*to|text.*to|message.*to\s+\w/i.test(lastMsg)) {
+          const emailData = await resolveEmailIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
           if (emailData) command = { type: 'email_send', ...emailData, requestId: undefined };
         }
 
