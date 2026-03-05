@@ -24,19 +24,19 @@
     </nav>
 
     <main>
-        <section class="hero">
-            <div class="container">
-                <h1>Settings</h1>
-                <p class="hero-sub">Manage your account and preferences.</p>
-            </div>
-        </section>
-
-        <section class="section">
+        <div class="st-page">
             <div class="container narrow">
-                <div class="settings-card" id="auth-wrap">
-                    <h2 class="settings-card-title">Account</h2>
+
+                <header class="st-header st-anim-0">
+                    <h1 class="st-title">Settings</h1>
+                </header>
+
+                <!-- Account -->
+                <div class="settings-card st-card st-anim-1" id="auth-wrap">
+                    <h2 class="settings-card-title st-card-title">Account</h2>
+
                     <div id="auth-signed-out">
-                        <p class="settings-auth-hint">Sign in to sync your subscription and access your account across devices.</p>
+                        <p class="st-hint">Sign in to sync your subscription and access your account across devices.</p>
                         <form class="settings-auth-form" id="form-sign-in">
                             <input type="email" id="auth-email" placeholder="your@email.com" required>
                             <button type="submit" class="btn-primary">Send magic link</button>
@@ -54,6 +54,7 @@
                         </div>
                         <span id="auth-status" class="settings-auth-status" hidden></span>
                     </div>
+
                     <div id="auth-signed-in" hidden>
                         <div class="settings-auth-signed-in">
                             <div class="settings-auth-avatar" aria-hidden="true"></div>
@@ -62,101 +63,137 @@
                                 <button type="button" class="btn-secondary btn-sm" id="btn-sign-out">Sign out</button>
                             </div>
                         </div>
-                        <div class="settings-open-app-wrap" id="open-app-wrap">
-                            <p class="settings-open-app-hint">Have the desktop app? Open it and sync your account.</p>
+                        <div class="st-open-app-wrap" id="open-app-wrap">
+                            <p class="st-hint">Have the desktop app? Open it and sync your account.</p>
                             <button type="button" class="btn-open-app-settings" id="btn-open-app-settings">Open openmud</button>
-                            <span class="settings-open-app-status" id="open-app-status" hidden></span>
+                            <span class="st-open-app-status" id="open-app-status" hidden></span>
                         </div>
                     </div>
                 </div>
-                <div class="settings-card settings-item-spaced" id="provider-keys-wrap">
-                    <h2 class="settings-card-title">Provider API keys</h2>
-                    <p class="settings-auth-hint">Optional. Add your own keys to run AI directly with your provider accounts.</p>
-                    <div class="provider-keys-grid">
-                        <label class="provider-key-row">
-                            <span class="provider-key-label">OpenAI</span>
-                            <input id="key-openai" type="password" class="provider-key-input" placeholder="sk-..." autocomplete="off">
-                        </label>
-                        <label class="provider-key-row">
-                            <span class="provider-key-label">Anthropic</span>
-                            <input id="key-anthropic" type="password" class="provider-key-input" placeholder="sk-ant-..." autocomplete="off">
-                        </label>
-                        <label class="provider-key-row">
-                            <span class="provider-key-label">Grok (xAI)</span>
-                            <input id="key-grok" type="password" class="provider-key-input" placeholder="xai-..." autocomplete="off">
-                        </label>
-                        <label class="provider-key-row">
-                            <span class="provider-key-label">OpenRouter</span>
-                            <input id="key-openrouter" type="password" class="provider-key-input" placeholder="sk-or-..." autocomplete="off">
-                        </label>
-                    </div>
-                    <div class="provider-keys-divider" aria-hidden="true"></div>
 
-                    <!-- OpenClaw relay pairing -->
-                    <div class="provider-keys-grid" id="openclaw-section">
-                        <div class="provider-key-row">
-                            <span class="provider-key-label">openmud agent</span>
-                            <span id="openclaw-status-badge" class="settings-auth-status" style="display:inline-block;margin-left:8px;"></span>
+                <!-- Provider API keys -->
+                <div class="settings-card st-card st-anim-2" id="provider-keys-wrap">
+                    <h2 class="settings-card-title st-card-title">Provider API keys</h2>
+                    <p class="st-hint st-hint-tight">Optional. Add your own keys to run AI directly with your provider accounts.</p>
+
+                    <div class="st-keys-list">
+                        <div class="st-key-row">
+                            <span class="st-key-label">OpenAI</span>
+                            <div class="st-key-field">
+                                <input id="key-openai" type="password" class="provider-key-input" placeholder="sk-..." autocomplete="off">
+                                <button type="button" class="st-key-copy" data-copy-from="key-openai" title="Copy key">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H2.5A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                                </button>
+                            </div>
                         </div>
-                        <div class="provider-key-row" id="openclaw-connected-view" hidden>
-                            <span class="provider-key-label">Status</span>
-                            <span style="color:var(--color-success,#4caf50);font-size:13px;">Connected — your Mac is linked.</span>
+                        <div class="st-key-row">
+                            <span class="st-key-label">Anthropic</span>
+                            <div class="st-key-field">
+                                <input id="key-anthropic" type="password" class="provider-key-input" placeholder="sk-ant-..." autocomplete="off">
+                                <button type="button" class="st-key-copy" data-copy-from="key-anthropic" title="Copy key">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H2.5A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                                </button>
+                            </div>
                         </div>
-                        <div class="provider-key-row" id="openclaw-setup-view">
-                            <span class="provider-key-label" style="align-self:flex-start;padding-top:6px;">Setup</span>
-                            <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
-                                <p style="margin:0;font-size:13px;color:var(--color-muted,#888);">Link your Mac to use calendar, email, iMessage, and system commands from chat.</p>
-                                <p style="margin:0;font-size:13px;color:var(--color-muted,#888);">1. Copy your token below.<br>2. Run the command on your Mac.<br>3. Come back — status updates automatically.</p>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <input id="openclaw-relay-token" type="text" class="provider-key-input" readonly style="font-family:monospace;font-size:12px;cursor:pointer;" placeholder="Generating token...">
-                                    <button type="button" class="btn-secondary btn-sm" id="btn-copy-oc-token">Copy</button>
-                                    <button type="button" class="btn-secondary btn-sm" id="btn-regen-oc-token">New token</button>
+                        <div class="st-key-row">
+                            <span class="st-key-label">Grok (xAI)</span>
+                            <div class="st-key-field">
+                                <input id="key-grok" type="password" class="provider-key-input" placeholder="xai-..." autocomplete="off">
+                                <button type="button" class="st-key-copy" data-copy-from="key-grok" title="Copy key">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H2.5A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="st-key-row">
+                            <span class="st-key-label">OpenRouter</span>
+                            <div class="st-key-field">
+                                <input id="key-openrouter" type="password" class="provider-key-input" placeholder="sk-or-..." autocomplete="off">
+                                <button type="button" class="st-key-copy" data-copy-from="key-openrouter" title="Copy key">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H2.5A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- openmud agent sub-section -->
+                    <div class="st-agent-section" id="openclaw-section">
+                        <div class="st-sub-divider" aria-hidden="true"></div>
+                        <div class="st-agent-header">
+                            <span class="st-agent-label">openmud agent</span>
+                            <span id="openclaw-status-badge" class="st-agent-badge"></span>
+                        </div>
+
+                        <div id="openclaw-connected-view" hidden>
+                            <p class="st-agent-connected-text">Connected — your Mac is linked.</p>
+                        </div>
+
+                        <div id="openclaw-setup-view">
+                            <p class="st-hint st-hint-tight">Link your Mac to use calendar, email, iMessage, and system commands from chat.</p>
+                            <ol class="st-agent-steps">
+                                <li>Copy your token below.</li>
+                                <li>Run the command on your Mac.</li>
+                                <li>Come back — status updates automatically.</li>
+                            </ol>
+                            <div class="st-token-row">
+                                <input id="openclaw-relay-token" type="password" class="provider-key-input st-token-input" readonly placeholder="Generating token...">
+                                <button type="button" class="btn-secondary btn-sm" id="btn-copy-oc-token">Copy</button>
+                                <button type="button" class="btn-secondary btn-sm" id="btn-regen-oc-token">New token</button>
+                            </div>
+                            <div class="st-cmd-block">
+                                <span id="openclaw-run-cmd" class="st-cmd-text">node relay/openmud-agent.js --token ...</span>
+                                <button type="button" id="btn-copy-oc-cmd" class="st-cmd-copy">copy</button>
+                            </div>
+                        </div>
+
+                        <div id="openclaw-disconnect-row" hidden>
+                            <button type="button" class="btn-secondary btn-sm" id="btn-oc-disconnect">Disconnect</button>
+                        </div>
+
+                        <div class="st-advanced-row">
+                            <button type="button" id="btn-oc-advanced-toggle" class="st-advanced-toggle">Manual key setup</button>
+                        </div>
+                        <div id="openclaw-advanced" hidden>
+                            <div class="st-keys-list st-advanced-keys">
+                                <div class="st-key-row">
+                                    <span class="st-key-label">API key</span>
+                                    <div class="st-key-field">
+                                        <input id="key-openclaw-api" type="password" class="provider-key-input" placeholder="oc-..." autocomplete="off">
+                                    </div>
                                 </div>
-                                <div style="background:var(--color-surface-alt,#1a1a1a);border-radius:6px;padding:10px 12px;font-family:monospace;font-size:12px;color:var(--color-muted,#aaa);position:relative;">
-                                    <span id="openclaw-run-cmd">node openmud-agent.js --token ...</span>
-                                    <button type="button" id="btn-copy-oc-cmd" style="position:absolute;right:8px;top:6px;background:none;border:1px solid var(--color-border,#333);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--color-muted,#aaa);cursor:pointer;">copy</button>
+                                <div class="st-key-row">
+                                    <span class="st-key-label">Base URL</span>
+                                    <div class="st-key-field">
+                                        <input id="key-openclaw-base" type="text" class="provider-key-input" placeholder="https://api.openclaw.ai/v1" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="st-key-row">
+                                    <span class="st-key-label">Model</span>
+                                    <div class="st-key-field">
+                                        <input id="key-openclaw-model" type="text" class="provider-key-input" placeholder="gpt-4.1-mini">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="provider-key-row" id="openclaw-disconnect-row" hidden>
-                            <span class="provider-key-label"></span>
-                            <button type="button" class="btn-secondary btn-sm" id="btn-oc-disconnect">Disconnect</button>
-                        </div>
-                        <!-- Advanced / manual key override (collapsed) -->
-                        <div class="provider-key-row" style="margin-top:4px;">
-                            <span class="provider-key-label" style="font-size:11px;color:var(--color-muted,#666);">Advanced</span>
-                            <button type="button" id="btn-oc-advanced-toggle" style="background:none;border:none;font-size:11px;color:var(--color-muted,#666);cursor:pointer;padding:0;text-decoration:underline;">Manual key setup</button>
-                        </div>
-                        <div id="openclaw-advanced" hidden>
-                            <label class="provider-key-row">
-                                <span class="provider-key-label">API key</span>
-                                <input id="key-openclaw-api" type="password" class="provider-key-input" placeholder="oc-..." autocomplete="off">
-                            </label>
-                            <label class="provider-key-row">
-                                <span class="provider-key-label">Base URL</span>
-                                <input id="key-openclaw-base" type="text" class="provider-key-input" placeholder="https://api.openclaw.ai/v1" autocomplete="off">
-                            </label>
-                            <label class="provider-key-row">
-                                <span class="provider-key-label">Model</span>
-                                <input id="key-openclaw-model" type="text" class="provider-key-input" placeholder="gpt-4.1-mini">
-                            </label>
-                        </div>
                     </div>
+
                     <div class="provider-keys-actions">
                         <button type="button" class="btn-primary btn-sm" id="btn-save-provider-keys">Save keys</button>
                         <button type="button" class="btn-secondary btn-sm" id="btn-clear-provider-keys">Clear keys</button>
                         <span id="provider-keys-status" class="settings-auth-status" hidden></span>
                     </div>
                 </div>
-                <a href="/dashboard" class="settings-item settings-item-link settings-item-spaced" id="usage-wrap">
+
+                <a href="/dashboard" class="settings-item-link st-link-item st-anim-3" id="usage-wrap">
                     <span class="settings-label">Usage &amp; dashboard</span>
                     <span class="settings-arrow">→</span>
                 </a>
-                <a href="/download.html" class="settings-item settings-item-link settings-item-spaced">
+
+                <a href="/download.html" class="settings-item-link st-link-item st-anim-3">
                     <span class="settings-label">Download desktop app</span>
                     <span class="settings-arrow">→</span>
                 </a>
-                <div class="settings-card settings-item-spaced settings-card-compact-list">
+
+                <div class="settings-card settings-card-compact-list st-anim-4">
                     <h2 class="settings-card-title">Contact &amp; Community</h2>
                     <a href="mailto:hi@masonearl.com?subject=Message%20from%20openmud.ai" class="settings-item settings-item-link">
                         <span class="settings-label">Contact</span>
@@ -171,8 +208,9 @@
                         <span class="settings-arrow">→</span>
                     </a>
                 </div>
+
             </div>
-        </section>
+        </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -240,8 +278,6 @@
             function renderOcPairing(token) {
                 if (!ocTokenInput) return;
                 var agentScript = 'https://raw.githubusercontent.com/masonearl/openmud/main/relay/openmud-agent.js';
-                var cmd = 'npx --yes node ' + agentScript + ' --token ' + token;
-                // simpler command once user has it locally:
                 var simpleCmd = 'node relay/openmud-agent.js --token ' + token;
                 ocTokenInput.value = token;
                 if (ocRunCmd) ocRunCmd.textContent = simpleCmd;
@@ -251,12 +287,12 @@
                 if (!ocConnectedView || !ocSetupView) return;
                 if (connected) {
                     ocConnectedView.hidden = false;
+                    ocSetupView.hidden = true;
                     ocDisconnectRow.hidden = false;
                     if (ocStatusBadge) {
                         ocStatusBadge.textContent = 'Connected';
-                        ocStatusBadge.style.color = '#4caf50';
+                        ocStatusBadge.className = 'st-agent-badge st-agent-badge-connected';
                     }
-                    // Save as connected in provider keys
                     var keys = readKeyStore();
                     keys.openclawRelayToken = getOrCreateToken();
                     keys.openclawRelayConnected = true;
@@ -264,9 +300,11 @@
                     writeKeyStore(keys);
                 } else {
                     ocConnectedView.hidden = true;
+                    ocSetupView.hidden = false;
                     ocDisconnectRow.hidden = true;
                     if (ocStatusBadge) {
                         ocStatusBadge.textContent = '';
+                        ocStatusBadge.className = 'st-agent-badge';
                     }
                 }
             }
@@ -330,9 +368,13 @@
 
             if (btnAdvancedToggle) {
                 btnAdvancedToggle.addEventListener('click', function () {
-                    if (ocAdvanced) ocAdvanced.hidden = !ocAdvanced.hidden;
+                    if (ocAdvanced) {
+                        ocAdvanced.hidden = !ocAdvanced.hidden;
+                        btnAdvancedToggle.textContent = ocAdvanced.hidden ? 'Manual key setup' : 'Hide manual setup';
+                    }
                 });
             }
+
             var btnSaveKeys = document.getElementById('btn-save-provider-keys');
             var btnClearKeys = document.getElementById('btn-clear-provider-keys');
 
@@ -485,7 +527,7 @@
                         showKeyStatus('Could not save keys in this browser.', true);
                         return;
                     }
-                    showKeyStatus('Provider keys saved. Chat will use these on your next message.', false);
+                    showKeyStatus('Keys saved. Chat will use these on your next message.', false);
                     renderKeys();
                 });
             }
@@ -497,9 +539,26 @@
                         return;
                     }
                     renderKeys();
-                    showKeyStatus('Provider keys cleared.', false);
+                    showKeyStatus('Keys cleared.', false);
                 });
             }
+
+            // Per-field copy buttons
+            document.querySelectorAll('.st-key-copy[data-copy-from]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var input = document.getElementById(btn.getAttribute('data-copy-from'));
+                    if (!input || !input.value) return;
+                    navigator.clipboard.writeText(input.value).then(function () {
+                        var svg = btn.innerHTML;
+                        btn.textContent = 'Copied';
+                        btn.style.fontSize = '11px';
+                        setTimeout(function () {
+                            btn.innerHTML = svg;
+                            btn.style.fontSize = '';
+                        }, 1500);
+                    });
+                });
+            });
         })();
     </script>
     <script src="assets/js/nav.js"></script>
@@ -509,7 +568,6 @@
             var openAppStatus = document.getElementById('open-app-status');
             var openAppWrap = document.getElementById('open-app-wrap');
 
-            // Hide the open-app section when already inside the desktop app
             if (/mudrag-desktop/i.test(navigator.userAgent || '')) {
                 if (openAppWrap) openAppWrap.hidden = true;
             }
@@ -537,60 +595,341 @@
             }
         })();
     </script>
+
     <style>
-        .settings-open-app-wrap { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-        .settings-open-app-hint { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
-        .btn-open-app-settings {
-            padding: 0.55rem 1.25rem;
-            background: rgba(187, 152, 113, 0.14);
+        /* ── Page entrance animations ──────────────────────────────────── */
+        @keyframes st-fade-up {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .st-anim-0 { animation: st-fade-up 0.4s ease both; }
+        .st-anim-1 { animation: st-fade-up 0.4s 0.07s ease both; }
+        .st-anim-2 { animation: st-fade-up 0.4s 0.15s ease both; }
+        .st-anim-3 { animation: st-fade-up 0.4s 0.22s ease both; }
+        .st-anim-4 { animation: st-fade-up 0.4s 0.28s ease both; }
+
+        /* ── Page layout ───────────────────────────────────────────────── */
+        .st-page {
+            padding: 44px 0 72px;
+        }
+
+        .st-header {
+            margin-bottom: 20px;
+        }
+
+        .st-title {
+            margin: 0;
+            font-size: 1.625rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* ── Compact settings card ─────────────────────────────────────── */
+        .st-card {
+            padding: 22px 24px;
+            margin-bottom: 10px;
+        }
+
+        .st-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        /* ── Hints ─────────────────────────────────────────────────────── */
+        .st-hint {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0 0 16px;
+            line-height: 1.55;
+        }
+
+        .st-hint-tight {
+            margin-bottom: 12px;
+        }
+
+        /* ── Horizontal key rows ───────────────────────────────────────── */
+        .st-keys-list {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .st-key-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .st-key-label {
+            width: 94px;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .st-key-field {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .st-key-field .provider-key-input {
+            flex: 1;
+            min-width: 0;
+            padding: 0.5rem 0.65rem;
+            font-size: 0.875rem;
+        }
+
+        /* ── Per-field copy button ─────────────────────────────────────── */
+        .st-key-copy {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .st-key-copy:hover {
+            border-color: rgba(187, 152, 113, 0.5);
             color: var(--text);
-            border: 1px solid rgba(187, 152, 113, 0.45);
-            border-radius: 8px;
+            background: rgba(187, 152, 113, 0.08);
+        }
+
+        /* ── openmud agent sub-section ─────────────────────────────────── */
+        .st-agent-section {
+            margin-top: 4px;
+        }
+
+        .st-sub-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 0 14px;
+        }
+
+        .st-agent-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .st-agent-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .st-agent-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .st-agent-badge-connected {
+            color: #5db870;
+        }
+
+        .st-agent-badge-connected::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #5db870;
+            margin-right: 5px;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
+        }
+
+        .st-agent-connected-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0 0 10px;
+        }
+
+        /* ── Agent setup steps ─────────────────────────────────────────── */
+        .st-agent-steps {
+            margin: 0 0 12px 0;
+            padding-left: 18px;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ── Token row ─────────────────────────────────────────────────── */
+        .st-token-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .st-token-input {
+            flex: 1;
+            min-width: 0;
+            font-family: monospace;
+            font-size: 0.8rem !important;
+            padding: 0.5rem 0.65rem !important;
+            cursor: default;
+        }
+
+        /* ── Command block ─────────────────────────────────────────────── */
+        .st-cmd-block {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: var(--color-surface-alt, rgba(16, 14, 11, 0.7));
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 9px 12px;
+            margin-bottom: 8px;
+        }
+
+        .st-cmd-text {
+            font-family: monospace;
+            font-size: 0.775rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .st-cmd-copy {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        .st-cmd-copy:hover {
+            border-color: rgba(187, 152, 113, 0.5);
+            color: var(--text);
+        }
+
+        /* ── Disconnect / advanced ─────────────────────────────────────── */
+        #openclaw-disconnect-row {
+            margin-bottom: 8px;
+        }
+
+        .st-advanced-row {
+            margin-top: 6px;
+        }
+
+        .st-advanced-toggle {
+            background: none;
+            border: none;
+            font-size: 0.775rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            opacity: 0.7;
+            transition: opacity 0.15s;
+        }
+
+        .st-advanced-toggle:hover {
+            opacity: 1;
+        }
+
+        .st-advanced-keys {
+            margin-top: 10px;
+        }
+
+        /* ── Actions row ───────────────────────────────────────────────── */
+        .provider-keys-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Link items spacing ────────────────────────────────────────── */
+        .st-link-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        /* ── Open app section ──────────────────────────────────────────── */
+        .st-open-app-wrap {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .st-open-app-status {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* ── Shared key input ──────────────────────────────────────────── */
+        .provider-key-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: var(--bg);
+            color: var(--text);
+            padding: 0.6rem 0.7rem;
             font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .provider-key-input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(187, 152, 113, 0.18);
+        }
+
+        /* ── Open app button ───────────────────────────────────────────── */
+        .btn-open-app-settings {
+            padding: 0.5rem 1.1rem;
+            background: rgba(187, 152, 113, 0.12);
+            color: var(--text);
+            border: 1px solid rgba(187, 152, 113, 0.4);
+            border-radius: 8px;
+            font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
             transition: border-color 0.15s, background 0.15s;
         }
+
         .btn-open-app-settings:hover {
-            background: rgba(187, 152, 113, 0.24);
-            border-color: rgba(187, 152, 113, 0.62);
+            background: rgba(187, 152, 113, 0.22);
+            border-color: rgba(187, 152, 113, 0.6);
         }
-        .settings-open-app-status { display: block; margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); }
-        .provider-keys-grid { display: grid; gap: 0.7rem; margin-top: 0.35rem; }
-        .provider-key-row { display: grid; gap: 0.35rem; }
-        .provider-key-label { font-size: 0.83rem; color: var(--text-secondary); font-weight: 600; }
-        .provider-key-input {
-            width: 100%;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--bg);
-            color: var(--text);
-            padding: 0.62rem 0.72rem;
-            font-size: 0.92rem;
-            outline: none;
-        }
-        .provider-key-input:focus {
-            border-color: var(--brand);
-            box-shadow: 0 0 0 3px rgba(187, 152, 113, 0.2);
-        }
-        .provider-keys-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.55rem;
-            flex-wrap: wrap;
-            margin-top: 0.9rem;
-        }
-        .provider-keys-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0.95rem 0 0.75rem;
-        }
-        .provider-key-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text);
+
+        /* ── Mobile ────────────────────────────────────────────────────── */
+        @media (max-width: 480px) {
+            .st-key-label {
+                width: 76px;
+                font-size: 0.75rem;
+            }
+
+            .st-keys-list {
+                gap: 8px;
+            }
         }
     </style>
 </body>
