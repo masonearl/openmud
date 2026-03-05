@@ -6412,3 +6412,60 @@ body.page-try .contact-choice-btn:hover {
     border-color: #c9a87c;
     color: #d9b790;
 }
+
+/* ── Proposal / Document preview card ─────────────────────────────────────── */
+
+.msg-proposal-preview {
+    margin: 10px 0 4px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-secondary, #1e1e1e);
+}
+
+.msg-proposal-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary, #1e1e1e);
+}
+
+.btn-proposal-dl,
+.btn-proposal-open {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    padding: 5px 14px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-proposal-dl {
+    background: var(--accent, #c9a87c);
+    border-color: var(--accent, #c9a87c);
+    color: #111;
+    font-weight: 500;
+}
+
+.btn-proposal-dl:hover {
+    opacity: 0.88;
+}
+
+.btn-proposal-open:hover {
+    background: rgba(187, 152, 113, 0.1);
+    border-color: var(--accent, #c9a87c);
+    color: var(--accent, #c9a87c);
+}
+
+.msg-proposal-frame {
+    display: block;
+    width: 100%;
+    height: 480px;
+    border: none;
+    border-radius: 0 0 9px 9px;
+    background: #fff;
+}

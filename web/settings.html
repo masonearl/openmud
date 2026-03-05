@@ -183,7 +183,51 @@
                     </div>
                 </div>
 
-                <a href="/dashboard" class="settings-item-link st-link-item st-anim-3" id="usage-wrap">
+                <!-- Company Profile -->
+                <div class="settings-card st-card st-anim-3" id="company-profile-wrap">
+                    <h2 class="settings-card-title st-card-title">Company profile</h2>
+                    <p class="st-hint st-hint-tight">Used when generating proposals, change orders, and other documents from chat.</p>
+
+                    <div class="st-keys-list">
+                        <div class="st-key-row">
+                            <span class="st-key-label">Company name</span>
+                            <div class="st-key-field">
+                                <input id="company-name" type="text" class="provider-key-input" placeholder="Acme Construction" autocomplete="organization">
+                            </div>
+                        </div>
+                        <div class="st-key-row">
+                            <span class="st-key-label">Contact name</span>
+                            <div class="st-key-field">
+                                <input id="company-contact" type="text" class="provider-key-input" placeholder="Jane Smith" autocomplete="name">
+                            </div>
+                        </div>
+                        <div class="st-key-row">
+                            <span class="st-key-label">Phone</span>
+                            <div class="st-key-field">
+                                <input id="company-phone" type="tel" class="provider-key-input" placeholder="(801) 555-0100" autocomplete="tel">
+                            </div>
+                        </div>
+                        <div class="st-key-row">
+                            <span class="st-key-label">Email</span>
+                            <div class="st-key-field">
+                                <input id="company-email" type="email" class="provider-key-input" placeholder="bids@acme.com" autocomplete="email">
+                            </div>
+                        </div>
+                        <div class="st-key-row">
+                            <span class="st-key-label">Website</span>
+                            <div class="st-key-field">
+                                <input id="company-url" type="url" class="provider-key-input" placeholder="https://acme.com" autocomplete="url">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="provider-keys-actions">
+                        <button type="button" class="btn-primary btn-sm" id="btn-save-company">Save</button>
+                        <span id="company-save-status" class="settings-auth-status" hidden></span>
+                    </div>
+                </div>
+
+                <a href="/dashboard" class="settings-item-link st-link-item st-anim-4" id="usage-wrap">
                     <span class="settings-label">Usage &amp; dashboard</span>
                     <span class="settings-arrow">→</span>
                 </a>
@@ -542,6 +586,57 @@
                     showKeyStatus('Keys cleared.', false);
                 });
             }
+
+            // ── Company profile save / load ────────────────────────────────────
+            var STORAGE_COMPANY = 'mudrag_company_profile';
+            var companyInputs = {
+                name:    document.getElementById('company-name'),
+                contact: document.getElementById('company-contact'),
+                phone:   document.getElementById('company-phone'),
+                email:   document.getElementById('company-email'),
+                url:     document.getElementById('company-url'),
+            };
+            var btnSaveCompany = document.getElementById('btn-save-company');
+            var companySaveStatus = document.getElementById('company-save-status');
+
+            function loadCompanyProfile() {
+                try {
+                    var stored = JSON.parse(localStorage.getItem(STORAGE_COMPANY) || '{}');
+                    if (companyInputs.name)    companyInputs.name.value    = stored.company_name    || '';
+                    if (companyInputs.contact) companyInputs.contact.value = stored.company_contact || '';
+                    if (companyInputs.phone)   companyInputs.phone.value   = stored.company_phone   || '';
+                    if (companyInputs.email)   companyInputs.email.value   = stored.company_email   || '';
+                    if (companyInputs.url)     companyInputs.url.value     = stored.company_url     || '';
+                } catch (e) {}
+            }
+
+            function showCompanyStatus(msg, isError) {
+                if (!companySaveStatus) return;
+                companySaveStatus.textContent = msg;
+                companySaveStatus.hidden = false;
+                companySaveStatus.className = 'settings-auth-status' + (isError ? ' settings-auth-status-error' : '');
+                setTimeout(function () { companySaveStatus.hidden = true; }, 3000);
+            }
+
+            if (btnSaveCompany) {
+                btnSaveCompany.addEventListener('click', function () {
+                    var profile = {
+                        company_name:    companyInputs.name    ? String(companyInputs.name.value    || '').trim() : '',
+                        company_contact: companyInputs.contact ? String(companyInputs.contact.value || '').trim() : '',
+                        company_phone:   companyInputs.phone   ? String(companyInputs.phone.value   || '').trim() : '',
+                        company_email:   companyInputs.email   ? String(companyInputs.email.value   || '').trim() : '',
+                        company_url:     companyInputs.url     ? String(companyInputs.url.value     || '').trim() : '',
+                    };
+                    try {
+                        localStorage.setItem(STORAGE_COMPANY, JSON.stringify(profile));
+                        showCompanyStatus('Saved.', false);
+                    } catch (e) {
+                        showCompanyStatus('Could not save in this browser.', true);
+                    }
+                });
+            }
+
+            loadCompanyProfile();
 
             // Per-field copy buttons
             document.querySelectorAll('.st-key-copy[data-copy-from]').forEach(function (btn) {

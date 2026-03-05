@@ -117,6 +117,16 @@
         try {
             h['X-Client-Date'] = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
         } catch (e) {}
+        // Forward company profile for proposal/document generation
+        try {
+            var cp = localStorage.getItem('mudrag_company_profile');
+            if (cp) h['X-Company-Profile'] = cp;
+        } catch (e) {}
+        // Forward UI theme so generated PDFs match the user's preference
+        try {
+            var isDark = document.body && document.body.classList.contains('theme-dark');
+            h['X-Ui-Theme'] = isDark ? 'dark' : 'light';
+        } catch (e) {}
         return h;
     }
 
@@ -2521,6 +2531,88 @@
 
         messagesEl.appendChild(row);
         scrollToLatest();
+    }
+
+    /**
+     * Render a generated proposal/document as an in-chat preview card with
+     * Download PDF and Open in new tab actions.
+     */
+    function renderProposalPreview(html) {
+        var wrap = document.createElement('div');
+        wrap.className = 'msg-proposal-preview';
+
+        // Action bar
+        var actions = document.createElement('div');
+        actions.className = 'msg-proposal-actions';
+
+        var dlBtn = document.createElement('button');
+        dlBtn.type = 'button';
+        dlBtn.className = 'btn-proposal-dl';
+        dlBtn.textContent = 'Download PDF';
+        dlBtn.addEventListener('click', function () {
+            if (typeof html2pdf === 'function') {
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                html2pdf(tempDiv, {
+                    margin: 0,
+                    filename: 'proposal-' + new Date().toISOString().slice(0, 10) + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                });
+            } else {
+                // Fallback: open in new tab for browser print-to-PDF
+                var win = window.open('', '_blank');
+                if (win) {
+                    win.document.write('<!DOCTYPE html><html><head><title>Proposal</title><style>body{margin:0;padding:0;background:#fff;} @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style></head><body>' + html + '</body></html>');
+                    win.document.close();
+                    setTimeout(function () { win.print(); }, 400);
+                }
+            }
+        });
+
+        var openBtn = document.createElement('button');
+        openBtn.type = 'button';
+        openBtn.className = 'btn-proposal-open';
+        openBtn.textContent = 'Open full view';
+        openBtn.addEventListener('click', function () {
+            var win = window.open('', '_blank');
+            if (win) {
+                win.document.write('<!DOCTYPE html><html><head><title>Proposal</title><style>body{margin:0;padding:24px;background:#fff;} @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style></head><body>' + html + '</body></html>');
+                win.document.close();
+            }
+        });
+
+        actions.appendChild(dlBtn);
+        actions.appendChild(openBtn);
+        wrap.appendChild(actions);
+
+        // Scrollable preview iframe
+        var frame = document.createElement('iframe');
+        frame.className = 'msg-proposal-frame';
+        frame.setAttribute('sandbox', 'allow-same-origin');
+        frame.setAttribute('scrolling', 'yes');
+        wrap.appendChild(frame);
+
+        messagesEl.appendChild(wrap);
+        scrollToLatest();
+
+        // Write HTML into iframe after it's in the DOM
+        requestAnimationFrame(function () {
+            try {
+                var doc = frame.contentDocument || frame.contentWindow.document;
+                doc.open();
+                doc.write('<!DOCTYPE html><html><head><style>body{margin:0;padding:0;font-family:Inter,-apple-system,sans-serif;background:#fff;}</style></head><body>' + html + '</body></html>');
+                doc.close();
+                // Auto-size frame to content height (capped)
+                setTimeout(function () {
+                    try {
+                        var h = Math.min(frame.contentDocument.body.scrollHeight + 24, 620);
+                        frame.style.height = h + 'px';
+                    } catch (_) {}
+                }, 200);
+            } catch (_) {}
+        });
     }
 
     function renderMessages() {
@@ -6601,6 +6693,10 @@
                             // Contact ambiguity: render choice buttons as a follow-up UI element
                             if (data && data._choices && data._choices.length > 0) {
                                 renderContactChoices(data._choices);
+                            }
+                            // Proposal/document preview card
+                            if (data && data._proposal_html) {
+                                renderProposalPreview(data._proposal_html);
                             }
                             if (data && data.tools_used && data.tools_used.length > 0) {
                                 updateActiveToolPills(data.tools_used);

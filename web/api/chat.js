@@ -1364,6 +1364,56 @@ module.exports = async function handler(req, res) {
       // No automation command detected — fall through to normal AI response
     }
 
+    // ── Document / Proposal generation (mud1 + openclaw) ─────────────────────
+    // Intercept before the RAG path so the AI doesn't refuse or hallucinate.
+    // Detects explicit requests to generate a proposal, document, or PDF,
+    // extracts params via GPT, builds the HTML using buildProposal(), and
+    // returns it as _proposal_html for the client to preview + download.
+    {
+      const lastUserContent = (lastUserMsg?.content || '').toLowerCase();
+      const isDocGenIntent = /\b(generate|create|make|build|write|draft)\b.*\b(proposal|document|doc|pdf)\b|\b(proposal|document|pdf)\b.*\b(generate|create|make|build|write|draft)\b|\bcombine.*\b(documents?|docs?|pdf)\b|\bmerge.*\b(documents?|docs?|pdf)\b/i.test(lastUserContent);
+
+      if (isDocGenIntent) {
+        const genApiKey = process.env.OPENAI_API_KEY;
+        if (genApiKey) {
+          try {
+            // Extract proposal params from the conversation
+            const fullContext = messages.filter(m => m.role === 'user').map(m => String(m.content || '')).join('\n');
+            const genClient = new OpenAI({ apiKey: genApiKey });
+            const paramCompletion = await genClient.chat.completions.create({
+              model: 'gpt-4o-mini',
+              max_tokens: 600,
+              temperature: 0.2,
+              messages: [
+                {
+                  role: 'system',
+                  content: 'Extract proposal details from the user\'s request. Return ONLY valid JSON:\n{"client":"client or project name","scope":"detailed scope of work","total":0,"duration":null,"bid_items":[{"description":"item","quantity":1,"unit":"LS","unit_price":0,"amount":0}],"assumptions":"","exclusions":""}\nIf a field is not mentioned, use sensible defaults. total=0 means unknown. duration in calendar days or null.'
+                },
+                { role: 'user', content: fullContext }
+              ],
+            });
+            const raw = String(paramCompletion.choices?.[0]?.message?.content || '');
+            const match = raw.match(/\{[\s\S]*\}/);
+            if (match) {
+              const params = JSON.parse(match[0]);
+              // Pull company profile forwarded from the client
+              let companyProfile = {};
+              try { companyProfile = JSON.parse(getHeader(req, 'x-company-profile') || '{}'); } catch (_) {}
+              // Match theme to user's UI preference
+              const theme = getHeader(req, 'x-ui-theme') === 'dark' ? 'dark' : 'light';
+              const result = buildProposal({ ...params, ...companyProfile, theme });
+              return res.status(200).json({
+                response: `Here's your proposal${params.client ? ' for ' + params.client : ''}. Preview below — click Download PDF to save it.`,
+                _proposal_html: result.html,
+              });
+            }
+          } catch (_) {
+            // Fall through to normal AI path on any extraction failure
+          }
+        }
+      }
+    }
+
     // mud1: True RAG — retrieve from knowledge base → GPT-4o generates grounded response
     if (isMud1) {
       const apiKey = openaiKeyOverride || process.env.OPENAI_API_KEY;
