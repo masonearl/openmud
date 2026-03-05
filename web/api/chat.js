@@ -660,6 +660,31 @@ function parseSendEmailIntent(userText) {
  * Use the OpenClaw model to properly extract email intent from the user's request.
  * Returns { to, subject, body } or null on failure.
  */
+async function resolveiMessageIntentViaModel(userText, apiKey, baseURL, modelName) {
+  try {
+    const client = new OpenAI({ apiKey, baseURL });
+    const response = await client.chat.completions.create({
+      model: modelName,
+      messages: [
+        {
+          role: 'system',
+          content: 'Extract the iMessage/text details the user wants to send. Return ONLY a JSON object:\n{"to":"recipient name, phone number, or email","message":"The message text to send"}\nIf message content is not specified, write a short friendly message matching the stated intent. Never include explanation outside the JSON.'
+        },
+        { role: 'user', content: userText }
+      ],
+      max_tokens: 200,
+      temperature: 0.1,
+    });
+    const raw = String(response.choices?.[0]?.message?.content || '');
+    const match = raw.match(/\{[\s\S]*?\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      if (parsed.to && parsed.message) return parsed;
+    }
+  } catch (e) { /* fall through */ }
+  return null;
+}
+
 async function resolveEmailIntentViaModel(userText, apiKey, baseURL, modelName) {
   try {
     const client = new OpenAI({ apiKey, baseURL });
@@ -1112,7 +1137,10 @@ module.exports = async function handler(req, res) {
       } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
         const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
         if (delData) command = { type: 'calendar_delete', ...delData, requestId: undefined };
-      } else if (sendEmailIntent || /send.*email|email.*to|write.*email|send.*message.*to|text.*to|message.*to\s+\w/i.test(lastMsg)) {
+      } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage/i.test(lastMsg)) {
+        const imsgData = await resolveiMessageIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+        if (imsgData) command = { type: 'imessage_send', ...imsgData, requestId: undefined };
+      } else if (sendEmailIntent || /send.*email|email.*to|write.*email/i.test(lastMsg)) {
         const emailData = await resolveEmailIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
         if (emailData) command = { type: 'email_send', ...emailData, requestId: undefined };
       }
@@ -1304,7 +1332,10 @@ module.exports = async function handler(req, res) {
         } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
           const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
           if (delData) command = { type: 'calendar_delete', ...delData, requestId: undefined };
-        } else if (sendEmailIntent || /send.*email|email.*to|write.*email|send.*message.*to|text.*to|message.*to\s+\w/i.test(lastMsg)) {
+        } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage/i.test(lastMsg)) {
+          const imsgData = await resolveiMessageIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
+          if (imsgData) command = { type: 'imessage_send', ...imsgData, requestId: undefined };
+        } else if (sendEmailIntent || /send.*email|email.*to|write.*email/i.test(lastMsg)) {
           const emailData = await resolveEmailIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
           if (emailData) command = { type: 'email_send', ...emailData, requestId: undefined };
         }

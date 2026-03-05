@@ -193,6 +193,47 @@ end tell
   return `Email sent.\nTo: ${to}\nSubject: ${subject}\nBody: ${body.slice(0, 120)}${body.length > 120 ? '...' : ''}`;
 }
 
+async function handleiMessageSend(params) {
+  const { to, message } = params;
+  if (!to || !message) throw new Error('Missing to or message for iMessage.');
+
+  // Try to look up recipient by name in Contacts if it doesn't look like a phone/email
+  const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(to) || to.includes('@');
+  let recipient = to;
+
+  if (!isPhoneOrEmail) {
+    // Look up by name in Contacts
+    const lookupScript = `
+tell application "Contacts"
+  set matches to (every person whose name contains "${to.replace(/"/g, '\\"')}")
+  if (count of matches) > 0 then
+    set p to item 1 of matches
+    if (count of phones of p) > 0 then
+      return value of item 1 of phones of p
+    else if (count of emails of p) > 0 then
+      return value of item 1 of emails of p
+    end if
+  end if
+  return ""
+end tell`;
+    try {
+      const found = await runAppleScript(lookupScript, 10000);
+      if (found) recipient = found.trim();
+    } catch (e) { /* fall through with original name */ }
+  }
+
+  const sendScript = `
+tell application "Messages"
+  set targetService to first service whose service type = iMessage
+  set targetBuddy to buddy "${recipient.replace(/"/g, '\\"')}" of targetService
+  send "${message.replace(/"/g, '\\"').replace(/\n/g, '\\n')}" to targetBuddy
+end tell
+"sent"`;
+
+  await runAppleScript(sendScript, 20000);
+  return `iMessage sent.\nTo: ${to}${recipient !== to ? ' (' + recipient + ')' : ''}\nMessage: ${message}`;
+}
+
 async function handleRun(params) {
   const { script, shell } = params;
   if (script) {
@@ -214,6 +255,7 @@ async function dispatch(msg) {
     case 'calendar_add':    return await handleCalendarAdd(msg);
     case 'calendar_delete': return await handleCalendarDelete(msg);
     case 'email_send':      return await handleEmailSend(msg);
+    case 'imessage_send':   return await handleiMessageSend(msg);
     case 'run':             return await handleRun(msg);
     case 'ping':            return 'pong';
     default:
