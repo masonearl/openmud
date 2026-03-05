@@ -272,6 +272,51 @@
         }
         .db-build-note p + p { margin-top: 8px; }
 
+        /* Setup SQL block */
+        .db-setup-note {
+            background: rgba(251, 146, 60, 0.06);
+            border: 1px solid rgba(251, 146, 60, 0.28);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+        .db-setup-note h2 { margin: 0 0 6px; font-size: 1rem; font-weight: 700; color: var(--text); }
+        .db-setup-note p { margin: 0 0 12px; color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+        .db-setup-sql {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 6px;
+            padding: 14px 16px;
+            color: #b8c9a8;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 0 0 12px;
+            line-height: 1.6;
+        }
+        .db-setup-actions { display: flex; gap: 8px; align-items: center; }
+        .db-setup-copy {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(251,146,60,0.4);
+            background: rgba(251,146,60,0.1);
+            color: #fb923c;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .db-setup-copy:hover { background: rgba(251,146,60,0.18); }
+        .db-setup-link {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            opacity: 0.7;
+        }
+        .db-setup-link:hover { opacity: 1; }
+
         /* Sign-in gate */
         .db-gate {
             display: flex;
@@ -397,6 +442,18 @@
         </div>
 
         <div id="db-loading" class="db-loading">Loading…</div>
+
+        <!-- Shown when usage_events table doesn't exist yet -->
+        <div id="db-setup-note" class="db-setup-note" hidden>
+            <h2>Database setup required</h2>
+            <p>Usage tracking is ready to go — run the SQL below once in your <a class="db-setup-link" href="https://supabase.com/dashboard" target="_blank" rel="noopener">Supabase SQL editor</a> to create the tracking tables. After that, every chat message will appear here automatically.</p>
+            <pre id="db-setup-sql" class="db-setup-sql"></pre>
+            <div class="db-setup-actions">
+                <button class="db-setup-copy" id="db-copy-sql">Copy SQL</button>
+                <a class="db-setup-link" href="https://supabase.com/dashboard" target="_blank" rel="noopener">Open Supabase →</a>
+            </div>
+        </div>
+
         <div id="db-build-note" class="db-build-note" hidden>
             <h2>Dashboard is being built out</h2>
             <p id="db-build-note-primary">We are actively improving this page so your usage and account activity are easier to track.</p>
@@ -562,6 +619,7 @@
 
     function loadDashboard(token, days) {
         hideBuildNote();
+        hideSetupNote();
         document.getElementById('db-loading').hidden = false;
         document.getElementById('db-content').hidden = true;
         var apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -602,6 +660,29 @@
         panel.hidden = true;
     }
 
+    function showSetupNote() {
+        var panel = document.getElementById('db-setup-note');
+        if (!panel) return;
+        var pre = document.getElementById('db-setup-sql');
+        if (pre) pre.textContent = SETUP_SQL;
+        panel.hidden = false;
+    }
+
+    function hideSetupNote() {
+        var panel = document.getElementById('db-setup-note');
+        if (panel) panel.hidden = true;
+    }
+
+    var copyBtn = document.getElementById('db-copy-sql');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function () {
+            navigator.clipboard.writeText(SETUP_SQL).then(function () {
+                copyBtn.textContent = 'Copied!';
+                setTimeout(function () { copyBtn.textContent = 'Copy SQL'; }, 2000);
+            });
+        });
+    }
+
     function fmtDate(iso) {
         var d = new Date(iso);
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -619,16 +700,89 @@
     }
 
     function fmtCost(microdollars) {
-        var cents = microdollars / 10000;
+        var v = microdollars || 0;
+        var cents = v / 10000;
         if (cents < 1) return '$0.00';
-        var dollars = microdollars / 1000000;
+        var dollars = v / 1000000;
         return '$' + dollars.toFixed(dollars < 0.10 ? 4 : 2);
     }
 
+    // SQL to show in the setup panel — keep in sync with migrations/
+    var SETUP_SQL = [
+        '-- Run this once in your Supabase SQL editor',
+        '',
+        'CREATE TABLE IF NOT EXISTS usage_events (',
+        '  id                UUID        DEFAULT gen_random_uuid() PRIMARY KEY,',
+        '  user_id           UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,',
+        '  created_at        TIMESTAMPTZ DEFAULT now() NOT NULL,',
+        '  source            TEXT        NOT NULL DEFAULT \'web\',',
+        '  model             TEXT        NOT NULL DEFAULT \'mud1\',',
+        '  input_tokens      INTEGER     NOT NULL DEFAULT 0,',
+        '  output_tokens     INTEGER     NOT NULL DEFAULT 0,',
+        '  cost_microdollars INTEGER     NOT NULL DEFAULT 0,',
+        '  request_type      TEXT        NOT NULL DEFAULT \'chat\'',
+        ');',
+        '',
+        'CREATE INDEX IF NOT EXISTS idx_usage_events_user_created',
+        '  ON usage_events (user_id, created_at DESC);',
+        '',
+        'ALTER TABLE usage_events ENABLE ROW LEVEL SECURITY;',
+        '',
+        'CREATE POLICY "users_read_own_usage_events" ON usage_events',
+        '  FOR SELECT USING (auth.uid() = user_id);',
+        'CREATE POLICY "service_insert_usage_events" ON usage_events',
+        '  FOR INSERT WITH CHECK (true);',
+        '',
+        '-- Daily usage counter table',
+        'CREATE TABLE IF NOT EXISTS usage_daily (',
+        '  user_id    UUID  NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,',
+        '  date       DATE  NOT NULL,',
+        '  count      INTEGER NOT NULL DEFAULT 0,',
+        '  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),',
+        '  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),',
+        '  PRIMARY KEY (user_id, date)',
+        ');',
+        '',
+        'ALTER TABLE usage_daily ENABLE ROW LEVEL SECURITY;',
+        '',
+        'CREATE POLICY "users_read_own_usage_daily" ON usage_daily',
+        '  FOR SELECT USING (auth.uid() = user_id);',
+        'CREATE POLICY "service_insert_usage_daily" ON usage_daily',
+        '  FOR INSERT WITH CHECK (true);',
+        'CREATE POLICY "service_update_usage_daily" ON usage_daily',
+        '  FOR UPDATE USING (true) WITH CHECK (true);',
+        '',
+        'CREATE OR REPLACE FUNCTION increment_usage_daily(p_user_id UUID)',
+        'RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$',
+        'DECLARE',
+        '  v_today DATE := (now() AT TIME ZONE \'utc\')::date;',
+        '  v_count INTEGER;',
+        'BEGIN',
+        '  INSERT INTO usage_daily (user_id, date, count, created_at, updated_at)',
+        '  VALUES (p_user_id, v_today, 1, now(), now())',
+        '  ON CONFLICT (user_id, date)',
+        '  DO UPDATE SET count = usage_daily.count + 1, updated_at = now()',
+        '  RETURNING count INTO v_count;',
+        '  RETURN v_count;',
+        'END; $$;',
+        '',
+        'REVOKE ALL ON FUNCTION increment_usage_daily(UUID) FROM PUBLIC;',
+        'GRANT EXECUTE ON FUNCTION increment_usage_daily(UUID) TO service_role;',
+    ].join('\n');
+
     function renderDashboard(data) {
         document.getElementById('db-loading').hidden = true;
-        document.getElementById('db-content').hidden = false;
         hideBuildNote();
+        hideSetupNote();
+
+        // If tables don't exist yet, show setup instructions and bail early
+        if (data.needs_setup) {
+            document.getElementById('db-content').hidden = true;
+            showSetupNote();
+            return;
+        }
+
+        document.getElementById('db-content').hidden = false;
 
         // Plan badge
         var badge = document.getElementById('db-plan-badge');

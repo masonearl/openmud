@@ -56,17 +56,22 @@ module.exports = async function handler(req, res) {
     .limit(500);
 
   if (error) {
-    // Table may not exist yet — return zeros gracefully
-    console.warn('[dashboard] usage_events query error:', error.message);
+    // PostgreSQL error 42P01 = table does not exist — migration hasn't been run yet.
+    const needsSetup = error.code === '42P01' || /does not exist/i.test(error.message || '');
+    if (needsSetup) {
+      console.warn('[dashboard] usage_events table missing — run migrations');
+    } else {
+      console.warn('[dashboard] usage_events query error:', error.message);
+    }
     return res.status(200).json({
       user: { email: user.email, tier, limit },
-      totals: { messages: 0, input_tokens: 0, output_tokens: 0, cost_cents: 0 },
+      totals: { messages: 0, input_tokens: 0, output_tokens: 0, cost_microdollars: 0 },
       daily: [],
       by_model: [],
       by_source: [],
       recent: [],
       days,
-      needs_migration: false,
+      needs_setup: needsSetup,
     });
   }
 
