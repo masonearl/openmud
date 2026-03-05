@@ -267,28 +267,29 @@ end tell
  *   1. If input already looks like a phone/email → use as-is.
  *   2. Search Contacts for all people whose name contains the query.
  *   3. If exactly one match → use it.
- *   4. If multiple → rank by most recent Messages conversation (sqlite3 on chat.db).
- *   5. If still ambiguous → return an object with options so the caller can ask the user.
+ *   4. If multiple → ask the user immediately (no hanging DB queries).
  */
 async function resolveContact(name) {
   const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(name) || name.includes('@');
   if (isPhoneOrEmail) return { resolved: name };
 
-  // Step 1: Get all matching contacts from Contacts.app
   const lookupScript = `
 tell application "Contacts"
   set out to ""
   set matches to (every person whose name contains "${name.replace(/"/g, '\\"')}")
   repeat with p in matches
     set pname to name of p
-    set phandle to ""
-    if (count of phones of p) > 0 then
-      set phandle to value of item 1 of phones of p
-    else if (count of emails of p) > 0 then
-      set phandle to value of item 1 of emails of p
-    end if
-    if phandle is not "" then
-      set out to out & pname & "|" & phandle & "\\n"
+    set allHandles to ""
+    -- collect all phones
+    repeat with ph in phones of p
+      set allHandles to allHandles & value of ph & ";"
+    end repeat
+    -- collect all emails
+    repeat with em in emails of p
+      set allHandles to allHandles & value of em & ";"
+    end repeat
+    if allHandles is not "" then
+      set out to out & pname & "|" & allHandles & "\\n"
     end if
   end repeat
   return out
@@ -298,50 +299,32 @@ end tell`;
   try { contactsRaw = await runAppleScript(lookupScript, 10000); } catch (e) {}
 
   const contacts = contactsRaw.trim().split('\n').filter(Boolean).map(line => {
-    const [cname, chandle] = line.split('|');
-    return { name: (cname || '').trim(), handle: (chandle || '').trim() };
-  }).filter(c => c.handle);
+    const parts = line.split('|');
+    const cname = (parts[0] || '').trim();
+    const handles = (parts[1] || '').split(';').map(h => h.trim()).filter(Boolean);
+    return { name: cname, handles };
+  }).filter(c => c.handles.length > 0);
 
   if (contacts.length === 0) throw new Error(`No contact found for "${name}". Ask for their phone number or email.`);
-  if (contacts.length === 1) return { resolved: contacts[0].handle, name: contacts[0].name };
+  if (contacts.length === 1) return { resolved: contacts[0].handles[0], allHandles: contacts[0].handles, name: contacts[0].name };
 
-  // Step 2: Multiple matches — rank by most recent Messages conversation
-  try {
-    const dbPath = `${process.env.HOME}/Library/Messages/chat.db`;
-    // Build a CASE expression to match each handle
-    const handles = contacts.map(c => {
-      // Normalize phone: strip non-digits for comparison
-      return c.handle.replace(/\D/g, '');
-    });
-    const sqlCases = handles.map((h, i) =>
-      `WHEN replace(replace(replace(h.id,' ',''),'-',''),'(','') LIKE '%${h}%' THEN ${i}`
-    ).join(' ');
-    const sql = `
-      SELECT CASE ${sqlCases} END as idx, MAX(m.date) as last_date
-      FROM message m
-      JOIN chat_message_join cmj ON m.rowid = cmj.message_id
-      JOIN chat_handle_join chj ON cmj.chat_id = chj.chat_id
-      JOIN handle h ON chj.handle_id = h.rowid
-      WHERE idx IS NOT NULL
-      GROUP BY idx
-      ORDER BY last_date DESC
-      LIMIT 1;`;
-    const result = await runShell(`sqlite3 "${dbPath}" "${sql.replace(/\n/g, ' ')}"`, 8000);
-    const row = result.trim().split('|');
-    if (row[0] !== '' && row[0] !== undefined) {
-      const idx = parseInt(row[0], 10);
-      if (!isNaN(idx) && contacts[idx]) {
-        return { resolved: contacts[idx].handle, name: contacts[idx].name };
-      }
-    }
-  } catch (e) { /* Messages DB not accessible — fall through */ }
-
-  // Step 3: Still ambiguous — return options so the chat can ask the user
+  // Multiple contacts — ask immediately, no hanging
   return {
     ambiguous: true,
     options: contacts,
-    question: `Found ${contacts.length} contacts named "${name}": ${contacts.map((c, i) => `${i + 1}. ${c.name} (${c.handle})`).join(', ')}. Which one?`,
+    question: `Found ${contacts.length} people named "${name}": ${contacts.map((c, i) => `${i + 1}. ${c.name}`).join(', ')}. Which one did you mean?`,
   };
+}
+
+/**
+ * Normalize a phone number to the format Messages.app expects.
+ * Tries to produce E.164 (+1XXXXXXXXXX for US numbers).
+ */
+function normalizePhone(raw) {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) return '+1' + digits;
+  if (digits.length === 11 && digits[0] === '1') return '+' + digits;
+  return raw; // return as-is if we can't normalize
 }
 
 async function handleiMessageSend(params) {
@@ -349,23 +332,31 @@ async function handleiMessageSend(params) {
   if (!to || !message) throw new Error('Missing to or message for iMessage.');
 
   const contact = await resolveContact(to);
+  if (contact.ambiguous) return contact.question;
 
-  if (contact.ambiguous) {
-    // Return the question as the response so the chat can relay it to the user
-    return contact.question;
-  }
+  // Build a list of handles to try: normalized phones first, then emails
+  const allHandles = contact.allHandles || [contact.resolved];
+  const phones = allHandles.filter(h => !h.includes('@')).map(normalizePhone);
+  const emails = allHandles.filter(h => h.includes('@'));
+  const tryOrder = [...phones, ...emails];
 
-  const recipient = contact.resolved;
-  const sendScript = `
+  let lastErr = null;
+  for (const handle of tryOrder) {
+    const sendScript = `
 tell application "Messages"
   set targetService to first service whose service type = iMessage
-  set targetBuddy to buddy "${recipient.replace(/"/g, '\\"')}" of targetService
+  set targetBuddy to buddy "${handle.replace(/"/g, '\\"')}" of targetService
   send "${message.replace(/"/g, '\\"').replace(/\n/g, '\\n')}" to targetBuddy
 end tell
 "sent"`;
-
-  await runAppleScript(sendScript, 20000);
-  return `iMessage sent.\nTo: ${contact.name || to} (${recipient})\nMessage: ${message}`;
+    try {
+      await runAppleScript(sendScript, 20000);
+      return `iMessage sent.\nTo: ${contact.name || to} (${handle})\nMessage: ${message}`;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw new Error(`Could not send iMessage to ${contact.name || to}. Tried: ${tryOrder.join(', ')}. Error: ${lastErr?.message}`);
 }
 
 async function handleRun(params) {
