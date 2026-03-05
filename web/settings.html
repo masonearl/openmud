@@ -91,26 +91,56 @@
                         </label>
                     </div>
                     <div class="provider-keys-divider" aria-hidden="true"></div>
-                    <div class="provider-keys-grid">
+
+                    <!-- OpenClaw relay pairing -->
+                    <div class="provider-keys-grid" id="openclaw-section">
                         <div class="provider-key-row">
-                            <span class="provider-key-label">OpenClaw access</span>
-                            <label class="provider-key-toggle">
-                                <input id="openclaw-enabled" type="checkbox">
-                                <span>Enable OpenClaw Agent in chat</span>
+                            <span class="provider-key-label">OpenClaw Agent</span>
+                            <span id="openclaw-status-badge" class="settings-auth-status" style="display:inline-block;margin-left:8px;"></span>
+                        </div>
+                        <div class="provider-key-row" id="openclaw-connected-view" hidden>
+                            <span class="provider-key-label">Status</span>
+                            <span style="color:var(--color-success,#4caf50);font-size:13px;">Connected — your Mac is linked.</span>
+                        </div>
+                        <div class="provider-key-row" id="openclaw-setup-view">
+                            <span class="provider-key-label" style="align-self:flex-start;padding-top:6px;">Setup</span>
+                            <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+                                <p style="margin:0;font-size:13px;color:var(--color-muted,#888);">Link your Mac's OpenClaw agent to use calendar, email, and system commands from chat.</p>
+                                <p style="margin:0;font-size:13px;color:var(--color-muted,#888);">1. Copy your token below.<br>2. Run the command on your Mac.<br>3. Come back — status updates automatically.</p>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <input id="openclaw-relay-token" type="text" class="provider-key-input" readonly style="font-family:monospace;font-size:12px;cursor:pointer;" placeholder="Generating token...">
+                                    <button type="button" class="btn-secondary btn-sm" id="btn-copy-oc-token">Copy</button>
+                                    <button type="button" class="btn-secondary btn-sm" id="btn-regen-oc-token">New token</button>
+                                </div>
+                                <div style="background:var(--color-surface-alt,#1a1a1a);border-radius:6px;padding:10px 12px;font-family:monospace;font-size:12px;color:var(--color-muted,#aaa);position:relative;">
+                                    <span id="openclaw-run-cmd">node openmud-agent.js --token ...</span>
+                                    <button type="button" id="btn-copy-oc-cmd" style="position:absolute;right:8px;top:6px;background:none;border:1px solid var(--color-border,#333);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--color-muted,#aaa);cursor:pointer;">copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="provider-key-row" id="openclaw-disconnect-row" hidden>
+                            <span class="provider-key-label"></span>
+                            <button type="button" class="btn-secondary btn-sm" id="btn-oc-disconnect">Disconnect</button>
+                        </div>
+                        <!-- Advanced / manual key override (collapsed) -->
+                        <div class="provider-key-row" style="margin-top:4px;">
+                            <span class="provider-key-label" style="font-size:11px;color:var(--color-muted,#666);">Advanced</span>
+                            <button type="button" id="btn-oc-advanced-toggle" style="background:none;border:none;font-size:11px;color:var(--color-muted,#666);cursor:pointer;padding:0;text-decoration:underline;">Manual key setup</button>
+                        </div>
+                        <div id="openclaw-advanced" hidden>
+                            <label class="provider-key-row">
+                                <span class="provider-key-label">API key</span>
+                                <input id="key-openclaw-api" type="password" class="provider-key-input" placeholder="oc-..." autocomplete="off">
+                            </label>
+                            <label class="provider-key-row">
+                                <span class="provider-key-label">Base URL</span>
+                                <input id="key-openclaw-base" type="text" class="provider-key-input" placeholder="https://api.openclaw.ai/v1" autocomplete="off">
+                            </label>
+                            <label class="provider-key-row">
+                                <span class="provider-key-label">Model</span>
+                                <input id="key-openclaw-model" type="text" class="provider-key-input" placeholder="gpt-4.1-mini">
                             </label>
                         </div>
-                        <label class="provider-key-row">
-                            <span class="provider-key-label">OpenClaw API key</span>
-                            <input id="key-openclaw-api" type="password" class="provider-key-input" placeholder="oc-..." autocomplete="off">
-                        </label>
-                        <label class="provider-key-row">
-                            <span class="provider-key-label">OpenClaw base URL</span>
-                            <input id="key-openclaw-base" type="text" class="provider-key-input" placeholder="https://api.openclaw.ai/v1" autocomplete="off">
-                        </label>
-                        <label class="provider-key-row">
-                            <span class="provider-key-label">Preferred OpenClaw model</span>
-                            <input id="key-openclaw-model" type="text" class="provider-key-input" placeholder="openclaw">
-                        </label>
                     </div>
                     <div class="provider-keys-actions">
                         <button type="button" class="btn-primary btn-sm" id="btn-save-provider-keys">Save keys</button>
@@ -168,6 +198,141 @@
             var keyOpenClawBase = document.getElementById('key-openclaw-base');
             var keyOpenClawModel = document.getElementById('key-openclaw-model');
             var keyStatus = document.getElementById('provider-keys-status');
+
+            // ── OpenClaw relay pairing ─────────────────────────────────────
+            var RELAY_URL = 'https://openmud-relay.up.railway.app';
+            var STORAGE_OC_TOKEN = 'openmud_oc_relay_token';
+            var ocTokenInput = document.getElementById('openclaw-relay-token');
+            var ocRunCmd = document.getElementById('openclaw-run-cmd');
+            var ocConnectedView = document.getElementById('openclaw-connected-view');
+            var ocSetupView = document.getElementById('openclaw-setup-view');
+            var ocDisconnectRow = document.getElementById('openclaw-disconnect-row');
+            var ocStatusBadge = document.getElementById('openclaw-status-badge');
+            var btnCopyToken = document.getElementById('btn-copy-oc-token');
+            var btnRegenToken = document.getElementById('btn-regen-oc-token');
+            var btnCopyCmd = document.getElementById('btn-copy-oc-cmd');
+            var btnDisconnect = document.getElementById('btn-oc-disconnect');
+            var btnAdvancedToggle = document.getElementById('btn-oc-advanced-toggle');
+            var ocAdvanced = document.getElementById('openclaw-advanced');
+            var ocCheckInterval = null;
+
+            function generateToken() {
+                var arr = new Uint8Array(18);
+                crypto.getRandomValues(arr);
+                return Array.from(arr).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+            }
+
+            function getOrCreateToken() {
+                var t = '';
+                try { t = localStorage.getItem(STORAGE_OC_TOKEN) || ''; } catch (e) {}
+                if (!t) {
+                    t = generateToken();
+                    try { localStorage.setItem(STORAGE_OC_TOKEN, t); } catch (e) {}
+                }
+                return t;
+            }
+
+            function setOcToken(t) {
+                try { localStorage.setItem(STORAGE_OC_TOKEN, t); } catch (e) {}
+                renderOcPairing(t);
+            }
+
+            function renderOcPairing(token) {
+                if (!ocTokenInput) return;
+                var agentScript = 'https://raw.githubusercontent.com/masonearl/openmud/main/relay/openmud-agent.js';
+                var cmd = 'npx --yes node ' + agentScript + ' --token ' + token;
+                // simpler command once user has it locally:
+                var simpleCmd = 'node relay/openmud-agent.js --token ' + token;
+                ocTokenInput.value = token;
+                if (ocRunCmd) ocRunCmd.textContent = simpleCmd;
+            }
+
+            function updateOcStatus(connected) {
+                if (!ocConnectedView || !ocSetupView) return;
+                if (connected) {
+                    ocConnectedView.hidden = false;
+                    ocDisconnectRow.hidden = false;
+                    if (ocStatusBadge) {
+                        ocStatusBadge.textContent = 'Connected';
+                        ocStatusBadge.style.color = '#4caf50';
+                    }
+                    // Save as connected in provider keys
+                    var keys = readKeyStore();
+                    keys.openclawRelayToken = getOrCreateToken();
+                    keys.openclawRelayConnected = true;
+                    keys.openclawEnabled = true;
+                    writeKeyStore(keys);
+                } else {
+                    ocConnectedView.hidden = true;
+                    ocDisconnectRow.hidden = true;
+                    if (ocStatusBadge) {
+                        ocStatusBadge.textContent = '';
+                    }
+                }
+            }
+
+            function checkOcConnection(token) {
+                fetch(RELAY_URL + '/relay/connected/' + encodeURIComponent(token))
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) { updateOcStatus(!!d.connected); })
+                    .catch(function () { updateOcStatus(false); });
+            }
+
+            function startOcPolling(token) {
+                if (ocCheckInterval) clearInterval(ocCheckInterval);
+                checkOcConnection(token);
+                ocCheckInterval = setInterval(function () { checkOcConnection(token); }, 4000);
+            }
+
+            if (ocTokenInput) {
+                var tok = getOrCreateToken();
+                renderOcPairing(tok);
+                startOcPolling(tok);
+            }
+
+            if (btnCopyToken) {
+                btnCopyToken.addEventListener('click', function () {
+                    var t = getOrCreateToken();
+                    navigator.clipboard.writeText(t).then(function () {
+                        btnCopyToken.textContent = 'Copied!';
+                        setTimeout(function () { btnCopyToken.textContent = 'Copy'; }, 1500);
+                    });
+                });
+            }
+
+            if (btnCopyCmd) {
+                btnCopyCmd.addEventListener('click', function () {
+                    var t = ocRunCmd ? ocRunCmd.textContent : '';
+                    navigator.clipboard.writeText(t).then(function () {
+                        btnCopyCmd.textContent = 'copied!';
+                        setTimeout(function () { btnCopyCmd.textContent = 'copy'; }, 1500);
+                    });
+                });
+            }
+
+            if (btnRegenToken) {
+                btnRegenToken.addEventListener('click', function () {
+                    var t = generateToken();
+                    setOcToken(t);
+                    startOcPolling(t);
+                });
+            }
+
+            if (btnDisconnect) {
+                btnDisconnect.addEventListener('click', function () {
+                    var keys = readKeyStore();
+                    keys.openclawRelayConnected = false;
+                    keys.openclawEnabled = false;
+                    writeKeyStore(keys);
+                    updateOcStatus(false);
+                });
+            }
+
+            if (btnAdvancedToggle) {
+                btnAdvancedToggle.addEventListener('click', function () {
+                    if (ocAdvanced) ocAdvanced.hidden = !ocAdvanced.hidden;
+                });
+            }
             var btnSaveKeys = document.getElementById('btn-save-provider-keys');
             var btnClearKeys = document.getElementById('btn-clear-provider-keys');
 

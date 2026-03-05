@@ -6081,14 +6081,62 @@
             if (modelSelect) localStorage.setItem(STORAGE_MODEL, model);
             var providerConfig = getProviderConfig();
             if (model === 'openclaw') {
+                var ocRelayToken = '';
+                var ocRelayConnected = false;
+                try {
+                    ocRelayToken = localStorage.getItem('openmud_oc_relay_token') || '';
+                    ocRelayConnected = !!(providerConfig.openclawRelayConnected && ocRelayToken);
+                } catch (e) {}
+
+                // Route through relay server if token is paired (works from any browser, any network)
+                if (ocRelayConnected && ocRelayToken) {
+                    var RELAY_BASE = 'https://openmud-relay.up.railway.app';
+                    var ocRequestId = 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+                    var ocRelayTimeout = setTimeout(function () {
+                        addMessage('assistant', 'OpenClaw request timed out. Make sure openmud-agent is running on your Mac.');
+                        setLoading(false);
+                        scrollToLatest();
+                    }, 90000);
+
+                    fetch(RELAY_BASE + '/relay/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: ocRelayToken, requestId: ocRequestId, messages: history, model: 'gpt-4.1-mini' })
+                    }).then(function (r) { return r.json(); }).then(function (d) {
+                        if (!d.ok) throw new Error(d.error || 'Relay send failed');
+                        // Poll for response
+                        var pollCount = 0;
+                        var poll = setInterval(function () {
+                            pollCount++;
+                            if (pollCount > 90) { clearInterval(poll); clearTimeout(ocRelayTimeout); addMessage('assistant', 'OpenClaw timed out waiting for your Mac to respond.'); setLoading(false); scrollToLatest(); return; }
+                            fetch(RELAY_BASE + '/relay/status/' + ocRequestId)
+                                .then(function (r) { return r.json(); })
+                                .then(function (result) {
+                                    if (!result.ready) return;
+                                    clearInterval(poll);
+                                    clearTimeout(ocRelayTimeout);
+                                    if (result.error) addMessage('assistant', 'OpenClaw error: ' + result.error);
+                                    else addMessage('assistant', result.response || 'No response.');
+                                    setLoading(false);
+                                    scrollToLatest();
+                                }).catch(function () {});
+                        }, 1000);
+                    }).catch(function (err) {
+                        clearTimeout(ocRelayTimeout);
+                        addMessage('assistant', 'Could not reach relay: ' + (err.message || err) + '. Check your connection.');
+                        setLoading(false);
+                        scrollToLatest();
+                    });
+                    return;
+                }
+
                 var openclawEnabled = !!(providerConfig.openclawEnabled || (providerConfig.openclawApiKey && providerConfig.openclawBaseUrl));
                 if (!openclawEnabled) {
-                    addMessage('assistant', 'OpenClaw is not enabled yet. Go to Settings → OpenClaw access, enter your API key and base URL, and save.');
+                    addMessage('assistant', 'OpenClaw is not linked yet. Go to Settings → OpenClaw Agent and follow the setup steps to connect your Mac.');
                     setLoading(false);
                     return;
                 }
-                // Call the local gateway directly from the browser.
-                // Vercel servers cannot reach localhost — only the browser can reach the user's local OpenClaw gateway.
+                // Fallback: call the local gateway directly (works on localhost dev, requires ngrok/Tailscale on live site)
                 var ocBaseUrl = (providerConfig.openclawBaseUrl || '').replace(/\/+$/, '');
                 var ocApiKey = providerConfig.openclawApiKey || '';
                 var ocModel = providerConfig.openclawModel || 'gpt-4.1-mini';
