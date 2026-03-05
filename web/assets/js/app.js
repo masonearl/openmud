@@ -4240,17 +4240,15 @@
                         selectLabel.appendChild(document.createTextNode('Select'));
                         controls.appendChild(selectLabel);
                         btn.addEventListener('click', function () {
-                            confirmDeleteDocument(doc, function () {
-                                deleteDocument(doc.id).then(function () {
-                                    delete selectedDeleteIds[doc.id];
-                                    delete duplicateDocById[doc.id];
-                                    row.remove();
-                                    updateBulkDeleteButton();
-                                    return refreshDocumentViews();
-                                }).catch(function () {
-                                    addMessage('assistant', 'Could not delete "' + (doc.name || 'file') + '". Please try again.');
-                                });
-                            }, { parentModalId: 'modal-duplicates' });
+                            deleteDocument(doc.id).then(function () {
+                                delete selectedDeleteIds[doc.id];
+                                delete duplicateDocById[doc.id];
+                                row.remove();
+                                updateBulkDeleteButton();
+                                return refreshDocumentViews();
+                            }).catch(function () {
+                                addMessage('assistant', 'Could not delete "' + (doc.name || 'file') + '". Please try again.');
+                            });
                         });
                     }
                     controls.appendChild(btn);
@@ -4481,12 +4479,10 @@
         var deleteBtn = menu.querySelector('[data-action="delete"]');
         if (deleteBtn) deleteBtn.addEventListener('click', function () {
             menu.remove();
-            confirmDeleteDocument(doc, function () {
-                deleteDocument(doc.id).then(function () {
-                    clearDocumentSelection();
-                    renderDocuments();
-                    if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
-                });
+            deleteDocument(doc.id).then(function () {
+                clearDocumentSelection();
+                renderDocuments();
+                if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
             });
         });
         function closeMenu() {
@@ -4572,12 +4568,10 @@
                     deleteSelectedDocuments();
                     return;
                 }
-                confirmDeleteDocument(doc, function () {
-                    deleteDocument(doc.id).then(function () {
-                        clearDocumentSelection();
-                        renderDocuments();
-                        if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
-                    });
+                deleteDocument(doc.id).then(function () {
+                    clearDocumentSelection();
+                    renderDocuments();
+                    if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
                 });
             });
         }
@@ -4669,11 +4663,9 @@
                 });
                 folderEl.querySelector('.btn-delete-folder').addEventListener('click', function (e) {
                     e.stopPropagation();
-                    confirmDeleteFolder(folder, function () {
-                        deleteFolder(folder.id).then(function () {
-                            renderDocuments();
-                            if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
-                        });
+                    deleteFolder(folder.id).then(function () {
+                        renderDocuments();
+                        if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
                     });
                 });
                 // Right-click on folder header → context menu with Copy Folder
@@ -4704,11 +4696,9 @@
                     });
                     fMenu.querySelector('[data-action="delete-folder"]').addEventListener('click', function () {
                         fMenu.remove();
-                        confirmDeleteFolder(folder, function () {
-                            deleteFolder(folder.id).then(function () {
-                                renderDocuments();
-                                if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
-                            });
+                        deleteFolder(folder.id).then(function () {
+                            renderDocuments();
+                            if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
                         });
                     });
                     function closeFMenu() { fMenu.remove(); document.removeEventListener('click', closeFMenu); }
