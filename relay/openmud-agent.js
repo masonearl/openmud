@@ -2,16 +2,23 @@
 /**
  * openmud-agent — bridges openmud.ai chat to your Mac.
  *
- * Self-updating: checks GitHub for a new version on startup and every hour.
- * If a newer version is found it downloads it, replaces itself, and restarts.
+ * VERSION: 2026.03.05.1
+ *
+ * Self-update: on startup and every hour, fetches the GitHub version.
+ * Updates ONLY if the remote VERSION string is strictly newer (no downgrades,
+ * no CDN-cache race conditions). Restarts automatically after a clean write.
  *
  * Usage:
  *   node openmud-agent.js --token <your-token>
  *
- * Get your token from: openmud.ai → Settings → OpenClaw Agent
+ * Get your token from: openmud.ai → Settings → openmud agent
  */
 
 'use strict';
+
+// Bump this string whenever you push a meaningful change to GitHub.
+// Format: YYYY.MM.DD.N  — the agent only updates when remote > local.
+const AGENT_VERSION = '2026.03.05.1';
 
 const { WebSocket } = require('ws');
 const { execFile, exec, spawn } = require('child_process');
@@ -27,7 +34,7 @@ const SELF = path.resolve(__filename);
 
 function fetchText(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'openmud-agent' } }, res => {
+    https.get(url, { headers: { 'User-Agent': 'openmud-agent/' + AGENT_VERSION } }, res => {
       let data = '';
       res.on('data', c => { data += c; });
       res.on('end', () => resolve(data));
@@ -35,18 +42,50 @@ function fetchText(url) {
   });
 }
 
-async function checkForUpdate() {
-  try {
-    const latest = await fetchText(AGENT_URL);
-    const current = fs.readFileSync(SELF, 'utf8');
-    if (latest.trim() === current.trim()) return;
-    // Only update if GitHub version is NEWER — check by comparing a version comment
-    // For now: log that an update is available but don't auto-apply to avoid CDN race conditions
-    console.log('[openmud-agent] Update available on GitHub. Restart with: git pull && node relay/openmud-agent.js --token YOUR_TOKEN');
-  } catch (e) { /* non-fatal */ }
+/** Extract AGENT_VERSION string from a raw source file */
+function extractVersion(src) {
+  const m = src.match(/const AGENT_VERSION\s*=\s*['"]([^'"]+)['"]/);
+  return m ? m[1] : null;
 }
 
-// Check once per hour but don't auto-restart (avoids CDN cache race conditions)
+/** Compare version strings like '2026.03.05.2' > '2026.03.05.1' */
+function isNewer(remote, local) {
+  if (!remote || !local) return false;
+  const r = remote.split('.').map(Number);
+  const l = local.split('.').map(Number);
+  for (let i = 0; i < Math.max(r.length, l.length); i++) {
+    const rv = r[i] || 0, lv = l[i] || 0;
+    if (rv > lv) return true;
+    if (rv < lv) return false;
+  }
+  return false;
+}
+
+async function checkForUpdate() {
+  try {
+    const remoteSource = await fetchText(AGENT_URL);
+    const remoteVersion = extractVersion(remoteSource);
+    if (!remoteVersion) return; // can't parse — skip
+    if (!isNewer(remoteVersion, AGENT_VERSION)) {
+      // Remote is same or older — nothing to do
+      return;
+    }
+    console.log(`[openmud-agent] Update available: ${AGENT_VERSION} → ${remoteVersion}. Applying...`);
+    fs.writeFileSync(SELF, remoteSource, 'utf8');
+    console.log('[openmud-agent] Updated. Restarting...');
+    const child = spawn(process.execPath, process.argv.slice(1), {
+      detached: true,
+      stdio: 'inherit',
+    });
+    child.unref();
+    process.exit(0);
+  } catch (e) {
+    // Non-fatal — keep running on current version
+  }
+}
+
+// Check on startup (after 5s to let connection stabilise), then every hour
+setTimeout(checkForUpdate, 5000);
 setInterval(checkForUpdate, 60 * 60 * 1000);
 
 // ── Args ───────────────────────────────────────────────────────────────────
@@ -61,7 +100,7 @@ const RELAY_URL = (args.relay || 'wss://openmud-production.up.railway.app').repl
 
 if (!TOKEN) {
   console.error('\nError: --token is required.');
-  console.error('Get your token from: openmud.ai → Settings → OpenClaw Agent\n');
+  console.error('Get your token from: openmud.ai → Settings → openmud agent\n');
   console.error('Usage: node openmud-agent.js --token <your-token>\n');
   process.exit(1);
 }
