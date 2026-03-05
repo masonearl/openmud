@@ -2545,6 +2545,26 @@
                 });
                 wrap.appendChild(toggle);
             }
+            // Copy button on assistant messages
+            if (m.role === 'assistant') {
+                var msgActions = document.createElement('div');
+                msgActions.className = 'msg-actions';
+                var copyBtn = document.createElement('button');
+                copyBtn.type = 'button';
+                copyBtn.className = 'msg-copy-btn';
+                copyBtn.textContent = 'Copy';
+                copyBtn.addEventListener('click', function () {
+                    var text = typeof m.content === 'string' ? m.content : (contentWrap.textContent || '');
+                    navigator.clipboard.writeText(text).then(function () {
+                        copyBtn.textContent = 'Copied';
+                        setTimeout(function () { copyBtn.textContent = 'Copy'; }, 2000);
+                    }).catch(function () {
+                        copyBtn.textContent = 'Copy';
+                    });
+                });
+                msgActions.appendChild(copyBtn);
+                wrap.appendChild(msgActions);
+            }
             // Mark the last assistant message for typewriter animation
             if (idx === lastAssistantIdx) {
                 wrap.setAttribute('data-typewriter', '1');

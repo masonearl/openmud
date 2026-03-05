@@ -373,6 +373,40 @@ end tell
   return `iMessage sent.\nTo: ${contact.name || to} (${handle})\nMessage: ${message}`;
 }
 
+async function handleReadMessages(params) {
+  const { to, count = 10 } = params;
+  if (!to) throw new Error('Missing to for read_messages.');
+
+  const contact = await resolveContact(to);
+  if (contact.ambiguous) return contact.question;
+
+  const allHandles = contact.allHandles || [contact.resolved];
+  const phones = allHandles.filter(h => !h.includes('@')).map(normalizePhone);
+  const emails = allHandles.filter(h => h.includes('@'));
+  const handles = [...phones, ...emails];
+  if (handles.length === 0) throw new Error(`No handle found for "${to}".`);
+
+  const handleConditions = handles.map(h => {
+    const digits = h.replace(/\D/g, '');
+    return digits.length >= 7
+      ? `(replace(replace(replace(replace(h.id,'+',''),' ',''),'-',''),'(','') LIKE '%${digits.slice(-10)}%')`
+      : `h.id = '${h.replace(/'/g, "''")}'`;
+  }).join(' OR ');
+
+  const dbPath = `${process.env.HOME}/Library/Messages/chat.db`;
+  const sql = `SELECT m.text, m.is_from_me, datetime(m.date/1000000000+978307200,'unixepoch','localtime') as ts FROM message m JOIN chat_message_join cmj ON m.rowid=cmj.message_id JOIN chat_handle_join chj ON cmj.chat_id=chj.chat_id JOIN handle h ON chj.handle_id=h.rowid WHERE (${handleConditions}) AND m.text IS NOT NULL AND m.text != '' ORDER BY m.date DESC LIMIT ${Math.min(count, 20)};`;
+
+  const raw = await runShell(`sqlite3 "${dbPath}" "${sql.replace(/"/g, '\\"')}"`, 12000);
+  if (!raw.trim()) return JSON.stringify({ contact: contact.name || to, messages: [], note: 'No messages found.' });
+
+  const msgs = raw.trim().split('\n').reverse().map(line => {
+    const parts = line.split('|');
+    return { from: parts[1] === '1' ? 'me' : (contact.name || to), text: parts[0] || '', time: parts[2] || '' };
+  });
+
+  return JSON.stringify({ contact: contact.name || to, handle: handles[0], messages: msgs });
+}
+
 async function handleRun(params) {
   const { script, shell } = params;
   if (script) {
@@ -395,6 +429,7 @@ async function dispatch(msg) {
     case 'calendar_delete': return await handleCalendarDelete(msg);
     case 'email_send':      return await handleEmailSend(msg);
     case 'imessage_send':   return await handleiMessageSend(msg);
+    case 'read_messages':   return await handleReadMessages(msg);
     case 'run':             return await handleRun(msg);
     case 'ping':            return 'pong';
     default:
