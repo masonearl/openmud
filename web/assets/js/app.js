@@ -2640,9 +2640,13 @@
                             addDocsBtn.addEventListener('click', function () {
                                 var projectId = window.mudrag && window.mudrag.getActiveProjectId();
                                 if (!projectId) { menu.remove(); return; }
-                                var ts = new Date();
-                                var pad = function (n) { return String(n).padStart(2, '0'); };
-                                var docName = 'AI response ' + ts.getFullYear() + '-' + pad(ts.getMonth() + 1) + '-' + pad(ts.getDate()) + ' ' + pad(ts.getHours()) + pad(ts.getMinutes()) + '.md';
+                                // Derive a 1-2 word name from the content
+                                var headingMatch = rawMd.match(/^#{1,4}\s+(.+)/m);
+                                var src = headingMatch ? headingMatch[1] : rawMd;
+                                src = src.replace(/[#*_`[\]()>!]/g, ' ').replace(/https?:\/\/\S+/g, '');
+                                var stop = { a:1,an:1,the:1,is:1,are:1,was:1,were:1,be:1,been:1,to:1,in:1,on:1,at:1,by:1,for:1,with:1,and:1,but:1,or:1,of:1,it:1,its:1,this:1,that:1,i:1,you:1,we:1,they:1,can:1,will:1,would:1,how:1,what:1,which:1,about:1 };
+                                var words = src.split(/\s+/).map(function (w) { return w.toLowerCase().replace(/[^a-z0-9]/g, ''); }).filter(function (w) { return w.length > 1 && !stop[w]; });
+                                var docName = (words.slice(0, 2).join('-') || 'response') + '.md';
                                 var blob = new Blob([rawMd], { type: 'text/markdown' });
                                 var file = new File([blob], docName, { type: 'text/markdown' });
                                 window.mudrag.saveDocument(projectId, file, null, { source: 'ai-message' }).then(function () {
