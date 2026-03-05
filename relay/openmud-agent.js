@@ -273,18 +273,41 @@ async function resolveContact(name) {
   const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(name) || name.includes('@');
   if (isPhoneOrEmail) return { resolved: name };
 
+  // Split the query into words so "Emma Bell" searches first name "Emma" + last name "Bell"
+  const nameParts = name.trim().split(/\s+/);
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+
   const lookupScript = `
 tell application "Contacts"
   set out to ""
-  set matches to (every person whose name contains "${name.replace(/"/g, '\\"')}")
-  repeat with p in matches
+  set seen to {}
+  -- Try full display name first
+  set matches1 to (every person whose name contains "${name.replace(/"/g, '\\"')}")
+  -- Try first name only (catches "Emma 🐻" when searching "Emma Bell")
+  set matches2 to (every person whose first name contains "${firstName.replace(/"/g, '\\"')}")
+  -- Merge: add last-name filter for matches2 when a last name was given
+  set allMatches to matches1
+  repeat with p in matches2
+    set alreadyIn to false
+    repeat with q in allMatches
+      if (id of p) is (id of q) then set alreadyIn to true
+    end repeat
+    if not alreadyIn then
+      -- If a last name was given, only include if last name or display name contains it
+      ${lastName ? `set pLast to last name of p
+        set pFull to name of p
+        if (pLast is not missing value and pLast contains "${lastName.replace(/"/g, '\\"')}") or pFull contains "${lastName.replace(/"/g, '\\"')}" then
+          set end of allMatches to p
+        end if` : 'set end of allMatches to p'}
+    end if
+  end repeat
+  repeat with p in allMatches
     set pname to name of p
     set allHandles to ""
-    -- collect all phones
     repeat with ph in phones of p
       set allHandles to allHandles & value of ph & ";"
     end repeat
-    -- collect all emails
     repeat with em in emails of p
       set allHandles to allHandles & value of em & ";"
     end repeat
@@ -388,7 +411,7 @@ async function dispatch(msg) {
   }
 }
 
-// ── WebSocket connection to relay ──────────────────────────���───────────────
+// ── WebSocket connection to relay ──────────────────────────���───────────���───
 
 let ws = null;
 let reconnectDelay = 2000;
