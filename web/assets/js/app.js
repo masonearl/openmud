@@ -6092,44 +6092,38 @@
                     ocRelayConnected = !!(providerConfig.openclawRelayConnected && ocRelayToken);
                 } catch (e) {}
 
-                // Route through relay server if token is paired (works from any browser, any network)
+                // Route through /api/chat (Vercel) with relay token header.
+                // Vercel detects intent, builds structured command, sends to relay → Mac agent.
                 if (ocRelayConnected && ocRelayToken) {
-                    var RELAY_BASE = 'https://openmud-production.up.railway.app';
-                    var ocRequestId = 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+                    var ocHeaders = getChatHeaders();
+                    ocHeaders['X-Openmud-Relay-Token'] = ocRelayToken;
+                    var ocController = new AbortController();
                     var ocRelayTimeout = setTimeout(function () {
+                        ocController.abort();
                         addMessage('assistant', 'OpenClaw request timed out. Make sure openmud-agent is running on your Mac.');
                         setLoading(false);
                         scrollToLatest();
                     }, 90000);
-
-                    fetch(RELAY_BASE + '/relay/send', {
+                    fetch(API_BASE + '/chat', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: ocRelayToken, requestId: ocRequestId, messages: history, model: 'gpt-4.1-mini' })
-                    }).then(function (r) { return r.json(); }).then(function (d) {
-                        if (!d.ok) throw new Error(d.error || 'Relay send failed');
-                        // Poll for response
-                        var pollCount = 0;
-                        var poll = setInterval(function () {
-                            pollCount++;
-                            if (pollCount > 90) { clearInterval(poll); clearTimeout(ocRelayTimeout); addMessage('assistant', 'OpenClaw timed out waiting for your Mac to respond.'); setLoading(false); scrollToLatest(); return; }
-                            fetch(RELAY_BASE + '/relay/status/' + ocRequestId)
-                                .then(function (r) { return r.json(); })
-                                .then(function (result) {
-                                    if (!result.ready) return;
-                                    clearInterval(poll);
-                                    clearTimeout(ocRelayTimeout);
-                                    if (result.error) addMessage('assistant', 'OpenClaw error: ' + result.error);
-                                    else addMessage('assistant', result.response || 'No response.');
-                                    setLoading(false);
-                                    scrollToLatest();
-                                }).catch(function () {});
-                        }, 1000);
+                        headers: ocHeaders,
+                        body: JSON.stringify({ messages: history, model: 'openclaw', temperature: 0.3, max_tokens: 1024 }),
+                        signal: ocController.signal
+                    }).then(function (r) {
+                        return r.json().then(function (data) {
+                            clearTimeout(ocRelayTimeout);
+                            if (!r.ok) addMessage('assistant', 'Error: ' + (data.error || 'Request failed'));
+                            else addMessage('assistant', data.response || 'No response.');
+                            setLoading(false);
+                            scrollToLatest();
+                        });
                     }).catch(function (err) {
                         clearTimeout(ocRelayTimeout);
-                        addMessage('assistant', 'Could not reach relay: ' + (err.message || err) + '. Check your connection.');
-                        setLoading(false);
-                        scrollToLatest();
+                        if (err.name !== 'AbortError') {
+                            addMessage('assistant', 'Could not reach server: ' + (err.message || err));
+                            setLoading(false);
+                            scrollToLatest();
+                        }
                     });
                     return;
                 }
