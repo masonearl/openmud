@@ -1194,10 +1194,24 @@ module.exports = async function handler(req, res) {
     const relayTokenAny = getHeader(req, 'x-openmud-relay-token');
     if (relayTokenAny) {
       const RELAY_HTTP_UNIVERSAL = process.env.OPENMUD_RELAY_URL || 'https://openmud-production.up.railway.app';
-      const lastMsg = lastUserMsg?.content || '';
       const relayApiKey = process.env.OPENAI_API_KEY;
       const relayModel = 'gpt-4o-mini';
-      const msgHistory = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
+
+      // Strip appended document/canvas context from a message string.
+      // The frontend appends "\n[Project has N uploaded document(s): ...]" and
+      // similar blobs to the last user message for AI context. These must be
+      // removed before using the message for relay intent or contact resolution
+      // so the contact lookup doesn't get the blob as part of the name.
+      function stripDocContext(text) {
+        return (text || '')
+          .replace(/\n\[Project has \d+ uploaded document[^)]*\. User may ask about these files\.\]/gi, '')
+          .replace(/\n\[Canvas document:[^\]]*\]/gi, '')
+          .replace(/\n\[Attachment:[^\]]*\]/gi, '')
+          .trim();
+      }
+
+      const lastMsg = stripDocContext(lastUserMsg?.content || '');
+      const msgHistory = messages.filter(m => m.role === 'user').map(m => m.content).map(stripDocContext).join(' ');
 
       // Helper: send one command to relay and poll for result
       async function relayRun(cmd, timeoutSecs = 30) {
@@ -1245,12 +1259,15 @@ module.exports = async function handler(req, res) {
           /send.*email|email.*to|write.*email/i.test(String(m.content || ''))
         );
 
+        // Use only the first line of the reply as the contact name — the rest may
+        // be document context or other metadata appended by the frontend.
+        const contactSelection = lastMsg.split('\n')[0].trim();
         if (originalImsgMsg) {
-          const origData = await resolveiMessageIntentViaModel(String(originalImsgMsg.content), relayApiKey, undefined, relayModel);
-          if (origData) command = { type: 'imessage_send', to: lastMsg.trim(), message: origData.message };
+          const origData = await resolveiMessageIntentViaModel(stripDocContext(String(originalImsgMsg.content)), relayApiKey, undefined, relayModel);
+          if (origData) command = { type: 'imessage_send', to: contactSelection, message: origData.message };
         } else if (originalEmailMsg) {
-          const origData = await resolveEmailIntentViaModel(String(originalEmailMsg.content), relayApiKey, undefined, relayModel);
-          if (origData) command = { type: 'email_send', to: lastMsg.trim(), subject: origData.subject, body: origData.body };
+          const origData = await resolveEmailIntentViaModel(stripDocContext(String(originalEmailMsg.content)), relayApiKey, undefined, relayModel);
+          if (origData) command = { type: 'email_send', to: contactSelection, subject: origData.subject, body: origData.body };
         }
       }
 
@@ -1488,13 +1505,15 @@ module.exports = async function handler(req, res) {
       const RELAY_HTTP = process.env.OPENMUD_RELAY_URL || 'https://openmud-production.up.railway.app';
 
       if (relayToken) {
-        const lastMsg = lastUserMsg?.content || '';
+        // Strip document/canvas context blobs appended by the frontend
+        const ocStripDoc = t => (t || '').replace(/\n\[Project has \d+ uploaded document[^)]*\. User may ask about these files\.\]/gi, '').replace(/\n\[Canvas document:[^\]]*\]/gi, '').replace(/\n\[Attachment:[^\]]*\]/gi, '').trim();
+        const lastMsg = ocStripDoc(lastUserMsg?.content || '');
         // Use server's hosted key for relay intent resolution
         const relayApiKey = process.env.OPENAI_API_KEY;
         const relayModel = 'gpt-4o-mini';
 
         // Combine message history into a single string for intent resolution
-        const msgHistory = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
+        const msgHistory = messages.filter(m => m.role === 'user').map(m => m.content).map(ocStripDoc).join(' ');
 
         // Resolve intent → structured command via AI
         let command = null;
