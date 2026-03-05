@@ -216,27 +216,34 @@ async function handleEmailSend(params) {
   const { to, subject, body } = params;
   if (!to || !subject || !body) throw new Error('Missing to, subject, or body for email.');
 
-  // If `to` is a name (not an email address), look up the email in Contacts
+  // If `to` is a name (not an email address), resolve via Contacts + Messages recency
   let recipient = to;
+  let resolvedName = to;
   const isEmail = to.includes('@');
   if (!isEmail) {
-    const lookupScript = `
+    const contact = await resolveContact(to);
+    if (contact.ambiguous) return contact.question;
+    // For email, we need an email address specifically — re-check if handle is a phone
+    if (contact.resolved && contact.resolved.includes('@')) {
+      recipient = contact.resolved;
+      resolvedName = contact.name || to;
+    } else {
+      // resolveContact returned a phone — look specifically for email address
+      const emailScript = `
 tell application "Contacts"
   set matches to (every person whose name contains "${to.replace(/"/g, '\\"')}")
-  if (count of matches) > 0 then
-    set p to item 1 of matches
+  repeat with p in matches
     if (count of emails of p) > 0 then
       return value of item 1 of emails of p
     end if
-  end if
+  end repeat
   return ""
 end tell`;
-    try {
-      const found = await runAppleScript(lookupScript, 10000);
-      if (found && found.trim()) recipient = found.trim();
-      else throw new Error(`No email address found for "${to}" in your Contacts. Ask the user for the email address.`);
-    } catch (e) {
-      throw new Error(`Could not find email for "${to}": ${e.message}`);
+      try {
+        const found = await runAppleScript(emailScript, 10000);
+        if (found && found.trim()) { recipient = found.trim(); resolvedName = contact.name || to; }
+        else throw new Error(`No email address found for "${to}" in your Contacts.`);
+      } catch (e) { throw new Error(`Could not find email for "${to}": ${e.message}`); }
     }
   }
 
@@ -251,38 +258,104 @@ end tell
 "sent"`;
 
   await runAppleScript(script, 30000);
-  return `Email sent.\nTo: ${recipient}${recipient !== to ? ' (' + to + ')' : ''}\nSubject: ${subject}\nBody: ${body.slice(0, 120)}${body.length > 120 ? '...' : ''}`;
+  return `Email sent.\nTo: ${resolvedName}${recipient !== resolvedName ? ' <' + recipient + '>' : ''}\nSubject: ${subject}\nBody: ${body.slice(0, 120)}${body.length > 120 ? '...' : ''}`;
+}
+
+/**
+ * Resolve a name to the best matching contact handle (phone or email).
+ * Strategy:
+ *   1. If input already looks like a phone/email → use as-is.
+ *   2. Search Contacts for all people whose name contains the query.
+ *   3. If exactly one match → use it.
+ *   4. If multiple → rank by most recent Messages conversation (sqlite3 on chat.db).
+ *   5. If still ambiguous → return an object with options so the caller can ask the user.
+ */
+async function resolveContact(name) {
+  const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(name) || name.includes('@');
+  if (isPhoneOrEmail) return { resolved: name };
+
+  // Step 1: Get all matching contacts from Contacts.app
+  const lookupScript = `
+tell application "Contacts"
+  set out to ""
+  set matches to (every person whose name contains "${name.replace(/"/g, '\\"')}")
+  repeat with p in matches
+    set pname to name of p
+    set phandle to ""
+    if (count of phones of p) > 0 then
+      set phandle to value of item 1 of phones of p
+    else if (count of emails of p) > 0 then
+      set phandle to value of item 1 of emails of p
+    end if
+    if phandle is not "" then
+      set out to out & pname & "|" & phandle & "\\n"
+    end if
+  end repeat
+  return out
+end tell`;
+
+  let contactsRaw = '';
+  try { contactsRaw = await runAppleScript(lookupScript, 10000); } catch (e) {}
+
+  const contacts = contactsRaw.trim().split('\n').filter(Boolean).map(line => {
+    const [cname, chandle] = line.split('|');
+    return { name: (cname || '').trim(), handle: (chandle || '').trim() };
+  }).filter(c => c.handle);
+
+  if (contacts.length === 0) throw new Error(`No contact found for "${name}". Ask for their phone number or email.`);
+  if (contacts.length === 1) return { resolved: contacts[0].handle, name: contacts[0].name };
+
+  // Step 2: Multiple matches — rank by most recent Messages conversation
+  try {
+    const dbPath = `${process.env.HOME}/Library/Messages/chat.db`;
+    // Build a CASE expression to match each handle
+    const handles = contacts.map(c => {
+      // Normalize phone: strip non-digits for comparison
+      return c.handle.replace(/\D/g, '');
+    });
+    const sqlCases = handles.map((h, i) =>
+      `WHEN replace(replace(replace(h.id,' ',''),'-',''),'(','') LIKE '%${h}%' THEN ${i}`
+    ).join(' ');
+    const sql = `
+      SELECT CASE ${sqlCases} END as idx, MAX(m.date) as last_date
+      FROM message m
+      JOIN chat_message_join cmj ON m.rowid = cmj.message_id
+      JOIN chat_handle_join chj ON cmj.chat_id = chj.chat_id
+      JOIN handle h ON chj.handle_id = h.rowid
+      WHERE idx IS NOT NULL
+      GROUP BY idx
+      ORDER BY last_date DESC
+      LIMIT 1;`;
+    const result = await runShell(`sqlite3 "${dbPath}" "${sql.replace(/\n/g, ' ')}"`, 8000);
+    const row = result.trim().split('|');
+    if (row[0] !== '' && row[0] !== undefined) {
+      const idx = parseInt(row[0], 10);
+      if (!isNaN(idx) && contacts[idx]) {
+        return { resolved: contacts[idx].handle, name: contacts[idx].name };
+      }
+    }
+  } catch (e) { /* Messages DB not accessible — fall through */ }
+
+  // Step 3: Still ambiguous — return options so the chat can ask the user
+  return {
+    ambiguous: true,
+    options: contacts,
+    question: `Found ${contacts.length} contacts named "${name}": ${contacts.map((c, i) => `${i + 1}. ${c.name} (${c.handle})`).join(', ')}. Which one?`,
+  };
 }
 
 async function handleiMessageSend(params) {
   const { to, message } = params;
   if (!to || !message) throw new Error('Missing to or message for iMessage.');
 
-  // Try to look up recipient by name in Contacts if it doesn't look like a phone/email
-  const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(to) || to.includes('@');
-  let recipient = to;
+  const contact = await resolveContact(to);
 
-  if (!isPhoneOrEmail) {
-    // Look up by name in Contacts
-    const lookupScript = `
-tell application "Contacts"
-  set matches to (every person whose name contains "${to.replace(/"/g, '\\"')}")
-  if (count of matches) > 0 then
-    set p to item 1 of matches
-    if (count of phones of p) > 0 then
-      return value of item 1 of phones of p
-    else if (count of emails of p) > 0 then
-      return value of item 1 of emails of p
-    end if
-  end if
-  return ""
-end tell`;
-    try {
-      const found = await runAppleScript(lookupScript, 10000);
-      if (found) recipient = found.trim();
-    } catch (e) { /* fall through with original name */ }
+  if (contact.ambiguous) {
+    // Return the question as the response so the chat can relay it to the user
+    return contact.question;
   }
 
+  const recipient = contact.resolved;
   const sendScript = `
 tell application "Messages"
   set targetService to first service whose service type = iMessage
@@ -292,7 +365,7 @@ end tell
 "sent"`;
 
   await runAppleScript(sendScript, 20000);
-  return `iMessage sent.\nTo: ${to}${recipient !== to ? ' (' + recipient + ')' : ''}\nMessage: ${message}`;
+  return `iMessage sent.\nTo: ${contact.name || to} (${recipient})\nMessage: ${message}`;
 }
 
 async function handleRun(params) {
@@ -324,7 +397,7 @@ async function dispatch(msg) {
   }
 }
 
-// ── WebSocket connection to relay ──────────────────────────────────────────
+// ── WebSocket connection to relay ──────────────────────────���───────────────
 
 let ws = null;
 let reconnectDelay = 2000;
