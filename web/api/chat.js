@@ -685,6 +685,64 @@ async function resolveiMessageIntentViaModel(userText, apiKey, baseURL, modelNam
   return null;
 }
 
+/**
+ * Extract who the user wants to text back from a "reply/text back" request.
+ * Returns { to: 'name or handle' } or null.
+ */
+async function resolveSmartReplyIntentViaModel(userText, apiKey, modelName) {
+  try {
+    const client = new OpenAI({ apiKey });
+    const response = await client.chat.completions.create({
+      model: modelName,
+      messages: [
+        {
+          role: 'system',
+          content: 'The user wants to reply to or text back someone. Extract the contact name. Return ONLY JSON: {"to":"contact name or number"}. Never include explanation outside the JSON.'
+        },
+        { role: 'user', content: userText }
+      ],
+      max_tokens: 60,
+      temperature: 0.1,
+    });
+    const raw = String(response.choices?.[0]?.message?.content || '');
+    const match = raw.match(/\{[\s\S]*?\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      if (parsed.to) return parsed;
+    }
+  } catch (e) { /* fall through */ }
+  return null;
+}
+
+/**
+ * Draft a reply message in the user's voice given a conversation thread.
+ * userName: the user's name for context.
+ * thread: array of { from, text } messages.
+ * userRequest: any additional instruction (e.g. "keep it short and friendly").
+ */
+async function draftSmartReplyViaModel(thread, userName, userRequest, apiKey, modelName) {
+  const threadStr = thread.map(m => `${m.from}: ${m.text}`).join('\n');
+  try {
+    const client = new OpenAI({ apiKey });
+    const response = await client.chat.completions.create({
+      model: modelName,
+      messages: [
+        {
+          role: 'system',
+          content: `You are drafting an iMessage reply on behalf of ${userName || 'the user'}. Write in a casual, natural texting style that matches how ${userName || 'the user'} would write. Keep it concise — this is a text message, not an email. Do not add pleasantries or sign-offs. Return ONLY the message text, nothing else.`
+        },
+        {
+          role: 'user',
+          content: `Here is the recent conversation:\n${threadStr}\n\nDraft a reply from me (${userName || 'me'})${userRequest ? '. Additional instruction: ' + userRequest : ''}. Reply only with the message text.`
+        }
+      ],
+      max_tokens: 200,
+      temperature: 0.7,
+    });
+    return (response.choices?.[0]?.message?.content || '').trim();
+  } catch (e) { return null; }
+}
+
 async function resolveEmailIntentViaModel(userText, apiKey, baseURL, modelName) {
   try {
     const client = new OpenAI({ apiKey, baseURL });
@@ -1141,13 +1199,78 @@ module.exports = async function handler(req, res) {
       const relayModel = 'gpt-4o-mini';
       const msgHistory = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
 
+      // Helper: send one command to relay and poll for result
+      async function relayRun(cmd, timeoutSecs = 30) {
+        const reqId = 'srv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        cmd.requestId = reqId;
+        const sendRes = await fetch(`${RELAY_HTTP_UNIVERSAL}/relay/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: relayTokenAny, requestId: reqId, ...cmd, messages: [] }),
+        });
+        const sendData = await sendRes.json();
+        if (!sendData.ok) throw new Error('No agent connected. Open Settings and make sure openmud-agent is running.');
+        for (let i = 0; i < timeoutSecs; i++) {
+          await new Promise(r => setTimeout(r, 1000));
+          const pollRes = await fetch(`${RELAY_HTTP_UNIVERSAL}/relay/status/${reqId}`);
+          const pollData = await pollRes.json();
+          if (pollData.ready) {
+            if (pollData.error) throw new Error(pollData.error);
+            return pollData.response;
+          }
+        }
+        throw new Error('Mac took too long to respond.');
+      }
+
       let command = null;
+      let smartReplyIntent = /text.*back|reply.*to\s+\w|respond.*to\s+\w|text\s+\w+.*back/i.test(lastMsg);
+
       if (calendarIntent || /calendar|event|meeting|schedule/i.test(lastMsg)) {
         const eventData = await resolveCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel, clientDate);
         if (eventData) command = { type: 'calendar_add', ...eventData, requestId: undefined };
       } else if (deleteCalendarIntent || /delete.*event|remove.*event|cancel.*event/i.test(lastMsg)) {
         const delData = await resolveDeleteCalendarIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
         if (delData) command = { type: 'calendar_delete', ...delData, requestId: undefined };
+      } else if (smartReplyIntent) {
+        // Two-step: read messages → draft reply → send
+        try {
+          const replyIntent = await resolveSmartReplyIntentViaModel(msgHistory, relayApiKey, relayModel);
+          if (replyIntent?.to) {
+            // Step 1: read last messages from contact
+            const readResult = await relayRun({ type: 'read_messages', to: replyIntent.to, count: 8 }, 20);
+            let thread = [];
+            let contactHandle = replyIntent.to;
+            try {
+              const parsed = JSON.parse(readResult);
+              thread = parsed.messages || [];
+              contactHandle = parsed.handle || replyIntent.to;
+            } catch (e) { /* readResult might be a plain string like ambiguity question */ }
+
+            if (typeof readResult === 'string' && !readResult.startsWith('{')) {
+              // Agent returned an ambiguity question or error
+              return res.status(200).json({ response: readResult });
+            }
+
+            if (thread.length === 0) {
+              return res.status(200).json({ response: `No recent messages found with ${replyIntent.to}.` });
+            }
+
+            // Step 2: draft reply in user's voice
+            const userName = req.body?.userName || getHeader(req, 'x-user-name') || 'Mason';
+            const additionalInstruction = lastMsg.replace(/text.*back|reply.*to\s+\w+|respond.*to\s+\w+/i, '').trim();
+            const drafted = await draftSmartReplyViaModel(thread, userName, additionalInstruction, relayApiKey, relayModel);
+            if (!drafted) return res.status(200).json({ response: 'Could not draft a reply. Try again.' });
+
+            // Step 3: send the drafted reply
+            const sendResult = await relayRun({ type: 'imessage_send', to: replyIntent.to, message: drafted }, 20);
+            const lastMsg2 = thread.filter(m => m.from !== 'me').slice(-1)[0];
+            return res.status(200).json({
+              response: `Read ${thread.length} messages with ${replyIntent.to}.\n\nTheir last message: "${lastMsg2?.text || '(no text)'}"\n\nReplied: "${drafted}"\n\n${sendResult}`
+            });
+          }
+        } catch (err) {
+          return res.status(200).json({ response: 'Error during smart reply: ' + err.message });
+        }
       } else if (/imessage|iMessage|send.*text|text.*to\s+\w|send.*imessage/i.test(lastMsg)) {
         const imsgData = await resolveiMessageIntentViaModel(msgHistory, relayApiKey, undefined, relayModel);
         if (imsgData) command = { type: 'imessage_send', ...imsgData, requestId: undefined };
@@ -1157,30 +1280,11 @@ module.exports = async function handler(req, res) {
       }
 
       if (command) {
-        const requestId = 'srv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-        command.requestId = requestId;
         try {
-          const sendRes = await fetch(`${RELAY_HTTP_UNIVERSAL}/relay/send`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: relayTokenAny, requestId, ...command, messages: [] }),
-          });
-          const sendData = await sendRes.json();
-          if (!sendData.ok) {
-            return res.status(503).json({ error: 'No agent connected. Open Settings and make sure openmud-agent is running on your Mac.', response: null });
-          }
-          for (let i = 0; i < 60; i++) {
-            await new Promise(r => setTimeout(r, 1000));
-            const pollRes = await fetch(`${RELAY_HTTP_UNIVERSAL}/relay/status/${requestId}`);
-            const pollData = await pollRes.json();
-            if (pollData.ready) {
-              if (pollData.error) return res.status(200).json({ response: 'Error from your Mac: ' + pollData.error });
-              return res.status(200).json({ response: pollData.response });
-            }
-          }
-          return res.status(504).json({ error: 'Mac took too long to respond. Check that openmud-agent is running.', response: null });
+          const result = await relayRun(command, 60);
+          return res.status(200).json({ response: result });
         } catch (err) {
-          return res.status(502).json({ error: 'Relay error: ' + err.message, response: null });
+          return res.status(200).json({ response: 'Error from your Mac: ' + err.message });
         }
       }
       // No automation command detected — fall through to normal AI response

@@ -273,41 +273,18 @@ async function resolveContact(name) {
   const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(name) || name.includes('@');
   if (isPhoneOrEmail) return { resolved: name };
 
-  // Split the query into words so "Emma Bell" searches first name "Emma" + last name "Bell"
-  const nameParts = name.trim().split(/\s+/);
-  const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
-
   const lookupScript = `
 tell application "Contacts"
   set out to ""
-  set seen to {}
-  -- Try full display name first
-  set matches1 to (every person whose name contains "${name.replace(/"/g, '\\"')}")
-  -- Try first name only (catches "Emma 🐻" when searching "Emma Bell")
-  set matches2 to (every person whose first name contains "${firstName.replace(/"/g, '\\"')}")
-  -- Merge: add last-name filter for matches2 when a last name was given
-  set allMatches to matches1
-  repeat with p in matches2
-    set alreadyIn to false
-    repeat with q in allMatches
-      if (id of p) is (id of q) then set alreadyIn to true
-    end repeat
-    if not alreadyIn then
-      -- If a last name was given, only include if last name or display name contains it
-      ${lastName ? `set pLast to last name of p
-        set pFull to name of p
-        if (pLast is not missing value and pLast contains "${lastName.replace(/"/g, '\\"')}") or pFull contains "${lastName.replace(/"/g, '\\"')}" then
-          set end of allMatches to p
-        end if` : 'set end of allMatches to p'}
-    end if
-  end repeat
-  repeat with p in allMatches
+  set matches to (every person whose name contains "${name.replace(/"/g, '\\"')}")
+  repeat with p in matches
     set pname to name of p
     set allHandles to ""
+    -- collect all phones
     repeat with ph in phones of p
       set allHandles to allHandles & value of ph & ";"
     end repeat
+    -- collect all emails
     repeat with em in emails of p
       set allHandles to allHandles & value of em & ";"
     end repeat
@@ -382,6 +359,52 @@ end tell
   throw new Error(`Could not send iMessage to ${contact.name || to}. Tried: ${tryOrder.join(', ')}. Error: ${lastErr?.message}`);
 }
 
+/**
+ * Read the last N messages from a contact.
+ * Uses sqlite3 against ~/Library/Messages/chat.db.
+ * Returns a JSON string with the message thread.
+ */
+async function handleReadMessages(params) {
+  const { to, count = 10 } = params;
+  if (!to) throw new Error('Missing to for read_messages.');
+
+  // Resolve contact to get their phone/email handle
+  const contact = await resolveContact(to);
+  if (contact.ambiguous) return contact.question;
+
+  const allHandles = contact.allHandles || [contact.resolved];
+  const phones = allHandles.filter(h => !h.includes('@')).map(normalizePhone);
+  const emails = allHandles.filter(h => h.includes('@'));
+  const handles = [...phones, ...emails];
+
+  if (handles.length === 0) throw new Error(`No handle found for "${to}".`);
+
+  // Build WHERE clause to match any of the contact's handles
+  const handleConditions = handles.map(h => {
+    const digits = h.replace(/\D/g, '');
+    return digits.length >= 7
+      ? `(replace(replace(replace(replace(h.id,'+',''),' ',''),'-',''),'(','') LIKE '%${digits.slice(-10)}%')`
+      : `h.id = '${h.replace(/'/g, "''")}'`;
+  }).join(' OR ');
+
+  const dbPath = `${process.env.HOME}/Library/Messages/chat.db`;
+  const sql = `SELECT m.text, m.is_from_me, datetime(m.date/1000000000+978307200,'unixepoch','localtime') as ts FROM message m JOIN chat_message_join cmj ON m.rowid=cmj.message_id JOIN chat_handle_join chj ON cmj.chat_id=chj.chat_id JOIN handle h ON chj.handle_id=h.rowid WHERE (${handleConditions}) AND m.text IS NOT NULL AND m.text != '' ORDER BY m.date DESC LIMIT ${Math.min(count, 20)};`;
+
+  const raw = await runShell(`sqlite3 "${dbPath}" "${sql.replace(/"/g, '\\"')}"`, 12000);
+  if (!raw.trim()) return JSON.stringify({ contact: contact.name || to, messages: [], note: 'No messages found.' });
+
+  const msgs = raw.trim().split('\n').reverse().map(line => {
+    const parts = line.split('|');
+    return {
+      from: parts[1] === '1' ? 'me' : (contact.name || to),
+      text: parts[0] || '',
+      time: parts[2] || '',
+    };
+  });
+
+  return JSON.stringify({ contact: contact.name || to, handle: handles[0], messages: msgs });
+}
+
 async function handleRun(params) {
   const { script, shell } = params;
   if (script) {
@@ -404,6 +427,7 @@ async function dispatch(msg) {
     case 'calendar_delete': return await handleCalendarDelete(msg);
     case 'email_send':      return await handleEmailSend(msg);
     case 'imessage_send':   return await handleiMessageSend(msg);
+    case 'read_messages':   return await handleReadMessages(msg);
     case 'run':             return await handleRun(msg);
     case 'ping':            return 'pong';
     default:
