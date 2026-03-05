@@ -1237,7 +1237,7 @@ module.exports = async function handler(req, res) {
           const replyIntent = await resolveSmartReplyIntentViaModel(msgHistory, relayApiKey, relayModel);
           if (replyIntent?.to) {
             // Step 1: read last messages from contact
-            const readResult = await relayRun({ type: 'read_messages', to: replyIntent.to, count: 8 }, 20);
+            const readResult = await relayRun({ type: 'read_messages', to: replyIntent.to, count: 8 }, 30);
             let thread = [];
             let contactHandle = replyIntent.to;
             try {
@@ -1262,7 +1262,7 @@ module.exports = async function handler(req, res) {
             if (!drafted) return res.status(200).json({ response: 'Could not draft a reply. Try again.' });
 
             // Step 3: send the drafted reply
-            const sendResult = await relayRun({ type: 'imessage_send', to: replyIntent.to, message: drafted }, 20);
+            const sendResult = await relayRun({ type: 'imessage_send', to: replyIntent.to, message: drafted }, 25);
             const lastMsg2 = thread.filter(m => m.from !== 'me').slice(-1)[0];
             return res.status(200).json({
               response: `Read ${thread.length} messages with ${replyIntent.to}.\n\nTheir last message: "${lastMsg2?.text || '(no text)'}"\n\nReplied: "${drafted}"\n\n${sendResult}`

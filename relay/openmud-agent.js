@@ -252,56 +252,10 @@ end tell
   return `Email sent.\nTo: ${resolvedName}${recipient !== resolvedName ? ' <' + recipient + '>' : ''}\nSubject: ${subject}\nBody: ${body.slice(0, 120)}${body.length > 120 ? '...' : ''}`;
 }
 
-// Cache all contacts for 5 minutes so we don't repeat the slow AppleScript
-let _contactsCache = null;
-let _contactsCacheTs = 0;
-const CONTACTS_CACHE_TTL = 5 * 60 * 1000;
-
-async function getAllContacts() {
-  if (_contactsCache && Date.now() - _contactsCacheTs < CONTACTS_CACHE_TTL) return _contactsCache;
-  // Single AppleScript call — fetch everyone who has at least one phone or email.
-  // Filtering by name happens in JS, not AppleScript, so there's no slow WHERE clause.
-  const script = `tell application "Contacts"
-  set out to ""
-  repeat with p in every person
-    set fn to first name of p
-    if fn is missing value then set fn to ""
-    set ln to last name of p
-    if ln is missing value then set ln to ""
-    set dn to name of p
-    if dn is missing value then set dn to ""
-    set allH to ""
-    repeat with ph in phones of p
-      set allH to allH & (value of ph) & ";"
-    end repeat
-    repeat with em in emails of p
-      set allH to allH & (value of em) & ";"
-    end repeat
-    if allH is not "" then
-      set out to out & fn & "\\t" & ln & "\\t" & dn & "\\t" & allH & "\\n"
-    end if
-  end repeat
-  return out
-end tell`;
-  const raw = await runAppleScript(script, 30000);
-  const contacts = raw.trim().split('\n').filter(Boolean).map(line => {
-    const [fn, ln, dn, handles] = line.split('\t');
-    return {
-      firstName: (fn || '').trim(),
-      lastName: (ln || '').trim(),
-      name: (dn || '').trim(),
-      handles: (handles || '').split(';').map(h => h.trim()).filter(Boolean),
-    };
-  }).filter(c => c.handles.length > 0);
-  _contactsCache = contacts;
-  _contactsCacheTs = Date.now();
-  return contacts;
-}
-
 /**
  * Resolve a name to the best matching contact handle.
- * Loads all contacts once (cached), then filters in JS — no slow AppleScript WHERE clauses.
- * Priority: exact display name > first+last > first-name-only (uses best single match).
+ * Queries AddressBook SQLite databases directly — fast (~0.5s) with no AppleScript WHERE clauses.
+ * Priority: exact display name > display-name-contains > first+last > first-name exact > first-name partial.
  */
 async function resolveContact(name) {
   const isPhoneOrEmail = /^\+?[\d\s\-().]{7,}$/.test(name) || name.includes('@');
@@ -312,42 +266,83 @@ async function resolveContact(name) {
   const qFirst = qParts[0] || '';
   const qLast = qParts.slice(1).join(' ') || '';
 
-  const all = await getAllContacts();
+  // Discover all AddressBook SQLite sources (multiple if iCloud + local + Exchange)
+  const home = process.env.HOME;
+  let dbPaths = [];
+  try {
+    const abDir = `${home}/Library/Application Support/AddressBook/Sources`;
+    const found = await runShell(`find "${abDir}" -name "AddressBook-v22.abcddb" 2>/dev/null`, 4000);
+    dbPaths = found.split('\n').filter(Boolean);
+  } catch {}
+  if (!dbPaths.length) throw new Error('Cannot access Contacts database. Check macOS permissions.');
 
-  // Exact display name match
-  let matches = all.filter(c => c.name.toLowerCase() === query);
-
-  // Partial display name contains
-  if (!matches.length) matches = all.filter(c => c.name.toLowerCase().includes(query));
-
-  // First + last name (useful when display name has emoji like "Emma 🐻" but first=Emma last=🐻)
-  if (!matches.length && qFirst && qLast) {
-    matches = all.filter(c =>
-      c.firstName.toLowerCase().includes(qFirst) &&
-      c.lastName.toLowerCase().includes(qLast)
-    );
+  // Query all source DBs for all contacts with at least one phone or email.
+  // ZNAME is NULL for person records (display name is computed from first+last).
+  // Use execFile with sqlite3 directly to avoid shell quoting issues with multiline SQL.
+  const rows = [];
+  const sql = 'SELECT r.ZFIRSTNAME, r.ZLASTNAME, TRIM(COALESCE(r.ZFIRSTNAME,\'\') || \' \' || COALESCE(r.ZLASTNAME,\'\')), GROUP_CONCAT(DISTINCT p.ZFULLNUMBER), GROUP_CONCAT(DISTINCT e.ZADDRESSNORMALIZED) FROM ZABCDRECORD r LEFT JOIN ZABCDPHONENUMBER p ON p.ZOWNER=r.Z_PK LEFT JOIN ZABCDEMAILADDRESS e ON e.ZOWNER=r.Z_PK WHERE (r.ZFIRSTNAME IS NOT NULL OR r.ZLASTNAME IS NOT NULL) GROUP BY r.Z_PK HAVING GROUP_CONCAT(DISTINCT p.ZFULLNUMBER) IS NOT NULL OR GROUP_CONCAT(DISTINCT e.ZADDRESSNORMALIZED) IS NOT NULL';
+  for (const db of dbPaths) {
+    try {
+      const raw = await new Promise((res, rej) =>
+        execFile('sqlite3', [db, sql], { timeout: 8000 },
+          (e, o, s) => e ? rej(new Error(s || e.message)) : res((o || '').trim()))
+      );
+      for (const line of raw.split('\n').filter(Boolean)) {
+        const parts = line.split('|');
+        const fn = (parts[0] || '').trim();
+        const ln = (parts[1] || '').trim();
+        const dn = (parts[2] || '').trim();
+        const phones = (parts[3] || '').split(',').map(h => h.trim()).filter(Boolean);
+        const emails = (parts[4] || '').split(',').map(h => h.trim()).filter(Boolean);
+        const handles = [...phones, ...emails];
+        if (handles.length) rows.push({ firstName: fn, lastName: ln, name: dn, handles });
+      }
+    } catch {}
   }
 
-  // First name only — if exactly one person has this first name, trust it
+  if (!rows.length) throw new Error('No contacts found in Contacts database.');
+
+  const norm = s => (s||'').toLowerCase().trim();
+  let matches = [];
+
+  // 1. Exact display name
+  matches = rows.filter(c => norm(c.name) === query);
+  // 2. Display name contains full query string
+  if (!matches.length) matches = rows.filter(c => norm(c.name).includes(query));
+  // 3. First + last name match (handles emoji display names like "Emma 🐻" when user says "Emma Bell")
+  if (!matches.length && qFirst && qLast) {
+    matches = rows.filter(c => norm(c.firstName) === qFirst && norm(c.lastName) === qLast);
+  }
+  // 4a. First name exact, last name ignored (emoji case: first=Emma last=🐻, user says "Emma Bell")
   if (!matches.length && qFirst) {
-    const firstOnly = all.filter(c => c.firstName.toLowerCase() === qFirst);
-    if (firstOnly.length === 1) matches = firstOnly;
-    else if (firstOnly.length > 1) matches = firstOnly; // will hit ambiguity below
-    else {
-      // Partial first name
-      const partial = all.filter(c => c.firstName.toLowerCase().startsWith(qFirst));
-      if (partial.length) matches = partial;
+    const exact = rows.filter(c => norm(c.firstName) === qFirst);
+    if (exact.length) {
+      // If multiple with same first name but a last name was given, prefer ones whose display name starts with first
+      matches = (qLast && exact.length > 1)
+        ? (exact.filter(c => norm(c.name).startsWith(qFirst)) || exact)
+        : exact;
+      if (!matches.length) matches = exact;
     }
+  }
+  // 4b. First name starts with query
+  if (!matches.length && qFirst) {
+    matches = rows.filter(c => norm(c.firstName).startsWith(qFirst));
+  }
+  // 5. Any name field contains first query word
+  if (!matches.length) {
+    matches = rows.filter(c => norm(c.name).includes(qFirst) || norm(c.firstName).includes(qFirst));
   }
 
   if (matches.length === 0) throw new Error(`No contact found for "${name}". Ask for their phone number or email.`);
-  if (matches.length === 1) return { resolved: matches[0].handles[0], allHandles: matches[0].handles, name: matches[0].name };
 
-  // Multiple matches — return ambiguity for the AI to clarify
+  // Deduplicate by display name
+  const unique = matches.filter((c, i, arr) => arr.findIndex(x => x.name === c.name) === i);
+  if (unique.length === 1) return { resolved: unique[0].handles[0], allHandles: unique[0].handles, name: unique[0].name };
+
   return {
     ambiguous: true,
-    options: matches,
-    question: `Found ${matches.length} contacts matching "${name}": ${matches.map((c, i) => `${i + 1}. ${c.name}`).join(', ')}. Which one?`,
+    options: unique,
+    question: `Found ${unique.length} contacts matching "${name}": ${unique.map((c, i) => `${i + 1}. ${c.name}`).join(', ')}. Which one did you mean?`,
   };
 }
 
