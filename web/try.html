@@ -147,7 +147,8 @@
                     <!-- Unified tab bar: Canvas tab + open document tabs + zoom controls -->
                     <div class="focus-bar" id="focus-bar">
                         <button type="button" class="focus-tab focus-tab-active" data-focus="canvas" id="focus-tab-canvas">Canvas</button>
-                        <button type="button" class="focus-tab" data-focus="pm-ops" id="focus-tab-pm-ops">PM Ops</button>
+                        <!-- PM Ops tab hidden until feature is ready -->
+                        <!-- <button type="button" class="focus-tab" data-focus="pm-ops" id="focus-tab-pm-ops">PM Ops</button> -->
                         <div class="doc-tabs-scroll" id="doc-tabs-scroll">
                             <div class="doc-tabs" id="doc-tabs"></div>
                         </div>
@@ -165,6 +166,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- PM Ops pane hidden until feature is ready
                     <div class="pm-ops-pane" id="pm-ops-pane" hidden>
                         <div class="pm-ops-grid">
                             <section class="pm-ops-card">
@@ -212,6 +214,7 @@
                             </section>
                         </div>
                     </div>
+                    -->
                     <!-- Document viewer: no header, content only — tabs live in focus-bar -->
                     <div class="document-viewer-pane" id="document-viewer-pane" hidden>
                         <div class="document-viewer-content" id="document-viewer-content"></div>

@@ -8572,7 +8572,7 @@
 
         var savedFocus = '';
         try { savedFocus = localStorage.getItem('mudrag_focus_tab') || ''; } catch (e) {}
-        if (savedFocus === 'pm-ops') setMainFocus('pm-ops');
+        if (savedFocus && savedFocus !== 'pm-ops') setMainFocus(savedFocus);
         else setMainFocus('canvas');
     })();
 
