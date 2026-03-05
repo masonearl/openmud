@@ -5014,6 +5014,64 @@
             });
         });
     }
+    // New file button — shows file-type picker, creates blank file in active project
+    var btnNewFile = document.getElementById('btn-new-file');
+    var newFileMenu = document.getElementById('new-file-menu');
+    if (btnNewFile && newFileMenu) {
+        btnNewFile.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (!activeProjectId) {
+                addMessage('assistant', 'Select a project first, then create a file.');
+                return;
+            }
+            newFileMenu.hidden = !newFileMenu.hidden;
+        });
+
+        newFileMenu.querySelectorAll('.new-file-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                newFileMenu.hidden = true;
+                if (!activeProjectId) return;
+
+                var ext  = item.getAttribute('data-ext')  || 'txt';
+                var mime = item.getAttribute('data-mime') || 'text/plain';
+                var defaultName = 'Untitled.' + ext;
+
+                // Stub content per type so the file isn't completely empty
+                var stubs = {
+                    md:   '# Untitled\n\n',
+                    txt:  '',
+                    csv:  'Column1,Column2,Column3\n',
+                    json: '{\n  \n}\n',
+                    html: '<!DOCTYPE html>\n<html>\n<head><title>Untitled</title></head>\n<body>\n\n</body>\n</html>\n'
+                };
+                var content = stubs[ext] !== undefined ? stubs[ext] : '';
+
+                var blob = new Blob([content], { type: mime });
+                var file = new File([blob], defaultName, { type: mime });
+
+                saveDocument(activeProjectId, file, null, { source: 'new-file' }).then(function (docId) {
+                    return renderDocuments().then(function () {
+                        // Kick off inline rename so the user can name it immediately
+                        var listEl = document.getElementById('documents-list');
+                        var docEl  = listEl && listEl.querySelector('.document-item[data-doc-id="' + docId + '"]');
+                        var nameEl = docEl  && docEl.querySelector('.document-item-name');
+                        if (nameEl) startRenameDocument(docId, nameEl, defaultName);
+                        if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
+                    });
+                }).catch(function () {
+                    showToast('Could not create file. Try again.');
+                });
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!newFileMenu.hidden && !document.getElementById('btn-new-file-wrap').contains(e.target)) {
+                newFileMenu.hidden = true;
+            }
+        });
+    }
+
     var chatDocUpload = document.getElementById('chat-doc-upload');
     if (chatDocUpload) {
         chatDocUpload.addEventListener('change', function () {

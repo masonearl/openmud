@@ -1500,6 +1500,40 @@ body.sidebar-collapsed .sidebar-resize-handle {
     flex-shrink: 0;
 }
 
+/* New file button + dropdown */
+.btn-new-file-wrap {
+    position: relative;
+}
+.new-file-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 400;
+    min-width: 160px;
+    padding: 4px 0;
+    background: var(--bg-alt, #1e1e1e);
+    border: 1px solid var(--border, #333);
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+.new-file-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    color: var(--text-secondary, #aaa);
+    background: none;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.new-file-item:hover {
+    color: var(--text, #f0f0f0);
+    background: rgba(255,255,255,0.06);
+}
+
 .projects-list {
     list-style: none;
     margin: 0;
