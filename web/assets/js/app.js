@@ -2545,25 +2545,42 @@
                 });
                 wrap.appendChild(toggle);
             }
-            // Copy button on assistant messages
+            // Right-click context menu on assistant messages
             if (m.role === 'assistant') {
-                var msgActions = document.createElement('div');
-                msgActions.className = 'msg-actions';
-                var copyBtn = document.createElement('button');
-                copyBtn.type = 'button';
-                copyBtn.className = 'msg-copy-btn';
-                copyBtn.textContent = 'Copy';
-                copyBtn.addEventListener('click', function () {
-                    var text = typeof m.content === 'string' ? m.content : (contentWrap.textContent || '');
-                    navigator.clipboard.writeText(text).then(function () {
-                        copyBtn.textContent = 'Copied';
-                        setTimeout(function () { copyBtn.textContent = 'Copy'; }, 2000);
-                    }).catch(function () {
-                        copyBtn.textContent = 'Copy';
+                (function (message, el) {
+                    el.addEventListener('contextmenu', function (e) {
+                        e.preventDefault();
+                        var existing = document.getElementById('msg-context-menu');
+                        if (existing) existing.remove();
+
+                        var menu = document.createElement('div');
+                        menu.id = 'msg-context-menu';
+                        menu.className = 'project-context-menu';
+                        menu.innerHTML =
+                            '<button type="button" class="project-context-item" data-action="copy-text">Copy message</button>' +
+                            '<button type="button" class="project-context-item" data-action="copy-md">Copy as markdown</button>';
+
+                        var textContent = typeof message.content === 'string' ? message.content : (el.textContent || '');
+
+                        menu.querySelector('[data-action="copy-text"]').addEventListener('click', function () {
+                            navigator.clipboard.writeText(el.querySelector('.msg-content') ? el.querySelector('.msg-content').textContent : textContent).catch(function () {});
+                            menu.remove();
+                        });
+                        menu.querySelector('[data-action="copy-md"]').addEventListener('click', function () {
+                            navigator.clipboard.writeText(textContent).catch(function () {});
+                            menu.remove();
+                        });
+
+                        menu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+                        menu.style.top = Math.min(e.clientY, window.innerHeight - 80) + 'px';
+                        document.body.appendChild(menu);
+
+                        function dismiss(ev) {
+                            if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener('mousedown', dismiss); }
+                        }
+                        setTimeout(function () { document.addEventListener('mousedown', dismiss); }, 0);
                     });
-                });
-                msgActions.appendChild(copyBtn);
-                wrap.appendChild(msgActions);
+                }(m, wrap));
             }
             // Mark the last assistant message for typewriter animation
             if (idx === lastAssistantIdx) {

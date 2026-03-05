@@ -3545,31 +3545,6 @@ label.btn-upload {
     color: var(--text);
 }
 
-.msg-actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 6px;
-    opacity: 0;
-    transition: opacity 0.15s;
-}
-.msg-assistant:hover .msg-actions,
-.msg-assistant:focus-within .msg-actions {
-    opacity: 1;
-}
-.msg-copy-btn {
-    background: none;
-    border: 1px solid var(--border, #333);
-    border-radius: 5px;
-    color: var(--muted, #888);
-    cursor: pointer;
-    font-size: 11px;
-    padding: 2px 8px;
-    transition: color 0.1s, border-color 0.1s;
-}
-.msg-copy-btn:hover {
-    border-color: var(--text, #ccc);
-    color: var(--text, #ccc);
-}
 
 .msg-bullet-list {
     margin: 8px 0;
