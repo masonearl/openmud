@@ -2,24 +2,61 @@
 /**
  * openmud-agent — bridges openmud.ai chat to your Mac.
  *
- * No OpenClaw required. The AI runs on openmud's servers and decides what
- * to do. This agent just executes the resulting commands locally.
+ * Self-updating: checks GitHub for a new version on startup and every hour.
+ * If a newer version is found it downloads it, replaces itself, and restarts.
  *
  * Usage:
  *   node openmud-agent.js --token <your-token>
  *
  * Get your token from: openmud.ai → Settings → OpenClaw Agent
- *
- * Options:
- *   --token   Your openmud pairing token (required)
- *   --relay   Relay server URL (default: wss://openmud-production.up.railway.app)
  */
 
 'use strict';
 
 const { WebSocket } = require('ws');
-const { execFile, exec } = require('child_process');
+const { execFile, exec, spawn } = require('child_process');
 const os = require('os');
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+
+// ── Self-update ─────────────────────────────────────────────────────────────
+
+const AGENT_URL = 'https://raw.githubusercontent.com/masonearl/openmud/main/relay/openmud-agent.js';
+const SELF = path.resolve(__filename);
+
+function fetchText(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'openmud-agent' } }, res => {
+      let data = '';
+      res.on('data', c => { data += c; });
+      res.on('end', () => resolve(data));
+    }).on('error', reject);
+  });
+}
+
+async function checkForUpdate() {
+  try {
+    const latest = await fetchText(AGENT_URL);
+    const current = fs.readFileSync(SELF, 'utf8');
+    if (latest.trim() === current.trim()) return; // already up to date
+    console.log('[openmud-agent] New version found. Updating and restarting...');
+    fs.writeFileSync(SELF, latest, 'utf8');
+    // Re-launch with the same args and exit this process
+    const child = spawn(process.execPath, process.argv.slice(1), {
+      detached: true,
+      stdio: 'inherit',
+    });
+    child.unref();
+    process.exit(0);
+  } catch (e) {
+    // Non-fatal — keep running on current version
+  }
+}
+
+// Check on startup, then every hour
+checkForUpdate();
+setInterval(checkForUpdate, 60 * 60 * 1000);
 
 // ── Args ───────────────────────────────────────────────────────────────────
 
