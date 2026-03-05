@@ -12,7 +12,7 @@
  *
  * Options:
  *   --token   Your openmud pairing token (required)
- *   --relay   Relay server URL (default: wss://openmud-relay.up.railway.app)
+ *   --relay   Relay server URL (default: wss://openmud-production.up.railway.app)
  */
 
 'use strict';
@@ -29,7 +29,7 @@ process.argv.slice(2).forEach((a, i, arr) => {
 });
 
 const TOKEN = args.token;
-const RELAY_URL = (args.relay || 'wss://openmud-relay.up.railway.app').replace(/^http/, 'ws').replace(/\/+$/, '');
+const RELAY_URL = (args.relay || 'wss://openmud-production.up.railway.app').replace(/^http/, 'ws').replace(/\/+$/, '');
 
 if (!TOKEN) {
   console.error('\nError: --token is required.');

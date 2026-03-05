@@ -6094,7 +6094,7 @@
 
                 // Route through relay server if token is paired (works from any browser, any network)
                 if (ocRelayConnected && ocRelayToken) {
-                    var RELAY_BASE = 'https://openmud-relay.up.railway.app';
+                    var RELAY_BASE = 'https://openmud-production.up.railway.app';
                     var ocRequestId = 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
                     var ocRelayTimeout = setTimeout(function () {
                         addMessage('assistant', 'OpenClaw request timed out. Make sure openmud-agent is running on your Mac.');
