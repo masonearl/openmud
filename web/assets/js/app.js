@@ -7380,7 +7380,10 @@
     if (toggleRightPanelBtn) {
         toggleRightPanelBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            localStorage.setItem(STORAGE_RIGHT_PANEL_VISIBLE, isRightPanelVisible() ? 'false' : 'true');
+            // Use actual DOM state, not localStorage, so that if a document opened the
+            // canvas without touching storage, clicking here still correctly hides it.
+            var currentlyVisible = mainWrapper && !mainWrapper.classList.contains('right-panel-hidden');
+            localStorage.setItem(STORAGE_RIGHT_PANEL_VISIBLE, currentlyVisible ? 'false' : 'true');
             applyRightPanelVisibility();
         });
     }
