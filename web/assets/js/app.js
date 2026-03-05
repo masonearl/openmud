@@ -5069,7 +5069,18 @@
                 addMessage('assistant', 'Select a project first, then create a file.');
                 return;
             }
-            newFileMenu.hidden = !newFileMenu.hidden;
+            var willShow = newFileMenu.hidden;
+            if (willShow) {
+                var rect = btnNewFile.getBoundingClientRect();
+                var menuW = 164;
+                var left = rect.left;
+                if (left + menuW > window.innerWidth - 8) {
+                    left = window.innerWidth - menuW - 8;
+                }
+                newFileMenu.style.top  = (rect.bottom + 4) + 'px';
+                newFileMenu.style.left = left + 'px';
+            }
+            newFileMenu.hidden = !willShow;
         });
 
         newFileMenu.querySelectorAll('.new-file-item').forEach(function (item) {
