@@ -7217,8 +7217,11 @@
     }
 
     function isRightPanelVisible() {
+        // Prefer the actual DOM state so that opening a document (which shows the
+        // canvas without touching localStorage) is reflected immediately.
+        if (mainWrapper) return !mainWrapper.classList.contains('right-panel-hidden');
         var raw = localStorage.getItem(STORAGE_RIGHT_PANEL_VISIBLE);
-        return raw === 'true';  // hidden by default; user can show via "Show canvas/document panel"
+        return raw === 'true';
     }
 
     function applyRightPanelVisibility() {
@@ -7402,6 +7405,9 @@
             var open = !settingsDropdown.hidden;
             closeSettingsDropdown();
             if (!open) {
+                // Refresh view-toggle checkmarks to reflect actual DOM state before showing
+                applyRightPanelVisibility();
+                applyChatVisibility();
                 positionSettingsDropdown(settingsDropdown, btn);
                 settingsDropdown.hidden = false;
                 btn.setAttribute('aria-expanded', 'true');
