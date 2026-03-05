@@ -58,16 +58,16 @@ const server = http.createServer((req, res) => {
   // Browser → relay: send a message to the local agent
   if (req.method === 'POST' && url.pathname === '/relay/send') {
     readBody(req).then(body => {
-      const { token, requestId, messages, model } = body;
-      if (!token || !requestId || !messages) {
-        return json(res, 400, { error: 'Missing token, requestId, or messages' });
+      const { token, requestId, ...rest } = body;
+      if (!token || !requestId) {
+        return json(res, 400, { error: 'Missing token or requestId' });
       }
       const ws = agents.get(token);
       if (!ws || ws.readyState !== WebSocket.OPEN) {
-        return json(res, 503, { error: 'No agent connected for this token. Make sure openmud-agent is running on your Mac.' });
+        return json(res, 503, { ok: false, error: 'No agent connected for this token. Make sure openmud-agent is running on your Mac.' });
       }
-      // Forward to local agent
-      ws.send(JSON.stringify({ requestId, messages, model: model || 'gpt-4.1-mini' }));
+      // Forward full command payload to agent (type, to, subject, body, messages, etc.)
+      ws.send(JSON.stringify({ requestId, ...rest }));
       json(res, 200, { ok: true, requestId });
     }).catch(err => json(res, 500, { error: err.message }));
     return;
