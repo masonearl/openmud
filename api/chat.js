@@ -4,6 +4,7 @@ const buildSchedule = require('./schedule').buildSchedule;
 const buildProposal = require('./proposal').buildProposal;
 const telemetry = require('./_lib/toolTelemetry');
 const { searchEmailForUser, sendEmailForUser } = require('./_lib/emailTools');
+const { getCoreOpenAITools } = require('./_lib/toolSchemas');
 
 const OUTPUT_RULES = `
 Output format: Plain text only. No markdown (no **, ##, ###). No LaTeX or math blocks (no \\[, \\], $$). Be concise. Short sentences. Get to the point. Use simple bullets with - if needed.`;
@@ -133,102 +134,7 @@ const toolSchemaCache = {
   expiresAt: 0,
   tools: [],
 };
-const FALLBACK_LOCAL_TOOLS = [
-  {
-    type: 'function',
-    function: {
-      name: 'build_schedule',
-      description: 'Build a construction schedule with phases and dates.',
-      parameters: {
-        type: 'object',
-        properties: {
-          project_name: { type: 'string' },
-          start_date: { type: 'string', description: 'ISO date YYYY-MM-DD' },
-          duration_days: { type: 'number' },
-          phases: { type: 'array', items: { type: 'string' } },
-        },
-        required: ['project_name', 'duration_days'],
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'render_proposal_html',
-      description: 'Generate proposal HTML for PDF export.',
-      parameters: {
-        type: 'object',
-        properties: {
-          client: { type: 'string' },
-          scope: { type: 'string' },
-          total: { type: 'number' },
-          duration: { type: 'number' },
-          assumptions: { type: 'string' },
-          exclusions: { type: 'string' },
-        },
-        required: ['client', 'scope', 'total'],
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'create_calendar_event',
-      description: 'Normalize calendar event data for Apple/Google calendar add flow.',
-      parameters: {
-        type: 'object',
-        properties: {
-          title: { type: 'string' },
-          start: { type: 'string' },
-          end: { type: 'string' },
-          duration_minutes: { type: 'number' },
-          timezone: { type: 'string' },
-          location: { type: 'string' },
-          description: { type: 'string' },
-          all_day: { type: 'boolean' },
-        },
-        required: ['title', 'start'],
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'search_email',
-      description: 'Search connected inbox (Gmail/Outlook) for matching messages.',
-      parameters: {
-        type: 'object',
-        properties: {
-          query: { type: 'string' },
-          from: { type: 'string' },
-          subject: { type: 'string' },
-          since: { type: 'string', description: 'Optional date or Gmail query date constraint.' },
-          limit: { type: 'number' },
-          provider: { type: 'string', enum: ['gmail', 'microsoft', 'apple_imap'] },
-        },
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'send_email',
-      description: 'Send email from a connected inbox account.',
-      parameters: {
-        type: 'object',
-        properties: {
-          to: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
-          cc: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
-          bcc: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
-          subject: { type: 'string' },
-          body: { type: 'string' },
-          provider: { type: 'string', enum: ['gmail', 'microsoft', 'apple_imap'] },
-        },
-        required: ['to', 'subject', 'body'],
-      },
-    },
-  },
-];
+const FALLBACK_LOCAL_TOOLS = getCoreOpenAITools();
 
 function getSystemPrompt(model, chatMode = 'agent') {
   const base = SYSTEM_PROMPTS[model] || SYSTEM_PROMPTS['gpt-4o-mini'];
@@ -257,9 +163,51 @@ function buildProposalFromEstimate(estimateContext) {
   return { client: 'Project', scope, total, duration, bid_items: bidItems };
 }
 
-function ensureProposalBlock(responseText, userMsg, useTools, estimateContext) {
+function findLatestExecutedTool(executedTools, toolName) {
+  if (!Array.isArray(executedTools) || !toolName) return null;
+  for (let i = executedTools.length - 1; i >= 0; i -= 1) {
+    const item = executedTools[i];
+    if (item && item.name === toolName) return item;
+  }
+  return null;
+}
+
+function buildProposalPayloadFromToolResult(toolRun) {
+  const result = toolRun && toolRun.result;
+  if (!result || typeof result !== 'object') return null;
+  if (!result.client || !result.scope || result.total == null) return null;
+  return {
+    client: String(result.client),
+    scope: String(result.scope),
+    total: toNum(result.total, 0),
+    duration: result.duration == null ? null : toNum(result.duration, null),
+    bid_items: Array.isArray(result.bid_items) ? result.bid_items : [],
+  };
+}
+
+function buildSchedulePayloadFromToolResult(toolRun) {
+  const result = toolRun && toolRun.result;
+  if (!result || typeof result !== 'object') return null;
+  if (!result.project || result.duration == null || !result.start_date) return null;
+  return {
+    project: String(result.project),
+    duration: Math.max(1, toNum(result.duration, 1)),
+    start_date: String(result.start_date),
+    phases: Array.isArray(result.phases) ? result.phases.map((phase) => String(phase)) : [],
+  };
+}
+
+function ensureProposalBlock(responseText, userMsg, useTools, estimateContext, executedTools) {
   if (!useTools || !PROPOSAL_INTENT.test(userMsg || '')) return responseText;
   if (/\[OPENMUD_PROPOSAL\]/.test(responseText || '')) return responseText;
+  const toolRun = findLatestExecutedTool(executedTools, 'render_proposal_html');
+  if (toolRun) {
+    const payload = buildProposalPayloadFromToolResult(toolRun);
+    if (!payload) return responseText;
+    const block = `[OPENMUD_PROPOSAL]${JSON.stringify(payload)}[/OPENMUD_PROPOSAL]`;
+    const trimmed = (responseText || '').trim();
+    return trimmed ? `${trimmed}\n\n${block}` : block;
+  }
   const params = buildProposalFromEstimate(estimateContext);
   if (!params) return responseText;
 
@@ -495,9 +443,17 @@ function extractScheduleParams(userMsg, messages) {
   };
 }
 
-function ensureScheduleBlock(responseText, userMsg, useTools, messages) {
+function ensureScheduleBlock(responseText, userMsg, useTools, messages, executedTools) {
   if (!useTools || !SCHEDULE_INTENT.test(userMsg || '')) return responseText;
   if (/\[OPENMUD_SCHEDULE\]/.test(responseText || '')) return responseText;
+  const toolRun = findLatestExecutedTool(executedTools, 'build_schedule');
+  if (toolRun) {
+    const payload = buildSchedulePayloadFromToolResult(toolRun);
+    if (!payload) return responseText;
+    const block = `[OPENMUD_SCHEDULE]${JSON.stringify(payload)}[/OPENMUD_SCHEDULE]`;
+    const trimmed = (responseText || '').trim();
+    return trimmed ? `${trimmed}\n\n${block}` : block;
+  }
   try {
     const { project, duration, startDate, phases } = extractScheduleParams(userMsg, messages);
     const result = buildSchedule(project, duration, startDate, phases);
@@ -721,6 +677,7 @@ async function runOpenAIWithTools(openai, req, options) {
   let hadToolError = false;
   let messageBuffer = [...apiMessages];
   let calendarEventResult = null;
+  const executedTools = [];
 
   for (let step = 0; step < 6; step += 1) {
     const completion = await openai.chat.completions.create({
@@ -734,12 +691,12 @@ async function runOpenAIWithTools(openai, req, options) {
 
     const assistantMessage = completion.choices?.[0]?.message;
     if (!assistantMessage) {
-      return { text: 'No response.', toolsUsed, hadToolError, calendarEventResult };
+      return { text: 'No response.', toolsUsed, hadToolError, calendarEventResult, executedTools };
     }
 
     const toolCalls = Array.isArray(assistantMessage.tool_calls) ? assistantMessage.tool_calls : [];
     if (toolCalls.length === 0) {
-      return { text: assistantMessage.content || 'No response.', toolsUsed, hadToolError, calendarEventResult };
+      return { text: assistantMessage.content || 'No response.', toolsUsed, hadToolError, calendarEventResult, executedTools };
     }
 
     messageBuffer.push({
@@ -755,6 +712,11 @@ async function runOpenAIWithTools(openai, req, options) {
 
       if (executed.ok) {
         toolsUsed.push(normalizeToolName(name));
+        executedTools.push({
+          name: normalizeToolName(name),
+          arguments: args,
+          result: executed.result,
+        });
         if (normalizeToolName(name) === 'create_calendar_event') {
           calendarEventResult = executed.result;
         }
@@ -782,6 +744,7 @@ async function runOpenAIWithTools(openai, req, options) {
     toolsUsed,
     hadToolError,
     calendarEventResult,
+    executedTools,
   };
 }
 
@@ -799,6 +762,7 @@ async function runAnthropicWithTools(anthropic, req, options) {
   let hadToolError = false;
   let messageBuffer = [...chatMessages];
   let calendarEventResult = null;
+  const executedTools = [];
 
   for (let step = 0; step < 6; step += 1) {
     const response = await anthropic.messages.create({
@@ -816,7 +780,7 @@ async function runAnthropicWithTools(anthropic, req, options) {
     const text = textParts.join('\n').trim();
 
     if (toolUses.length === 0) {
-      return { text: text || 'No response.', toolsUsed, hadToolError, calendarEventResult };
+      return { text: text || 'No response.', toolsUsed, hadToolError, calendarEventResult, executedTools };
     }
 
     messageBuffer.push({ role: 'assistant', content: blocks });
@@ -829,6 +793,11 @@ async function runAnthropicWithTools(anthropic, req, options) {
 
       if (executed.ok) {
         toolsUsed.push(normalizeToolName(name));
+        executedTools.push({
+          name: normalizeToolName(name),
+          arguments: args,
+          result: executed.result,
+        });
         if (normalizeToolName(name) === 'create_calendar_event') {
           calendarEventResult = executed.result;
         }
@@ -866,6 +835,7 @@ async function runAnthropicWithTools(anthropic, req, options) {
     toolsUsed,
     hadToolError,
     calendarEventResult,
+    executedTools,
   };
 }
 
@@ -947,8 +917,8 @@ module.exports = async function handler(req, res) {
           });
 
           const lastUser = chatMessages.filter((m) => m.role === 'user').pop();
-          let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages);
-          text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context);
+          let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages, generated.executedTools);
+          text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context, generated.executedTools);
           text = ensureWorkflowBlock(text, lastUser?.content, toolsEnabled, messages);
           text = ensureCalendarBlock(text, lastUser?.content, toolsEnabled, generated.calendarEventResult);
           text = ensureSafetyCorrections(text, lastUser?.content);
@@ -1001,8 +971,8 @@ module.exports = async function handler(req, res) {
     });
 
     const lastUser = messages.filter((m) => m.role === 'user').pop();
-    let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages);
-    text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context);
+    let text = ensureScheduleBlock(generated.text, lastUser?.content, toolsEnabled, messages, generated.executedTools);
+    text = ensureProposalBlock(text, lastUser?.content, toolsEnabled, estimate_context, generated.executedTools);
     text = ensureWorkflowBlock(text, lastUser?.content, toolsEnabled, messages);
     text = ensureCalendarBlock(text, lastUser?.content, toolsEnabled, generated.calendarEventResult);
     text = ensureSafetyCorrections(text, lastUser?.content);

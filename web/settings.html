@@ -131,8 +131,8 @@
                             <p class="st-hint st-hint-tight">Link your Mac to use calendar, email, iMessage, and system commands from chat.</p>
                             <ol class="st-agent-steps">
                                 <li>Copy your token below.</li>
-                                <li>Run the command on your Mac.</li>
-                                <li>Come back — status updates automatically.</li>
+                                <li>Run the installer on your Mac. It installs, starts, and keeps the agent running automatically.</li>
+                                <li>Come back. The relay heartbeat updates automatically.</li>
                             </ol>
                             <div class="st-token-row">
                                 <input id="openclaw-relay-token" type="password" class="provider-key-input st-token-input" readonly placeholder="Generating token...">
@@ -140,9 +140,10 @@
                                 <button type="button" class="btn-secondary btn-sm" id="btn-regen-oc-token">New token</button>
                             </div>
                             <div class="st-cmd-block">
-                                <span id="openclaw-run-cmd" class="st-cmd-text">node relay/openmud-agent.js --token ...</span>
+                                <span id="openclaw-run-cmd" class="st-cmd-text">curl -fsSL https://openmud.ai/api/install-agent | bash -s -- --token ...</span>
                                 <button type="button" id="btn-copy-oc-cmd" class="st-cmd-copy">copy</button>
                             </div>
+                            <p class="st-agent-heartbeat" id="openclaw-heartbeat">Checking relay heartbeat…</p>
                         </div>
 
                         <div id="openclaw-disconnect-row" hidden>
@@ -304,6 +305,7 @@
             var ocSetupView = document.getElementById('openclaw-setup-view');
             var ocDisconnectRow = document.getElementById('openclaw-disconnect-row');
             var ocStatusBadge = document.getElementById('openclaw-status-badge');
+            var ocHeartbeat = document.getElementById('openclaw-heartbeat');
             var btnCopyToken = document.getElementById('btn-copy-oc-token');
             var btnRegenToken = document.getElementById('btn-regen-oc-token');
             var btnCopyCmd = document.getElementById('btn-copy-oc-cmd');
@@ -335,15 +337,14 @@
 
             function renderOcPairing(token) {
                 if (!ocTokenInput) return;
-                var agentScript = 'https://raw.githubusercontent.com/masonearl/openmud/main/relay/openmud-agent.js';
-                var simpleCmd = 'node relay/openmud-agent.js --token ' + token;
+                var installCmd = 'curl -fsSL https://openmud.ai/api/install-agent | bash -s -- --token ' + token;
                 ocTokenInput.value = token;
-                if (ocRunCmd) ocRunCmd.textContent = simpleCmd;
+                if (ocRunCmd) ocRunCmd.textContent = installCmd;
             }
 
-            function updateOcStatus(connected) {
+            function updateOcStatus(state) {
                 if (!ocConnectedView || !ocSetupView) return;
-                if (connected) {
+                if (state === 'connected') {
                     ocConnectedView.hidden = false;
                     ocSetupView.hidden = true;
                     ocDisconnectRow.hidden = false;
@@ -356,13 +357,19 @@
                     keys.openclawRelayConnected = true;
                     keys.openclawEnabled = true;
                     writeKeyStore(keys);
+                    if (ocHeartbeat) ocHeartbeat.textContent = 'Heartbeat: Connected to your Mac through the openmud relay.';
                 } else {
                     ocConnectedView.hidden = true;
                     ocSetupView.hidden = false;
                     ocDisconnectRow.hidden = true;
                     if (ocStatusBadge) {
-                        ocStatusBadge.textContent = '';
-                        ocStatusBadge.className = 'st-agent-badge';
+                        ocStatusBadge.textContent = state === 'error' ? 'Relay offline' : 'Waiting';
+                        ocStatusBadge.className = 'st-agent-badge' + (state === 'error' ? ' st-agent-badge-error' : ' st-agent-badge-pending');
+                    }
+                    if (ocHeartbeat) {
+                        ocHeartbeat.textContent = state === 'error'
+                            ? 'Heartbeat: Could not reach the relay. Check your internet connection, then try again.'
+                            : 'Heartbeat: No Mac agent connected yet. Run the installer command above on your Mac.';
                     }
                 }
             }
@@ -370,8 +377,8 @@
             function checkOcConnection(token) {
                 fetch(RELAY_URL + '/relay/connected/' + encodeURIComponent(token))
                     .then(function (r) { return r.json(); })
-                    .then(function (d) { updateOcStatus(!!d.connected); })
-                    .catch(function () { updateOcStatus(false); });
+                    .then(function (d) { updateOcStatus(d && d.connected ? 'connected' : 'pending'); })
+                    .catch(function () { updateOcStatus('error'); });
             }
 
             function startOcPolling(token) {
@@ -420,7 +427,7 @@
                     keys.openclawRelayConnected = false;
                     keys.openclawEnabled = false;
                     writeKeyStore(keys);
-                    updateOcStatus(false);
+                    updateOcStatus('pending');
                 });
             }
 
@@ -944,6 +951,42 @@
             vertical-align: middle;
             position: relative;
             top: -1px;
+        }
+
+        .st-agent-badge-pending {
+            color: var(--text-secondary);
+        }
+
+        .st-agent-badge-pending::before,
+        .st-agent-badge-error::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
+        }
+
+        .st-agent-badge-pending::before {
+            background: #caa46c;
+        }
+
+        .st-agent-badge-error {
+            color: #d28a8a;
+        }
+
+        .st-agent-badge-error::before {
+            background: #d28a8a;
+        }
+
+        .st-agent-heartbeat {
+            margin: 10px 0 0;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
         .st-agent-connected-text {

@@ -17,6 +17,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { getUserFromRequest } = require('./lib/auth');
 const { allocateUsage, logUsageEvent, detectSource } = require('./lib/usage');
+const { getCoreAnthropicTools } = require('../../api/_lib/toolSchemas');
 
 const MODEL = 'claude-haiku-4-5';
 
@@ -36,46 +37,7 @@ Do not use unavailable tools. Do not use destructive tools. If required info is 
 Be concise and actionable. Format currency with commas and 2 decimal places.`;
 
 const AGENTIC_TOOLS = [
-  {
-    name: 'estimate_project_cost',
-    description: 'Full project cost estimate with materials, labor, equipment, and markup. Returns detailed cost breakdown.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        materials: {
-          type: 'array',
-          items: { type: 'object', properties: { type: { type: 'string' }, quantity: { type: 'number' }, size: { type: 'string' } } },
-          description: 'List of {type, quantity, size}',
-        },
-        labor: {
-          type: 'array',
-          items: { type: 'object', properties: { type: { type: 'string' }, hours: { type: 'number' } } },
-          description: 'List of {type, hours}',
-        },
-        equipment: {
-          type: 'array',
-          items: { type: 'object', properties: { type: { type: 'string' }, days: { type: 'number' } } },
-          description: 'Optional list of {type, days}',
-        },
-        markup: { type: 'number', description: 'Markup as decimal, e.g. 0.15 for 15%' },
-      },
-      required: ['materials', 'labor'],
-    },
-  },
-  {
-    name: 'build_schedule',
-    description: 'Build a construction schedule with phases and dates.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        project_name: { type: 'string' },
-        start_date: { type: 'string', description: 'ISO date YYYY-MM-DD' },
-        duration_days: { type: 'number' },
-        phases: { type: 'array', items: { type: 'string' }, description: 'Phase names' },
-      },
-      required: ['project_name', 'duration_days'],
-    },
-  },
+  ...getCoreAnthropicTools(['estimate_project_cost', 'build_schedule']),
   {
     name: 'search_mail',
     description: 'Search Mac Mail.app for emails. Returns sender, subject, date, read/flagged status.',

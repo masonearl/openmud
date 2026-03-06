@@ -36,9 +36,12 @@
     var STORAGE_SUB_ACTIVE = 'mudrag_subscription_active';
     var STORAGE_SUB_TIER = 'mudrag_subscription_tier';
     var STORAGE_PROVIDER_KEYS = 'mudrag_provider_keys_v1';
+    var STORAGE_OC_TOKEN = 'openmud_oc_relay_token';
+    var RELAY_STATUS_BASE = 'https://openmud-production.up.railway.app';
     var TIER_LIMITS = { free: 5, personal: 100, pro: null, executive: null };
     var _authToken = null;
     var DEV_KEY = 'openmud';
+    var _relayStatusTimer = null;
 
     function getAuthHeaders() {
         var h = { 'Content-Type': 'application/json' };
@@ -61,7 +64,7 @@
             if (cfg.openclawModel) h['X-OpenClaw-Model'] = String(cfg.openclawModel).trim();
             // Relay token — always send if present so the server can route to the user's local agent
             var relayToken = '';
-            try { relayToken = localStorage.getItem('openmud_oc_relay_token') || ''; } catch (e) {}
+            try { relayToken = localStorage.getItem(STORAGE_OC_TOKEN) || ''; } catch (e) {}
             if (relayToken) h['X-Openmud-Relay-Token'] = relayToken;
         } catch (e) {}
         return h;
@@ -85,6 +88,59 @@
         }
     }
 
+    function getRelayToken() {
+        try {
+            return localStorage.getItem(STORAGE_OC_TOKEN) || '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function renderRelayStatusPill(state, text) {
+        var pill = document.getElementById('relay-status-pill');
+        var modelSelect = document.getElementById('model-select');
+        var shouldShow = !!pill && !!modelSelect && modelSelect.value === 'openclaw';
+        if (!pill) return;
+        pill.hidden = !shouldShow;
+        if (!shouldShow) return;
+        pill.className = 'chat-composer-pill relay-status-pill relay-status-' + (state || 'pending');
+        pill.textContent = text || 'Agent waiting';
+    }
+
+    function checkRelayStatus() {
+        var token = getRelayToken();
+        if (!token) {
+            renderRelayStatusPill('pending', 'Agent not linked');
+            return Promise.resolve(false);
+        }
+        return fetch(RELAY_STATUS_BASE + '/relay/connected/' + encodeURIComponent(token))
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var connected = !!(data && data.connected);
+                renderRelayStatusPill(connected ? 'connected' : 'pending', connected ? 'Agent connected' : 'Agent waiting');
+                return connected;
+            })
+            .catch(function () {
+                renderRelayStatusPill('error', 'Relay offline');
+                return false;
+            });
+    }
+
+    function updateRelayStatusVisibility() {
+        var modelSelect = document.getElementById('model-select');
+        if (!modelSelect || modelSelect.value !== 'openclaw') {
+            if (_relayStatusTimer) {
+                clearInterval(_relayStatusTimer);
+                _relayStatusTimer = null;
+            }
+            renderRelayStatusPill('pending', 'Agent waiting');
+            return;
+        }
+        checkRelayStatus();
+        if (_relayStatusTimer) clearInterval(_relayStatusTimer);
+        _relayStatusTimer = setInterval(checkRelayStatus, 5000);
+    }
+
     function setModelSelection(value) {
         var modelSelectEl = document.getElementById('model-select');
         if (!modelSelectEl) return;
@@ -100,6 +156,7 @@
                 btn.setAttribute('aria-selected', btn.getAttribute('data-value') === value ? 'true' : 'false');
             });
         }
+        updateRelayStatusVisibility();
     }
 
     function getChatHeaders() {
@@ -6367,7 +6424,7 @@
             var providerConfig = getProviderConfig();
             if (model === 'openclaw') {
                 var ocRelayToken = '';
-                try { ocRelayToken = localStorage.getItem('openmud_oc_relay_token') || ''; } catch (e) {}
+                try { ocRelayToken = localStorage.getItem(STORAGE_OC_TOKEN) || ''; } catch (e) {}
 
                 // Route through /api/chat with relay token if a token exists — no need for
                 // the explicit "connected" flag. Server will return a clear error if no agent is connected.
@@ -7647,6 +7704,12 @@
     var modelTrigger = document.getElementById('model-select-trigger');
     var modelDropdown = document.getElementById('model-dropdown');
     var modelLabel = document.getElementById('model-select-label');
+    var relayStatusPill = document.getElementById('relay-status-pill');
+    if (relayStatusPill) {
+        relayStatusPill.addEventListener('click', function () {
+            window.location.href = '/settings.html#openclaw-section';
+        });
+    }
     if (modelSelect && modelTrigger && modelDropdown && modelLabel) {
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved && modelSelect.querySelector('option[value="' + saved + '"]')) modelSelect.value = saved;
@@ -7656,6 +7719,7 @@
             modelDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
                 btn.setAttribute('aria-selected', btn.getAttribute('data-value') === modelSelect.value ? 'true' : 'false');
             });
+            updateRelayStatusVisibility();
         }
         updateModelLabel();
         modelTrigger.addEventListener('click', function (e) {
@@ -7682,7 +7746,11 @@
     } else if (modelSelect) {
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved) modelSelect.value = saved;
-        modelSelect.addEventListener('change', function () { localStorage.setItem(STORAGE_MODEL, modelSelect.value); });
+        modelSelect.addEventListener('change', function () {
+            localStorage.setItem(STORAGE_MODEL, modelSelect.value);
+            updateRelayStatusVisibility();
+        });
+        updateRelayStatusVisibility();
     }
 
     var agentModeSelect = document.getElementById('agent-mode-select');
