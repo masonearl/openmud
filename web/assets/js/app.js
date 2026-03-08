@@ -2486,6 +2486,60 @@
         'Find the email from Granite about material pricing',
         'Organize my desktop',
     ];
+    var CHAT_SUGGESTIONS_ASK = [
+        'What is OSHA Type C trench slope?',
+        'What pipe bedding depth is typical for 8" sewer?',
+        'What does an excavator cost per day?',
+        'Explain prevailing wage on a utility job',
+    ];
+    var CHAT_SUGGESTIONS_OPENCLAW = [
+        'Text Mason Earl and ask what time ConExpo starts tomorrow',
+        'Add a calendar event for a bid review tomorrow at 7 AM',
+        'Send an email to bids@example.com saying the proposal is attached',
+        'Read my last messages with Emma and draft a reply',
+    ];
+
+    function getCurrentAgentMode() {
+        try {
+            var savedMode = localStorage.getItem(STORAGE_AGENT_MODE);
+            return savedMode === 'ask' ? 'ask' : 'agent';
+        } catch (e) {
+            return 'agent';
+        }
+    }
+
+    function getCurrentModelSelection() {
+        var modelSelect = document.getElementById('model-select');
+        if (modelSelect && modelSelect.value) return modelSelect.value;
+        try {
+            return localStorage.getItem(STORAGE_MODEL) || 'mud1';
+        } catch (e) {
+            return 'mud1';
+        }
+    }
+
+    function getChatPlaceholderText() {
+        var model = getCurrentModelSelection();
+        var mode = getCurrentAgentMode();
+        if (model === 'openclaw') return 'Send a text, create a calendar event, or draft an email from your Mac…';
+        if (mode === 'ask') return 'Ask a construction question…';
+        if (model === 'mud1') return 'Estimate, bid, schedule, or draft a proposal…';
+        return 'Ask about estimates, schedules, proposals, or construction…';
+    }
+
+    function getStarterSuggestions() {
+        var model = getCurrentModelSelection();
+        var mode = getCurrentAgentMode();
+        if (model === 'openclaw') return CHAT_SUGGESTIONS_OPENCLAW;
+        if (mode === 'ask') return CHAT_SUGGESTIONS_ASK;
+        return isDesktopApp ? CHAT_SUGGESTIONS_DESKTOP : CHAT_SUGGESTIONS_BASE;
+    }
+
+    function refreshChatEntryHints() {
+        var inputEl = document.getElementById('chat-input');
+        if (inputEl) inputEl.placeholder = getChatPlaceholderText();
+        if (activeProjectId && getMessages(activeProjectId).length === 0) renderMessages();
+    }
 
     // ── Typewriter effect ──────────────────────────────────────────────────────
     // Animates only the last assistant message at ~800 chars/sec.
@@ -2685,7 +2739,7 @@
             emptyWrap.appendChild(emptyTitle);
             var chipsWrap = document.createElement('div');
             chipsWrap.className = 'chat-suggestions';
-            var suggestions = isDesktopApp ? CHAT_SUGGESTIONS_DESKTOP : CHAT_SUGGESTIONS_BASE;
+            var suggestions = getStarterSuggestions();
             suggestions.forEach(function (text) {
                 var chip = document.createElement('button');
                 chip.type = 'button';
@@ -7720,6 +7774,7 @@
                 btn.setAttribute('aria-selected', btn.getAttribute('data-value') === modelSelect.value ? 'true' : 'false');
             });
             updateRelayStatusVisibility();
+            refreshChatEntryHints();
         }
         updateModelLabel();
         modelTrigger.addEventListener('click', function (e) {
@@ -7749,8 +7804,10 @@
         modelSelect.addEventListener('change', function () {
             localStorage.setItem(STORAGE_MODEL, modelSelect.value);
             updateRelayStatusVisibility();
+            refreshChatEntryHints();
         });
         updateRelayStatusVisibility();
+        refreshChatEntryHints();
     }
 
     var agentModeSelect = document.getElementById('agent-mode-select');
@@ -7765,6 +7822,7 @@
             agentModeDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
                 btn.setAttribute('aria-selected', btn.getAttribute('data-value') === agentModeSelect.value ? 'true' : 'false');
             });
+            refreshChatEntryHints();
         }
         updateAgentModeLabel();
         agentModeTrigger.addEventListener('click', function (e) {
