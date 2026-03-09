@@ -113,16 +113,23 @@
                     <div class="chats-list" id="chats-list"></div>
                 </div>
                 <div class="tasks-section" id="tasks-section">
-                    <div class="tasks-header">
-                        <h3>TASKS</h3>
+                    <div class="tasks-header" id="tasks-header" role="button" tabindex="0" aria-expanded="false" aria-controls="tasks-body">
+                        <div class="tasks-header-left">
+                            <span class="section-chevron" id="tasks-chevron" aria-hidden="true">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2.5L8 6 4 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <h3>TASKS</h3>
+                        </div>
                         <div class="tasks-header-actions documents-header-toolbar">
                             <button type="button" class="btn-icon-toolbar" id="btn-new-task" title="New task" aria-label="New task">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             </button>
                         </div>
                     </div>
-                    <div class="tasks-list" id="tasks-list"></div>
-                    <p class="tasks-hint" id="tasks-hint">Select a project to track tasks.</p>
+                    <div class="tasks-body" id="tasks-body">
+                        <div class="tasks-list" id="tasks-list"></div>
+                        <p class="tasks-hint" id="tasks-hint">Select a project to track tasks.</p>
+                    </div>
                 </div>
                 <div class="documents-section" id="documents-section">
                     <div class="documents-header">
@@ -150,6 +157,17 @@
                             <button type="button" class="btn-icon-toolbar" id="btn-desktop-sync" title="Sync project to Desktop" aria-label="Sync project to Desktop" hidden>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
                             </button>
+                        </div>
+                    </div>
+                    <div class="documents-sync-status" id="documents-sync-status" hidden>
+                        <div class="documents-sync-copy">
+                            <div class="documents-sync-label" id="documents-sync-label">Desktop sync is off.</div>
+                            <div class="documents-sync-path" id="documents-sync-path"></div>
+                            <div class="documents-sync-help" id="documents-sync-help"></div>
+                        </div>
+                        <div class="documents-sync-actions">
+                            <button type="button" class="btn-secondary btn-sm" id="btn-desktop-sync-open" hidden>Open folder</button>
+                            <button type="button" class="btn-secondary btn-sm" id="btn-desktop-sync-change" hidden>Change folder</button>
                         </div>
                     </div>
                     <div class="documents-list" id="documents-list"></div>

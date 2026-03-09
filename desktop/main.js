@@ -4240,6 +4240,39 @@ ipcMain.handle('mudrag:desktop-sync-project', async (_, opts = {}) => {
   return writeProjectSnapshotToDesktop(opts);
 });
 
+ipcMain.handle('mudrag:desktop-sync-status', async (_, opts = {}) => {
+  const cfg = getDesktopSyncConfig();
+  const projectId = opts.projectId || '';
+  const projectMeta = projectId && cfg.projects ? cfg.projects[projectId] : null;
+  const rootPath = cfg.rootPath || getDefaultDesktopSyncRoot();
+  return {
+    ok: true,
+    enabled: !!(cfg.rootPath && cfg.enabled !== false),
+    rootPath,
+    projectPath: projectMeta && projectMeta.path ? projectMeta.path : '',
+    projectName: projectMeta && projectMeta.name ? projectMeta.name : '',
+    lastSyncAt: projectMeta && projectMeta.lastSyncAt ? projectMeta.lastSyncAt : cfg.lastSyncAt || null,
+  };
+});
+
+ipcMain.handle('mudrag:desktop-sync-choose-root', async () => {
+  const currentRoot = getDesktopSyncConfig().rootPath || getDefaultDesktopSyncRoot();
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory', 'createDirectory'],
+    defaultPath: currentRoot,
+    title: 'Choose Desktop sync folder',
+    message: 'Select where openmud should store synced project files.',
+  });
+  if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+    return { ok: false, cancelled: true, rootPath: currentRoot };
+  }
+  const rootPath = result.filePaths[0];
+  ensureDirSync(rootPath);
+  const cfg = setDesktopSyncConfig({ rootPath, enabled: true });
+  startDesktopSyncWatcher(rootPath);
+  return { ok: true, rootPath, config: cfg };
+});
+
 ipcMain.handle('mudrag:desktop-sync-remove-project', async (_, projectId) => {
   if (!projectId) return { ok: false, error: 'projectId required' };
   const cfg = getDesktopSyncConfig();

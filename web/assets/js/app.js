@@ -48,6 +48,8 @@
     var _desktopSyncRefreshTimers = {};
     var _desktopSyncIgnoreUntil = {};
     var _desktopSyncBootstrapped = false;
+    var _desktopSyncStatusCache = null;
+    var STORAGE_TASKS_SECTION_EXPANDED = 'mudrag_tasks_section_expanded';
 
     function getAuthHeaders() {
         var h = { 'Content-Type': 'application/json' };
@@ -459,6 +461,28 @@
         return 'Open';
     }
 
+    function getStoredBool(key) {
+        try {
+            var raw = localStorage.getItem(key);
+            if (raw === null) return null;
+            return raw === 'true';
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function shortenHomePath(pathValue) {
+        var value = String(pathValue || '').trim();
+        if (!value) return '';
+        try {
+            if (window.mudragDesktop && window.mudragDesktop.isDesktop) {
+                var homeGuess = '/Users/' + (value.split('/')[2] || '');
+                if (value.indexOf(homeGuess) === 0) return '~' + value.slice(homeGuess.length);
+            }
+        } catch (e) {}
+        return value;
+    }
+
     function consumeStructuredAction(namespace, payload) {
         try {
             var raw = sessionStorage.getItem('mudrag_structured_actions_v1');
@@ -590,6 +614,40 @@
         };
     }
 
+    function getTaskMetaParts(task, options) {
+        options = options || {};
+        var parts = [];
+        if (task.status === 'done') parts.push('Done');
+        else if (task.status === 'in_progress') parts.push('In progress');
+        else if (options.includeOpenStatus) parts.push('Open');
+        if (task.priority && task.priority !== 'medium') parts.push(task.priority === 'high' ? 'High priority' : 'Low priority');
+        var due = formatTaskDueLabel(task.due_at);
+        if (due) parts.push('Due ' + due);
+        return parts;
+    }
+
+    function getTaskMetaText(task, options) {
+        return getTaskMetaParts(task, options).join(' • ');
+    }
+
+    function updateTaskRowVisualState(row, task, options) {
+        if (!row || !task) return;
+        options = options || {};
+        row.classList.toggle('msg-task-item-done', task.status === 'done');
+        var toggle = row.querySelector('.msg-task-item-toggle');
+        if (toggle) {
+            toggle.textContent = task.status === 'done' ? '✓' : '';
+            toggle.setAttribute('aria-label', task.status === 'done' ? 'Mark task open' : 'Mark task done');
+            toggle.classList.toggle('is-done', task.status === 'done');
+        }
+        var metaEl = row.querySelector('.msg-task-item-meta');
+        if (metaEl) {
+            var metaText = getTaskMetaText(task, options);
+            metaEl.textContent = metaText;
+            metaEl.hidden = !metaText;
+        }
+    }
+
     function appendTaskResultCard(container, taskResult) {
         if (!container || !taskResult) return;
         var card = document.createElement('div');
@@ -623,18 +681,27 @@
             (group.tasks || []).slice(0, 6).forEach(function (task) {
                 var row = document.createElement('div');
                 row.className = 'msg-task-item';
+                var toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'msg-task-item-toggle';
+                row.appendChild(toggle);
                 var name = document.createElement('span');
                 name.className = 'msg-task-item-title';
                 name.textContent = task.title || 'Untitled task';
                 row.appendChild(name);
-                var meta = [];
-                meta.push(formatTaskStatusLabel(task.status));
-                var due = formatTaskDueLabel(task.due_at);
-                if (due) meta.push('Due ' + due);
                 var metaEl = document.createElement('span');
                 metaEl.className = 'msg-task-item-meta';
-                metaEl.textContent = meta.join(' • ');
                 row.appendChild(metaEl);
+                updateTaskRowVisualState(row, task, { includeOpenStatus: true });
+                toggle.addEventListener('click', function () {
+                    var nextStatus = task.status === 'done' ? 'open' : 'done';
+                    var updated = updateTaskInProject(group.projectId, task.id, { status: nextStatus });
+                    var fresh = (updated || []).find(function (item) { return item.id === task.id; }) || Object.assign({}, task, { status: nextStatus });
+                    task.status = fresh.status;
+                    task.completed_at = fresh.completed_at || null;
+                    updateTaskRowVisualState(row, fresh, { includeOpenStatus: true });
+                    if (group.projectId === activeProjectId) renderTasksSection();
+                });
                 list.appendChild(row);
             });
             if ((group.tasks || []).length > 6) {
@@ -654,6 +721,7 @@
     }
 
     function isDesktopSyncEnabled() {
+        if (_desktopSyncStatusCache && _desktopSyncStatusCache.enabled) return true;
         if (_desktopSyncBootstrapped) return true;
         try {
             return localStorage.getItem('mudrag_desktop_sync_enabled') === 'true';
@@ -667,6 +735,19 @@
         try {
             localStorage.setItem('mudrag_desktop_sync_enabled', enabled ? 'true' : 'false');
         } catch (e) {}
+    }
+
+    function getDesktopSyncStatus(projectId) {
+        if (!isDesktopSyncAvailable() || !window.mudragDesktop.desktopSyncStatus) {
+            return Promise.resolve({ ok: false, enabled: false, rootPath: '', projectPath: '' });
+        }
+        return window.mudragDesktop.desktopSyncStatus({ projectId: projectId || activeProjectId || '' }).then(function (status) {
+            _desktopSyncStatusCache = status || null;
+            rememberDesktopSyncEnabled(!!(status && status.enabled));
+            return status || { ok: false, enabled: false };
+        }).catch(function () {
+            return { ok: false, enabled: false, rootPath: '', projectPath: '' };
+        });
     }
 
     function arrayBufferToBase64(arrayBuffer) {
@@ -722,15 +803,19 @@
         });
     }
 
-    function setupDesktopSync() {
+    function setupDesktopSync(options) {
         if (!isDesktopSyncAvailable()) {
             return Promise.resolve({ ok: false, error: 'Desktop sync is only available in the openmud desktop app.' });
         }
         var projects = getProjects().map(function (project) {
             return { id: project.id, name: project.name };
         });
-        return window.mudragDesktop.desktopSyncSetup({ projects: projects }).then(function (result) {
-            if (result && result.ok) rememberDesktopSyncEnabled(true);
+        options = options || {};
+        return window.mudragDesktop.desktopSyncSetup({ projects: projects, rootPath: options.rootPath || '' }).then(function (result) {
+            if (result && result.ok) {
+                rememberDesktopSyncEnabled(true);
+                _desktopSyncStatusCache = result;
+            }
             return result;
         });
     }
@@ -744,7 +829,16 @@
             return buildDesktopSyncSnapshot(projectId).then(function (snapshot) {
                 if (!snapshot) return { ok: false, error: 'Project not found.' };
                 _desktopSyncIgnoreUntil[projectId] = Date.now() + 2500;
-                return window.mudragDesktop.desktopSyncProject(snapshot);
+                return window.mudragDesktop.desktopSyncProject(snapshot).then(function (result) {
+                    if (result && result.ok) {
+                        _desktopSyncStatusCache = Object.assign({}, _desktopSyncStatusCache || {}, result, {
+                            enabled: true,
+                            projectPath: result.projectPath || '',
+                            rootPath: result.rootPath || (_desktopSyncStatusCache && _desktopSyncStatusCache.rootPath) || ''
+                        });
+                    }
+                    return result;
+                });
             });
         });
     }
@@ -875,6 +969,66 @@
             card.appendChild(openBtn);
         }
         container.appendChild(card);
+    }
+
+    function isTasksSectionExpanded() {
+        var stored = getStoredBool(STORAGE_TASKS_SECTION_EXPANDED);
+        if (stored !== null) return stored;
+        return !!(activeProjectId && getTasksForProject(activeProjectId).length > 0);
+    }
+
+    function setTasksSectionExpanded(expanded) {
+        try {
+            localStorage.setItem(STORAGE_TASKS_SECTION_EXPANDED, expanded ? 'true' : 'false');
+        } catch (e) {}
+        renderTasksSection();
+    }
+
+    function renderDesktopSyncStatus() {
+        var statusWrap = document.getElementById('documents-sync-status');
+        var labelEl = document.getElementById('documents-sync-label');
+        var pathEl = document.getElementById('documents-sync-path');
+        var helpEl = document.getElementById('documents-sync-help');
+        if (!statusWrap || !labelEl || !pathEl || !helpEl) return;
+        if (!isDesktopSyncAvailable()) {
+            statusWrap.hidden = true;
+            return;
+        }
+        statusWrap.hidden = false;
+        var status = _desktopSyncStatusCache || {};
+        var enabled = !!status.enabled;
+        var rootPath = shortenHomePath(status.rootPath || '');
+        var projectPath = shortenHomePath(status.projectPath || '');
+        if (!activeProjectId) {
+            labelEl.textContent = 'Desktop sync is available in the desktop app.';
+            pathEl.textContent = rootPath ? ('Default sync folder: ' + rootPath) : 'Default sync folder: ~/Desktop/Openmud';
+            helpEl.textContent = 'When you sync a project, openmud mirrors its files into that folder and watches for local changes to pull back in.';
+            if (btnDesktopSyncOpen) btnDesktopSyncOpen.hidden = !enabled;
+            if (btnDesktopSyncChange) btnDesktopSyncChange.hidden = false;
+            return;
+        }
+        if (enabled) {
+            labelEl.textContent = projectPath
+                ? 'This project syncs to your Desktop folder.'
+                : 'Desktop sync is enabled for this app.';
+            pathEl.textContent = projectPath
+                ? ('Project folder: ' + projectPath)
+                : ('Root folder: ' + (rootPath || '~/Desktop/Openmud'));
+            helpEl.textContent = 'Add or edit files in that folder while the desktop app is open and openmud will sync them back into this project. Uploads in openmud also sync out automatically.';
+        } else {
+            labelEl.textContent = 'Desktop sync is not set up yet.';
+            pathEl.textContent = 'Default folder: ~/Desktop/Openmud';
+            helpEl.textContent = 'Click the sync button to create the folder, or choose a different folder first. Each project gets its own subfolder.';
+        }
+        if (btnDesktopSyncOpen) btnDesktopSyncOpen.hidden = !enabled;
+        if (btnDesktopSyncChange) btnDesktopSyncChange.hidden = false;
+    }
+
+    function refreshDesktopSyncStatus(projectId) {
+        return getDesktopSyncStatus(projectId || activeProjectId || '').then(function (status) {
+            renderDesktopSyncStatus();
+            return status;
+        });
     }
 
     function handleDesktopSyncAction(actionData) {
@@ -1301,6 +1455,9 @@
     var btnOpenFolder = document.getElementById('btn-open-folder');
     var btnNewTask = document.getElementById('btn-new-task');
     var btnDesktopSync = document.getElementById('btn-desktop-sync');
+    var btnDesktopSyncOpen = document.getElementById('btn-desktop-sync-open');
+    var btnDesktopSyncChange = document.getElementById('btn-desktop-sync-change');
+    var tasksHeader = document.getElementById('tasks-header');
     var modalNewProject = document.getElementById('modal-new-project');
     var formNewProject = document.getElementById('form-new-project');
     var inputProjectName = document.getElementById('input-project-name');
@@ -3733,18 +3890,20 @@
     }
 
     function buildTaskItemMeta(task) {
-        var bits = [formatTaskStatusLabel(task.status)];
-        if (task.priority && task.priority !== 'medium') bits.push(task.priority === 'high' ? 'High priority' : 'Low priority');
-        var dueLabel = formatTaskDueLabel(task.due_at);
-        if (dueLabel) bits.push('Due ' + dueLabel);
-        return bits.join(' • ');
+        return getTaskMetaText(task, { includeOpenStatus: false });
     }
 
     function renderTasksSection() {
         var listEl = document.getElementById('tasks-list');
         var hintEl = document.getElementById('tasks-hint');
         var btnNewTask = document.getElementById('btn-new-task');
-        if (!listEl || !hintEl) return;
+        var bodyEl = document.getElementById('tasks-body');
+        var headerEl = document.getElementById('tasks-header');
+        if (!listEl || !hintEl || !bodyEl || !headerEl) return;
+        var expanded = isTasksSectionExpanded();
+        bodyEl.hidden = !expanded;
+        headerEl.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        headerEl.classList.toggle('section-collapsed', !expanded);
         listEl.innerHTML = '';
         if (btnNewTask) btnNewTask.disabled = !activeProjectId;
         if (!activeProjectId) {
@@ -3794,10 +3953,13 @@
                 notes.textContent = task.notes;
                 body.appendChild(notes);
             }
-            var meta = document.createElement('div');
-            meta.className = 'task-item-meta';
-            meta.textContent = buildTaskItemMeta(task);
-            body.appendChild(meta);
+            var metaText = buildTaskItemMeta(task);
+            if (metaText) {
+                var meta = document.createElement('div');
+                meta.className = 'task-item-meta';
+                meta.textContent = metaText;
+                body.appendChild(meta);
+            }
             row.appendChild(body);
 
             var deleteBtn = document.createElement('button');
@@ -5923,6 +6085,7 @@
                 renderChats();
                 renderTasksSection();
                 renderDocuments();
+                refreshDesktopSyncStatus(id).catch(function () {});
                 if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
                     syncProjectFromDesktop(id).catch(function () {});
                 }
@@ -5935,6 +6098,7 @@
             renderMessages();
             renderTasksSection();
             renderDocuments();
+            refreshDesktopSyncStatus(id).catch(function () {});
             if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
                 syncProjectFromDesktop(id).catch(function () {});
             }
@@ -7941,13 +8105,28 @@
         });
     }
 
+    if (tasksHeader) {
+        function toggleTasksSection(event) {
+            if (event && event.target && event.target.closest && event.target.closest('#btn-new-task')) return;
+            setTasksSectionExpanded(!isTasksSectionExpanded());
+        }
+        tasksHeader.addEventListener('click', toggleTasksSection);
+        tasksHeader.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleTasksSection(event);
+            }
+        });
+    }
+
     if (btnDesktopSync && isDesktopSyncAvailable()) {
         btnDesktopSync.hidden = false;
         btnDesktopSync.addEventListener('click', function () {
             if (!activeProjectId) return;
             syncProjectToDesktop(activeProjectId).then(function (result) {
                 if (result && result.ok) {
-                    showToast('Synced "' + getTaskProjectLabel(activeProjectId) + '" to Desktop');
+                    refreshDesktopSyncStatus(activeProjectId);
+                    showToast('Synced "' + getTaskProjectLabel(activeProjectId) + '" to ' + shortenHomePath(result.projectPath || result.rootPath || '~/Desktop/Openmud'));
                 } else {
                     addMessage('assistant', 'Desktop sync error: ' + ((result && result.error) || 'Unknown error'));
                     renderMessages();
@@ -7956,6 +8135,37 @@
                 addMessage('assistant', 'Desktop sync error: ' + (err && err.message ? err.message : 'Unknown error'));
                 renderMessages();
             });
+        });
+    }
+
+    if (btnDesktopSyncOpen && isDesktopSyncAvailable()) {
+        btnDesktopSyncOpen.addEventListener('click', function () {
+            window.mudragDesktop.desktopSyncOpenRoot().then(function (result) {
+                if (result && result.rootPath) {
+                    _desktopSyncStatusCache = Object.assign({}, _desktopSyncStatusCache || {}, result, { enabled: true });
+                    renderDesktopSyncStatus();
+                }
+            }).catch(function () {});
+        });
+    }
+
+    if (btnDesktopSyncChange && isDesktopSyncAvailable() && window.mudragDesktop.desktopSyncChooseRoot) {
+        btnDesktopSyncChange.addEventListener('click', function () {
+            window.mudragDesktop.desktopSyncChooseRoot().then(function (result) {
+                if (!result || !result.ok) return;
+                return setupDesktopSync({ rootPath: result.rootPath }).then(function () {
+                    if (!activeProjectId) {
+                        refreshDesktopSyncStatus();
+                        showToast('Desktop sync folder set to ' + shortenHomePath(result.rootPath));
+                        return null;
+                    }
+                    return syncProjectToDesktop(activeProjectId).then(function (syncResult) {
+                        refreshDesktopSyncStatus(activeProjectId);
+                        showToast('Desktop sync folder set to ' + shortenHomePath(result.rootPath));
+                        return syncResult;
+                    });
+                });
+            }).catch(function () {});
         });
     }
 
@@ -9385,6 +9595,7 @@
         renderMessages();
         renderTasksSection();
         renderDocuments();
+        refreshDesktopSyncStatus(activeProjectId).catch(function () {});
         if (chatWindowParam && chatWindowProjectId) {
             document.body.classList.add('chat-window-mode');
             if (mainWrapper) {

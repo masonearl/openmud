@@ -1861,6 +1861,32 @@ body.sidebar-collapsed .sidebar-resize-handle {
     margin-bottom: 8px;
 }
 
+.tasks-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.tasks-header-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.section-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+    transition: transform 0.15s ease;
+}
+
+.tasks-header.section-collapsed .section-chevron {
+    transform: rotate(-90deg);
+}
+
 /* Chat composer drop zone */
 .chat-composer.chat-drop-active {
     outline: 2px dashed var(--accent);
@@ -2005,11 +2031,15 @@ body.sidebar-collapsed .sidebar-resize-handle {
     padding: 2px 0 8px;
 }
 
+.tasks-body[hidden] {
+    display: none;
+}
+
 .task-item {
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    padding: 6px 4px;
+    padding: 4px 4px;
     border-radius: 6px;
 }
 
@@ -2025,13 +2055,13 @@ body.sidebar-collapsed .sidebar-resize-handle {
 .task-item-toggle,
 .task-item-delete {
     flex-shrink: 0;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     margin-top: 1px;
     border-radius: 4px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-secondary);
+    border: 1px solid rgba(187, 152, 113, 0.32);
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.78);
     cursor: pointer;
     font-size: 0.72rem;
     line-height: 1;
@@ -2052,21 +2082,25 @@ body.sidebar-collapsed .sidebar-resize-handle {
 }
 
 .task-item-title {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--text);
-    line-height: 1.35;
+    line-height: 1.3;
 }
 
 .task-item-notes {
-    margin-top: 2px;
-    font-size: 0.7rem;
+    margin-top: 1px;
+    font-size: 0.68rem;
     color: var(--text-secondary);
-    line-height: 1.35;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .task-item-meta {
-    margin-top: 3px;
-    font-size: 0.66rem;
+    margin-top: 1px;
+    font-size: 0.64rem;
     color: var(--text-secondary);
 }
 
@@ -2280,6 +2314,45 @@ label.btn-upload {
     opacity: 0.8;
 }
 
+.documents-sync-status {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding: 8px 9px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+}
+
+.documents-sync-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.documents-sync-label {
+    font-size: 0.72rem;
+    color: var(--text);
+    line-height: 1.35;
+}
+
+.documents-sync-path,
+.documents-sync-help {
+    margin-top: 3px;
+    font-size: 0.66rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.documents-sync-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
 .msg-task-card {
     margin-top: 10px;
     border: 1px solid rgba(187, 152, 113, 0.22);
@@ -2323,13 +2396,45 @@ label.btn-upload {
 
 .msg-task-item {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 8px;
     font-size: 0.75rem;
 }
 
+.msg-task-item-toggle {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid rgba(187, 152, 113, 0.32);
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.82);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.msg-task-item-toggle:hover {
+    background: rgba(187, 152, 113, 0.12);
+    border-color: rgba(187, 152, 113, 0.5);
+}
+
+.msg-task-item-toggle.is-done {
+    background: rgba(187, 152, 113, 0.16);
+}
+
+.msg-task-item-done .msg-task-item-title {
+    text-decoration: line-through;
+    opacity: 0.72;
+}
+
 .msg-task-item-title {
+    flex: 1;
+    min-width: 0;
     color: var(--text);
 }
 
