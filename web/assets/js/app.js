@@ -38,10 +38,16 @@
     var STORAGE_PROVIDER_KEYS = 'mudrag_provider_keys_v1';
     var STORAGE_OC_TOKEN = 'openmud_oc_relay_token';
     var RELAY_STATUS_BASE = 'https://openmud-production.up.railway.app';
+    var TASKS_PROJECT_NAME = 'Tasks';
+    var DESKTOP_SYNC_FOLDER_NAME = 'Openmud';
     var TIER_LIMITS = { free: 5, personal: 100, pro: null, executive: null };
     var _authToken = null;
     var DEV_KEY = 'openmud';
     var _relayStatusTimer = null;
+    var _desktopSyncTimers = {};
+    var _desktopSyncRefreshTimers = {};
+    var _desktopSyncIgnoreUntil = {};
+    var _desktopSyncBootstrapped = false;
 
     function getAuthHeaders() {
         var h = { 'Content-Type': 'application/json' };
@@ -289,6 +295,633 @@
         if (!all[projectId]) return;
         delete all[projectId];
         localStorage.setItem(STORAGE_PROJECT_DATA, JSON.stringify(all));
+    }
+
+    function normalizeTaskText(value, fallback) {
+        var text = String(value == null ? '' : value).trim();
+        return text || (fallback || '');
+    }
+
+    function normalizeTaskStatus(status) {
+        var value = String(status || '').toLowerCase().trim();
+        if (value === 'done' || value === 'complete' || value === 'completed' || value === 'closed') return 'done';
+        if (value === 'in_progress' || value === 'in progress' || value === 'doing' || value === 'active') return 'in_progress';
+        return 'open';
+    }
+
+    function normalizeTaskPriority(priority) {
+        var value = String(priority || '').toLowerCase().trim();
+        if (value === 'high' || value === 'urgent') return 'high';
+        if (value === 'low') return 'low';
+        return 'medium';
+    }
+
+    function isValidTaskDate(value) {
+        if (!value) return false;
+        var str = String(value).trim();
+        return /^\d{4}-\d{2}-\d{2}/.test(str) || !isNaN(Date.parse(str));
+    }
+
+    function makeTaskId() {
+        return 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    }
+
+    function isTasksProjectRecord(project) {
+        return !!(project && String(project.name || '').trim().toLowerCase() === TASKS_PROJECT_NAME.toLowerCase());
+    }
+
+    function getTasksProjectRecord() {
+        var projects = getProjects();
+        return projects.find(function (project) { return isTasksProjectRecord(project); }) || null;
+    }
+
+    function ensureTasksProjectRecord(options) {
+        var existing = getTasksProjectRecord();
+        if (existing) return existing;
+        var projects = getProjects();
+        var project = {
+            id: id(),
+            name: TASKS_PROJECT_NAME,
+            createdAt: Date.now(),
+            system: 'tasks'
+        };
+        projects.unshift(project);
+        setProjects(projects);
+        if (options && options.switchToProject) switchProject(project.id);
+        return project;
+    }
+
+    function cloneTaskRecord(task) {
+        return task ? JSON.parse(JSON.stringify(task)) : null;
+    }
+
+    function toTaskRecord(projectId, task, current) {
+        var base = current ? cloneTaskRecord(current) : {};
+        var nowIso = new Date().toISOString();
+        var title = normalizeTaskText(task && (task.title || task.name || task.task), base.title || '');
+        return {
+            id: normalizeTaskText(task && task.id, base.id || makeTaskId()),
+            title: title || 'Untitled task',
+            notes: normalizeTaskText(task && (task.notes || task.description || task.detail), base.notes || ''),
+            status: normalizeTaskStatus(task && task.status != null ? task.status : base.status),
+            priority: normalizeTaskPriority(task && task.priority != null ? task.priority : base.priority),
+            due_at: isValidTaskDate(task && (task.due_at || task.dueAt || task.due_date)) ? String(task.due_at || task.dueAt || task.due_date) : (base.due_at || null),
+            created_at: base.created_at || nowIso,
+            updated_at: nowIso,
+            completed_at: normalizeTaskStatus(task && task.status != null ? task.status : base.status) === 'done'
+                ? (base.completed_at || nowIso)
+                : null,
+            project_id: projectId,
+            source: normalizeTaskText(task && task.source, base.source || 'chat')
+        };
+    }
+
+    function getTasksForProject(projectId) {
+        var data = getProjectData(projectId);
+        return Array.isArray(data.tasks) ? data.tasks.map(cloneTaskRecord).filter(Boolean) : [];
+    }
+
+    function setTasksForProject(projectId, tasks, meta) {
+        if (!projectId) return [];
+        var prev = getProjectData(projectId);
+        var normalized = (tasks || []).map(function (task) {
+            return toTaskRecord(projectId, task, task);
+        }).sort(function (a, b) {
+            var aDone = a.status === 'done' ? 1 : 0;
+            var bDone = b.status === 'done' ? 1 : 0;
+            if (aDone !== bDone) return aDone - bDone;
+            return (b.updated_at || '').localeCompare(a.updated_at || '');
+        });
+        var next = Object.assign({}, prev, {
+            tasks: normalized,
+            tasks_meta: Object.assign({}, prev.tasks_meta || {}, meta || {}, {
+                count: normalized.length,
+                updated_at: new Date().toISOString()
+            })
+        });
+        setProjectData(projectId, next);
+        return normalized;
+    }
+
+    function addTaskToProject(projectId, task) {
+        var current = getTasksForProject(projectId);
+        current.unshift(toTaskRecord(projectId, task || {}, null));
+        return setTasksForProject(projectId, current);
+    }
+
+    function updateTaskInProject(projectId, taskId, patch) {
+        if (!projectId || !taskId) return [];
+        var tasks = getTasksForProject(projectId);
+        var updated = false;
+        tasks = tasks.map(function (task) {
+            if (task.id !== taskId) return task;
+            updated = true;
+            return toTaskRecord(projectId, Object.assign({}, task, patch || {}), task);
+        });
+        if (!updated) return tasks;
+        return setTasksForProject(projectId, tasks);
+    }
+
+    function deleteTaskFromProject(projectId, taskId) {
+        if (!projectId || !taskId) return [];
+        var tasks = getTasksForProject(projectId).filter(function (task) { return task.id !== taskId; });
+        return setTasksForProject(projectId, tasks);
+    }
+
+    function getTaskProjectLabel(projectId) {
+        var project = getProjects().find(function (item) { return item.id === projectId; }) || null;
+        return project ? project.name : 'Project';
+    }
+
+    function getAllTasksSummary() {
+        return getProjects().map(function (project) {
+            return {
+                projectId: project.id,
+                projectName: project.name,
+                isGlobal: isTasksProjectRecord(project),
+                tasks: getTasksForProject(project.id)
+            };
+        }).filter(function (entry) {
+            return entry.tasks.length > 0;
+        });
+    }
+
+    function formatTaskDueLabel(value) {
+        if (!value) return '';
+        var date = new Date(value);
+        if (isNaN(date.getTime())) return '';
+        return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+
+    function formatTaskStatusLabel(status) {
+        if (status === 'done') return 'Done';
+        if (status === 'in_progress') return 'In progress';
+        return 'Open';
+    }
+
+    function consumeStructuredAction(namespace, payload) {
+        try {
+            var raw = sessionStorage.getItem('mudrag_structured_actions_v1');
+            var used = raw ? JSON.parse(raw) : {};
+            var key = namespace + ':' + JSON.stringify(payload || {});
+            if (used[key]) return false;
+            used[key] = Date.now();
+            sessionStorage.setItem('mudrag_structured_actions_v1', JSON.stringify(used));
+            return true;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function resolveTaskProjectRecord(actionData) {
+        var scope = String((actionData && actionData.scope) || '').toLowerCase();
+        var requestedProjectId = normalizeTaskText(actionData && actionData.project_id, '');
+        var requestedProjectName = normalizeTaskText(actionData && actionData.project_name, '');
+        var projects = getProjects();
+        if (requestedProjectId) {
+            var byId = projects.find(function (project) { return project.id === requestedProjectId; }) || null;
+            if (byId) return byId;
+        }
+        if (requestedProjectName) {
+            var byName = projects.find(function (project) {
+                return String(project.name || '').trim().toLowerCase() === requestedProjectName.toLowerCase();
+            }) || null;
+            if (byName) return byName;
+        }
+        if (scope === 'global' || scope === 'tasks') return ensureTasksProjectRecord();
+        if (scope === 'current' && activeProjectId) {
+            return projects.find(function (project) { return project.id === activeProjectId; }) || null;
+        }
+        if (activeProjectId) {
+            return projects.find(function (project) { return project.id === activeProjectId; }) || null;
+        }
+        return projects[0] || ensureTasksProjectRecord();
+    }
+
+    function findTaskRecord(taskQuery) {
+        var normalizedId = normalizeTaskText(taskQuery && taskQuery.id, '');
+        var normalizedTitle = normalizeTaskText(taskQuery && taskQuery.title, '').toLowerCase();
+        var groups = getAllTasksSummary();
+        for (var i = 0; i < groups.length; i++) {
+            var tasks = groups[i].tasks || [];
+            for (var j = 0; j < tasks.length; j++) {
+                var task = tasks[j];
+                if (normalizedId && task.id === normalizedId) {
+                    return { projectId: groups[i].projectId, projectName: groups[i].projectName, task: task };
+                }
+                if (normalizedTitle && String(task.title || '').trim().toLowerCase() === normalizedTitle) {
+                    return { projectId: groups[i].projectId, projectName: groups[i].projectName, task: task };
+                }
+            }
+        }
+        return null;
+    }
+
+    function buildTaskGroupsForScope(actionData) {
+        var scope = String((actionData && actionData.scope) || '').toLowerCase();
+        if (scope === 'all') return getAllTasksSummary();
+        var project = resolveTaskProjectRecord(actionData);
+        if (!project) return [];
+        return [{
+            projectId: project.id,
+            projectName: project.name,
+            isGlobal: isTasksProjectRecord(project),
+            tasks: getTasksForProject(project.id)
+        }];
+    }
+
+    function applyTaskActionBlock(actionData) {
+        var action = String((actionData && actionData.action) || 'list').toLowerCase();
+        var taskInput = actionData && (actionData.task || actionData.payload || {});
+        var match = null;
+        if (action === 'add') {
+            var targetProject = resolveTaskProjectRecord(actionData);
+            if (!targetProject) return { ok: false, message: 'No project available for that task yet.', groups: [] };
+            var nextTasks = addTaskToProject(targetProject.id, taskInput || {});
+            return {
+                ok: true,
+                changed: true,
+                message: 'Added task to ' + targetProject.name + '.',
+                groups: [{
+                    projectId: targetProject.id,
+                    projectName: targetProject.name,
+                    isGlobal: isTasksProjectRecord(targetProject),
+                    tasks: nextTasks
+                }]
+            };
+        }
+        if (action === 'update' || action === 'complete' || action === 'done') {
+            match = findTaskRecord(taskInput || {});
+            if (!match) return { ok: false, message: 'I could not find that task.', groups: getAllTasksSummary() };
+            var patch = Object.assign({}, taskInput || {});
+            if (action === 'complete' || action === 'done') patch.status = 'done';
+            var updatedTasks = updateTaskInProject(match.projectId, match.task.id, patch);
+            return {
+                ok: true,
+                changed: true,
+                message: 'Updated task in ' + match.projectName + '.',
+                groups: [{
+                    projectId: match.projectId,
+                    projectName: match.projectName,
+                    tasks: updatedTasks
+                }]
+            };
+        }
+        if (action === 'delete' || action === 'remove') {
+            match = findTaskRecord(taskInput || {});
+            if (!match) return { ok: false, message: 'I could not find that task to delete.', groups: getAllTasksSummary() };
+            var remainingTasks = deleteTaskFromProject(match.projectId, match.task.id);
+            return {
+                ok: true,
+                changed: true,
+                message: 'Deleted task from ' + match.projectName + '.',
+                groups: [{
+                    projectId: match.projectId,
+                    projectName: match.projectName,
+                    tasks: remainingTasks
+                }]
+            };
+        }
+        return {
+            ok: true,
+            changed: false,
+            message: normalizeTaskText(actionData && actionData.message, 'Task list'),
+            groups: buildTaskGroupsForScope(actionData)
+        };
+    }
+
+    function appendTaskResultCard(container, taskResult) {
+        if (!container || !taskResult) return;
+        var card = document.createElement('div');
+        card.className = 'msg-task-card';
+        var header = document.createElement('div');
+        header.className = 'msg-task-card-head';
+        var title = document.createElement('strong');
+        title.textContent = taskResult.message || 'Tasks';
+        header.appendChild(title);
+        card.appendChild(header);
+
+        var groups = Array.isArray(taskResult.groups) ? taskResult.groups : [];
+        if (!groups.length) {
+            var empty = document.createElement('p');
+            empty.className = 'msg-task-card-empty';
+            empty.textContent = 'No tasks yet.';
+            card.appendChild(empty);
+            container.appendChild(card);
+            return;
+        }
+
+        groups.forEach(function (group) {
+            var groupWrap = document.createElement('div');
+            groupWrap.className = 'msg-task-group';
+            var groupLabel = document.createElement('div');
+            groupLabel.className = 'msg-task-group-label';
+            groupLabel.textContent = group.projectName || 'Project';
+            groupWrap.appendChild(groupLabel);
+            var list = document.createElement('div');
+            list.className = 'msg-task-items';
+            (group.tasks || []).slice(0, 6).forEach(function (task) {
+                var row = document.createElement('div');
+                row.className = 'msg-task-item';
+                var name = document.createElement('span');
+                name.className = 'msg-task-item-title';
+                name.textContent = task.title || 'Untitled task';
+                row.appendChild(name);
+                var meta = [];
+                meta.push(formatTaskStatusLabel(task.status));
+                var due = formatTaskDueLabel(task.due_at);
+                if (due) meta.push('Due ' + due);
+                var metaEl = document.createElement('span');
+                metaEl.className = 'msg-task-item-meta';
+                metaEl.textContent = meta.join(' • ');
+                row.appendChild(metaEl);
+                list.appendChild(row);
+            });
+            if ((group.tasks || []).length > 6) {
+                var more = document.createElement('div');
+                more.className = 'msg-task-card-more';
+                more.textContent = '+' + ((group.tasks || []).length - 6) + ' more';
+                list.appendChild(more);
+            }
+            groupWrap.appendChild(list);
+            card.appendChild(groupWrap);
+        });
+        container.appendChild(card);
+    }
+
+    function isDesktopSyncAvailable() {
+        return !!(window.mudragDesktop && window.mudragDesktop.desktopSyncSetup && window.mudragDesktop.desktopSyncProject && window.mudragDesktop.desktopSyncListFiles);
+    }
+
+    function isDesktopSyncEnabled() {
+        if (_desktopSyncBootstrapped) return true;
+        try {
+            return localStorage.getItem('mudrag_desktop_sync_enabled') === 'true';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function rememberDesktopSyncEnabled(enabled) {
+        _desktopSyncBootstrapped = !!enabled;
+        try {
+            localStorage.setItem('mudrag_desktop_sync_enabled', enabled ? 'true' : 'false');
+        } catch (e) {}
+    }
+
+    function arrayBufferToBase64(arrayBuffer) {
+        var bytes = new Uint8Array(arrayBuffer || new ArrayBuffer(0));
+        var chunkSize = 0x8000;
+        var binary = '';
+        for (var i = 0; i < bytes.length; i += chunkSize) {
+            binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+        }
+        return btoa(binary);
+    }
+
+    function normalizeRelativePath(pathValue) {
+        return String(pathValue || '').replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+    }
+
+    function buildDocumentRelativePath(doc, folderLookup) {
+        var folderName = doc && doc.folderId ? folderLookup[doc.folderId] : '';
+        return normalizeRelativePath(folderName ? (folderName + '/' + (doc.name || '')) : (doc && doc.name) || '');
+    }
+
+    function buildDesktopSyncSnapshot(projectId) {
+        var project = getProjects().find(function (item) { return item.id === projectId; }) || null;
+        if (!project) return Promise.resolve(null);
+        return Promise.all([getFolders(projectId), getDocuments(projectId)]).then(function (results) {
+            var folders = results[0] || [];
+            var docs = results[1] || [];
+            var folderLookup = {};
+            folders.forEach(function (folder) {
+                folderLookup[folder.id] = folder.name || 'Folder';
+            });
+            return {
+                projectId: project.id,
+                projectName: project.name,
+                folders: folders.map(function (folder) {
+                    return {
+                        id: folder.id,
+                        name: folder.name,
+                        relativePath: normalizeRelativePath(folder.name)
+                    };
+                }),
+                files: docs.map(function (doc) {
+                    return {
+                        id: doc.id,
+                        name: doc.name,
+                        relativePath: buildDocumentRelativePath(doc, folderLookup),
+                        base64: arrayBufferToBase64(doc.data),
+                        mime: doc.type || 'application/octet-stream',
+                        size: doc.size || 0
+                    };
+                })
+            };
+        });
+    }
+
+    function setupDesktopSync() {
+        if (!isDesktopSyncAvailable()) {
+            return Promise.resolve({ ok: false, error: 'Desktop sync is only available in the openmud desktop app.' });
+        }
+        var projects = getProjects().map(function (project) {
+            return { id: project.id, name: project.name };
+        });
+        return window.mudragDesktop.desktopSyncSetup({ projects: projects }).then(function (result) {
+            if (result && result.ok) rememberDesktopSyncEnabled(true);
+            return result;
+        });
+    }
+
+    function syncProjectToDesktop(projectId) {
+        if (!projectId || !isDesktopSyncAvailable()) {
+            return Promise.resolve({ ok: false, error: 'Desktop sync is not available.' });
+        }
+        return setupDesktopSync().then(function (setupResult) {
+            if (!setupResult || !setupResult.ok) return setupResult;
+            return buildDesktopSyncSnapshot(projectId).then(function (snapshot) {
+                if (!snapshot) return { ok: false, error: 'Project not found.' };
+                _desktopSyncIgnoreUntil[projectId] = Date.now() + 2500;
+                return window.mudragDesktop.desktopSyncProject(snapshot);
+            });
+        });
+    }
+
+    function syncAllProjectsToDesktop() {
+        var projects = getProjects().slice();
+        return setupDesktopSync().then(function (setupResult) {
+            if (!setupResult || !setupResult.ok) return setupResult;
+            return projects.reduce(function (promise, project) {
+                return promise.then(function (acc) {
+                    return syncProjectToDesktop(project.id).then(function (result) {
+                        acc.results.push({ projectId: project.id, result: result });
+                        return acc;
+                    });
+                });
+            }, Promise.resolve({ ok: true, results: [] }));
+        });
+    }
+
+    function scheduleDesktopProjectSync(projectId) {
+        if (!projectId || !isDesktopSyncAvailable() || !isDesktopSyncEnabled()) return;
+        clearTimeout(_desktopSyncTimers[projectId]);
+        _desktopSyncTimers[projectId] = setTimeout(function () {
+            syncProjectToDesktop(projectId).catch(function () {});
+        }, 900);
+    }
+
+    function arrayBuffersEqual(a, b) {
+        if (a === b) return true;
+        if (!(a instanceof ArrayBuffer) || !(b instanceof ArrayBuffer)) return false;
+        if (a.byteLength !== b.byteLength) return false;
+        var aView = new Uint8Array(a);
+        var bView = new Uint8Array(b);
+        for (var i = 0; i < aView.length; i++) {
+            if (aView[i] !== bView[i]) return false;
+        }
+        return true;
+    }
+
+    function syncProjectFromDesktop(projectId) {
+        if (!projectId || !isDesktopSyncAvailable() || !isDesktopSyncEnabled()) return Promise.resolve({ ok: false, skipped: true });
+        _desktopSyncIgnoreUntil[projectId] = Date.now() + 2500;
+        return Promise.all([getFolders(projectId), getDocuments(projectId), window.mudragDesktop.desktopSyncListFiles({ projectId: projectId })]).then(function (results) {
+            var folders = results[0] || [];
+            var docs = results[1] || [];
+            var listing = results[2] || {};
+            if (!listing.ok) return listing;
+            var folderLookup = {};
+            folders.forEach(function (folder) { folderLookup[folder.id] = folder.name || 'Folder'; });
+            var currentByPath = {};
+            docs.forEach(function (doc) {
+                currentByPath[buildDocumentRelativePath(doc, folderLookup)] = doc;
+            });
+            var desktopFiles = Array.isArray(listing.files) ? listing.files : [];
+            var desktopPaths = {};
+            var work = Promise.resolve();
+            desktopFiles.forEach(function (fileInfo) {
+                work = work.then(function () {
+                    var relPath = normalizeRelativePath(fileInfo.relativePath);
+                    desktopPaths[relPath] = true;
+                    return window.mudragDesktop.readLocalFile(fileInfo.path).then(function (imported) {
+                        if (!imported || !imported.ok || !imported.base64) return;
+                        var data = base64ToArrayBuffer(imported.base64);
+                        var existing = currentByPath[relPath];
+                        if (existing) {
+                            if (existing.name !== imported.name) {
+                                return renameDocument(existing.id, imported.name).then(function () {
+                                    return arrayBuffersEqual(existing.data, data) ? null : updateDocumentContent(existing.id, data);
+                                });
+                            }
+                            if (!arrayBuffersEqual(existing.data, data)) {
+                                return updateDocumentContent(existing.id, data);
+                            }
+                            return null;
+                        }
+                        var parts = relPath.split('/').filter(Boolean);
+                        var fileName = parts.pop() || imported.name || 'Imported file';
+                        var folderName = parts.length ? parts.join(' / ') : '';
+                        var targetPromise = folderName ? getOrCreateFolder(projectId, folderName) : Promise.resolve(null);
+                        return targetPromise.then(function (folderId) {
+                            var file = new File([data], fileName, { type: imported.mime || 'application/octet-stream' });
+                            return saveDocument(projectId, file, folderId, {
+                                source: 'desktop-sync',
+                                source_meta: { relative_path: relPath }
+                            });
+                        });
+                    });
+                });
+            });
+            return work.then(function () {
+                var deletions = docs.filter(function (doc) {
+                    return !desktopPaths[buildDocumentRelativePath(doc, folderLookup)];
+                }).map(function (doc) {
+                    return deleteDocument(doc.id);
+                });
+                return Promise.all(deletions).then(function () {
+                    renderDocuments();
+                    renderTasksSection();
+                    if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
+                    return { ok: true, imported: desktopFiles.length, deleted: deletions.length };
+                });
+            });
+        });
+    }
+
+    function appendDesktopSyncCard(container, result) {
+        if (!container || !result) return;
+        var card = document.createElement('div');
+        card.className = 'msg-task-card';
+        var head = document.createElement('div');
+        head.className = 'msg-task-card-head';
+        var title = document.createElement('strong');
+        title.textContent = result.ok ? 'Desktop sync ready' : 'Desktop sync issue';
+        head.appendChild(title);
+        card.appendChild(head);
+        var body = document.createElement('p');
+        body.className = 'msg-task-card-empty';
+        body.textContent = result.message || result.error || 'Desktop sync status updated.';
+        card.appendChild(body);
+        if (result.rootPath && isDesktopSyncAvailable() && window.mudragDesktop.desktopSyncOpenRoot) {
+            var openBtn = document.createElement('button');
+            openBtn.type = 'button';
+            openBtn.className = 'btn-secondary btn-sm';
+            openBtn.textContent = 'Open Desktop folder';
+            openBtn.addEventListener('click', function () {
+                window.mudragDesktop.desktopSyncOpenRoot();
+            });
+            card.appendChild(openBtn);
+        }
+        container.appendChild(card);
+    }
+
+    function handleDesktopSyncAction(actionData) {
+        if (!actionData) return Promise.resolve({ ok: false, error: 'Desktop sync command missing.' });
+        if (!isDesktopSyncAvailable()) {
+            return Promise.resolve({ ok: false, error: 'Desktop sync is only available in the openmud desktop app.' });
+        }
+        var action = String(actionData.action || '').toLowerCase();
+        if (action === 'status') {
+            return Promise.resolve({
+                ok: isDesktopSyncEnabled(),
+                message: isDesktopSyncEnabled()
+                    ? 'Desktop sync is enabled. Changes in the Openmud Desktop folder will sync back into your projects while the desktop app is open.'
+                    : 'Desktop sync is not set up yet. Ask openmud to sync your projects to Desktop or click the sync button in Documents.',
+                rootPath: isDesktopSyncEnabled() ? DESKTOP_SYNC_FOLDER_NAME : ''
+            });
+        }
+        if (action === 'sync_all') {
+            return syncAllProjectsToDesktop().then(function () {
+                return {
+                    ok: true,
+                    message: 'Synced all projects to the Openmud folder on your Desktop.',
+                    rootPath: DESKTOP_SYNC_FOLDER_NAME
+                };
+            });
+        }
+        if (action === 'sync_project') {
+            return syncProjectToDesktop(activeProjectId).then(function (result) {
+                return {
+                    ok: !!(result && result.ok),
+                    message: result && result.ok
+                        ? 'Synced "' + getTaskProjectLabel(activeProjectId) + '" to the Openmud folder on your Desktop.'
+                        : ((result && result.error) || 'Could not sync this project.'),
+                    rootPath: result && result.rootPath
+                };
+            });
+        }
+        return setupDesktopSync().then(function (setupResult) {
+            if (!setupResult || !setupResult.ok) return setupResult;
+            return syncAllProjectsToDesktop().then(function () {
+                return {
+                    ok: true,
+                    message: 'Created the Openmud folder on your Desktop and synced your projects into it.',
+                    rootPath: setupResult.rootPath
+                };
+            });
+        });
     }
 
     function toCanonicalBidItems(items) {
@@ -666,6 +1299,8 @@
     var projectsList = document.getElementById('projects-list');
     var btnNewProject = document.getElementById('btn-new-project');
     var btnOpenFolder = document.getElementById('btn-open-folder');
+    var btnNewTask = document.getElementById('btn-new-task');
+    var btnDesktopSync = document.getElementById('btn-desktop-sync');
     var modalNewProject = document.getElementById('modal-new-project');
     var formNewProject = document.getElementById('form-new-project');
     var inputProjectName = document.getElementById('input-project-name');
@@ -1130,6 +1765,8 @@
         var text = (content || '').trim();
         var scheduleMatch = text.match(/\[MUDRAG_SCHEDULE\]([\s\S]*?)\[\/MUDRAG_SCHEDULE\]/);
         var proposalMatch = text.match(/\[MUDRAG_PROPOSAL\]([\s\S]*?)\[\/MUDRAG_PROPOSAL\]/);
+        var tasksMatch = text.match(/\[MUDRAG_TASKS\]([\s\S]*?)\[\/MUDRAG_TASKS\]/);
+        var desktopSyncMatch = text.match(/\[MUDRAG_DESKTOP_SYNC\]([\s\S]*?)\[\/MUDRAG_DESKTOP_SYNC\]/);
         var resumeMatch = text.match(/\[MUDRAG_RESUME\]([\s\S]*?)\[\/MUDRAG_RESUME\]/);
         var createProjectMatch = text.match(/\[MUDRAG_CREATE_PROJECT\]([\s\S]*?)\[\/MUDRAG_CREATE_PROJECT\]/);
         var chooseEmailMatch = text.match(/\[MUDRAG_CHOOSE_EMAIL_ACCOUNT\]([\s\S]*?)\[\/MUDRAG_CHOOSE_EMAIL_ACCOUNT\]/);
@@ -1465,9 +2102,34 @@
         var bidDocData = null;
         var actionsData = null;
         var citationsData = null;
+        var taskResultData = null;
+        var desktopSyncData = null;
         if (actionsMatch) {
             displayText = displayText.replace(/\[MUDRAG_ACTIONS\][\s\S]*?\[\/MUDRAG_ACTIONS\]/, '').trim();
             try { actionsData = JSON.parse(actionsMatch[1].trim()); } catch (e) { /* ignore */ }
+        }
+        if (tasksMatch) {
+            displayText = displayText.replace(/\[MUDRAG_TASKS\][\s\S]*?\[\/MUDRAG_TASKS\]/, '').trim();
+            try {
+                var parsedTaskAction = JSON.parse(tasksMatch[1].trim());
+                var shouldApplyTaskAction = !parsedTaskAction
+                    || !parsedTaskAction.action
+                    || String(parsedTaskAction.action).toLowerCase() === 'list'
+                    || consumeStructuredAction('task', parsedTaskAction);
+                taskResultData = shouldApplyTaskAction ? applyTaskActionBlock(parsedTaskAction) : {
+                    ok: true,
+                    changed: false,
+                    message: normalizeTaskText(parsedTaskAction.message, 'Task list'),
+                    groups: buildTaskGroupsForScope(parsedTaskAction)
+                };
+                if (taskResultData && taskResultData.changed) renderTasksSection();
+            } catch (e) { /* ignore */ }
+        }
+        if (desktopSyncMatch) {
+            displayText = displayText.replace(/\[MUDRAG_DESKTOP_SYNC\][\s\S]*?\[\/MUDRAG_DESKTOP_SYNC\]/, '').trim();
+            try {
+                desktopSyncData = JSON.parse(desktopSyncMatch[1].trim());
+            } catch (e) { /* ignore */ }
         }
         if (citationsMatch) {
             displayText = displayText.replace(/\[MUDRAG_CITATIONS\][\s\S]*?\[\/MUDRAG_CITATIONS\]/, '').trim();
@@ -1560,6 +2222,20 @@
             var p = document.createElement('p');
             p.textContent = displayText;
             wrap.appendChild(p);
+        }
+        if (taskResultData) {
+            appendTaskResultCard(wrap, taskResultData);
+        }
+        if (desktopSyncData && wrap) {
+            var shouldRunDesktopSyncAction = String(desktopSyncData.action || '').toLowerCase() === 'status'
+                || consumeStructuredAction('desktop-sync', desktopSyncData);
+            if (shouldRunDesktopSyncAction) {
+                handleDesktopSyncAction(desktopSyncData).then(function (result) {
+                    appendDesktopSyncCard(wrap, result);
+                }).catch(function (err) {
+                    appendDesktopSyncCard(wrap, { ok: false, error: err && err.message ? err.message : 'Desktop sync failed.' });
+                });
+            }
         }
         if (citationsData && citationsData.sources && Array.isArray(citationsData.sources) && citationsData.sources.length > 0) {
             var sourcesWrap = document.createElement('div');
@@ -2956,6 +3632,9 @@
         if (isToolServerOrigin && API_BASE) {
             fetch(API_BASE + '/storage/projects/' + encodeURIComponent(projectId), { method: 'DELETE' }).catch(function () {});
         }
+        if (isDesktopSyncAvailable() && isDesktopSyncEnabled() && window.mudragDesktop.desktopSyncRemoveProject) {
+            window.mudragDesktop.desktopSyncRemoveProject(projectId).catch(function () {});
+        }
         // If deleted project was active, switch to another
         if (activeProjectId === projectId) {
             var remaining = getProjects();
@@ -2965,6 +3644,7 @@
                 activeProjectId = null;
                 try { localStorage.removeItem(STORAGE_ACTIVE); } catch (_) {}
                 renderChats();
+                renderTasksSection();
             }
         }
         renderProjects();
@@ -3049,6 +3729,88 @@
                 }(activeProjectId, cid));
             }
             chatsList.appendChild(btn);
+        });
+    }
+
+    function buildTaskItemMeta(task) {
+        var bits = [formatTaskStatusLabel(task.status)];
+        if (task.priority && task.priority !== 'medium') bits.push(task.priority === 'high' ? 'High priority' : 'Low priority');
+        var dueLabel = formatTaskDueLabel(task.due_at);
+        if (dueLabel) bits.push('Due ' + dueLabel);
+        return bits.join(' • ');
+    }
+
+    function renderTasksSection() {
+        var listEl = document.getElementById('tasks-list');
+        var hintEl = document.getElementById('tasks-hint');
+        var btnNewTask = document.getElementById('btn-new-task');
+        if (!listEl || !hintEl) return;
+        listEl.innerHTML = '';
+        if (btnNewTask) btnNewTask.disabled = !activeProjectId;
+        if (!activeProjectId) {
+            hintEl.hidden = false;
+            hintEl.textContent = 'Select a project to track tasks.';
+            return;
+        }
+
+        var tasks = getTasksForProject(activeProjectId);
+        if (!tasks.length) {
+            hintEl.hidden = false;
+            var globalProject = getTasksProjectRecord();
+            var globalCount = globalProject && globalProject.id !== activeProjectId ? getTasksForProject(globalProject.id).length : 0;
+            hintEl.textContent = globalCount > 0
+                ? 'No tasks in this project. "' + TASKS_PROJECT_NAME + '" has ' + globalCount + ' task' + (globalCount === 1 ? '' : 's') + '.'
+                : 'No tasks yet. Add one from chat or use +.';
+            return;
+        }
+
+        hintEl.hidden = true;
+        tasks.forEach(function (task) {
+            var row = document.createElement('div');
+            row.className = 'task-item' + (task.status === 'done' ? ' task-item-done' : '');
+
+            var toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'task-item-toggle';
+            toggle.setAttribute('aria-label', task.status === 'done' ? 'Mark task open' : 'Mark task done');
+            toggle.textContent = task.status === 'done' ? '✓' : '';
+            toggle.addEventListener('click', function () {
+                updateTaskInProject(activeProjectId, task.id, {
+                    status: task.status === 'done' ? 'open' : 'done'
+                });
+                renderTasksSection();
+            });
+            row.appendChild(toggle);
+
+            var body = document.createElement('div');
+            body.className = 'task-item-body';
+            var title = document.createElement('div');
+            title.className = 'task-item-title';
+            title.textContent = task.title || 'Untitled task';
+            body.appendChild(title);
+            if (task.notes) {
+                var notes = document.createElement('div');
+                notes.className = 'task-item-notes';
+                notes.textContent = task.notes;
+                body.appendChild(notes);
+            }
+            var meta = document.createElement('div');
+            meta.className = 'task-item-meta';
+            meta.textContent = buildTaskItemMeta(task);
+            body.appendChild(meta);
+            row.appendChild(body);
+
+            var deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'task-item-delete';
+            deleteBtn.setAttribute('aria-label', 'Delete task');
+            deleteBtn.textContent = '×';
+            deleteBtn.addEventListener('click', function () {
+                deleteTaskFromProject(activeProjectId, task.id);
+                renderTasksSection();
+            });
+            row.appendChild(deleteBtn);
+            listEl.appendChild(row);
         });
     }
 
@@ -3305,6 +4067,7 @@
                     tx.objectStore(DOC_STORE).add(doc);
                     tx.oncomplete = function () {
                         indexDocumentForProjectRag(projectId, doc, meta || {});
+                        scheduleDesktopProjectSync(projectId);
                         resolve(doc.id);
                     };
                     tx.onerror = function () { reject(tx.error); };
@@ -3326,7 +4089,10 @@
                 };
                 var tx = db.transaction(FOLDERS_STORE, 'readwrite');
                 tx.objectStore(FOLDERS_STORE).add(folder);
-                tx.oncomplete = function () { resolve(folder.id); };
+                tx.oncomplete = function () {
+                    scheduleDesktopProjectSync(projectId);
+                    resolve(folder.id);
+                };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
@@ -3359,14 +4125,19 @@
         return openDB().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(FOLDERS_STORE, 'readwrite');
+                var folderProjectId = null;
                 var req = tx.objectStore(FOLDERS_STORE).get(folderId);
                 req.onsuccess = function () {
                     var folder = req.result;
                     if (!folder) { resolve(); return; }
+                    folderProjectId = folder.projectId || null;
                     folder.name = trimmed;
                     tx.objectStore(FOLDERS_STORE).put(folder);
                 };
-                tx.oncomplete = function () { resolve(); };
+                tx.oncomplete = function () {
+                    scheduleDesktopProjectSync(folderProjectId || activeProjectId);
+                    resolve();
+                };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
@@ -3378,14 +4149,19 @@
         return openDB().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(DOC_STORE, 'readwrite');
+                var docProjectId = null;
                 var req = tx.objectStore(DOC_STORE).get(docId);
                 req.onsuccess = function () {
                     var doc = req.result;
                     if (!doc) { resolve(); return; }
+                    docProjectId = doc.projectId || null;
                     doc.name = trimmed;
                     tx.objectStore(DOC_STORE).put(doc);
                 };
-                tx.oncomplete = function () { resolve(); };
+                tx.oncomplete = function () {
+                    scheduleDesktopProjectSync(docProjectId || activeProjectId);
+                    resolve();
+                };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
@@ -3406,7 +4182,10 @@
                         tx.objectStore(DOC_STORE).put(d2);
                     });
                 };
-                tx.oncomplete = function () { resolve(); };
+                tx.oncomplete = function () {
+                    scheduleDesktopProjectSync(activeProjectId);
+                    resolve();
+                };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
@@ -3417,13 +4196,18 @@
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(DOC_STORE, 'readwrite');
                 var req = tx.objectStore(DOC_STORE).get(docId);
+                var docProjectId = null;
                 req.onsuccess = function () {
                     var doc = req.result;
                     if (!doc) { resolve(); return; }
+                    docProjectId = doc.projectId || null;
                     doc.folderId = folderId || null;
                     tx.objectStore(DOC_STORE).put(doc);
                 };
-                tx.oncomplete = function () { resolve(); };
+                tx.oncomplete = function () {
+                    scheduleDesktopProjectSync(docProjectId || activeProjectId);
+                    resolve();
+                };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
@@ -3447,8 +4231,18 @@
         return openDB().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(DOC_STORE, 'readwrite');
-                tx.objectStore(DOC_STORE).delete(docId);
-                tx.oncomplete = function () { resolve(); };
+                var docProjectId = null;
+                var store = tx.objectStore(DOC_STORE);
+                var getReq = store.get(docId);
+                getReq.onsuccess = function () {
+                    var doc = getReq.result;
+                    docProjectId = doc && doc.projectId ? doc.projectId : null;
+                    store.delete(docId);
+                };
+                tx.oncomplete = function () {
+                    scheduleDesktopProjectSync(docProjectId || activeProjectId);
+                    resolve();
+                };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
@@ -3476,6 +4270,7 @@
                             source: updatedDoc.source || 'project-upload',
                             source_meta: updatedDoc.source_meta || {}
                         });
+                        scheduleDesktopProjectSync(updatedDoc.projectId);
                     }
                     resolve();
                 };
@@ -3595,13 +4390,18 @@
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(DOC_STORE, 'readwrite');
                 var req = tx.objectStore(DOC_STORE).get(docId);
+                var docProjectId = null;
                 req.onsuccess = function () {
                     var doc = req.result;
                     if (!doc) { resolve(); return; }
+                    docProjectId = doc.projectId || null;
                     doc.folderId = folderId;
                     tx.objectStore(DOC_STORE).put(doc);
                 };
-                tx.oncomplete = function () { resolve(); };
+                tx.oncomplete = function () {
+                    scheduleDesktopProjectSync(docProjectId || activeProjectId);
+                    resolve();
+                };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
@@ -5121,7 +5921,11 @@
                 }
                 renderMessages();
                 renderChats();
+                renderTasksSection();
                 renderDocuments();
+                if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
+                    syncProjectFromDesktop(id).catch(function () {});
+                }
                 var pmPane = document.getElementById('pm-ops-pane');
                 if (pmPane && typeof pmPane._mudragPmRefresh === 'function') pmPane._mudragPmRefresh();
                 updateDesktopTitle();
@@ -5129,7 +5933,11 @@
             });
         } else {
             renderMessages();
+            renderTasksSection();
             renderDocuments();
+            if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
+                syncProjectFromDesktop(id).catch(function () {});
+            }
             var pmPane2 = document.getElementById('pm-ops-pane');
             if (pmPane2 && typeof pmPane2._mudragPmRefresh === 'function') pmPane2._mudragPmRefresh();
             updateDesktopTitle();
@@ -5144,6 +5952,9 @@
         setProjects(projects);
         createNewChat(p.id);
         switchProject(p.id);
+        if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
+            syncProjectToDesktop(p.id).catch(function () {});
+        }
         modalNewProject.hidden = true;
         inputProjectName.value = '';
         if (getAuthHeaders().Authorization) {
@@ -5165,6 +5976,9 @@
         setProjects(projects);
         renderProjects();
         updateDesktopTitle();
+        if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
+            syncProjectToDesktop(projectId).catch(function () {});
+        }
     }
 
     var _renamingProject = false;
@@ -7111,6 +7925,40 @@
         if (name) createProject(name);
     });
 
+    if (btnNewTask) {
+        btnNewTask.addEventListener('click', function () {
+            if (!activeProjectId) return;
+            var title = prompt('Task title:');
+            if (!title) return;
+            var dueAt = prompt('Due date (optional, YYYY-MM-DD):', '');
+            addTaskToProject(activeProjectId, {
+                title: title,
+                due_at: isValidTaskDate(dueAt) ? dueAt : null,
+                source: 'manual'
+            });
+            renderTasksSection();
+            showToast('Task added to ' + getTaskProjectLabel(activeProjectId));
+        });
+    }
+
+    if (btnDesktopSync && isDesktopSyncAvailable()) {
+        btnDesktopSync.hidden = false;
+        btnDesktopSync.addEventListener('click', function () {
+            if (!activeProjectId) return;
+            syncProjectToDesktop(activeProjectId).then(function (result) {
+                if (result && result.ok) {
+                    showToast('Synced "' + getTaskProjectLabel(activeProjectId) + '" to Desktop');
+                } else {
+                    addMessage('assistant', 'Desktop sync error: ' + ((result && result.error) || 'Unknown error'));
+                    renderMessages();
+                }
+            }).catch(function (err) {
+                addMessage('assistant', 'Desktop sync error: ' + (err && err.message ? err.message : 'Unknown error'));
+                renderMessages();
+            });
+        });
+    }
+
     var btnSettings = document.getElementById('btn-settings');
     var settingsDropdown = document.getElementById('settings-dropdown');
     var btnSettingsWeb = document.getElementById('btn-settings-web');
@@ -8535,6 +9383,7 @@
         renderProjects();
         renderChats();
         renderMessages();
+        renderTasksSection();
         renderDocuments();
         if (chatWindowParam && chatWindowProjectId) {
             document.body.classList.add('chat-window-mode');
@@ -9032,6 +9881,31 @@
                 pill.classList.remove('update-pill-visible');
                 setTimeout(function () { if (pill.parentNode) pill.remove(); }, 300);
             });
+        });
+    }
+
+    if (window.mudragDesktop && window.mudragDesktop.onDesktopSync) {
+        window.mudragDesktop.onDesktopSync(function (data) {
+            if (!data || data.type !== 'project-changed') return;
+            var projectId = data.projectId || '';
+            if (!projectId && data.projectPath) {
+                var folderName = String(data.projectPath).split(/[\\/]/).pop();
+                var matchedProject = getProjects().find(function (project) {
+                    return String(project.name || '').trim().toLowerCase() === String(folderName || '').trim().toLowerCase();
+                });
+                projectId = matchedProject ? matchedProject.id : '';
+            }
+            if (!projectId) projectId = activeProjectId;
+            if (!projectId) return;
+            if (_desktopSyncIgnoreUntil[projectId] && Date.now() < _desktopSyncIgnoreUntil[projectId]) return;
+            clearTimeout(_desktopSyncRefreshTimers[projectId]);
+            _desktopSyncRefreshTimers[projectId] = setTimeout(function () {
+                syncProjectFromDesktop(projectId).then(function (result) {
+                    if (result && result.ok) {
+                        showToast('Desktop changes synced into ' + getTaskProjectLabel(projectId));
+                    }
+                }).catch(function () {});
+            }, 900);
         });
     }
 

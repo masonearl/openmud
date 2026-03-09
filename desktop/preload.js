@@ -19,6 +19,11 @@ const desktopBridge = {
   openDocFolder:   (folderPath) => ipcRenderer.invoke('mudrag:open-doc-folder', folderPath),
   readTemplateSource: (docType) => ipcRenderer.invoke('mudrag:read-template-source', docType),
   editDoc:         (opts) => ipcRenderer.invoke('mudrag:edit-doc', opts),
+  desktopSyncSetup: (opts) => ipcRenderer.invoke('mudrag:desktop-sync-setup', opts),
+  desktopSyncProject: (opts) => ipcRenderer.invoke('mudrag:desktop-sync-project', opts),
+  desktopSyncRemoveProject: (projectId) => ipcRenderer.invoke('mudrag:desktop-sync-remove-project', projectId),
+  desktopSyncOpenRoot: () => ipcRenderer.invoke('mudrag:desktop-sync-open-root'),
+  desktopSyncListFiles: (opts) => ipcRenderer.invoke('mudrag:desktop-sync-list-files', opts),
   bidWatchAdd:     (criteria) => ipcRenderer.invoke('mudrag:bid-watch-add', criteria),
   bidWatchRemove:  (id) => ipcRenderer.invoke('mudrag:bid-watch-remove', id),
   bidWatchList:    () => ipcRenderer.invoke('mudrag:bid-watch-list'),
@@ -38,6 +43,10 @@ const desktopBridge = {
   onUpdateProgress: (cb) => {
     ipcRenderer.on('mudrag:update-progress', (_, data) => cb(data));
     return () => ipcRenderer.removeAllListeners('mudrag:update-progress');
+  },
+  onDesktopSync: (cb) => {
+    ipcRenderer.on('mudrag:desktop-sync', (_, data) => cb(data));
+    return () => ipcRenderer.removeAllListeners('mudrag:desktop-sync');
   },
   isDesktop: true,
   udotScan:       (opts) => ipcRenderer.invoke('mudrag:udot-scan', opts),

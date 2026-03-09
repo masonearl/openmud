@@ -96,12 +96,23 @@ async function invokeOpenClawTool({ apiKey, baseURL, tool, action, args, session
 
 async function readJsonOrTextResponse(resp, fallbackMessage) {
   const contentType = String(resp?.headers?.get?.('content-type') || '').toLowerCase();
-  if (contentType.includes('application/json')) {
+  async function tryParseJson(source) {
     try {
-      return { ok: true, data: await resp.json() };
+      return { ok: true, data: await source.json() };
     } catch (e) {
-      return { ok: false, error: fallbackMessage || 'Invalid JSON response.' };
+      return null;
     }
+  }
+  if (contentType.includes('application/json')) {
+    const parsed = await tryParseJson(resp);
+    return parsed || { ok: false, error: fallbackMessage || 'Invalid JSON response.' };
+  }
+  if (typeof resp?.clone === 'function') {
+    const parsedClone = await tryParseJson(resp.clone());
+    if (parsedClone) return parsedClone;
+  } else if (typeof resp?.json === 'function' && typeof resp?.text !== 'function') {
+    const parsed = await tryParseJson(resp);
+    if (parsed) return parsed;
   }
   try {
     const text = String(await resp.text() || '').trim();
@@ -645,6 +656,107 @@ function parseQuickEstimateIntent(userText) {
   return { quantity, sizeRaw, sizeInches, pipeType };
 }
 
+function isTaskIntent(userText) {
+  const text = String(userText || '').toLowerCase().trim();
+  if (!text) return false;
+  if (!/\btask(s)?\b/.test(text)) return false;
+  return /\b(add|create|show|list|what are|update|mark|complete|done|finish|delete|remove)\b/.test(text);
+}
+
+async function resolveTaskIntentViaModel(userText, projectName, projectData, apiKey) {
+  const safeProjectName = String(projectName || '').trim() || 'Current project';
+  const currentTasks = Array.isArray(projectData?.tasks) ? projectData.tasks.slice(0, 20) : [];
+  try {
+    const client = new OpenAI({ apiKey });
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: [
+            'You are extracting task actions for the openmud chat UI.',
+            'Return ONLY valid JSON with this schema:',
+            '{"action":"add|list|update|delete","scope":"current|global|all","project_name":"string or empty","message":"short UI summary","task":{"id":"","title":"","notes":"","status":"open|in_progress|done","priority":"low|medium|high","due_at":"YYYY-MM-DD or empty"}}',
+            'Rules:',
+            '- "global", "my tasks list", or "Tasks project" means scope=global.',
+            '- "show my tasks" means action=list and scope=all unless the user clearly says current project.',
+            '- If the user refers to the current job/project without naming another one, use scope=current.',
+            '- For mark complete/done requests, use action=update and task.status=done.',
+            '- For delete/remove requests, use action=delete.',
+            '- Keep message short and actionable.',
+            `Current project: ${safeProjectName}.`,
+            `Current project tasks: ${safeJson(currentTasks, 1800) || '[]'}.`
+          ].join('\n')
+        },
+        { role: 'user', content: String(userText || '') }
+      ],
+      max_tokens: 240,
+      temperature: 0.1,
+    });
+    const raw = String(response.choices?.[0]?.message?.content || '');
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      if (parsed && parsed.action) return parsed;
+    }
+  } catch (e) { /* fall through */ }
+
+  const lower = String(userText || '').toLowerCase();
+  if (/\b(show|list|what are)\b/.test(lower)) {
+    return {
+      action: 'list',
+      scope: /\b(current|this project|this job)\b/.test(lower) ? 'current' : 'all',
+      project_name: '',
+      message: 'Task list',
+      task: {}
+    };
+  }
+  if (/\b(delete|remove)\b/.test(lower)) {
+    return {
+      action: 'delete',
+      scope: /\b(global|tasks list|my tasks)\b/.test(lower) ? 'global' : 'all',
+      project_name: '',
+      message: 'Removing task',
+      task: { title: String(userText || '').replace(/^.*?\btask\b/i, '').trim() }
+    };
+  }
+  if (/\b(mark|complete|done|finish)\b/.test(lower)) {
+    return {
+      action: 'update',
+      scope: 'all',
+      project_name: '',
+      message: 'Updating task',
+      task: {
+        title: String(userText || '').replace(/^.*?\btask\b/i, '').trim(),
+        status: 'done'
+      }
+    };
+  }
+  return {
+    action: 'add',
+    scope: /\b(global|tasks list|my tasks)\b/.test(lower) ? 'global' : 'current',
+    project_name: '',
+    message: 'Adding task',
+    task: {
+      title: String(userText || '').replace(/^.*?\btask\b/i, '').trim() || String(userText || '').trim(),
+      status: 'open',
+      priority: 'medium'
+    }
+  };
+}
+
+function parseDesktopSyncIntent(userText) {
+  const text = String(userText || '').toLowerCase().trim();
+  if (!text) return null;
+  if (!/\b(sync|desktop folder|openmud folder)\b/.test(text)) return null;
+  if (!/\b(desktop|finder|folder|openmud)\b/.test(text)) return null;
+  if (/\b(status|state)\b/.test(text)) return { action: 'status', scope: 'all', message: 'Desktop sync status' };
+  if (/\b(this project|current project|this job)\b/.test(text)) return { action: 'sync_project', scope: 'current', message: 'Syncing this project to Desktop' };
+  if (/\b(set up|setup|create|make)\b/.test(text)) return { action: 'setup', scope: 'all', message: 'Setting up Desktop sync' };
+  if (/\b(all projects|everything|all jobs)\b/.test(text)) return { action: 'sync_all', scope: 'all', message: 'Syncing all projects to Desktop' };
+  return { action: 'setup', scope: 'all', message: 'Setting up Desktop sync' };
+}
+
 /**
  * Quick detector: does this message contain an email send request?
  * Scans only the most relevant sentence to avoid picking up prior context.
@@ -1127,7 +1239,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { messages, model = 'mud1', temperature = 0.7, max_tokens = 1024, use_tools = false, estimate_context = null, stream = false, email, project_id } = req.body || {};
+    const { messages, model = 'mud1', temperature = 0.7, max_tokens = 1024, use_tools = false, estimate_context = null, stream = false, email, project_id, project_name, project_data } = req.body || {};
     const reqSource = detectSource(req);
     const devBypass = isDevBypass(req);
     const openaiKeyOverride = getHeader(req, 'x-openai-api-key');
@@ -1199,6 +1311,8 @@ module.exports = async function handler(req, res) {
     // not the UTC date on the Vercel server (which can be a day ahead of US timezones).
     const clientDate = getHeader(req, 'x-client-date') || null;
     const quickEstimate = parseQuickEstimateIntent(lastUserMsg && lastUserMsg.content);
+    const taskIntent = isTaskIntent(lastUserMsg && lastUserMsg.content);
+    const desktopSyncIntent = parseDesktopSyncIntent(lastUserMsg && lastUserMsg.content);
     const openClawSetupHelp = isOpenClawSetupHelpIntent(lastUserMsg && lastUserMsg.content);
     const sendEmailIntent = parseSendEmailIntent(lastUserMsg && lastUserMsg.content);
     const calendarIntent = parseCalendarIntent(lastUserMsg && lastUserMsg.content);
@@ -1208,6 +1322,33 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({
         response: buildQuickEstimateResponse(quickEstimate),
         tools_used: ['estimate_project_cost'],
+      });
+    }
+    if (taskIntent) {
+      const taskAction = await resolveTaskIntentViaModel(
+        lastUserMsg && lastUserMsg.content,
+        project_name,
+        project_data || {},
+        process.env.OPENAI_API_KEY
+      );
+      const taskSummary = taskAction?.message || 'Task update';
+      return res.status(200).json({
+        response: [
+          taskSummary,
+          '',
+          '[MUDRAG_TASKS]' + JSON.stringify(taskAction || { action: 'list', scope: 'all', task: {} }) + '[/MUDRAG_TASKS]'
+        ].join('\n'),
+        tools_used: ['tasks']
+      });
+    }
+    if (desktopSyncIntent) {
+      return res.status(200).json({
+        response: [
+          desktopSyncIntent.message || 'Desktop sync',
+          '',
+          '[MUDRAG_DESKTOP_SYNC]' + JSON.stringify(desktopSyncIntent) + '[/MUDRAG_DESKTOP_SYNC]'
+        ].join('\n'),
+        tools_used: ['desktop_sync']
       });
     }
     if (model === 'mud1' && openClawSetupHelp) {

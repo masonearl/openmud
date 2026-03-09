@@ -86,6 +86,222 @@ const OLLAMA_BASE = 'http://127.0.0.1:11434';
 const fs = require('fs');
 const { scrapeUDOT, parseContractorPayments, aggregateByContractor } = require('./udot-scraper');
 const { scanLocalFiles, readFileForImport } = require('./file-scanner');
+const DESKTOP_SYNC_FOLDER_NAME = 'Openmud';
+const desktopSyncState = {
+  rootPath: '',
+  watcher: null,
+  eventTimers: {},
+};
+
+function slugifyProjectName(name) {
+  const cleaned = String(name || 'Project')
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned || 'Project';
+}
+
+function ensureDirSync(dirPath) {
+  if (!dirPath) return;
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+}
+
+function getDefaultDesktopSyncRoot() {
+  return path.join(app.getPath('desktop'), DESKTOP_SYNC_FOLDER_NAME);
+}
+
+function getDesktopSyncConfig() {
+  const userData = storage.getUserData() || {};
+  const cfg = userData.desktopSync || {};
+  return {
+    rootPath: cfg.rootPath || '',
+    projects: cfg.projects || {},
+    enabled: cfg.enabled !== false,
+    lastSyncAt: cfg.lastSyncAt || null,
+  };
+}
+
+function setDesktopSyncConfig(next) {
+  const current = getDesktopSyncConfig();
+  const replaceProjects = !!(next && next.replaceProjects);
+  const merged = {
+    ...current,
+    ...(next || {}),
+    projects: replaceProjects
+      ? { ...((next && next.projects) || {}) }
+      : {
+        ...(current.projects || {}),
+        ...((next && next.projects) || {}),
+      },
+  };
+  delete merged.replaceProjects;
+  storage.setUserData({ desktopSync: merged });
+  return merged;
+}
+
+function getProjectSyncDir(projectId, projectName, rootPath) {
+  const cfg = getDesktopSyncConfig();
+  const baseRoot = rootPath || cfg.rootPath || getDefaultDesktopSyncRoot();
+  const byId = cfg.projects && cfg.projects[projectId];
+  if (byId && byId.path) return byId.path;
+  return path.join(baseRoot, slugifyProjectName(projectName));
+}
+
+function listRelativeFilesRecursive(rootDir, baseDir, bucket) {
+  const target = rootDir || '';
+  if (!target || !fs.existsSync(target)) return;
+  let entries = [];
+  try {
+    entries = fs.readdirSync(target, { withFileTypes: true });
+  } catch (err) {
+    return;
+  }
+  entries.forEach((entry) => {
+    if (!entry || entry.name.startsWith('.')) return;
+    const absPath = path.join(target, entry.name);
+    if (entry.isDirectory()) {
+      listRelativeFilesRecursive(absPath, baseDir, bucket);
+      return;
+    }
+    let stat = null;
+    try {
+      stat = fs.statSync(absPath);
+    } catch (err) {
+      stat = null;
+    }
+    bucket.push({
+      path: absPath,
+      name: entry.name,
+      relativePath: path.relative(baseDir, absPath),
+      size: stat ? stat.size : 0,
+      modifiedAt: stat ? stat.mtime.toISOString() : null,
+    });
+  });
+}
+
+function ensureProjectFolders(projectDir, folders) {
+  ensureDirSync(projectDir);
+  (folders || []).forEach((folder) => {
+    const rel = String(folder && folder.relativePath || '').replace(/^\/+|\/+$/g, '');
+    if (!rel) return;
+    ensureDirSync(path.join(projectDir, rel));
+  });
+}
+
+function removeExtraPaths(projectDir, desiredFiles) {
+  const current = [];
+  listRelativeFilesRecursive(projectDir, projectDir, current);
+  current.forEach((file) => {
+    const rel = String(file.relativePath || '').replace(/\\/g, '/');
+    if (!desiredFiles.has(rel)) {
+      try { fs.unlinkSync(file.path); } catch (err) {}
+    }
+  });
+}
+
+function pruneEmptyDirs(rootDir) {
+  if (!rootDir || !fs.existsSync(rootDir)) return;
+  let entries = [];
+  try {
+    entries = fs.readdirSync(rootDir, { withFileTypes: true });
+  } catch (err) {
+    return;
+  }
+  entries.forEach((entry) => {
+    if (!entry.isDirectory()) return;
+    const absPath = path.join(rootDir, entry.name);
+    pruneEmptyDirs(absPath);
+    try {
+      if (fs.readdirSync(absPath).length === 0) fs.rmdirSync(absPath);
+    } catch (err) {}
+  });
+}
+
+function emitDesktopSyncEvent(data) {
+  const windows = BrowserWindow.getAllWindows();
+  windows.forEach((win) => {
+    if (win && !win.isDestroyed()) win.webContents.send('mudrag:desktop-sync', data);
+  });
+}
+
+function scheduleDesktopSyncEvent(projectId, projectPath, reason) {
+  const key = String(projectId || projectPath || 'desktop-sync');
+  clearTimeout(desktopSyncState.eventTimers[key]);
+  desktopSyncState.eventTimers[key] = setTimeout(() => {
+    emitDesktopSyncEvent({ type: 'project-changed', projectId, projectPath, reason: reason || 'fswatch' });
+    delete desktopSyncState.eventTimers[key];
+  }, 700);
+}
+
+function startDesktopSyncWatcher(rootPath) {
+  const targetRoot = rootPath || getDesktopSyncConfig().rootPath;
+  if (!targetRoot) return;
+  ensureDirSync(targetRoot);
+  if (desktopSyncState.watcher) {
+    try { desktopSyncState.watcher.close(); } catch (err) {}
+  }
+  desktopSyncState.rootPath = targetRoot;
+  try {
+    desktopSyncState.watcher = fs.watch(targetRoot, { recursive: true }, (_eventType, filename) => {
+      const rel = String(filename || '').replace(/\\/g, '/').trim();
+      if (!rel || rel.startsWith('.')) return;
+      const projectName = rel.split('/')[0];
+      const cfg = getDesktopSyncConfig();
+      const projectEntries = Object.entries(cfg.projects || {});
+      const match = projectEntries.find(([, meta]) => {
+        const projectPath = String(meta && meta.path || '').replace(/\\/g, '/');
+        return projectPath && projectPath.endsWith('/' + projectName);
+      });
+      const projectId = match ? match[0] : null;
+      const projectPath = match && match[1] ? match[1].path : path.join(targetRoot, projectName);
+      scheduleDesktopSyncEvent(projectId, projectPath, 'desktop-change');
+    });
+  } catch (err) {
+    desktopSyncState.watcher = null;
+  }
+}
+
+function writeProjectSnapshotToDesktop(opts) {
+  const payload = opts || {};
+  if (!payload.projectId || !payload.projectName) return { ok: false, error: 'projectId and projectName are required.' };
+  const cfg = getDesktopSyncConfig();
+  const rootPath = payload.rootPath || cfg.rootPath || getDefaultDesktopSyncRoot();
+  ensureDirSync(rootPath);
+  const desiredDir = path.join(rootPath, slugifyProjectName(payload.projectName));
+  const currentMeta = cfg.projects[payload.projectId] || {};
+  const previousDir = currentMeta.path;
+  if (previousDir && previousDir !== desiredDir && fs.existsSync(previousDir) && !fs.existsSync(desiredDir)) {
+    try { fs.renameSync(previousDir, desiredDir); } catch (err) {}
+  }
+  ensureProjectFolders(desiredDir, payload.folders || []);
+  const desiredFiles = new Set();
+  (payload.files || []).forEach((file) => {
+    const relPath = String(file && file.relativePath || '').replace(/^\/+/, '').replace(/\\/g, '/');
+    if (!relPath || !file.base64) return;
+    desiredFiles.add(relPath);
+    const targetPath = path.join(desiredDir, relPath);
+    ensureDirSync(path.dirname(targetPath));
+    try {
+      fs.writeFileSync(targetPath, Buffer.from(String(file.base64), 'base64'));
+    } catch (err) {}
+  });
+  removeExtraPaths(desiredDir, desiredFiles);
+  pruneEmptyDirs(desiredDir);
+  const nextProjects = {};
+  nextProjects[payload.projectId] = {
+    path: desiredDir,
+    name: payload.projectName,
+    lastSyncAt: new Date().toISOString(),
+  };
+  setDesktopSyncConfig({
+    rootPath,
+    enabled: true,
+    lastSyncAt: new Date().toISOString(),
+    projects: nextProjects,
+  });
+  startDesktopSyncWatcher(rootPath);
+  return { ok: true, rootPath, projectPath: desiredDir };
+}
 
 function getWebPath() {
   if (app.isPackaged) {
@@ -3995,6 +4211,68 @@ ipcMain.handle('mudrag:read-local-file', async (_, filePath) => {
   return readFileForImport(filePath);
 });
 
+ipcMain.handle('mudrag:desktop-sync-setup', async (_, opts = {}) => {
+  const rootPath = opts.rootPath || getDesktopSyncConfig().rootPath || getDefaultDesktopSyncRoot();
+  ensureDirSync(rootPath);
+  const projectMap = {};
+  const projects = Array.isArray(opts.projects) ? opts.projects : [];
+  projects.forEach((project) => {
+    if (!project || !project.id) return;
+    const projectPath = path.join(rootPath, slugifyProjectName(project.name));
+    ensureDirSync(projectPath);
+    projectMap[project.id] = {
+      path: projectPath,
+      name: project.name || 'Project',
+      lastSyncAt: null,
+    };
+  });
+  const config = setDesktopSyncConfig({
+    rootPath,
+    enabled: true,
+    replaceProjects: true,
+    projects: projectMap,
+  });
+  startDesktopSyncWatcher(rootPath);
+  return { ok: true, rootPath, config };
+});
+
+ipcMain.handle('mudrag:desktop-sync-project', async (_, opts = {}) => {
+  return writeProjectSnapshotToDesktop(opts);
+});
+
+ipcMain.handle('mudrag:desktop-sync-remove-project', async (_, projectId) => {
+  if (!projectId) return { ok: false, error: 'projectId required' };
+  const cfg = getDesktopSyncConfig();
+  const projectMeta = cfg.projects && cfg.projects[projectId];
+  if (projectMeta && projectMeta.path && fs.existsSync(projectMeta.path)) {
+    try { fs.rmSync(projectMeta.path, { recursive: true, force: true }); } catch (err) {}
+  }
+  const nextProjects = { ...(cfg.projects || {}) };
+  delete nextProjects[projectId];
+  setDesktopSyncConfig({ replaceProjects: true, projects: nextProjects });
+  return { ok: true };
+});
+
+ipcMain.handle('mudrag:desktop-sync-open-root', async () => {
+  const rootPath = getDesktopSyncConfig().rootPath || getDefaultDesktopSyncRoot();
+  ensureDirSync(rootPath);
+  await shell.openPath(rootPath);
+  return { ok: true, rootPath };
+});
+
+ipcMain.handle('mudrag:desktop-sync-list-files', async (_, opts = {}) => {
+  const cfg = getDesktopSyncConfig();
+  const projectId = opts.projectId || '';
+  let projectPath = opts.projectPath || '';
+  if (!projectPath && projectId && cfg.projects && cfg.projects[projectId]) {
+    projectPath = cfg.projects[projectId].path || '';
+  }
+  if (!projectPath) return { ok: false, error: 'No project path configured.', files: [] };
+  const files = [];
+  listRelativeFilesRecursive(projectPath, projectPath, files);
+  return { ok: true, files, projectPath, rootPath: cfg.rootPath || getDefaultDesktopSyncRoot() };
+});
+
 ipcMain.handle('mudrag:udot-scan', async (_, opts = {}) => {
   const sources = opts.sources || ['payments', 'advertising'];
   const progress = [];
@@ -4099,6 +4377,10 @@ function forceReload() {
 
 app.whenReady().then(() => {
   hydrateSessionState();
+  try {
+    const cfg = getDesktopSyncConfig();
+    if (cfg.rootPath) startDesktopSyncWatcher(cfg.rootPath);
+  } catch (err) {}
   const isDev = process.env.DEV === '1' || process.env.NODE_ENV === 'development';
   const template = [
     {
