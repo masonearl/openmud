@@ -748,10 +748,13 @@ async function resolveTaskIntentViaModel(userText, projectName, projectData, api
 function parseDesktopSyncIntent(userText) {
   const text = String(userText || '').toLowerCase().trim();
   if (!text) return null;
-  if (!/\b(sync|desktop folder|openmud folder)\b/.test(text)) return null;
+  if (!/\b(sync|mirror|desktop sync|desktop folder|openmud folder|folder sync)\b/.test(text)) return null;
   if (!/\b(desktop|finder|folder|openmud)\b/.test(text)) return null;
   if (/\b(status|state)\b/.test(text)) return { action: 'status', scope: 'all', message: 'Desktop sync status' };
   if (/\b(this project|current project|this job)\b/.test(text)) return { action: 'sync_project', scope: 'current', message: 'Syncing this project to Desktop' };
+  if (/\b(all documents|all files|all projects|everything|entire site|entire workspace|all jobs)\b/.test(text)) {
+    return { action: 'setup', scope: 'all', message: 'Setting up Desktop sync for all project documents' };
+  }
   if (/\b(set up|setup|create|make)\b/.test(text)) return { action: 'setup', scope: 'all', message: 'Setting up Desktop sync' };
   if (/\b(all projects|everything|all jobs)\b/.test(text)) return { action: 'sync_all', scope: 'all', message: 'Syncing all projects to Desktop' };
   return { action: 'setup', scope: 'all', message: 'Setting up Desktop sync' };

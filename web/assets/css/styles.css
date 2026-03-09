@@ -1392,7 +1392,13 @@ body {
     flex-shrink: 0;
 }
 
-.projects-sidebar .tasks-section,
+.projects-sidebar .tasks-section {
+    flex: 0 0 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 .projects-sidebar .documents-section {
     flex: 1;
     min-height: 0;

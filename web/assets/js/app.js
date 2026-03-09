@@ -820,11 +820,13 @@
         });
     }
 
-    function syncProjectToDesktop(projectId) {
+    function syncProjectToDesktop(projectId, options) {
         if (!projectId || !isDesktopSyncAvailable()) {
             return Promise.resolve({ ok: false, error: 'Desktop sync is not available.' });
         }
-        return setupDesktopSync().then(function (setupResult) {
+        options = options || {};
+        var setupPromise = options.skipSetup ? Promise.resolve({ ok: true }) : setupDesktopSync(options);
+        return setupPromise.then(function (setupResult) {
             if (!setupResult || !setupResult.ok) return setupResult;
             return buildDesktopSyncSnapshot(projectId).then(function (snapshot) {
                 if (!snapshot) return { ok: false, error: 'Project not found.' };
@@ -843,18 +845,58 @@
         });
     }
 
-    function syncAllProjectsToDesktop() {
+    function syncAllProjectsToDesktop(options) {
         var projects = getProjects().slice();
-        return setupDesktopSync().then(function (setupResult) {
+        options = options || {};
+        var setupPromise = options.skipSetup ? Promise.resolve({ ok: true }) : setupDesktopSync(options);
+        return setupPromise.then(function (setupResult) {
             if (!setupResult || !setupResult.ok) return setupResult;
             return projects.reduce(function (promise, project) {
                 return promise.then(function (acc) {
-                    return syncProjectToDesktop(project.id).then(function (result) {
+                    return syncProjectToDesktop(project.id, { skipSetup: true }).then(function (result) {
                         acc.results.push({ projectId: project.id, result: result });
                         return acc;
                     });
                 });
-            }, Promise.resolve({ ok: true, results: [] }));
+            }, Promise.resolve({
+                ok: true,
+                results: [],
+                rootPath: setupResult.rootPath || '',
+                enabled: true
+            }));
+        });
+    }
+
+    function runDesktopSyncSetupFlow(options) {
+        options = options || {};
+        if (!isDesktopSyncAvailable()) {
+            return Promise.resolve({ ok: false, error: 'Desktop sync is only available in the openmud desktop app.' });
+        }
+        var rootChoice = options.rootPath
+            ? Promise.resolve({ ok: true, rootPath: options.rootPath })
+            : (options.chooseRoot && window.mudragDesktop.desktopSyncChooseRoot
+                ? window.mudragDesktop.desktopSyncChooseRoot()
+                : Promise.resolve({ ok: true, rootPath: '' }));
+        return rootChoice.then(function (choice) {
+            if (!choice || choice.ok === false) return choice || { ok: false, error: 'Desktop sync setup was cancelled.' };
+            return syncAllProjectsToDesktop({
+                rootPath: choice.rootPath || '',
+                skipSetup: false
+            }).then(function (result) {
+                if (!result || !result.ok) return result;
+                var rootPath = choice.rootPath || result.rootPath || (_desktopSyncStatusCache && _desktopSyncStatusCache.rootPath) || '';
+                return refreshDesktopSyncStatus(activeProjectId || '').then(function () {
+                    return {
+                        ok: true,
+                        rootPath: rootPath,
+                        enabled: true,
+                        results: result.results || [],
+                        message: rootPath
+                            ? 'Desktop sync is on. All project documents are mirrored to ' + shortenHomePath(rootPath) + '.'
+                            : 'Desktop sync is on. All project documents are mirrored to your Openmud Desktop folder.'
+                    };
+                });
+            });
         });
     }
 
@@ -1002,9 +1044,20 @@
         if (!activeProjectId) {
             labelEl.textContent = 'Desktop sync is available in the desktop app.';
             pathEl.textContent = rootPath ? ('Default sync folder: ' + rootPath) : 'Default sync folder: ~/Desktop/Openmud';
-            helpEl.textContent = 'When you sync a project, openmud mirrors its files into that folder and watches for local changes to pull back in.';
+            helpEl.textContent = 'Set up sync once to create the root folder, mirror every project into it, and keep local edits flowing back into openmud while the desktop app is open.';
+            if (btnDesktopSyncSetup) {
+                btnDesktopSyncSetup.hidden = enabled;
+                btnDesktopSyncSetup.textContent = 'Set up sync';
+            }
+            if (btnDesktopSyncSyncAll) {
+                btnDesktopSyncSyncAll.hidden = !enabled;
+                btnDesktopSyncSyncAll.textContent = 'Sync all now';
+            }
             if (btnDesktopSyncOpen) btnDesktopSyncOpen.hidden = !enabled;
-            if (btnDesktopSyncChange) btnDesktopSyncChange.hidden = false;
+            if (btnDesktopSyncChange) {
+                btnDesktopSyncChange.hidden = false;
+                btnDesktopSyncChange.textContent = enabled ? 'Change folder' : 'Choose folder';
+            }
             return;
         }
         if (enabled) {
@@ -1014,14 +1067,25 @@
             pathEl.textContent = projectPath
                 ? ('Project folder: ' + projectPath)
                 : ('Root folder: ' + (rootPath || '~/Desktop/Openmud'));
-            helpEl.textContent = 'Add or edit files in that folder while the desktop app is open and openmud will sync them back into this project. Uploads in openmud also sync out automatically.';
+            helpEl.textContent = 'The first setup syncs every project into the root folder. After that, uploads in openmud sync out automatically and Desktop edits sync back in while the desktop app is open.';
         } else {
-            labelEl.textContent = 'Desktop sync is not set up yet.';
-            pathEl.textContent = 'Default folder: ~/Desktop/Openmud';
-            helpEl.textContent = 'Click the sync button to create the folder, or choose a different folder first. Each project gets its own subfolder.';
+            labelEl.textContent = 'Desktop sync is off.';
+            pathEl.textContent = 'Default root folder: ~/Desktop/Openmud';
+            helpEl.textContent = 'Set up sync to create the Openmud folder, mirror every project into it, and keep the Desktop folder and openmud in sync.';
+        }
+        if (btnDesktopSyncSetup) {
+            btnDesktopSyncSetup.hidden = enabled;
+            btnDesktopSyncSetup.textContent = 'Set up sync';
+        }
+        if (btnDesktopSyncSyncAll) {
+            btnDesktopSyncSyncAll.hidden = !enabled;
+            btnDesktopSyncSyncAll.textContent = 'Sync all now';
         }
         if (btnDesktopSyncOpen) btnDesktopSyncOpen.hidden = !enabled;
-        if (btnDesktopSyncChange) btnDesktopSyncChange.hidden = false;
+        if (btnDesktopSyncChange) {
+            btnDesktopSyncChange.hidden = false;
+            btnDesktopSyncChange.textContent = enabled ? 'Change folder' : 'Choose folder';
+        }
     }
 
     function refreshDesktopSyncStatus(projectId) {
@@ -1041,17 +1105,17 @@
             return Promise.resolve({
                 ok: isDesktopSyncEnabled(),
                 message: isDesktopSyncEnabled()
-                    ? 'Desktop sync is enabled. Changes in the Openmud Desktop folder will sync back into your projects while the desktop app is open.'
-                    : 'Desktop sync is not set up yet. Ask openmud to sync your projects to Desktop or click the sync button in Documents.',
-                rootPath: isDesktopSyncEnabled() ? DESKTOP_SYNC_FOLDER_NAME : ''
+                    ? 'Desktop sync is enabled. openmud mirrors every project into your Desktop sync root and watches for local changes while the desktop app is open.'
+                    : 'Desktop sync is off. Ask openmud to set up Desktop sync or use Settings to choose the folder and mirror all project documents.',
+                rootPath: (_desktopSyncStatusCache && _desktopSyncStatusCache.rootPath) || ''
             });
         }
         if (action === 'sync_all') {
-            return syncAllProjectsToDesktop().then(function () {
+            return syncAllProjectsToDesktop().then(function (result) {
                 return {
                     ok: true,
-                    message: 'Synced all projects to the Openmud folder on your Desktop.',
-                    rootPath: DESKTOP_SYNC_FOLDER_NAME
+                    message: 'Synced all projects to ' + shortenHomePath((result && result.rootPath) || ((_desktopSyncStatusCache && _desktopSyncStatusCache.rootPath) || '~/Desktop/Openmud')) + '.',
+                    rootPath: (result && result.rootPath) || ((_desktopSyncStatusCache && _desktopSyncStatusCache.rootPath) || '')
                 };
             });
         }
@@ -1066,15 +1130,12 @@
                 };
             });
         }
-        return setupDesktopSync().then(function (setupResult) {
-            if (!setupResult || !setupResult.ok) return setupResult;
-            return syncAllProjectsToDesktop().then(function () {
-                return {
-                    ok: true,
-                    message: 'Created the Openmud folder on your Desktop and synced your projects into it.',
-                    rootPath: setupResult.rootPath
-                };
-            });
+        return runDesktopSyncSetupFlow().then(function (result) {
+            return {
+                ok: !!(result && result.ok),
+                message: (result && result.message) || 'Desktop sync is ready.',
+                rootPath: result && result.rootPath
+            };
         });
     }
 
@@ -1455,6 +1516,8 @@
     var btnOpenFolder = document.getElementById('btn-open-folder');
     var btnNewTask = document.getElementById('btn-new-task');
     var btnDesktopSync = document.getElementById('btn-desktop-sync');
+    var btnDesktopSyncSetup = document.getElementById('btn-desktop-sync-setup');
+    var btnDesktopSyncSyncAll = document.getElementById('btn-desktop-sync-sync-all');
     var btnDesktopSyncOpen = document.getElementById('btn-desktop-sync-open');
     var btnDesktopSyncChange = document.getElementById('btn-desktop-sync-change');
     var tasksHeader = document.getElementById('tasks-header');
@@ -8122,6 +8185,20 @@
     if (btnDesktopSync && isDesktopSyncAvailable()) {
         btnDesktopSync.hidden = false;
         btnDesktopSync.addEventListener('click', function () {
+            if (!isDesktopSyncEnabled()) {
+                runDesktopSyncSetupFlow().then(function (result) {
+                    if (result && result.ok) {
+                        showToast(result.message || 'Desktop sync is ready.');
+                    } else if (result && result.error) {
+                        addMessage('assistant', 'Desktop sync error: ' + result.error);
+                        renderMessages();
+                    }
+                }).catch(function (err) {
+                    addMessage('assistant', 'Desktop sync error: ' + (err && err.message ? err.message : 'Unknown error'));
+                    renderMessages();
+                });
+                return;
+            }
             if (!activeProjectId) return;
             syncProjectToDesktop(activeProjectId).then(function (result) {
                 if (result && result.ok) {
@@ -8129,6 +8206,36 @@
                     showToast('Synced "' + getTaskProjectLabel(activeProjectId) + '" to ' + shortenHomePath(result.projectPath || result.rootPath || '~/Desktop/Openmud'));
                 } else {
                     addMessage('assistant', 'Desktop sync error: ' + ((result && result.error) || 'Unknown error'));
+                    renderMessages();
+                }
+            }).catch(function (err) {
+                addMessage('assistant', 'Desktop sync error: ' + (err && err.message ? err.message : 'Unknown error'));
+                renderMessages();
+            });
+        });
+    }
+
+    if (btnDesktopSyncSetup && isDesktopSyncAvailable()) {
+        btnDesktopSyncSetup.addEventListener('click', function () {
+            runDesktopSyncSetupFlow().then(function (result) {
+                if (result && result.ok) {
+                    showToast(result.message || 'Desktop sync is ready.');
+                }
+            }).catch(function (err) {
+                addMessage('assistant', 'Desktop sync error: ' + (err && err.message ? err.message : 'Unknown error'));
+                renderMessages();
+            });
+        });
+    }
+
+    if (btnDesktopSyncSyncAll && isDesktopSyncAvailable()) {
+        btnDesktopSyncSyncAll.addEventListener('click', function () {
+            syncAllProjectsToDesktop().then(function (result) {
+                if (result && result.ok) {
+                    refreshDesktopSyncStatus(activeProjectId || '');
+                    showToast('Synced all projects to ' + shortenHomePath(result.rootPath || (_desktopSyncStatusCache && _desktopSyncStatusCache.rootPath) || '~/Desktop/Openmud'));
+                } else if (result && result.error) {
+                    addMessage('assistant', 'Desktop sync error: ' + result.error);
                     renderMessages();
                 }
             }).catch(function (err) {
@@ -8153,17 +8260,11 @@
         btnDesktopSyncChange.addEventListener('click', function () {
             window.mudragDesktop.desktopSyncChooseRoot().then(function (result) {
                 if (!result || !result.ok) return;
-                return setupDesktopSync({ rootPath: result.rootPath }).then(function () {
-                    if (!activeProjectId) {
-                        refreshDesktopSyncStatus();
+                return runDesktopSyncSetupFlow({ rootPath: result.rootPath }).then(function (setupResult) {
+                    if (setupResult && setupResult.ok) {
                         showToast('Desktop sync folder set to ' + shortenHomePath(result.rootPath));
-                        return null;
                     }
-                    return syncProjectToDesktop(activeProjectId).then(function (syncResult) {
-                        refreshDesktopSyncStatus(activeProjectId);
-                        showToast('Desktop sync folder set to ' + shortenHomePath(result.rootPath));
-                        return syncResult;
-                    });
+                    return setupResult;
                 });
             }).catch(function () {});
         });
