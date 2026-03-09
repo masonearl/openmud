@@ -31,7 +31,8 @@ jobs:
         run: npm --prefix desktop ci
 
       - name: Build app bundle
-        run: CSC_IDENTITY_AUTO_DISCOVERY=false npm --prefix desktop exec electron-builder -- --mac dir
+        working-directory: desktop
+        run: CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dir
 
       - name: Resolve release metadata
         id: meta
