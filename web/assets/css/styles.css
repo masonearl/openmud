@@ -3526,8 +3526,24 @@ label.btn-upload {
     letter-spacing: 0.01em;
 }
 
-.msg {
+.msg-row {
     max-width: 88%;
+    display: flex;
+    flex-direction: column;
+}
+
+.msg-row-user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.msg-row-assistant {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.msg {
+    max-width: 100%;
     padding: 10px 14px;
     border-radius: 14px;
     font-size: 0.9375rem;
@@ -3541,14 +3557,12 @@ label.btn-upload {
 }
 
 .msg-user {
-    align-self: flex-end;
     background: #2c2c2c;
     color: var(--text);
     border: 1px solid var(--border);
 }
 
 .msg-assistant {
-    align-self: flex-start;
     background: var(--bg-alt);
     color: var(--text-secondary);
     border: 1px solid var(--border);
@@ -3580,6 +3594,7 @@ label.btn-upload {
     line-height: 1.2;
     color: var(--text-secondary);
     opacity: 0.8;
+    padding: 0 2px;
 }
 
 

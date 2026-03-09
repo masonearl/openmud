@@ -99,12 +99,20 @@
     function renderRelayStatusPill(state, text) {
         var pill = document.getElementById('relay-status-pill');
         var modelSelect = document.getElementById('model-select');
-        var shouldShow = !!pill && !!modelSelect && modelSelect.value === 'openclaw';
+        var currentModel = modelSelect && modelSelect.value ? modelSelect.value : getCurrentModelSelection();
+        var shouldShow = !!pill && currentModel === 'openclaw';
         if (!pill) return;
         pill.hidden = !shouldShow;
-        if (!shouldShow) return;
+        if (!shouldShow) {
+            pill.textContent = '';
+            pill.title = '';
+            return;
+        }
         pill.className = 'chat-composer-pill relay-status-pill relay-status-' + (state || 'pending');
-        pill.textContent = text || 'Agent waiting';
+        pill.textContent = text || 'Waiting for Mac';
+        pill.title = state === 'connected'
+            ? 'Your Mac is linked. Click to open openmud agent settings.'
+            : 'Open openmud agent settings';
     }
 
     function checkRelayStatus() {
@@ -2814,11 +2822,14 @@
 
         msgs.forEach(function (m, idx) {
             var wrap = document.createElement('div');
-            wrap.className = 'msg msg-' + m.role;
+            wrap.className = 'msg-row msg-row-' + m.role;
+            var bubble = document.createElement('div');
+            bubble.className = 'msg msg-' + m.role;
             var contentWrap = document.createElement('div');
             contentWrap.className = 'msg-content';
             renderMessageContent(m.content, contentWrap);
-            wrap.appendChild(contentWrap);
+            bubble.appendChild(contentWrap);
+            wrap.appendChild(bubble);
             var contentEl = contentWrap.querySelector('p');
             var isFirstAssistant = m.role === 'assistant' && !firstAssistantSeen;
             var isLastMessage = idx === msgs.length - 1;
@@ -2834,7 +2845,7 @@
                     contentWrap.classList.toggle('msg-collapsed');
                     toggle.textContent = contentWrap.classList.contains('msg-collapsed') ? 'Show more' : 'Show less';
                 });
-                wrap.appendChild(toggle);
+                bubble.appendChild(toggle);
             }
             var timestampText = formatMessageTimestamp(m);
             if (timestampText) {
