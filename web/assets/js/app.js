@@ -716,8 +716,17 @@
         container.appendChild(card);
     }
 
+    function isDesktopRuntime() {
+        return !!(window.mudragDesktop
+            && window.mudragDesktop.isDesktop === true
+            && /mudrag-desktop/i.test(navigator.userAgent || ''));
+    }
+
     function isDesktopSyncAvailable() {
-        return !!(window.mudragDesktop && window.mudragDesktop.desktopSyncSetup && window.mudragDesktop.desktopSyncProject && window.mudragDesktop.desktopSyncListFiles);
+        return !!(isDesktopRuntime()
+            && window.mudragDesktop.desktopSyncSetup
+            && window.mudragDesktop.desktopSyncProject
+            && window.mudragDesktop.desktopSyncListFiles);
     }
 
     function isDesktopSyncEnabled() {
@@ -1033,10 +1042,19 @@
         var helpEl = document.getElementById('documents-sync-help');
         if (!statusWrap || !labelEl || !pathEl || !helpEl) return;
         if (!isDesktopSyncAvailable()) {
-            statusWrap.hidden = true;
+            statusWrap.hidden = false;
+            labelEl.textContent = 'Folder sync works in the desktop app.';
+            pathEl.textContent = 'Desktop app only: choose a sync folder and openmud will mirror your project documents there.';
+            helpEl.textContent = 'The web app can use your linked Mac for chat actions, but reliable two-way folder sync needs the desktop app because it owns the local filesystem watcher.';
+            if (btnDesktopSyncDownload) btnDesktopSyncDownload.hidden = false;
+            if (btnDesktopSyncSetup) btnDesktopSyncSetup.hidden = true;
+            if (btnDesktopSyncSyncAll) btnDesktopSyncSyncAll.hidden = true;
+            if (btnDesktopSyncOpen) btnDesktopSyncOpen.hidden = true;
+            if (btnDesktopSyncChange) btnDesktopSyncChange.hidden = true;
             return;
         }
         statusWrap.hidden = false;
+        if (btnDesktopSyncDownload) btnDesktopSyncDownload.hidden = true;
         var status = _desktopSyncStatusCache || {};
         var enabled = !!status.enabled;
         var rootPath = shortenHomePath(status.rootPath || '');
@@ -1098,7 +1116,10 @@
     function handleDesktopSyncAction(actionData) {
         if (!actionData) return Promise.resolve({ ok: false, error: 'Desktop sync command missing.' });
         if (!isDesktopSyncAvailable()) {
-            return Promise.resolve({ ok: false, error: 'Desktop sync is only available in the openmud desktop app.' });
+            return Promise.resolve({
+                ok: false,
+                error: 'Folder sync is available in the openmud desktop app. Download it to create a local sync folder and keep project documents mirrored on your Mac.'
+            });
         }
         var action = String(actionData.action || '').toLowerCase();
         if (action === 'status') {
@@ -1516,6 +1537,7 @@
     var btnOpenFolder = document.getElementById('btn-open-folder');
     var btnNewTask = document.getElementById('btn-new-task');
     var btnDesktopSync = document.getElementById('btn-desktop-sync');
+    var btnDesktopSyncDownload = document.getElementById('btn-desktop-sync-download');
     var btnDesktopSyncSetup = document.getElementById('btn-desktop-sync-setup');
     var btnDesktopSyncSyncAll = document.getElementById('btn-desktop-sync-sync-all');
     var btnDesktopSyncOpen = document.getElementById('btn-desktop-sync-open');

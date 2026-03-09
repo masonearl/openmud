@@ -2,6 +2,22 @@
  * Returns the latest openmud desktop version and download URL.
  * Used by the desktop app for update checks.
  */
+const GITHUB_REPO = 'masonearl/openmud';
+
+function pickLatestDmgRelease(releases) {
+  if (!Array.isArray(releases)) return null;
+  return releases.find((release) => {
+    if (!release || release.draft || release.prerelease) return false;
+    return Array.isArray(release.assets) && release.assets.some((asset) =>
+      asset && asset.name && asset.name.toLowerCase().endsWith('.dmg')
+    );
+  }) || null;
+}
+
+function parseDesktopVersion(tag) {
+  return String(tag || '').replace(/^desktop-v/i, '').replace(/^v/i, '');
+}
+
 const handler = async (req, res) => {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -19,16 +35,20 @@ const handler = async (req, res) => {
     if (token) headers.Authorization = `Bearer ${token}`;
 
     const response = await fetch(
-      'https://api.github.com/repos/masonearl/openmud.ai/releases/latest',
+      `https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=20`,
       { headers }
     );
     if (!response.ok) {
       return res.status(502).json({ error: 'Could not fetch release' });
     }
 
-    const release = await response.json();
+    const releases = await response.json();
+    const release = pickLatestDmgRelease(releases);
+    if (!release) {
+      return res.status(404).json({ error: 'No desktop release with a DMG asset is available yet.' });
+    }
     const tag = release.tag_name || '';
-    const version = tag.replace(/^v/, '');
+    const version = parseDesktopVersion(tag);
     const dmgAsset = release.assets?.find((a) =>
       a.name && a.name.toLowerCase().endsWith('.dmg')
     );

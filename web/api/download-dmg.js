@@ -5,6 +5,17 @@
  * Add ?debug=1 to get JSON diagnostic info instead of download.
  */
 const { Readable } = require('stream');
+const GITHUB_REPO = 'masonearl/openmud';
+
+function pickLatestDmgRelease(releases) {
+  if (!Array.isArray(releases)) return null;
+  return releases.find((release) => {
+    if (!release || release.draft || release.prerelease) return false;
+    return Array.isArray(release.assets) && release.assets.some((asset) =>
+      asset && asset.name && asset.name.toLowerCase().endsWith('.dmg')
+    );
+  }) || null;
+}
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -15,7 +26,7 @@ module.exports = async function handler(req, res) {
   const debug = req.url && req.url.includes('debug=1');
   const publicDmgUrl = process.env.PUBLIC_DMG_URL && process.env.PUBLIC_DMG_URL.trim();
   const token = process.env.GITHUB_TOKEN && process.env.GITHUB_TOKEN.trim();
-  const releasesUrl = 'https://github.com/masonearl/openmud.ai/releases/latest';
+  const releasesUrl = 'https://github.com/masonearl/openmud/releases';
 
   // Prefer explicit public hosting (Vercel Blob/S3/R2) when configured.
   if (publicDmgUrl) {
@@ -41,7 +52,7 @@ module.exports = async function handler(req, res) {
       headers.Authorization = `Bearer ${token}`;
     }
     const response = await fetch(
-      'https://api.github.com/repos/masonearl/openmud.ai/releases/latest',
+      `https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=20`,
       { headers }
     );
 
@@ -79,7 +90,24 @@ module.exports = async function handler(req, res) {
 </html>`);
     }
 
-    const release = await response.json();
+    const releases = await response.json();
+    const release = pickLatestDmgRelease(releases);
+    if (!release) {
+      if (debug) {
+        return res.status(200).json({
+          ok: false,
+          reason: 'no_release_with_dmg',
+          release_tags: Array.isArray(releases) ? releases.map((item) => item && item.tag_name).filter(Boolean) : [],
+          has_public_dmg_url: !!publicDmgUrl,
+        });
+      }
+      if (publicDmgUrl) {
+        res.setHeader('Location', publicDmgUrl);
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
+        return res.status(302).end();
+      }
+      return res.redirect(302, releasesUrl);
+    }
     const dmgAsset = release.assets?.find((a) =>
       a.name && a.name.toLowerCase().endsWith('.dmg')
     );
@@ -113,7 +141,7 @@ module.exports = async function handler(req, res) {
     // Private repo: stream the .dmg through this API (bypasses 404 on direct GitHub URL)
     if (token && dmgAsset.id) {
       const assetRes = await fetch(
-        `https://api.github.com/repos/masonearl/openmud.ai/releases/assets/${dmgAsset.id}`,
+        `https://api.github.com/repos/${GITHUB_REPO}/releases/assets/${dmgAsset.id}`,
         {
           headers: {
             Accept: 'application/octet-stream',

@@ -2,7 +2,7 @@
 /**
  * Release a new desktop app version.
  * Bumps version in desktop/package.json, commits, tags, and pushes.
- * Triggers GitHub Actions to build .dmg and create release.
+ * Triggers GitHub Actions to build a desktop archive and create a release.
  *
  * Usage: npm run release:desktop [patch|minor|major]
  * Default: patch (1.0.2 -> 1.0.3)
@@ -31,11 +31,11 @@ const newVersion = parts.join('.');
 pkg.version = newVersion;
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 
-const tag = `v${newVersion}`;
+const tag = `desktop-v${newVersion}`;
 execSync('git add desktop/package.json', { stdio: 'inherit' });
 execSync(`git commit -m "Release openmud ${newVersion}"`, { stdio: 'inherit' });
 execSync(`git tag ${tag}`, { stdio: 'inherit' });
 execSync('git push && git push origin ' + tag, { stdio: 'inherit' });
 
-console.log(`\nReleased ${tag}. GitHub Actions will build and publish the .dmg.`);
+console.log(`\nReleased ${tag}. GitHub Actions will build and publish the desktop archive.`);
 console.log('Check https://github.com/masonearl/openmud/actions');

@@ -36,9 +36,18 @@
                 <h1 class="dl-title">openmud</h1>
                 <p class="dl-sub">Desktop app for macOS</p>
                 <div class="dl-divider" aria-hidden="true"></div>
-                <p class="dl-badge">Coming soon</p>
-                <p class="dl-note">A native macOS desktop app is in development. Check back or use the web version in the meantime.</p>
-                <a href="/try" class="dl-btn dl-btn-alt">Try the web app</a>
+                <p class="dl-badge">macOS desktop app</p>
+                <p class="dl-note">Download openmud for Mac to get reliable folder sync, local file access, and the desktop-only project mirror workflow.</p>
+                <div class="dl-actions">
+                    <a href="/api/download-desktop" class="dl-btn">Download for Mac</a>
+                    <a href="https://github.com/masonearl/openmud/releases" class="dl-btn dl-btn-alt" target="_blank" rel="noopener">GitHub releases</a>
+                </div>
+                <ul class="dl-list">
+                    <li>Folder sync is desktop-only and mirrors project documents into a local Mac folder.</li>
+                    <li>The web app still works for chat, projects, and hosted AI, but it does not own your filesystem.</li>
+                    <li>If the direct download is unavailable, use the GitHub release link.</li>
+                </ul>
+                <p class="dl-footnote">After download: unzip the archive, move `openmud.app` into Applications, launch it, then set up your sync folder in Settings.</p>
             </div>
         </section>
     </main>
@@ -147,7 +156,15 @@
             color: var(--text-secondary, #888);
             margin: 0 0 32px;
             line-height: 1.65;
-            max-width: 320px;
+            max-width: 420px;
+        }
+
+        .dl-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
         }
 
         .dl-btn {
@@ -174,6 +191,29 @@
         .dl-btn:active {
             transform: translateY(0);
             box-shadow: none;
+        }
+
+        .dl-btn-alt {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.14);
+        }
+
+        .dl-list {
+            width: min(460px, 100%);
+            margin: 0 0 22px;
+            padding-left: 18px;
+            text-align: left;
+            color: var(--text-secondary, #999);
+            font-size: 0.875rem;
+            line-height: 1.65;
+        }
+
+        .dl-footnote {
+            margin: 0;
+            color: var(--text-secondary, #888);
+            font-size: 0.82rem;
+            line-height: 1.6;
+            max-width: 440px;
         }
     </style>
 </body>
