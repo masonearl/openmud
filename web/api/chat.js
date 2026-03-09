@@ -21,6 +21,11 @@ const OUTPUT_RULES = `
 Output format: Plain text only. No markdown (no **, ##, ###). No LaTeX or math blocks (no \\[, \\], $$). Be concise. Short sentences. Get to the point. Use simple bullets with - if needed.`;
 const DEV_KEY = 'openmud';
 const HOSTED_FREE_MODELS = new Set(['mud1', 'gpt-4o-mini']);
+const OPENMUD_BRAND_CONTEXT = [
+  'openmud is an open-source agentic AI platform for heavy civil and underground utility construction.',
+  'The mission is to build the best agentic AI tool in construction and help construction teams finish real workflows, not just chat.',
+  'openmud focuses on executing work like estimating, scheduling, proposals, document extraction, email drafting, takeoffs, and production tracking.'
+].join(' ');
 
 function getHeader(req, name) {
   const v = req && req.headers ? req.headers[name.toLowerCase()] : '';
@@ -691,7 +696,7 @@ async function resolveiMessageIntentViaModel(userText, apiKey, baseURL, modelNam
       messages: [
         {
           role: 'system',
-          content: 'Extract the iMessage/text details the user wants to send. Return ONLY a JSON object:\n{"to":"recipient name, phone number, or email","message":"The message text to send"}\nIf message content is not specified, write a short friendly message matching the stated intent. Never include explanation outside the JSON.'
+          content: `Extract the iMessage/text details the user wants to send. Return ONLY a JSON object:\n{"to":"recipient name, phone number, or email","message":"The message text to send"}\nIf message content is not specified, write a short message that matches the user's request.\nUse factual company/product context when the user refers to openmud or asks what openmud does.\nBrand context: ${OPENMUD_BRAND_CONTEXT}\nDo not invent brand positioning or product details beyond that context. Never include explanation outside the JSON.`
         },
         { role: 'user', content: userText }
       ],
@@ -774,7 +779,7 @@ async function resolveEmailIntentViaModel(userText, apiKey, baseURL, modelName) 
       messages: [
         {
           role: 'system',
-          content: 'Extract the email details the user wants to send. Return ONLY a JSON object:\n{"to":"email@example.com","subject":"Subject line (concise, under 10 words)","body":"Full email body text"}\nIf body content is not specified, write a short professional message matching the stated intent. Never include explanation outside the JSON.'
+          content: `Extract the email details the user wants to send. Return ONLY a JSON object:\n{"to":"email@example.com","subject":"Subject line (concise, under 10 words)","body":"Full email body text"}\nIf body content is not specified, write a short professional message matching the stated intent.\nUse factual company/product context when the user refers to openmud or asks what openmud does.\nBrand context: ${OPENMUD_BRAND_CONTEXT}\nDo not invent brand positioning or product details beyond that context. Never include explanation outside the JSON.`
         },
         { role: 'user', content: userText }
       ],
