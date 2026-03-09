@@ -6328,6 +6328,7 @@
         var indicator = document.getElementById('chat-loading-indicator');
         if (indicator) indicator.hidden = !on;
         var statusEl = document.getElementById('chat-loading-status');
+        if (!on) _isSending = false;
 
         if (_loadingPhraseTimer) { clearInterval(_loadingPhraseTimer); _loadingPhraseTimer = null; }
 
@@ -6410,6 +6411,7 @@
     }
 
     var TOOL_TRIGGERS = /generate|build|create|make|draft|estimate|bid|proposal|schedule|project/i;
+    var _isSending = false;
     function shouldUseTools(text) {
         return TOOL_TRIGGERS.test(text);
     }
@@ -6439,6 +6441,7 @@
 
     function doSend(prefillText) {
         if (prefillText) { input.value = prefillText; }
+        if (_isSending) return;
         var text = (input.value || '').trim();
         if (!text && pendingAttachments.length === 0) return;
         window.__mudragSend = doSend;
@@ -6480,6 +6483,7 @@
             }
             return;
         }
+        _isSending = true;
 
         var attachmentContext = '';
         var pendingImages = [];
