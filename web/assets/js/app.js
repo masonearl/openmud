@@ -88,52 +88,6 @@
         }
     }
 
-    function getRelayToken() {
-        try {
-            return localStorage.getItem(STORAGE_OC_TOKEN) || '';
-        } catch (e) {
-            return '';
-        }
-    }
-
-    function renderRelayStatusPill(state, text) {
-        var pill = document.getElementById('relay-status-pill');
-        var modelSelect = document.getElementById('model-select');
-        var currentModel = modelSelect && modelSelect.value ? modelSelect.value : getCurrentModelSelection();
-        var shouldShow = !!pill && currentModel === 'openclaw';
-        if (!pill) return;
-        pill.hidden = !shouldShow;
-        if (!shouldShow) {
-            pill.textContent = '';
-            pill.title = '';
-            return;
-        }
-        pill.className = 'chat-composer-pill relay-status-pill relay-status-' + (state || 'pending');
-        pill.textContent = text || 'Waiting for Mac';
-        pill.title = state === 'connected'
-            ? 'Your Mac is linked. Click to open openmud agent settings.'
-            : 'Open openmud agent settings';
-    }
-
-    function checkRelayStatus() {
-        var token = getRelayToken();
-        if (!token) {
-            renderRelayStatusPill('pending', 'Agent not linked');
-            return Promise.resolve(false);
-        }
-        return fetch(RELAY_STATUS_BASE + '/relay/connected/' + encodeURIComponent(token))
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                var connected = !!(data && data.connected);
-                renderRelayStatusPill(connected ? 'connected' : 'pending', connected ? 'Agent connected' : 'Waiting for Mac');
-                return connected;
-            })
-            .catch(function () {
-                renderRelayStatusPill('error', 'Relay offline');
-                return false;
-            });
-    }
-
     function readApiJsonSafely(res, options) {
         options = options || {};
         var contentType = ((res && res.headers && res.headers.get && res.headers.get('content-type')) || '').toLowerCase();
@@ -160,21 +114,6 @@
         });
     }
 
-    function updateRelayStatusVisibility() {
-        var modelSelect = document.getElementById('model-select');
-        if (!modelSelect || modelSelect.value !== 'openclaw') {
-            if (_relayStatusTimer) {
-                clearInterval(_relayStatusTimer);
-                _relayStatusTimer = null;
-            }
-            renderRelayStatusPill('pending', 'Waiting for Mac');
-            return;
-        }
-        checkRelayStatus();
-        if (_relayStatusTimer) clearInterval(_relayStatusTimer);
-        _relayStatusTimer = setInterval(checkRelayStatus, 5000);
-    }
-
     function setModelSelection(value) {
         var modelSelectEl = document.getElementById('model-select');
         if (!modelSelectEl) return;
@@ -190,7 +129,6 @@
                 btn.setAttribute('aria-selected', btn.getAttribute('data-value') === value ? 'true' : 'false');
             });
         }
-        updateRelayStatusVisibility();
     }
 
     function getChatHeaders() {
@@ -7859,12 +7797,6 @@
     var modelTrigger = document.getElementById('model-select-trigger');
     var modelDropdown = document.getElementById('model-dropdown');
     var modelLabel = document.getElementById('model-select-label');
-    var relayStatusPill = document.getElementById('relay-status-pill');
-    if (relayStatusPill) {
-        relayStatusPill.addEventListener('click', function () {
-            window.location.href = '/settings.html#openclaw-section';
-        });
-    }
     if (modelSelect && modelTrigger && modelDropdown && modelLabel) {
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved && modelSelect.querySelector('option[value="' + saved + '"]')) modelSelect.value = saved;
@@ -7874,7 +7806,6 @@
             modelDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
                 btn.setAttribute('aria-selected', btn.getAttribute('data-value') === modelSelect.value ? 'true' : 'false');
             });
-            updateRelayStatusVisibility();
             refreshChatEntryHints();
         }
         updateModelLabel();
@@ -7904,10 +7835,8 @@
         if (saved) modelSelect.value = saved;
         modelSelect.addEventListener('change', function () {
             localStorage.setItem(STORAGE_MODEL, modelSelect.value);
-            updateRelayStatusVisibility();
             refreshChatEntryHints();
         });
-        updateRelayStatusVisibility();
         refreshChatEntryHints();
     }
 
