@@ -1,7 +1,6 @@
-const { getUserFromRequest: getEmailToolUserFromRequest } = require('../../../api/_lib/emailTools');
-
 async function getUserFromRequest(req) {
   try {
+    const { getUserFromRequest: getEmailToolUserFromRequest } = require('../../../api/_lib/emailTools');
     const result = await getEmailToolUserFromRequest(req);
     const user = result && result.user ? result.user : null;
     if (!user || !user.id) return null;

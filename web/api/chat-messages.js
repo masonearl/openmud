@@ -1,6 +1,13 @@
 const { createClient } = require('@supabase/supabase-js');
 const { getUserFromRequest } = require('./lib/auth');
 
+function normalizeCreatedAt(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
@@ -37,7 +44,11 @@ module.exports = async function handler(req, res) {
         .eq('project_id', projectId)
         .order('created_at', { ascending: true });
       if (error) throw error;
-      const messages = (data || []).map((m) => ({ role: m.role, content: m.content || '' }));
+      const messages = (data || []).map((m) => ({
+        role: m.role,
+        content: m.content || '',
+        createdAt: m.created_at || null,
+      }));
       return res.status(200).json({ messages });
     }
 
@@ -70,11 +81,16 @@ module.exports = async function handler(req, res) {
       }
       await supabase.from('chat_messages').delete().eq('project_id', project_id);
       if (messages.length > 0) {
-        const rows = messages.map((m) => ({
-          project_id,
-          role: m.role || 'user',
-          content: String(m.content || ''),
-        }));
+        const rows = messages.map((m) => {
+          const row = {
+            project_id,
+            role: m.role || 'user',
+            content: String(m.content || ''),
+          };
+          const createdAt = normalizeCreatedAt(m.createdAt || m.created_at || m.timestamp || null);
+          if (createdAt) row.created_at = createdAt;
+          return row;
+        });
         const { error } = await supabase.from('chat_messages').insert(rows);
         if (error) throw error;
       }

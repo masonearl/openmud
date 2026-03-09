@@ -117,13 +117,39 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var connected = !!(data && data.connected);
-                renderRelayStatusPill(connected ? 'connected' : 'pending', connected ? 'Agent connected' : 'Agent waiting');
+                renderRelayStatusPill(connected ? 'connected' : 'pending', connected ? 'Agent connected' : 'Waiting for Mac');
                 return connected;
             })
             .catch(function () {
                 renderRelayStatusPill('error', 'Relay offline');
                 return false;
             });
+    }
+
+    function readApiJsonSafely(res, options) {
+        options = options || {};
+        var contentType = ((res && res.headers && res.headers.get && res.headers.get('content-type')) || '').toLowerCase();
+        if (contentType.indexOf('application/json') >= 0) {
+            return res.json();
+        }
+        return res.text().then(function (text) {
+            var raw = String(text || '').trim();
+            var looksHtml = contentType.indexOf('text/html') >= 0 || /<!doctype|<html/i.test(raw);
+            var baseMessage = options.nonJsonMessage || 'The server returned an unexpected response.';
+            var detail = looksHtml
+                ? 'The API returned an HTML/server error page before the request reached your Mac.'
+                : ('Server response: ' + (raw ? raw.slice(0, 180) : 'empty response'));
+            return {
+                error: baseMessage + ' ' + detail,
+                _nonJson: true,
+                _raw: raw
+            };
+        }).catch(function () {
+            return {
+                error: options.fallbackMessage || 'The server returned an unreadable response.',
+                _nonJson: true
+            };
+        });
     }
 
     function updateRelayStatusVisibility() {
@@ -133,7 +159,7 @@
                 clearInterval(_relayStatusTimer);
                 _relayStatusTimer = null;
             }
-            renderRelayStatusPill('pending', 'Agent waiting');
+            renderRelayStatusPill('pending', 'Waiting for Mac');
             return;
         }
         checkRelayStatus();
@@ -728,10 +754,31 @@
         projectId = projectId || activeProjectId;
         if (!projectId) return;
         var msgs = getMessages(projectId);
-        msgs.push({ role: role, content: content });
+        msgs.push({ role: role, content: content, createdAt: new Date().toISOString() });
         setMessages(projectId, msgs);
         if (role === 'user') autoNameChat(projectId, content);
         if (projectId === activeProjectId) renderMessages();
+    }
+
+    function getMessageTimestampValue(message) {
+        if (!message || typeof message !== 'object') return null;
+        return message.createdAt || message.created_at || message.timestamp || message.time || null;
+    }
+
+    function formatMessageTimestamp(message) {
+        var raw = getMessageTimestampValue(message);
+        if (!raw) return '';
+        try {
+            var date = new Date(raw);
+            if (isNaN(date.getTime())) return '';
+            var now = new Date();
+            var isToday = date.toDateString() === now.toDateString();
+            return isToday
+                ? date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                : date.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        } catch (e) {
+            return '';
+        }
     }
 
     var MSG_COLLAPSE_THRESHOLD = 400;
@@ -2788,6 +2835,13 @@
                     toggle.textContent = contentWrap.classList.contains('msg-collapsed') ? 'Show more' : 'Show less';
                 });
                 wrap.appendChild(toggle);
+            }
+            var timestampText = formatMessageTimestamp(m);
+            if (timestampText) {
+                var meta = document.createElement('div');
+                meta.className = 'msg-meta';
+                meta.textContent = timestampText;
+                wrap.appendChild(meta);
             }
             // Right-click context menu on assistant messages
             if (m.role === 'assistant') {
@@ -6498,17 +6552,49 @@
                         body: JSON.stringify({ messages: history, model: 'openclaw', temperature: 0.3, max_tokens: 1024 }),
                         signal: ocController.signal
                     }).then(function (r) {
-                        return r.json().then(function (data) {
+                        return readApiJsonSafely(r, {
+                            nonJsonMessage: 'openmud agent could not reach the chat server cleanly.',
+                            fallbackMessage: 'openmud agent request failed before a valid response came back.'
+                        }).then(function (data) {
                             clearTimeout(ocRelayTimeout);
-                            if (!r.ok) addMessage('assistant', 'Error: ' + (data.error || 'Request failed'));
-                            else addMessage('assistant', data.response || 'No response.');
+                            if (!r.ok) {
+                                var serverError = data && data.error ? String(data.error) : 'Request failed';
+                                if ((data && data._nonJson) || /html\/server error page|unexpected response|unreadable response/i.test(serverError)) {
+                                    addMessage(
+                                        'assistant',
+                                        'openmud agent could not reach the server cleanly. ' +
+                                        'This usually means the API route returned a server error page instead of JSON.\n\n' +
+                                        'How to fix:\n' +
+                                        '1. Open Settings and make sure the relay status says Connected.\n' +
+                                        '2. Hard refresh the page and try again.\n' +
+                                        '3. If you are testing locally, restart the local app/server and use `http://localhost:3950/try`.\n\n' +
+                                        'Details: ' + serverError
+                                    );
+                                } else {
+                                    addMessage('assistant', 'Error: ' + serverError);
+                                }
+                            } else {
+                                addMessage('assistant', data.response || 'No response.');
+                            }
                             setLoading(false);
                             scrollToLatest();
                         });
                     }).catch(function (err) {
                         clearTimeout(ocRelayTimeout);
                         if (err.name !== 'AbortError') {
-                            addMessage('assistant', 'Could not reach server: ' + (err.message || err));
+                            var errMessage = String(err && (err.message || err) || '');
+                            if (/Unexpected token .* is not valid JSON/i.test(errMessage)) {
+                                addMessage(
+                                    'assistant',
+                                    'openmud agent could not reach the server cleanly. The page got a server error page instead of JSON.\n\n' +
+                                    'How to fix:\n' +
+                                    '1. Open Settings and make sure the relay status says Connected.\n' +
+                                    '2. Hard refresh the page.\n' +
+                                    '3. If you are testing locally, restart the local app/server and use `http://localhost:3950/try`.'
+                                );
+                            } else {
+                                addMessage('assistant', 'Could not reach server: ' + errMessage);
+                            }
                             setLoading(false);
                             scrollToLatest();
                         }

@@ -3574,6 +3574,14 @@ label.btn-upload {
     color: var(--text);
 }
 
+.msg-meta {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
 
 .msg-bullet-list {
     margin: 8px 0;

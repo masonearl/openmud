@@ -89,6 +89,29 @@ async function invokeOpenClawTool({ apiKey, baseURL, tool, action, args, session
   }
 }
 
+async function readJsonOrTextResponse(resp, fallbackMessage) {
+  const contentType = String(resp?.headers?.get?.('content-type') || '').toLowerCase();
+  if (contentType.includes('application/json')) {
+    try {
+      return { ok: true, data: await resp.json() };
+    } catch (e) {
+      return { ok: false, error: fallbackMessage || 'Invalid JSON response.' };
+    }
+  }
+  try {
+    const text = String(await resp.text() || '').trim();
+    const looksHtml = contentType.includes('text/html') || /<!doctype|<html/i.test(text);
+    return {
+      ok: false,
+      error: looksHtml
+        ? (fallbackMessage || 'Upstream returned an HTML error page instead of JSON.')
+        : (text || fallbackMessage || 'Unexpected response format.'),
+    };
+  } catch (e) {
+    return { ok: false, error: fallbackMessage || 'Unexpected response format.' };
+  }
+}
+
 /**
  * Gateway response: { ok, result: { content: [{type:"text",text:"...json..."}], details: {...} } }
  * Parse nodes from wherever they appear in that structure.
@@ -1222,12 +1245,16 @@ module.exports = async function handler(req, res) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: relayTokenAny, requestId: reqId, ...cmd, messages: [] }),
         });
-        const sendData = await sendRes.json();
+        const sendParsed = await readJsonOrTextResponse(sendRes, 'Relay send failed before a valid JSON response was returned.');
+        if (!sendParsed.ok) throw new Error(sendParsed.error);
+        const sendData = sendParsed.data;
         if (!sendData.ok) throw new Error('No agent connected. Open Settings and make sure openmud-agent is running.');
         for (let i = 0; i < timeoutSecs; i++) {
           await new Promise(r => setTimeout(r, 1000));
           const pollRes = await fetch(`${RELAY_HTTP_UNIVERSAL}/relay/status/${reqId}`);
-          const pollData = await pollRes.json();
+          const pollParsed = await readJsonOrTextResponse(pollRes, 'Relay status failed before a valid JSON response was returned.');
+          if (!pollParsed.ok) throw new Error(pollParsed.error);
+          const pollData = pollParsed.data;
           if (pollData.ready) {
             if (pollData.error) throw new Error(pollData.error);
             return pollData.response;
@@ -1593,7 +1620,11 @@ module.exports = async function handler(req, res) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ token: relayToken, requestId, ...command, messages: [] }),
             });
-            const sendData = await sendRes.json();
+            const sendParsed = await readJsonOrTextResponse(sendRes, 'Relay send failed before a valid JSON response was returned.');
+            if (!sendParsed.ok) {
+              return res.status(502).json({ error: 'Relay error: ' + sendParsed.error, response: null });
+            }
+            const sendData = sendParsed.data;
             if (!sendData.ok) {
               return res.status(503).json({ error: 'No agent connected. Make sure openmud-agent is running on your Mac (see Settings → openmud agent).', response: null });
             }
@@ -1602,7 +1633,11 @@ module.exports = async function handler(req, res) {
             for (let i = 0; i < 60; i++) {
               await new Promise(r => setTimeout(r, 1000));
               const pollRes = await fetch(`${RELAY_HTTP}/relay/status/${requestId}`);
-              const pollData = await pollRes.json();
+              const pollParsed = await readJsonOrTextResponse(pollRes, 'Relay status failed before a valid JSON response was returned.');
+              if (!pollParsed.ok) {
+                return res.status(502).json({ error: 'Relay error: ' + pollParsed.error, response: null });
+              }
+              const pollData = pollParsed.data;
               if (pollData.ready) {
                 if (pollData.error) return res.status(200).json({ response: 'Error from your Mac: ' + pollData.error });
                 return res.status(200).json({ response: pollData.response });
