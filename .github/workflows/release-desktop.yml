@@ -30,35 +30,56 @@ jobs:
       - name: Install desktop dependencies
         run: npm --prefix desktop ci
 
-      - name: Build app bundle
+      - name: Build desktop artifacts
+        id: build
         working-directory: desktop
-        run: CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dir
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -n "$CSC_LINK" ] && [ -n "$CSC_KEY_PASSWORD" ] && [ -n "$APPLE_ID" ] && [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ] && [ -n "$APPLE_TEAM_ID" ]; then
+            echo "mode=signed" >> "$GITHUB_OUTPUT"
+            npx electron-builder --mac zip dmg
+          else
+            echo "mode=unsigned" >> "$GITHUB_OUTPUT"
+            CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dir
+          fi
 
       - name: Resolve release metadata
         id: meta
         run: |
           TAG_NAME="${GITHUB_REF_NAME:-desktop-manual}"
           APP_VERSION=$(node -p "require('./desktop/package.json').version")
-          APP_DIR=$(ls -td desktop/dist/mac* | head -1)
-          if [ -z "$APP_DIR" ] || [ ! -d "$APP_DIR/openmud.app" ]; then
-            echo "No app bundle was produced."
-            exit 1
+          ZIP_PATH=$(ls -t desktop/dist/*.zip 2>/dev/null | head -1 || true)
+          DMG_PATH=$(ls -t desktop/dist/*.dmg 2>/dev/null | head -1 || true)
+          if [ -z "$ZIP_PATH" ]; then
+            APP_DIR=$(ls -td desktop/dist/mac* 2>/dev/null | head -1 || true)
+            if [ -z "$APP_DIR" ] || [ ! -d "$APP_DIR/openmud.app" ]; then
+              echo "No app bundle was produced."
+              exit 1
+            fi
+            ZIP_PATH="desktop/dist/openmud-${APP_VERSION}-arm64.zip"
+            rm -f "$ZIP_PATH"
+            (
+              cd "$APP_DIR"
+              zip -qry "../openmud-${APP_VERSION}-arm64.zip" "openmud.app"
+            )
           fi
-          ZIP_PATH="desktop/dist/openmud-${APP_VERSION}-arm64.zip"
-          rm -f "$ZIP_PATH"
-          (
-            cd "$APP_DIR"
-            zip -qry "../openmud-${APP_VERSION}-arm64.zip" "openmud.app"
-          )
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
           echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
           echo "zip_path=$ZIP_PATH" >> "$GITHUB_OUTPUT"
+          echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Upload desktop artifact
         uses: actions/upload-artifact@v4
         with:
-          name: openmud-desktop-zip
-          path: ${{ steps.meta.outputs.zip_path }}
+          name: openmud-desktop-archive
+          path: |
+            ${{ steps.meta.outputs.zip_path }}
+            ${{ steps.meta.outputs.dmg_path }}
 
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/')
@@ -67,4 +88,6 @@ jobs:
           tag_name: ${{ steps.meta.outputs.tag_name }}
           name: openmud Desktop ${{ steps.meta.outputs.app_version }}
           generate_release_notes: true
-          files: ${{ steps.meta.outputs.zip_path }}
+          files: |
+            ${{ steps.meta.outputs.zip_path }}
+            ${{ steps.meta.outputs.dmg_path }}

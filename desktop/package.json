@@ -23,7 +23,7 @@
     "appId": "ai.mudrag.desktop",
     "productName": "openmud",
     "afterPack": "../scripts/after-pack.js",
-    "icon": "../assets/mudraglogo.png",
+    "icon": "../web/assets/logo.png",
     "extraResources": [
       {
         "from": "../web",

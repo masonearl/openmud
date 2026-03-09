@@ -30,7 +30,7 @@ for (const line of envContent.split('\n')) {
 }
 
 console.log('Building with cert from Keychain (signed + notarized)...\n');
-const r = spawnSync('npx', ['electron-builder', '--mac', 'dmg'], {
+const r = spawnSync('npx', ['electron-builder', '--mac', 'zip', 'dmg'], {
   cwd: desktopDir,
   stdio: 'inherit',
   env,
