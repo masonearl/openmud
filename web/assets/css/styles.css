@@ -416,6 +416,8 @@ body.page-try.has-desktop-title-bar .lp-nav {
     top: 0;
     left: 0;
     right: 0;
+    padding-left: 84px;
+    padding-right: 16px;
 }
 
 body.page-try.has-desktop-title-bar .desktop-title-bar {
@@ -2322,41 +2324,49 @@ label.btn-upload {
 
 .documents-sync-status {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
     gap: 10px;
-    margin-bottom: 8px;
-    padding: 8px 9px;
+    margin-bottom: 10px;
+    padding: 12px;
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
 }
 
 .documents-sync-copy {
     min-width: 0;
-    flex: 1;
+    flex: 1 1 auto;
 }
 
 .documents-sync-label {
-    font-size: 0.72rem;
+    font-size: 0.98rem;
+    font-weight: 700;
     color: var(--text);
     line-height: 1.35;
 }
 
 .documents-sync-path,
 .documents-sync-help {
-    margin-top: 3px;
-    font-size: 0.66rem;
+    margin-top: 6px;
+    font-size: 0.84rem;
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: 1.55;
     word-break: break-word;
 }
 
 .documents-sync-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+}
+
+.documents-sync-actions > * {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    min-width: 0;
 }
 
 .msg-task-card {
