@@ -23,17 +23,64 @@ if (!fs.existsSync(envPath)) {
 }
 
 const envContent = fs.readFileSync(envPath, 'utf8');
-const env = { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'true' };
+const env = {
+  ...process.env,
+  CSC_IDENTITY_AUTO_DISCOVERY: 'true',
+  CI: '',
+};
 for (const line of envContent.split('\n')) {
   const m = line.match(/^([A-Z_]+)=(.*)$/);
   if (m) env[m[1].trim()] = m[2].trim();
 }
 
+const appVersion = JSON.parse(fs.readFileSync(path.join(desktopDir, 'package.json'), 'utf8')).version;
+const distDir = path.join(desktopDir, 'dist');
+const appDir = path.join(distDir, 'mac-arm64');
+const appPath = path.join(appDir, 'openmud.app');
+const zipPath = path.join(distDir, `openmud-${appVersion}-arm64.zip`);
+
+function run(command, args, opts) {
+  const result = spawnSync(command, args, {
+    stdio: 'inherit',
+    ...opts,
+  });
+  if ((result.status ?? 1) !== 0) {
+    process.exit(result.status ?? 1);
+  }
+}
+
 console.log('Building with cert from Keychain (signed + notarized)...\n');
-const r = spawnSync('npx', ['electron-builder', '--mac', 'zip', 'dmg'], {
+run('npx', ['electron-builder', '--mac', 'dir', '--publish', 'never'], {
   cwd: desktopDir,
-  stdio: 'inherit',
   env,
 });
 
-process.exit(r.status ?? 1);
+if (!fs.existsSync(appPath)) {
+  console.error(`\nExpected app bundle not found: ${appPath}\n`);
+  process.exit(1);
+}
+
+if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+run('zip', ['-qry', zipPath, 'openmud.app'], { cwd: appDir, env });
+
+console.log('\nSubmitting zip to Apple notarization...');
+run('xcrun', [
+  'notarytool',
+  'submit',
+  zipPath,
+  '--apple-id', env.APPLE_ID,
+  '--password', env.APPLE_APP_SPECIFIC_PASSWORD,
+  '--team-id', env.APPLE_TEAM_ID,
+  '--wait',
+], { env });
+
+console.log('\nStapling notarization ticket to app...');
+run('xcrun', ['stapler', 'staple', appPath], { env });
+
+if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+run('zip', ['-qry', zipPath, 'openmud.app'], { cwd: appDir, env });
+
+console.log('\nVerifying Gatekeeper acceptance...');
+run('spctl', ['--assess', '--type', 'execute', '-vv', appPath], { env });
+
+console.log(`\nSigned and notarized desktop build ready:\n${zipPath}\n`);
