@@ -413,6 +413,59 @@
         return 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
     }
 
+    function getTaskDateKey(value) {
+        if (!isValidTaskDate(value)) return '';
+        var date = new Date(value);
+        if (isNaN(date.getTime())) return String(value || '').trim().slice(0, 10);
+        return date.toISOString().slice(0, 10);
+    }
+
+    function hashTaskKey(value) {
+        var str = String(value || '');
+        var hash = 5381;
+        for (var i = 0; i < str.length; i++) {
+            hash = ((hash << 5) + hash) + str.charCodeAt(i);
+        }
+        return (hash >>> 0).toString(36);
+    }
+
+    function getTaskReplayKey(projectId, task) {
+        var source = normalizeTaskText(task && task.source, 'chat').toLowerCase();
+        if (source && source !== 'chat') return '';
+        var title = normalizeTaskText(task && (task.title || task.name || task.task), '').toLowerCase();
+        if (!title) return '';
+        var notes = normalizeTaskText(task && (task.notes || task.description || task.detail), '').toLowerCase();
+        var dueAt = getTaskDateKey(task && (task.due_at || task.dueAt || task.due_date));
+        return [String(projectId || ''), title, notes, dueAt].join('|');
+    }
+
+    function getStableTaskId(projectId, task) {
+        var replayKey = getTaskReplayKey(projectId, task);
+        return replayKey ? ('t_chat_' + hashTaskKey(replayKey)) : '';
+    }
+
+    function mergeTaskRecords(existing, incoming) {
+        if (!existing) return cloneTaskRecord(incoming);
+        if (!incoming) return cloneTaskRecord(existing);
+        return {
+            id: incoming.id || existing.id || makeTaskId(),
+            title: incoming.title || existing.title || 'Untitled task',
+            notes: incoming.notes || existing.notes || '',
+            status: incoming.status === 'done' || existing.status === 'done'
+                ? 'done'
+                : (incoming.status || existing.status || 'open'),
+            priority: incoming.priority || existing.priority || 'medium',
+            due_at: incoming.due_at || existing.due_at || null,
+            created_at: existing.created_at || incoming.created_at || new Date().toISOString(),
+            updated_at: (incoming.updated_at || '') > (existing.updated_at || '')
+                ? incoming.updated_at
+                : (existing.updated_at || incoming.updated_at || new Date().toISOString()),
+            completed_at: incoming.completed_at || existing.completed_at || null,
+            project_id: incoming.project_id || existing.project_id || null,
+            source: incoming.source || existing.source || 'chat'
+        };
+    }
+
     function isTasksProjectRecord(project) {
         return !!(project && String(project.name || '').trim().toLowerCase() === TASKS_PROJECT_NAME.toLowerCase());
     }
@@ -446,8 +499,10 @@
         var base = current ? cloneTaskRecord(current) : {};
         var nowIso = new Date().toISOString();
         var title = normalizeTaskText(task && (task.title || task.name || task.task), base.title || '');
+        var source = normalizeTaskText(task && task.source, base.source || 'chat');
+        var fallbackId = base.id || getStableTaskId(projectId, Object.assign({}, base, task || {}, { source: source })) || makeTaskId();
         return {
-            id: normalizeTaskText(task && task.id, base.id || makeTaskId()),
+            id: normalizeTaskText(task && task.id, fallbackId),
             title: title || 'Untitled task',
             notes: normalizeTaskText(task && (task.notes || task.description || task.detail), base.notes || ''),
             status: normalizeTaskStatus(task && task.status != null ? task.status : base.status),
@@ -459,7 +514,7 @@
                 ? (base.completed_at || nowIso)
                 : null,
             project_id: projectId,
-            source: normalizeTaskText(task && task.source, base.source || 'chat')
+            source: source
         };
     }
 
@@ -473,21 +528,43 @@
         var prev = getProjectData(projectId);
         var normalized = (tasks || []).map(function (task) {
             return toTaskRecord(projectId, task, task);
-        }).sort(function (a, b) {
+        });
+        var deduped = [];
+        var seenIds = Object.create(null);
+        var seenReplayKeys = Object.create(null);
+        normalized.forEach(function (task) {
+            if (!task) return;
+            var idKey = task.id ? ('id:' + task.id) : '';
+            var replayKey = getTaskReplayKey(projectId, task);
+            var existingIndex = -1;
+            if (idKey && Object.prototype.hasOwnProperty.call(seenIds, idKey)) {
+                existingIndex = seenIds[idKey];
+            } else if (replayKey && Object.prototype.hasOwnProperty.call(seenReplayKeys, replayKey)) {
+                existingIndex = seenReplayKeys[replayKey];
+            }
+            if (existingIndex >= 0) {
+                deduped[existingIndex] = mergeTaskRecords(deduped[existingIndex], task);
+                return;
+            }
+            seenIds[idKey] = deduped.length;
+            if (replayKey) seenReplayKeys[replayKey] = deduped.length;
+            deduped.push(task);
+        });
+        deduped.sort(function (a, b) {
             var aDone = a.status === 'done' ? 1 : 0;
             var bDone = b.status === 'done' ? 1 : 0;
             if (aDone !== bDone) return aDone - bDone;
             return (b.updated_at || '').localeCompare(a.updated_at || '');
         });
         var next = Object.assign({}, prev, {
-            tasks: normalized,
+            tasks: deduped,
             tasks_meta: Object.assign({}, prev.tasks_meta || {}, meta || {}, {
-                count: normalized.length,
+                count: deduped.length,
                 updated_at: new Date().toISOString()
             })
         });
         setProjectData(projectId, next);
-        return normalized;
+        return deduped;
     }
 
     function addTaskToProject(projectId, task) {
@@ -6222,9 +6299,7 @@
     function updateDesktopTitle() {
         var isDesktop = isDesktopApp || useDesktopApi;
         var isTryPage = !!(document.body && document.body.classList && document.body.classList.contains('page-try'));
-        // Keep /try on the desktop-title-bar layout so settings + sidebar toggle
-        // remain available with lp-nav fixed as the true top bar.
-        var useDesktopLayout = isDesktop || isTryPage;
+        var useDesktopLayout = isDesktop;
         var bar = document.getElementById('desktop-title-bar');
         var nameEl = document.getElementById('desktop-title-bar-name');
         var webHeader = document.getElementById('header-web-fallback');
@@ -6236,6 +6311,14 @@
             document.title = '';
         } else {
             document.title = name;
+        }
+        if (isTryPage && !isDesktop) {
+            if (bar) bar.hidden = true;
+            if (webHeader) webHeader.hidden = true;
+            document.body.classList.remove('has-desktop-title-bar');
+            document.body.classList.remove('has-web-bar');
+            document.title = 'openmud';
+            return;
         }
         if (useDesktopLayout && bar) {
             bar.hidden = false;
