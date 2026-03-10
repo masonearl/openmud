@@ -94,6 +94,16 @@ module.exports = async function handler(req, res) {
         .single();
       if (error) throw error;
 
+      console.log(JSON.stringify({
+        event: 'project_state_synced',
+        user_id: user.id,
+        project_id: projectId,
+        chat_count: Object.keys(payload.chats_json || {}).length,
+        task_count: Array.isArray(payload.project_data_json && payload.project_data_json.tasks)
+          ? payload.project_data_json.tasks.length
+          : 0,
+      }));
+
       return res.status(200).json({
         project_state: {
           project_id: data.project_id,

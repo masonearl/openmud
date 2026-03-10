@@ -52,6 +52,12 @@ module.exports = async function handler(req, res) {
       .is('consumed_at', null);
     if (updateError) throw updateError;
 
+    console.log(JSON.stringify({
+      event: 'desktop_handoff_redeemed',
+      user_id: row.user_id,
+      handoff_id: row.id,
+    }));
+
     return res.status(200).json({
       access_token: decryptText(row.access_token_encrypted),
       refresh_token: decryptText(row.refresh_token_encrypted),

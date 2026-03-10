@@ -49,6 +49,12 @@ module.exports = async function handler(req, res) {
 
     if (error) throw error;
 
+    console.log(JSON.stringify({
+      event: 'desktop_handoff_started',
+      user_id: user.id,
+      expires_at: expiresAt,
+    }));
+
     return res.status(200).json({
       handoff_code: handoffCode,
       expires_at: expiresAt,

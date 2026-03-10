@@ -99,6 +99,16 @@ const desktopSyncState = {
   projectIgnoreUntil: {},
 };
 
+function logPrelaunchEvent(eventName, payload = {}) {
+  console.log(JSON.stringify({
+    event: eventName,
+    source: 'desktop',
+    user_id: storage.getActiveUser ? storage.getActiveUser() : 'anon',
+    at: new Date().toISOString(),
+    ...payload,
+  }));
+}
+
 function slugifyProjectName(name) {
   const cleaned = String(name || 'Project')
     .replace(/[<>:"/\\|?*\u0000-\u001F]/g, ' ')
@@ -4367,6 +4377,7 @@ ipcMain.handle('mudrag:set-active-account', async (_, opts = {}) => {
   const userId = String(opts.userId || '').trim() || 'anon';
   const email = String(opts.email || '').trim();
   const activeUser = storage.setActiveUser(userId);
+  logPrelaunchEvent('desktop_account_scope_set', { scoped_user_id: activeUser, email: email || null });
   return { ok: true, userId: activeUser, email };
 });
 
@@ -4396,11 +4407,22 @@ ipcMain.handle('mudrag:desktop-sync-setup', async (_, opts = {}) => {
     projects: projectMap,
   });
   startDesktopSyncWatcher(rootPath);
+  logPrelaunchEvent('desktop_sync_setup_completed', {
+    root_path: rootPath,
+    project_count: Object.keys(projectMap).length,
+  });
   return { ok: true, rootPath, config };
 });
 
 ipcMain.handle('mudrag:desktop-sync-project', async (_, opts = {}) => {
-  return writeProjectSnapshotToDesktop(opts);
+  const result = writeProjectSnapshotToDesktop(opts);
+  logPrelaunchEvent(result && result.ok ? 'desktop_sync_project_completed' : 'desktop_sync_project_failed', {
+    project_id: opts.projectId || null,
+    project_name: opts.projectName || null,
+    root_path: result && result.rootPath ? result.rootPath : null,
+    message: result && result.error ? result.error : null,
+  });
+  return result;
 });
 
 ipcMain.handle('mudrag:desktop-sync-status', async (_, opts = {}) => {
@@ -4448,6 +4470,10 @@ ipcMain.handle('mudrag:desktop-sync-remove-project', async (_, projectId) => {
   const nextProjects = { ...(cfg.projects || {}) };
   delete nextProjects[projectId];
   setDesktopSyncConfig({ replaceProjects: true, projects: nextProjects });
+  logPrelaunchEvent('desktop_sync_project_removed', {
+    project_id: projectId,
+    project_path: projectMeta && projectMeta.path ? projectMeta.path : null,
+  });
   return { ok: true };
 });
 

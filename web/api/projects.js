@@ -82,6 +82,11 @@ module.exports = async function handler(req, res) {
         .eq('id', projectId)
         .eq('user_id', user.id);
       if (error) throw error;
+      console.log(JSON.stringify({
+        event: 'project_deleted',
+        user_id: user.id,
+        project_id: projectId,
+      }));
       return res.status(200).json({ ok: true, id: projectId });
     }
 
