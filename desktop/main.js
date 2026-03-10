@@ -17,23 +17,36 @@ if (!app.isPackaged && process.argv.length >= 2) {
   app.setAsDefaultProtocolClient('openmud');
   app.setAsDefaultProtocolClient('mudrag');
 }
+let pendingDeepLinkUrl = null;
+
 function handleDeepLink(url) {
   if (!url) return;
+  if (!mainWindowRef || mainWindowRef.isDestroyed()) {
+    pendingDeepLinkUrl = url;
+    return;
+  }
   try {
-    // openmud://auth?access_token=...&refresh_token=...
     const parsed = new URL(url);
     if (parsed.hostname === 'auth') {
+      // openmud://auth?access_token=...&refresh_token=...
       const accessToken = parsed.searchParams.get('access_token');
       const refreshToken = parsed.searchParams.get('refresh_token');
-      if (accessToken && refreshToken && mainWindowRef && !mainWindowRef.isDestroyed()) {
+      if (accessToken && refreshToken) {
         mainWindowRef.webContents.send('mudrag:auth-callback', { access_token: accessToken, refresh_token: refreshToken });
       }
     }
+    // openmud://try — just focus the window (no auth needed)
   } catch (e) {
     // not a parseable URL, ignore
   }
-  if (mainWindowRef && !mainWindowRef.isDestroyed()) {
-    mainWindowRef.focus();
+  mainWindowRef.focus();
+}
+
+function processPendingDeepLink() {
+  if (pendingDeepLinkUrl) {
+    const url = pendingDeepLinkUrl;
+    pendingDeepLinkUrl = null;
+    handleDeepLink(url);
   }
 }
 
@@ -3769,6 +3782,7 @@ function createWindow(toolPort) {
   win.webContents.once('did-finish-load', () => {
     win.setTitle('');
     emitUpdateState();
+    processPendingDeepLink();
   });
   if (isDev) win.webContents.openDevTools();
 
