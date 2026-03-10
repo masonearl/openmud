@@ -236,3 +236,34 @@ When adding models or changing routing, preserve this split first: `mud1 free`, 
 5. **Job site mapper** — Leaflet.js + OSM embedded in the browser. No API key, zero cost.
 6. **Better unit rates** — `tools/estimating/estimating_tools.py` rates are ballpark. Real regional data welcome.
 7. **Change order generator** — complete the partial proposal workflow for COs.
+
+---
+
+## Cursor Cloud specific instructions
+
+### Services overview
+
+| Service | How to run | Port | Notes |
+|---|---|---|---|
+| Web (static) | `python3 -m http.server 3947 --directory web` | 3947 | Serves static HTML/CSS/JS. No API routes. |
+| Web (full, with API) | `cd web && vercel dev --listen 3947` | 3947 | Requires Vercel CLI auth or `--token`. Serves static files + API routes. |
+| Playwright E2E | `npx playwright test` | 4302 | Auto-starts `python3 -m http.server 4302 --directory public`. Tests mock API. |
+| Site-bot | See CI config in `.github/workflows/ci.yml` | 4312 | Uses static server on `public/` with `BOT_MOCK_API=1`. |
+
+### Running tests and checks
+
+- **Python lint**: `flake8 tools/ --max-line-length=120 --extend-ignore=E203,W503 --count --statistics`
+- **Python tests**: `pytest tests/ -v --cov=tools --cov-report=term-missing` (75 tests, ~68% coverage)
+- **Node.js syntax check**: `node --check api/chat.js api/search.js api/schedule.js api/proposal.js api/health.js api/predict.js api/feedback.js`
+- **Playwright E2E**: `npx playwright test` (4 tests, auto-starts static server from `public/`)
+- **Site-bot**: `BASE_URL=http://127.0.0.1:4312 BOT_MOCK_API=1 BOT_FAIL_ON=high npm run bot:site` (start `python3 -m http.server 4312 --directory public` first)
+
+### Gotchas
+
+- `vercel dev` requires Vercel CLI authentication (run `vercel login` or pass `--token`). Without it, use `python3 -m http.server` for static serving.
+- The `serve` package (v14) does **not** serve `index.html` for `/` in the `web/` directory due to its configuration. Use `python3 -m http.server` instead for reliable static serving.
+- Two static content directories exist: `web/` (main site, used by Vercel) and `public/` (used by Playwright E2E and site-bot). They contain similar but not identical content.
+- `~/.local/bin` must be on `PATH` for `flake8` and `pytest` (pip installs there as non-root).
+- Site-bot `WARN` health on external CDN assets (Pexels video, YouTube) is expected in headless/offline environments.
+- No ESLint config exists; JS linting is limited to `node --check` syntax validation per CI.
+- `web/.env` must exist for `vercel dev` (copy from `web/.env.example`). Chat API needs at least `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`.
