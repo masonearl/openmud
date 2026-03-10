@@ -362,7 +362,7 @@
         fetch(API_BASE + '/projects', { method: 'GET', headers: getAuthHeaders() })
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (data) {
-                if (data && Array.isArray(data.projects)) {
+                if (data && Array.isArray(data.projects) && data.projects.length > 0) {
                     localStorage.setItem(STORAGE_PROJECTS, JSON.stringify(data.projects));
                     if (cb) cb(data.projects);
                     return;
