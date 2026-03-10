@@ -267,3 +267,12 @@ When adding models or changing routing, preserve this split first: `mud1 free`, 
 - Site-bot `WARN` health on external CDN assets (Pexels video, YouTube) is expected in headless/offline environments.
 - No ESLint config exists; JS linting is limited to `node --check` syntax validation per CI.
 - `web/.env` must exist for `vercel dev` (copy from `web/.env.example`). Chat API needs at least `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`.
+- Auth deep link unit tests: `node tests/test_auth_deeplink.js` (7 tests for `openmud://auth` handling).
+- The live web content is in `web/`; the `public/` directory is an older copy used only by Playwright E2E and site-bot. When testing UI changes, verify against `web/` not `public/`.
+
+### Sync architecture
+
+- **Tasks**: synced to Supabase via `web/api/tasks.js`. Client writes to localStorage first, then syncs to server with 2s debounce. Version-based merge (last-write-wins by `updated_at`). Migration: `web/api/lib/migrations/004_tasks.sql`.
+- **Documents**: manifest-based sync via `web/api/sync-manifest.js`. Each document has a SHA-256 `content_hash`. Delta sync: only changed files transfer. Conflicts detected when both sides change between syncs. Migration: `web/api/lib/migrations/005_sync_manifest.sql`.
+- **Desktop sync**: `desktop/main.js` mirrors project documents to `~/Desktop/Openmud` via `fs.watch`. The manifest API layers on top for cross-device sync.
+- **Auth handoff**: web signs in via Supabase, passes tokens to desktop via `openmud://auth?access_token=...&refresh_token=...` deep link. Desktop queues the URL if the window is not ready (cold-start fix).
