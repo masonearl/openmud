@@ -1169,8 +1169,8 @@
                         enabled: true,
                         results: result.results || [],
                         message: rootPath
-                            ? 'Desktop sync is on. All project documents are mirrored to ' + shortenHomePath(rootPath) + '.'
-                            : 'Desktop sync is on. All project documents are mirrored to your Openmud Desktop folder.'
+                            ? 'Desktop sync is on. Project documents are mirrored to ' + shortenHomePath(rootPath) + ' without deleting app files when a mirror file goes missing.'
+                            : 'Desktop sync is on. Project documents are mirrored to your Openmud Desktop folder without deleting app files when a mirror file goes missing.'
                     };
                 });
             });
@@ -1213,6 +1213,9 @@
             });
             var desktopFiles = Array.isArray(listing.files) ? listing.files : [];
             var desktopPaths = {};
+            var importedCount = 0;
+            var updatedCount = 0;
+            var unchangedCount = 0;
             var work = Promise.resolve();
             desktopFiles.forEach(function (fileInfo) {
                 work = work.then(function () {
@@ -1225,20 +1228,38 @@
                         if (existing) {
                             if (existing.name !== imported.name) {
                                 return renameDocument(existing.id, imported.name).then(function () {
-                                    return arrayBuffersEqual(existing.data, data) ? null : updateDocumentContent(existing.id, data);
+                                    if (arrayBuffersEqual(existing.data, data)) {
+                                        unchangedCount += 1;
+                                        return null;
+                                    }
+                                    updatedCount += 1;
+                                    return updateDocumentContent(existing.id, data);
                                 });
                             }
                             if (!arrayBuffersEqual(existing.data, data)) {
+                                updatedCount += 1;
                                 return updateDocumentContent(existing.id, data);
                             }
+                            unchangedCount += 1;
                             return null;
                         }
                         var parts = relPath.split('/').filter(Boolean);
                         var fileName = parts.pop() || imported.name || 'Imported file';
                         var folderName = parts.length ? parts.join(' / ') : '';
+                        var fallbackExisting = docs.find(function (doc) {
+                            if (!doc || (doc.source || '') !== 'desktop-sync') return false;
+                            var currentRelPath = buildDocumentRelativePath(doc, folderLookup);
+                            var currentFolderName = currentRelPath.split('/').slice(0, -1).join(' / ');
+                            return currentFolderName === folderName && arrayBuffersEqual(doc.data, data);
+                        });
+                        if (fallbackExisting) {
+                            unchangedCount += 1;
+                            return renameDocument(fallbackExisting.id, fileName);
+                        }
                         var targetPromise = folderName ? getOrCreateFolder(projectId, folderName) : Promise.resolve(null);
                         return targetPromise.then(function (folderId) {
                             var file = new File([data], fileName, { type: imported.mime || 'application/octet-stream' });
+                            importedCount += 1;
                             return saveDocument(projectId, file, folderId, {
                                 source: 'desktop-sync',
                                 source_meta: { relative_path: relPath }
@@ -1248,17 +1269,27 @@
                 });
             });
             return work.then(function () {
-                var deletions = docs.filter(function (doc) {
+                var untouchedAppDocs = docs.filter(function (doc) {
                     return !desktopPaths[buildDocumentRelativePath(doc, folderLookup)];
-                }).map(function (doc) {
-                    return deleteDocument(doc.id);
+                }).length;
+                renderDocuments();
+                renderTasksSection();
+                if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
+                _desktopSyncStatusCache = Object.assign({}, _desktopSyncStatusCache || {}, {
+                    enabled: true,
+                    syncMode: 'non_destructive',
+                    statusLabels: ['synced', 'mirror active']
                 });
-                return Promise.all(deletions).then(function () {
-                    renderDocuments();
-                    renderTasksSection();
-                    if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
-                    return { ok: true, imported: desktopFiles.length, deleted: deletions.length };
-                });
+                return {
+                    ok: true,
+                    imported: importedCount,
+                    updated: updatedCount,
+                    unchanged: unchangedCount,
+                    preserved: untouchedAppDocs,
+                    untouchedAppDocs: untouchedAppDocs,
+                    syncMode: 'non_destructive',
+                    statusLabels: ['synced', 'mirror active']
+                };
             });
         });
     }
@@ -1353,16 +1384,16 @@
         }
         if (enabled) {
             labelEl.textContent = projectPath
-                ? 'This project syncs to your Desktop folder.'
-                : 'Desktop sync is enabled for this app.';
+                ? 'Mirror active for this project.'
+                : 'Mirror active for this app.';
             pathEl.textContent = projectPath
                 ? ('Project folder: ' + projectPath)
                 : ('Root folder: ' + (rootPath || '~/Desktop/Openmud'));
-            helpEl.textContent = 'The first setup syncs every project into the root folder. After that, uploads in openmud sync out automatically and Desktop edits sync back in while the desktop app is open.';
+            helpEl.textContent = 'The first setup mirrors every project into the root folder. After that, uploads in openmud sync out automatically and Desktop edits import back in while the desktop app is open. Missing mirror files do not delete the app copy automatically.';
         } else {
             labelEl.textContent = 'Desktop sync is off.';
             pathEl.textContent = 'Default root folder: ~/Desktop/Openmud';
-            helpEl.textContent = 'Set up sync to create the Openmud folder, mirror every project into it, and keep the Desktop folder and openmud in sync.';
+            helpEl.textContent = 'Set up sync to create the Openmud folder, mirror every project into it, and import Desktop edits back into openmud without destructive delete-on-absence behavior.';
         }
         if (btnDesktopSyncSetup) {
             btnDesktopSyncSetup.hidden = enabled;
@@ -1399,7 +1430,7 @@
             return Promise.resolve({
                 ok: isDesktopSyncEnabled(),
                 message: isDesktopSyncEnabled()
-                    ? 'Desktop sync is enabled. openmud mirrors every project into your Desktop sync root and watches for local changes while the desktop app is open.'
+                    ? 'Desktop sync is enabled. openmud mirrors every project into your Desktop sync root, imports local changes while the desktop app is open, and does not delete app documents just because a mirror file is missing.'
                     : 'Desktop sync is off. Ask openmud to set up Desktop sync or use Settings to choose the folder and mirror all project documents.',
                 rootPath: (_desktopSyncStatusCache && _desktopSyncStatusCache.rootPath) || ''
             });

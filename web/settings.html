@@ -598,7 +598,7 @@
                 if (!isDesktopSyncAvailable()) {
                     desktopSyncLabel.textContent = 'Folder sync works in the desktop app.';
                     desktopSyncPath.textContent = 'Default root folder: ~/Desktop/Openmud';
-                    desktopSyncHelp.textContent = 'Use the desktop app to choose the sync folder, mirror project files, and keep local folder changes synced reliably.';
+                    desktopSyncHelp.textContent = 'Use the desktop app to choose the sync folder, mirror project files, and import local folder changes without deleting app files just because a mirror file is missing.';
                     if (btnDesktopSyncDownload) btnDesktopSyncDownload.hidden = false;
                     if (btnDesktopSyncSetup) btnDesktopSyncSetup.disabled = true;
                     if (btnDesktopSyncAll) btnDesktopSyncAll.disabled = true;
@@ -614,11 +614,11 @@
                 if (enabled) {
                     desktopSyncLabel.textContent = 'Desktop sync is on.';
                     desktopSyncPath.textContent = 'Root folder: ' + (rootPath || '~/Desktop/Openmud');
-                    desktopSyncHelp.textContent = 'All project documents are mirrored under that root. Edits in the Desktop folder sync back into openmud while the desktop app is open.';
+                    desktopSyncHelp.textContent = 'All project documents are mirrored under that root. Edits in the Desktop folder import back into openmud while the desktop app is open, and missing mirror files do not delete the app copy automatically.';
                 } else {
                     desktopSyncLabel.textContent = 'Desktop sync is off.';
                     desktopSyncPath.textContent = 'Default root folder: ~/Desktop/Openmud';
-                    desktopSyncHelp.textContent = 'Set up sync to create the root folder and mirror every project into it. Use Change folder first if you want a different location.';
+                    desktopSyncHelp.textContent = 'Set up sync to create the root folder and mirror every project into it. Mirror sync is non-destructive: missing mirror files do not automatically delete project documents inside openmud.';
                 }
                 if (btnDesktopSyncSetup) btnDesktopSyncSetup.hidden = enabled;
                 if (btnDesktopSyncAll) btnDesktopSyncAll.hidden = !enabled;
