@@ -70,6 +70,68 @@
     var _desktopSyncBootstrapped = false;
     var _desktopSyncStatusCache = null;
     var STORAGE_TASKS_SECTION_EXPANDED = 'mudrag_tasks_section_expanded';
+    var STORAGE_TASKS_LAST_SYNC = 'mudrag_tasks_last_sync';
+    var _taskSyncInFlight = false;
+
+    function syncTasksToServer(projectId) {
+        if (!_authToken || _taskSyncInFlight) return Promise.resolve(null);
+        var tasks = getTasksForProject(projectId);
+        if (!tasks.length) return Promise.resolve(null);
+        _taskSyncInFlight = true;
+        return fetch(API_BASE + '/tasks', {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ project_id: projectId, tasks: tasks })
+        }).then(function (r) {
+            _taskSyncInFlight = false;
+            if (!r.ok) return null;
+            return r.json().then(function (data) {
+                if (data && data.synced_at) {
+                    try { localStorage.setItem(STORAGE_TASKS_LAST_SYNC, data.synced_at); } catch (e) {}
+                }
+                if (data && Array.isArray(data.tasks)) {
+                    setTasksForProject(projectId, data.tasks);
+                }
+                return data;
+            });
+        }).catch(function () { _taskSyncInFlight = false; return null; });
+    }
+
+    function pullTasksFromServer(projectId) {
+        if (!_authToken) return Promise.resolve(null);
+        var since = '';
+        try { since = localStorage.getItem(STORAGE_TASKS_LAST_SYNC) || ''; } catch (e) {}
+        var url = API_BASE + '/tasks?project_id=' + encodeURIComponent(projectId || '');
+        if (since) url += '&since=' + encodeURIComponent(since);
+        return fetch(url, { headers: getAuthHeaders() }).then(function (r) {
+            if (!r.ok) return null;
+            return r.json().then(function (data) {
+                if (data && Array.isArray(data.tasks) && data.tasks.length) {
+                    var local = getTasksForProject(projectId);
+                    var localMap = {};
+                    local.forEach(function (t) { localMap[t.id] = t; });
+                    var merged = local.slice();
+                    data.tasks.forEach(function (serverTask) {
+                        var localTask = localMap[serverTask.id];
+                        if (!localTask) {
+                            if (!serverTask.deleted_at) merged.push(serverTask);
+                        } else if ((serverTask.updated_at || '') > (localTask.updated_at || '')) {
+                            var idx = merged.indexOf(localTask);
+                            if (serverTask.deleted_at) {
+                                if (idx >= 0) merged.splice(idx, 1);
+                            } else {
+                                if (idx >= 0) merged[idx] = serverTask;
+                            }
+                        }
+                    });
+                    setTasksForProject(projectId, merged);
+                    renderTasksSection();
+                }
+                try { localStorage.setItem(STORAGE_TASKS_LAST_SYNC, new Date().toISOString()); } catch (e) {}
+                return data;
+            });
+        }).catch(function () { return null; });
+    }
 
     function getAuthHeaders() {
         var h = { 'Content-Type': 'application/json' };
@@ -259,6 +321,7 @@
                 localStorage.setItem(STORAGE_SUBSCRIBER_EMAIL, session.user.email || '');
                 localStorage.removeItem('mudrag_dev_unlimited');
             } catch (e) {}
+            if (activeProjectId) pullTasksFromServer(activeProjectId);
         } else {
             _authToken = null;
         }
@@ -564,7 +627,17 @@
             })
         });
         setProjectData(projectId, next);
+        scheduleTaskSync(projectId);
         return deduped;
+    }
+
+    var _taskSyncTimers = {};
+    function scheduleTaskSync(projectId) {
+        if (!projectId || !_authToken) return;
+        clearTimeout(_taskSyncTimers[projectId]);
+        _taskSyncTimers[projectId] = setTimeout(function () {
+            syncTasksToServer(projectId);
+        }, 2000);
     }
 
     function addTaskToProject(projectId, task) {
@@ -1089,6 +1162,59 @@
             if (aView[i] !== bView[i]) return false;
         }
         return true;
+    }
+
+    function computeContentHash(data) {
+        if (!data || typeof crypto === 'undefined' || !crypto.subtle) return Promise.resolve('');
+        var buf = data instanceof ArrayBuffer ? data : new TextEncoder().encode(String(data));
+        return crypto.subtle.digest('SHA-256', buf).then(function (hash) {
+            var arr = new Uint8Array(hash);
+            var hex = '';
+            for (var i = 0; i < arr.length; i++) {
+                hex += ('0' + arr[i].toString(16)).slice(-2);
+            }
+            return hex;
+        }).catch(function () { return ''; });
+    }
+
+    function buildLocalManifest(projectId) {
+        return Promise.all([getFolders(projectId), getDocuments(projectId)]).then(function (results) {
+            var folders = results[0] || [];
+            var docs = results[1] || [];
+            var folderLookup = {};
+            folders.forEach(function (f) { folderLookup[f.id] = f.name || 'Folder'; });
+            var entries = [];
+            var hashPromises = docs.map(function (doc) {
+                return computeContentHash(doc.data).then(function (hash) {
+                    entries.push({
+                        doc_id: doc.id,
+                        doc_name: doc.name || '',
+                        folder_path: buildDocumentRelativePath(doc, folderLookup),
+                        content_hash: hash,
+                        byte_size: doc.data ? doc.data.byteLength || 0 : 0,
+                        version: doc.version || 1,
+                        source: doc.source || 'web',
+                        updated_at: doc.updated_at || doc.created_at || new Date().toISOString(),
+                        created_at: doc.created_at || new Date().toISOString()
+                    });
+                });
+            });
+            return Promise.all(hashPromises).then(function () { return entries; });
+        });
+    }
+
+    function syncManifestWithServer(projectId) {
+        if (!_authToken || !projectId) return Promise.resolve(null);
+        return buildLocalManifest(projectId).then(function (localEntries) {
+            return fetch(API_BASE + '/sync-manifest', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ project_id: projectId, entries: localEntries })
+            }).then(function (r) {
+                if (!r.ok) return null;
+                return r.json();
+            });
+        }).catch(function () { return null; });
     }
 
     function syncProjectFromDesktop(projectId) {
