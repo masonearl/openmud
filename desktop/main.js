@@ -20,12 +20,15 @@ if (!app.isPackaged && process.argv.length >= 2) {
 function handleDeepLink(url) {
   if (!url) return;
   try {
-    // openmud://auth?access_token=...&refresh_token=...
+    // openmud://auth?handoff=...
     const parsed = new URL(url);
     if (parsed.hostname === 'auth') {
+      const handoffCode = parsed.searchParams.get('handoff');
       const accessToken = parsed.searchParams.get('access_token');
       const refreshToken = parsed.searchParams.get('refresh_token');
-      if (accessToken && refreshToken && mainWindowRef && !mainWindowRef.isDestroyed()) {
+      if (handoffCode && mainWindowRef && !mainWindowRef.isDestroyed()) {
+        mainWindowRef.webContents.send('mudrag:auth-callback', { handoff_code: handoffCode });
+      } else if (accessToken && refreshToken && mainWindowRef && !mainWindowRef.isDestroyed()) {
         mainWindowRef.webContents.send('mudrag:auth-callback', { access_token: accessToken, refresh_token: refreshToken });
       }
     }
@@ -4348,6 +4351,13 @@ ipcMain.handle('mudrag:scan-local-files', async (_, opts = {}) => {
 ipcMain.handle('mudrag:read-local-file', async (_, filePath) => {
   if (!filePath) return { ok: false, error: 'No file path provided.' };
   return readFileForImport(filePath);
+});
+
+ipcMain.handle('mudrag:set-active-account', async (_, opts = {}) => {
+  const userId = String(opts.userId || '').trim() || 'anon';
+  const email = String(opts.email || '').trim();
+  const activeUser = storage.setActiveUser(userId);
+  return { ok: true, userId: activeUser, email };
 });
 
 ipcMain.handle('mudrag:desktop-sync-setup', async (_, opts = {}) => {

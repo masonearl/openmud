@@ -69,6 +69,7 @@
     var _desktopSyncIgnoreUntil = {};
     var _desktopSyncBootstrapped = false;
     var _desktopSyncStatusCache = null;
+    var _currentAccountScope = 'anon';
     var STORAGE_TASKS_SECTION_EXPANDED = 'mudrag_tasks_section_expanded';
 
     function getAuthHeaders() {
@@ -253,6 +254,8 @@
     }
 
     function syncAuthSession(session) {
+        var nextScope = (session && session.user && session.user.id) ? String(session.user.id) : 'anon';
+        var scopeChanged = nextScope !== _currentAccountScope;
         if (session && session.user && session.access_token) {
             _authToken = session.access_token;
             try {
@@ -262,7 +265,36 @@
         } else {
             _authToken = null;
         }
+        _currentAccountScope = nextScope;
         updateNavAuth();
+        if (scopeChanged) {
+            handleAccountScopeChange();
+        }
+    }
+
+    function handleAccountScopeChange() {
+        _desktopSyncStatusCache = null;
+        _desktopSyncBootstrapped = false;
+        activeProjectId = getActiveId();
+        activeChatId = activeProjectId ? getActiveChatId(activeProjectId) : null;
+        if (!activeProjectId) {
+            var scopedProjects = getProjects();
+            if (scopedProjects.length > 0) {
+                activeProjectId = scopedProjects[0].id;
+                setActiveId(activeProjectId);
+                activeChatId = getActiveChatId(activeProjectId);
+            } else if (!_authToken) {
+                ensureProject();
+                activeProjectId = getActiveId();
+                activeChatId = activeProjectId ? getActiveChatId(activeProjectId) : null;
+            }
+        }
+        renderProjects();
+        renderChats();
+        renderMessages();
+        renderTasksSection();
+        renderDocuments();
+        refreshDesktopSyncStatus(activeProjectId || '').catch(function () {});
     }
 
     function updateNavAuth() {
@@ -4366,6 +4398,31 @@
     var docClipboard = null; // { type: 'doc'|'folder', doc?, folder?, folderDocs? }
 
     function openDB() {
+        var accountState = window.openmudAccountState || null;
+        if (accountState && accountState.openScopedDatabase) {
+            return accountState.openScopedDatabase({
+                baseName: DB_NAME,
+                version: DB_VERSION,
+                upgrade: function (db, e) {
+                    if (!db.objectStoreNames.contains(DOC_STORE)) {
+                        var docStore = db.createObjectStore(DOC_STORE, { keyPath: 'id' });
+                        docStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                    if (e.oldVersion < 2 && db.objectStoreNames.contains(DOC_STORE)) {
+                        try {
+                            var docStore = e.target.transaction.objectStore(DOC_STORE);
+                            if (!docStore.indexNames.contains('folderId')) {
+                                docStore.createIndex('folderId', 'folderId', { unique: false });
+                            }
+                        } catch (err) { /* ignore */ }
+                    }
+                    if (!db.objectStoreNames.contains(FOLDERS_STORE)) {
+                        var folderStore = db.createObjectStore(FOLDERS_STORE, { keyPath: 'id' });
+                        folderStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                }
+            });
+        }
         return new Promise(function (resolve, reject) {
             var req = indexedDB.open(DB_NAME, DB_VERSION);
             req.onerror = function () { reject(req.error); };
@@ -7060,7 +7117,7 @@
     function ensureProject() {
         var projects = getProjects();
         if (projects.length === 0) {
-            createProject('Untitled project');
+            if (!getAuthHeaders().Authorization) createProject('Untitled project');
         } else if (!activeProjectId || !projects.find(function (p) { return p.id === activeProjectId; })) {
             switchProject(projects[0].id);
         }
@@ -9978,10 +10035,18 @@
             }
         }
     }
-    if (isToolServerOrigin || (useDesktopApi && toolPort)) {
-        loadStorageProjects(doInit);
+    function startAppAfterAuth() {
+        if (isToolServerOrigin || (useDesktopApi && toolPort)) {
+            loadStorageProjects(doInit);
+        } else {
+            doInit();
+        }
+    }
+
+    if (window.mudragAuthReady && typeof window.mudragAuthReady.then === 'function') {
+        window.mudragAuthReady.finally(startAppAfterAuth);
     } else {
-        doInit();
+        startAppAfterAuth();
     }
 
     (function initMobileSidebar() {

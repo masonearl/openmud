@@ -79,6 +79,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/account-state.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
         (function () {
@@ -275,13 +276,16 @@
                         var session = r.data && r.data.session;
                         var url;
                         if (session && session.access_token && session.refresh_token) {
-                            url = 'openmud://auth?access_token=' + encodeURIComponent(session.access_token)
-                                + '&refresh_token=' + encodeURIComponent(session.refresh_token);
+                            return mudragAuth.createDesktopHandoff(session).then(function (data) {
+                                url = 'openmud://auth?handoff=' + encodeURIComponent(data.handoff_code);
+                                window.location.href = url;
+                                setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
+                            });
                         } else {
                             url = 'openmud://try';
+                            window.location.href = url;
+                            setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
                         }
-                        window.location.href = url;
-                        setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
                     }).catch(function () {
                         window.location.href = 'openmud://try';
                         setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');

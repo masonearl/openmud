@@ -322,6 +322,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/account-state.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
         (function () {
@@ -424,6 +425,23 @@
             }
 
             function openDocsDb() {
+                if (window.openmudAccountState && window.openmudAccountState.openScopedDatabase) {
+                    return window.openmudAccountState.openScopedDatabase({
+                        baseName: DB_NAME,
+                        version: DB_VERSION,
+                        upgrade: function (db) {
+                            if (!db.objectStoreNames.contains(DOC_STORE)) {
+                                var docStore = db.createObjectStore(DOC_STORE, { keyPath: 'id' });
+                                docStore.createIndex('projectId', 'projectId', { unique: false });
+                                docStore.createIndex('folderId', 'folderId', { unique: false });
+                            }
+                            if (!db.objectStoreNames.contains(FOLDERS_STORE)) {
+                                var folderStore = db.createObjectStore(FOLDERS_STORE, { keyPath: 'id' });
+                                folderStore.createIndex('projectId', 'projectId', { unique: false });
+                            }
+                        }
+                    });
+                }
                 return new Promise(function (resolve, reject) {
                     var req = indexedDB.open(DB_NAME, DB_VERSION);
                     req.onerror = function () { reject(req.error || new Error('Could not open documents database.')); };
@@ -1312,15 +1330,21 @@
                         var session = r.data && r.data.session;
                         var url;
                         if (session && session.access_token && session.refresh_token) {
-                            url = 'openmud://auth?access_token=' + encodeURIComponent(session.access_token)
-                                + '&refresh_token=' + encodeURIComponent(session.refresh_token);
+                            return mudragAuth.createDesktopHandoff(session).then(function (data) {
+                                url = 'openmud://auth?handoff=' + encodeURIComponent(data.handoff_code);
+                                window.location.href = url;
+                                if (openAppStatus) {
+                                    openAppStatus.textContent = 'Opening openmud… If nothing happens, make sure the app is installed.';
+                                    openAppStatus.hidden = false;
+                                }
+                            });
                         } else {
                             url = 'openmud://try';
-                        }
-                        window.location.href = url;
-                        if (openAppStatus) {
-                            openAppStatus.textContent = 'Opening openmud\u2026 If nothing happens, make sure the app is installed.';
-                            openAppStatus.hidden = false;
+                            window.location.href = url;
+                            if (openAppStatus) {
+                                openAppStatus.textContent = 'Opening openmud… If nothing happens, make sure the app is installed.';
+                                openAppStatus.hidden = false;
+                            }
                         }
                     }).catch(function () {
                         window.location.href = 'openmud://try';

@@ -59,6 +59,89 @@
     return _clientPromise;
   }
 
+  function getAccountState() {
+    return (typeof window !== 'undefined' && window.openmudAccountState) ? window.openmudAccountState : null;
+  }
+
+  function syncDesktopAccountContext(session) {
+    if (typeof window === 'undefined' || !window.mudragDesktop || !window.mudragDesktop.setActiveAccount) return Promise.resolve();
+    var user = session && session.user ? session.user : null;
+    return window.mudragDesktop.setActiveAccount({
+      userId: user && user.id ? user.id : '',
+      email: user && user.email ? user.email : ''
+    }).catch(function () {
+      return { ok: false };
+    });
+  }
+
+  function syncAccountScope(session) {
+    var accountState = getAccountState();
+    if (accountState && typeof accountState.setActiveUser === 'function') {
+      accountState.setActiveUser(session || null);
+    }
+    return syncDesktopAccountContext(session);
+  }
+
+  function readJsonResponse(resp) {
+    if (!resp) return Promise.resolve(null);
+    return resp.text().then(function (text) {
+      if (!text) return null;
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        return { error: 'Unexpected server response.' };
+      }
+    }).catch(function () {
+      return null;
+    });
+  }
+
+  function createDesktopHandoff(session) {
+    if (!session || !session.access_token || !session.refresh_token) {
+      return Promise.reject(new Error('You need to sign in before opening the desktop app.'));
+    }
+    return fetch(getApiBase() + '/desktop-handoff/start', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token
+      },
+      body: JSON.stringify({
+        refresh_token: session.refresh_token
+      })
+    }).then(function (resp) {
+      return readJsonResponse(resp).then(function (data) {
+        if (!resp.ok) {
+          throw new Error((data && data.error) || 'Could not prepare desktop sign-in.');
+        }
+        if (!data || !data.handoff_code) {
+          throw new Error('Desktop handoff was not created.');
+        }
+        return data;
+      });
+    });
+  }
+
+  function redeemDesktopHandoff(handoffCode) {
+    var code = String(handoffCode || '').trim();
+    if (!code) return Promise.reject(new Error('Missing desktop handoff code.'));
+    return fetch(getApiBase() + '/desktop-handoff/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ handoff_code: code })
+    }).then(function (resp) {
+      return readJsonResponse(resp).then(function (data) {
+        if (!resp.ok) {
+          throw new Error((data && data.error) || 'Desktop sign-in failed.');
+        }
+        if (!data || !data.access_token || !data.refresh_token) {
+          throw new Error('Desktop sign-in response was incomplete.');
+        }
+        return data;
+      });
+    });
+  }
+
   function getSafeReturnPath() {
     if (typeof window === 'undefined' || !window.location) return '/try';
     var path = window.location.pathname || '/';
@@ -97,7 +180,22 @@
   function initDesktopAuthBridge() {
     if (typeof window === 'undefined' || !window.mudragDesktop || !window.mudragDesktop.onAuthCallback) return;
     window.mudragDesktop.onAuthCallback(function (data) {
-      if (!data || !data.access_token || !data.refresh_token) return;
+      if (!data) return;
+      if (data.handoff_code) {
+        redeemDesktopHandoff(data.handoff_code).then(function (tokens) {
+          return getClient().then(function (client) {
+            if (!client) return null;
+            return client.auth.setSession({
+              access_token: tokens.access_token,
+              refresh_token: tokens.refresh_token
+            });
+          });
+        }).catch(function (e) {
+          console.warn('[mudrag] desktop handoff redeem failed', e);
+        });
+        return;
+      }
+      if (!data.access_token || !data.refresh_token) return;
       getClient().then(function (client) {
         if (!client) return;
         client.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token })
@@ -156,21 +254,51 @@
     },
     signOut: function () {
       return getClient().then(function (client) {
-        if (!client) return Promise.resolve();
-        return client.auth.signOut();
+        if (!client) {
+          return syncAccountScope(null).then(function () { return null; });
+        }
+        return client.auth.signOut().then(function (result) {
+          return syncAccountScope(null).then(function () {
+            return result;
+          });
+        }).catch(function (err) {
+          return syncAccountScope(null).then(function () {
+            throw err;
+          });
+        });
       });
     },
     getSession: function () {
       return getClient().then(function (client) {
-        if (!client) return { data: { session: null }, error: null };
-        return client.auth.getSession();
+        if (!client) {
+          return syncAccountScope(null).then(function () {
+            return { data: { session: null }, error: null };
+          });
+        }
+        return client.auth.getSession().then(function (result) {
+          var session = result && result.data ? result.data.session : null;
+          return syncAccountScope(session).then(function () {
+            return result;
+          });
+        });
       });
     },
     onAuthStateChange: function (cb) {
       getClient().then(function (client) {
         if (!client) return;
-        client.auth.onAuthStateChange(cb);
+        client.auth.onAuthStateChange(function (event, session) {
+          syncAccountScope(session).then(function () {
+            cb(event, session);
+          });
+        });
       });
     },
+    createDesktopHandoff: createDesktopHandoff
   };
+
+  window.mudragAuthReady = window.mudragAuth.getSession()
+    .then(function (result) { return result; })
+    .catch(function () {
+      return { data: { session: null }, error: null };
+    });
 })();

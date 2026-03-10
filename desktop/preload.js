@@ -6,6 +6,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 const desktopBridge = {
   openFolder:      () => ipcRenderer.invoke('mudrag:open-folder'),
+  setActiveAccount: (opts) => ipcRenderer.invoke('mudrag:set-active-account', opts),
   openMail:        (opts) => ipcRenderer.invoke('mudrag:open-mail', opts),
   importMailAttachments: (opts) => ipcRenderer.invoke('mudrag:import-mail-attachments', opts),
   openExternal:    (url) => ipcRenderer.invoke('mudrag:open-external', url),
