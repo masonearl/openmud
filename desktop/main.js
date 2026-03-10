@@ -5,6 +5,7 @@ if (process.env.DEV === '1' || process.env.NODE_ENV === 'development') {
 const { app, BrowserWindow, shell, dialog, Menu, ipcMain } = require('electron');
 const path = require('path');
 const http = require('http');
+const crypto = require('crypto');
 
 const isDev = process.env.DEV === '1' || process.env.NODE_ENV === 'development';
 
@@ -20,13 +21,21 @@ if (!app.isPackaged && process.argv.length >= 2) {
 function handleDeepLink(url) {
   if (!url) return;
   try {
-    // openmud://auth?access_token=...&refresh_token=...
     const parsed = new URL(url);
     if (parsed.hostname === 'auth') {
       const accessToken = parsed.searchParams.get('access_token');
       const refreshToken = parsed.searchParams.get('refresh_token');
-      if (accessToken && refreshToken && mainWindowRef && !mainWindowRef.isDestroyed()) {
-        mainWindowRef.webContents.send('mudrag:auth-callback', { access_token: accessToken, refresh_token: refreshToken });
+      if (accessToken && refreshToken) {
+        pendingAuthCallback = { access_token: accessToken, refresh_token: refreshToken };
+        flushPendingAuthCallback();
+      }
+    } else {
+      const rawPath = ((parsed.hostname && parsed.hostname !== 'openmud') ? ('/' + parsed.hostname) : '') + (parsed.pathname || '');
+      const safePath = rawPath && rawPath !== '/' ? rawPath : '/try';
+      const port = activeToolPort || TOOL_SERVER_PORT;
+      const targetUrl = `http://127.0.0.1:${port}${safePath}${parsed.search || ''}${parsed.hash || ''}`;
+      if (mainWindowRef && !mainWindowRef.isDestroyed()) {
+        mainWindowRef.loadURL(targetUrl).catch(() => {});
       }
     }
   } catch (e) {
@@ -44,6 +53,111 @@ app.on('open-url', (event, url) => {
 
 let mainWindowRef = null;
 let activeToolPort = null;
+let pendingAuthCallback = null;
+const pendingDesktopAuthHandoffs = new Map();
+const TOOL_SERVER_ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/(?:www\.)?openmud\.ai$/,
+  /^https:\/\/openmud-[a-z0-9-]+\.vercel\.app$/,
+  /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/,
+];
+const desktopAuthAttemptState = {
+  startByIp: new Map(),
+  completeByIp: new Map(),
+  completeByRequest: new Map(),
+};
+
+function isAllowedToolServerOrigin(origin) {
+  const normalizedOrigin = String(origin || '').trim();
+  if (!normalizedOrigin) return false;
+  return TOOL_SERVER_ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(normalizedOrigin));
+}
+
+function applyToolServerCors(req, res) {
+  const origin = String(req.headers.origin || '').trim();
+  if (isAllowedToolServerOrigin(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
+function getToolServerClientIp(req) {
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return forwarded || req.socket?.remoteAddress || 'unknown';
+}
+
+function consumeRateLimit(map, key, limit, windowMs) {
+  const normalizedKey = String(key || '').trim();
+  if (!normalizedKey) return { ok: true, retryAfterMs: 0 };
+  const now = Date.now();
+  const existing = map.get(normalizedKey);
+  const entry = (!existing || existing.resetAt <= now)
+    ? { count: 0, resetAt: now + windowMs }
+    : existing;
+  if (entry.count >= limit) {
+    map.set(normalizedKey, entry);
+    return { ok: false, retryAfterMs: Math.max(0, entry.resetAt - now) };
+  }
+  entry.count += 1;
+  map.set(normalizedKey, entry);
+  return { ok: true, retryAfterMs: 0 };
+}
+
+function sendJson(res, statusCode, payload) {
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(payload));
+}
+
+function flushPendingAuthCallback() {
+  if (!pendingAuthCallback || !mainWindowRef || mainWindowRef.isDestroyed()) return;
+  try {
+    mainWindowRef.webContents.send('mudrag:auth-callback', pendingAuthCallback);
+    pendingAuthCallback = null;
+  } catch (err) {}
+}
+
+function cleanupExpiredDesktopAuthHandoffs() {
+  const now = Date.now();
+  pendingDesktopAuthHandoffs.forEach((value, key) => {
+    if (!value || value.expiresAt <= now) pendingDesktopAuthHandoffs.delete(key);
+  });
+}
+
+function createDesktopAuthHandoff(opts = {}) {
+  cleanupExpiredDesktopAuthHandoffs();
+  const requestId = crypto.randomUUID();
+  const expiresAt = Date.now() + (5 * 60 * 1000);
+  pendingDesktopAuthHandoffs.set(requestId, {
+    requestId,
+    nextPath: opts.nextPath || '/try',
+    expiresAt,
+  });
+  return {
+    ok: true,
+    requestId,
+    port: activeToolPort || TOOL_SERVER_PORT,
+    expiresAt: new Date(expiresAt).toISOString(),
+  };
+}
+
+function completeDesktopAuthHandoff(requestId, tokens) {
+  cleanupExpiredDesktopAuthHandoffs();
+  const handoff = pendingDesktopAuthHandoffs.get(requestId);
+  if (!handoff) return { ok: false, error: 'Desktop auth request not found or expired.' };
+  pendingDesktopAuthHandoffs.delete(requestId);
+  const accessToken = tokens && tokens.access_token;
+  const refreshToken = tokens && tokens.refresh_token;
+  if (!accessToken || !refreshToken) return { ok: false, error: 'Missing auth tokens.' };
+  pendingAuthCallback = { access_token: accessToken, refresh_token: refreshToken };
+  flushPendingAuthCallback();
+  return {
+    ok: true,
+    nextPath: handoff.nextPath || '/try',
+    deliveredAt: new Date().toISOString(),
+  };
+}
+
 // Dev: reload window when web files change (no full restart)
 if (isDev) {
   try {
@@ -92,6 +206,7 @@ const desktopSyncState = {
   rootPath: '',
   watcher: null,
   eventTimers: {},
+  ignoreUntil: 0,
 };
 
 function slugifyProjectName(name) {
@@ -189,15 +304,8 @@ function ensureProjectFolders(projectDir, folders) {
   });
 }
 
-function removeExtraPaths(projectDir, desiredFiles) {
-  const current = [];
-  listRelativeFilesRecursive(projectDir, projectDir, current);
-  current.forEach((file) => {
-    const rel = String(file.relativePath || '').replace(/\\/g, '/');
-    if (!desiredFiles.has(rel)) {
-      try { fs.unlinkSync(file.path); } catch (err) {}
-    }
-  });
+function suspendDesktopSyncWatcher(ms) {
+  desktopSyncState.ignoreUntil = Math.max(desktopSyncState.ignoreUntil || 0, Date.now() + (ms || 0));
 }
 
 function pruneEmptyDirs(rootDir) {
@@ -244,6 +352,7 @@ function startDesktopSyncWatcher(rootPath) {
   desktopSyncState.rootPath = targetRoot;
   try {
     desktopSyncState.watcher = fs.watch(targetRoot, { recursive: true }, (_eventType, filename) => {
+      if (desktopSyncState.ignoreUntil && Date.now() < desktopSyncState.ignoreUntil) return;
       const rel = String(filename || '').replace(/\\/g, '/').trim();
       if (!rel || rel.startsWith('.')) return;
       const projectName = rel.split('/')[0];
@@ -275,18 +384,16 @@ function writeProjectSnapshotToDesktop(opts) {
     try { fs.renameSync(previousDir, desiredDir); } catch (err) {}
   }
   ensureProjectFolders(desiredDir, payload.folders || []);
-  const desiredFiles = new Set();
+  suspendDesktopSyncWatcher(4000);
   (payload.files || []).forEach((file) => {
     const relPath = String(file && file.relativePath || '').replace(/^\/+/, '').replace(/\\/g, '/');
     if (!relPath || !file.base64) return;
-    desiredFiles.add(relPath);
     const targetPath = path.join(desiredDir, relPath);
     ensureDirSync(path.dirname(targetPath));
     try {
       fs.writeFileSync(targetPath, Buffer.from(String(file.base64), 'base64'));
     } catch (err) {}
   });
-  removeExtraPaths(desiredDir, desiredFiles);
   pruneEmptyDirs(desiredDir);
   const nextProjects = {};
   nextProjects[payload.projectId] = {
@@ -3165,11 +3272,9 @@ async function recordDesktopUsage(authToken, payload) {
 
 function startToolServer(cb) {
   const server = http.createServer(async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    applyToolServerCors(req, res);
     if (req.method === 'OPTIONS') {
-      res.writeHead(200);
+      res.writeHead(isAllowedToolServerOrigin(req.headers.origin) ? 200 : 403);
       res.end();
       return;
     }
@@ -3208,6 +3313,71 @@ function startToolServer(cb) {
             models: [],
           }));
         });
+      return;
+    }
+    if (req.method === 'POST' && pathname === '/api/desktop-auth/start') {
+      if (!isAllowedToolServerOrigin(req.headers.origin)) {
+        sendJson(res, 403, { ok: false, error: 'Origin not allowed.' });
+        return;
+      }
+      const startLimit = consumeRateLimit(
+        desktopAuthAttemptState.startByIp,
+        `start:${getToolServerClientIp(req)}`,
+        12,
+        60 * 1000
+      );
+      if (!startLimit.ok) {
+        res.setHeader('Retry-After', String(Math.ceil(startLimit.retryAfterMs / 1000)));
+        sendJson(res, 429, { ok: false, error: 'Too many auth handoff attempts. Try again shortly.' });
+        return;
+      }
+      let body = '';
+      req.on('data', (c) => { body += c; });
+      req.on('end', () => {
+        try {
+          const data = JSON.parse(body || '{}');
+          const result = createDesktopAuthHandoff({ nextPath: data.nextPath || '/try' });
+          sendJson(res, 200, result);
+        } catch (e) {
+          sendJson(res, 500, { ok: false, error: e.message });
+        }
+      });
+      return;
+    }
+    if (req.method === 'POST' && pathname === '/api/desktop-auth/complete') {
+      if (!isAllowedToolServerOrigin(req.headers.origin)) {
+        sendJson(res, 403, { ok: false, error: 'Origin not allowed.' });
+        return;
+      }
+      let body = '';
+      req.on('data', (c) => { body += c; });
+      req.on('end', () => {
+        try {
+          const data = JSON.parse(body || '{}');
+          const ipLimit = consumeRateLimit(
+            desktopAuthAttemptState.completeByIp,
+            `complete-ip:${getToolServerClientIp(req)}`,
+            20,
+            60 * 1000
+          );
+          const requestLimit = consumeRateLimit(
+            desktopAuthAttemptState.completeByRequest,
+            `complete-request:${String(data.requestId || '').trim() || 'unknown'}`,
+            5,
+            5 * 60 * 1000
+          );
+          if (!ipLimit.ok || !requestLimit.ok) {
+            const retryAfterMs = Math.max(ipLimit.retryAfterMs || 0, requestLimit.retryAfterMs || 0);
+            res.setHeader('Retry-After', String(Math.ceil(retryAfterMs / 1000)));
+            sendJson(res, 429, { ok: false, error: 'Too many auth redemption attempts. Try again shortly.' });
+            return;
+          }
+          const result = completeDesktopAuthHandoff(data.requestId, data);
+          sendJson(res, result.ok ? 200 : 400, result);
+        } catch (e) {
+          sendJson(res, 500, { ok: false, error: e.message });
+        }
+      });
       return;
     }
     if (req.method === 'GET' && pathname === '/api/storage/rates') {
@@ -3638,7 +3808,7 @@ function startToolServer(cb) {
       });
       return;
     }
-    if ((req.method === 'POST' || req.method === 'PUT') && pathname.startsWith('/api/') && pathname !== '/api/chat') {
+    if ((req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') && pathname.startsWith('/api/') && pathname !== '/api/chat') {
       let body = '';
       req.on('data', (c) => { body += c; });
       req.on('end', () => {
@@ -3769,6 +3939,7 @@ function createWindow(toolPort) {
   win.webContents.once('did-finish-load', () => {
     win.setTitle('');
     emitUpdateState();
+    flushPendingAuthCallback();
   });
   if (isDev) win.webContents.openDevTools();
 
@@ -4224,6 +4395,10 @@ ipcMain.handle('mudrag:open-external', async (_, url) => {
   return { ok: false, error: 'Invalid URL' };
 });
 
+ipcMain.handle('mudrag:begin-auth-handoff', async (_, opts = {}) => {
+  return createDesktopAuthHandoff({ nextPath: opts.nextPath || '/try' });
+});
+
 ipcMain.handle('mudrag:set-window-title', async (_, title) => {
   const w = BrowserWindow.getFocusedWindow() || mainWindowRef;
   if (w && !w.isDestroyed()) w.setTitle(title ?? '');
@@ -4352,6 +4527,7 @@ ipcMain.handle('mudrag:read-local-file', async (_, filePath) => {
 
 ipcMain.handle('mudrag:desktop-sync-setup', async (_, opts = {}) => {
   const rootPath = opts.rootPath || getDesktopSyncConfig().rootPath || getDefaultDesktopSyncRoot();
+  suspendDesktopSyncWatcher(4000);
   ensureDirSync(rootPath);
   const projectMap = {};
   const projects = Array.isArray(opts.projects) ? opts.projects : [];
@@ -4406,6 +4582,7 @@ ipcMain.handle('mudrag:desktop-sync-choose-root', async () => {
     return { ok: false, cancelled: true, rootPath: currentRoot };
   }
   const rootPath = result.filePaths[0];
+  suspendDesktopSyncWatcher(4000);
   ensureDirSync(rootPath);
   const cfg = setDesktopSyncConfig({ rootPath, enabled: true });
   startDesktopSyncWatcher(rootPath);

@@ -37,6 +37,8 @@
     var STORAGE_SUB_TIER = 'mudrag_subscription_tier';
     var STORAGE_PROVIDER_KEYS = 'mudrag_provider_keys_v1';
     var STORAGE_OC_TOKEN = 'openmud_oc_relay_token';
+    var STORAGE_COMPANY_PROFILE = 'mudrag_company_profile';
+    var STORAGE_COMPANY_LOGO = 'mudrag_company_logo';
     var RELAY_STATUS_BASE = 'https://openmud-production.up.railway.app';
     var TASKS_PROJECT_NAME = 'Tasks';
     var DESKTOP_SYNC_FOLDER_NAME = 'Openmud';
@@ -70,6 +72,94 @@
     var _desktopSyncBootstrapped = false;
     var _desktopSyncStatusCache = null;
     var STORAGE_TASKS_SECTION_EXPANDED = 'mudrag_tasks_section_expanded';
+    var _storageScopeUserId = '';
+    var STORAGE_PROJECTS_BASE = STORAGE_PROJECTS;
+    var STORAGE_ACTIVE_BASE = STORAGE_ACTIVE;
+    var STORAGE_MESSAGES_BASE = STORAGE_MESSAGES;
+    var STORAGE_PROJECT_DATA_BASE = STORAGE_PROJECT_DATA;
+    var STORAGE_ACTIVE_CHAT_BASE = STORAGE_ACTIVE_CHAT;
+    var STORAGE_MODEL_BASE = STORAGE_MODEL;
+    var STORAGE_USAGE_BASE = STORAGE_USAGE;
+    var STORAGE_SUBSCRIBER_EMAIL_BASE = STORAGE_SUBSCRIBER_EMAIL;
+    var STORAGE_SUB_ACTIVE_BASE = STORAGE_SUB_ACTIVE;
+    var STORAGE_SUB_TIER_BASE = STORAGE_SUB_TIER;
+    var STORAGE_PROVIDER_KEYS_BASE = STORAGE_PROVIDER_KEYS;
+    var STORAGE_OC_TOKEN_BASE = STORAGE_OC_TOKEN;
+    var STORAGE_COMPANY_PROFILE_BASE = STORAGE_COMPANY_PROFILE;
+    var STORAGE_COMPANY_LOGO_BASE = STORAGE_COMPANY_LOGO;
+    var ACCOUNT_SCOPED_STORAGE_BASE_KEYS = [
+        STORAGE_PROJECTS_BASE,
+        STORAGE_ACTIVE_BASE,
+        STORAGE_MESSAGES_BASE,
+        STORAGE_PROJECT_DATA_BASE,
+        STORAGE_ACTIVE_CHAT_BASE,
+        STORAGE_MODEL_BASE,
+        STORAGE_USAGE_BASE,
+        STORAGE_SUBSCRIBER_EMAIL_BASE,
+        STORAGE_SUB_ACTIVE_BASE,
+        STORAGE_SUB_TIER_BASE,
+        STORAGE_PROVIDER_KEYS_BASE,
+        STORAGE_OC_TOKEN_BASE,
+        STORAGE_COMPANY_PROFILE_BASE,
+        STORAGE_COMPANY_LOGO_BASE
+    ];
+
+    function getScopedStorageKey(baseKey, userId) {
+        if (window.mudragAuth && mudragAuth.getScopedStorageKey) {
+            return mudragAuth.getScopedStorageKey(baseKey, { userId: userId || '' });
+        }
+        var base = String(baseKey || '').trim();
+        var normalizedUserId = String(userId || '').trim();
+        return normalizedUserId ? (base + '::user::' + normalizedUserId) : base;
+    }
+
+    function readCurrentAuthUserId() {
+        try {
+            if (window.mudragAuth && mudragAuth.getScopedStorageKey) {
+                return String(localStorage.getItem('openmud_auth_user_id_v1') || '').trim();
+            }
+        } catch (e) {}
+        return '';
+    }
+
+    function migrateLegacyScopedStorage(userId) {
+        var normalizedUserId = String(userId || '').trim();
+        if (!normalizedUserId) return;
+        ACCOUNT_SCOPED_STORAGE_BASE_KEYS.forEach(function (baseKey) {
+            try {
+                var scopedKey = getScopedStorageKey(baseKey, normalizedUserId);
+                if (localStorage.getItem(scopedKey) == null) {
+                    var legacyValue = localStorage.getItem(baseKey);
+                    if (legacyValue != null) localStorage.setItem(scopedKey, legacyValue);
+                }
+                // Leave the legacy key in place so other user scopes can migrate safely.
+            } catch (e) {}
+        });
+    }
+
+    function applyStorageScope(userId) {
+        var normalizedUserId = String(userId || '').trim();
+        if (normalizedUserId === _storageScopeUserId) return false;
+        if (normalizedUserId) migrateLegacyScopedStorage(normalizedUserId);
+        _storageScopeUserId = normalizedUserId;
+        STORAGE_PROJECTS = getScopedStorageKey(STORAGE_PROJECTS_BASE, normalizedUserId);
+        STORAGE_ACTIVE = getScopedStorageKey(STORAGE_ACTIVE_BASE, normalizedUserId);
+        STORAGE_MESSAGES = getScopedStorageKey(STORAGE_MESSAGES_BASE, normalizedUserId);
+        STORAGE_PROJECT_DATA = getScopedStorageKey(STORAGE_PROJECT_DATA_BASE, normalizedUserId);
+        STORAGE_ACTIVE_CHAT = getScopedStorageKey(STORAGE_ACTIVE_CHAT_BASE, normalizedUserId);
+        STORAGE_MODEL = getScopedStorageKey(STORAGE_MODEL_BASE, normalizedUserId);
+        STORAGE_USAGE = getScopedStorageKey(STORAGE_USAGE_BASE, normalizedUserId);
+        STORAGE_SUBSCRIBER_EMAIL = getScopedStorageKey(STORAGE_SUBSCRIBER_EMAIL_BASE, normalizedUserId);
+        STORAGE_SUB_ACTIVE = getScopedStorageKey(STORAGE_SUB_ACTIVE_BASE, normalizedUserId);
+        STORAGE_SUB_TIER = getScopedStorageKey(STORAGE_SUB_TIER_BASE, normalizedUserId);
+        STORAGE_PROVIDER_KEYS = getScopedStorageKey(STORAGE_PROVIDER_KEYS_BASE, normalizedUserId);
+        STORAGE_OC_TOKEN = getScopedStorageKey(STORAGE_OC_TOKEN_BASE, normalizedUserId);
+        STORAGE_COMPANY_PROFILE = getScopedStorageKey(STORAGE_COMPANY_PROFILE_BASE, normalizedUserId);
+        STORAGE_COMPANY_LOGO = getScopedStorageKey(STORAGE_COMPANY_LOGO_BASE, normalizedUserId);
+        return true;
+    }
+
+    applyStorageScope(readCurrentAuthUserId());
 
     function getAuthHeaders() {
         var h = { 'Content-Type': 'application/json' };
@@ -241,7 +331,7 @@
         } catch (e) {}
         // Forward company profile for proposal/document generation
         try {
-            var cp = localStorage.getItem('mudrag_company_profile');
+            var cp = localStorage.getItem(STORAGE_COMPANY_PROFILE);
             if (cp) h['X-Company-Profile'] = cp;
         } catch (e) {}
         // Forward UI theme so generated PDFs match the user's preference
@@ -253,6 +343,8 @@
     }
 
     function syncAuthSession(session) {
+        var nextUserId = session && session.user ? session.user.id : '';
+        var storageScopeChanged = applyStorageScope(nextUserId);
         if (session && session.user && session.access_token) {
             _authToken = session.access_token;
             try {
@@ -261,6 +353,20 @@
             } catch (e) {}
         } else {
             _authToken = null;
+            try {
+                localStorage.removeItem(STORAGE_SUBSCRIBER_EMAIL);
+                localStorage.removeItem(STORAGE_SUB_ACTIVE);
+                localStorage.removeItem(STORAGE_SUB_TIER);
+            } catch (e) {}
+        }
+        if (storageScopeChanged) {
+            activeProjectId = getActiveId();
+            activeChatId = activeProjectId ? getActiveChatId(activeProjectId) : null;
+            if (typeof renderProjects === 'function') renderProjects();
+            if (typeof renderChats === 'function') renderChats();
+            if (typeof renderMessages === 'function') renderMessages();
+            if (typeof renderTasksSection === 'function') renderTasksSection();
+            if (typeof renderDocuments === 'function') renderDocuments();
         }
         updateNavAuth();
     }
@@ -318,11 +424,9 @@
         fetch(API_BASE + '/projects', { method: 'GET', headers: getAuthHeaders() })
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (data) {
-                if (data && Array.isArray(data.projects) && data.projects.length > 0) {
-                    localStorage.setItem(STORAGE_PROJECTS, JSON.stringify(data.projects));
-                    if (cb) cb(data.projects);
-                }
-                if (cb) cb();
+                var projects = (data && Array.isArray(data.projects)) ? data.projects : [];
+                localStorage.setItem(STORAGE_PROJECTS, JSON.stringify(projects));
+                if (cb) cb(projects);
             })
             .catch(function () { if (cb) cb(); });
     }
@@ -1106,12 +1210,10 @@
                 currentByPath[buildDocumentRelativePath(doc, folderLookup)] = doc;
             });
             var desktopFiles = Array.isArray(listing.files) ? listing.files : [];
-            var desktopPaths = {};
             var work = Promise.resolve();
             desktopFiles.forEach(function (fileInfo) {
                 work = work.then(function () {
                     var relPath = normalizeRelativePath(fileInfo.relativePath);
-                    desktopPaths[relPath] = true;
                     return window.mudragDesktop.readLocalFile(fileInfo.path).then(function (imported) {
                         if (!imported || !imported.ok || !imported.base64) return;
                         var data = base64ToArrayBuffer(imported.base64);
@@ -1142,17 +1244,10 @@
                 });
             });
             return work.then(function () {
-                var deletions = docs.filter(function (doc) {
-                    return !desktopPaths[buildDocumentRelativePath(doc, folderLookup)];
-                }).map(function (doc) {
-                    return deleteDocument(doc.id);
-                });
-                return Promise.all(deletions).then(function () {
-                    renderDocuments();
-                    renderTasksSection();
-                    if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
-                    return { ok: true, imported: desktopFiles.length, deleted: deletions.length };
-                });
+                renderDocuments();
+                renderTasksSection();
+                if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
+                return { ok: true, imported: desktopFiles.length, deleted: 0 };
             });
         });
     }
@@ -1608,52 +1703,32 @@
                                 });
                                 if (cb) cb(active, tier);
                             } else {
-                                runLegacySubscriptionCheck(cb);
+                                try { localStorage.setItem(STORAGE_SUB_ACTIVE, 'false'); localStorage.setItem(STORAGE_SUB_TIER, 'free'); } catch (e) {}
+                                if (cb) cb(false, 'free');
                             }
                         })
-                        .catch(function () { runLegacySubscriptionCheck(cb); });
+                        .catch(function () {
+                            try { localStorage.setItem(STORAGE_SUB_ACTIVE, 'false'); localStorage.setItem(STORAGE_SUB_TIER, 'free'); } catch (e) {}
+                            if (cb) cb(false, 'free');
+                        });
                 } else {
                     syncAuthSession(null);
-                    runLegacySubscriptionCheck(cb);
+                    try { localStorage.setItem(STORAGE_SUB_ACTIVE, 'false'); localStorage.setItem(STORAGE_SUB_TIER, 'free'); } catch (e) {}
+                    if (cb) cb(false, 'free');
                 }
-            }).catch(function () { runLegacySubscriptionCheck(cb); });
+            }).catch(function () {
+                try { localStorage.setItem(STORAGE_SUB_ACTIVE, 'false'); localStorage.setItem(STORAGE_SUB_TIER, 'free'); } catch (e) {}
+                if (cb) cb(false, 'free');
+            });
         } else {
-            runLegacySubscriptionCheck(cb);
+            try { localStorage.setItem(STORAGE_SUB_ACTIVE, 'false'); localStorage.setItem(STORAGE_SUB_TIER, 'free'); } catch (e) {}
+            if (cb) cb(false, 'free');
         }
     }
 
     function runLegacySubscriptionCheck(cb) {
-        var email = localStorage.getItem(STORAGE_SUBSCRIBER_EMAIL);
-        if (!email) {
-            try { localStorage.setItem(STORAGE_SUB_ACTIVE, 'false'); localStorage.setItem(STORAGE_SUB_TIER, 'free'); } catch (e) {}
-            if (cb) cb(false, 'free');
-            return;
-        }
-        fetch(API_BASE + '/subscription-status', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ email: email })
-        }).then(function (r) { return r.json(); }).then(function (data) {
-            var active = !!(data && data.active);
-            var tier = (data && data.tier) || 'free';
-            try {
-                localStorage.setItem(STORAGE_SUB_ACTIVE, active ? 'true' : 'false');
-                localStorage.setItem(STORAGE_SUB_TIER, tier);
-            } catch (e) {}
-            syncUsageFromApi();
-            loadProjectsFromApi(function (projects) {
-                if (projects && projects.length > 0) {
-                    renderProjects();
-                    if (!activeProjectId || !getProjects().find(function (p) { return p.id === activeProjectId; })) {
-                        switchProject(projects[0].id);
-                    }
-                }
-            });
-            if (cb) cb(active, tier);
-        }).catch(function () {
-            try { localStorage.setItem(STORAGE_SUB_ACTIVE, 'false'); localStorage.setItem(STORAGE_SUB_TIER, 'free'); } catch (e) {}
-            if (cb) cb(false, 'free');
-        });
+        try { localStorage.setItem(STORAGE_SUB_ACTIVE, 'false'); localStorage.setItem(STORAGE_SUB_TIER, 'free'); } catch (e) {}
+        if (cb) cb(false, 'free');
     }
 
     function syncUsageFromApi() {
@@ -1718,6 +1793,11 @@
     var formNewProject = document.getElementById('form-new-project');
     var inputProjectName = document.getElementById('input-project-name');
     var btnCancelProject = document.getElementById('btn-cancel-project');
+    var modalNewTask = document.getElementById('modal-new-task');
+    var formNewTask = document.getElementById('form-new-task');
+    var inputTaskTitle = document.getElementById('input-task-title');
+    var inputTaskDueDate = document.getElementById('input-task-due-date');
+    var btnCancelTask = document.getElementById('btn-cancel-task');
     var activeProjectId = null;
     var lastEstimatePayload = null;
     var lastEstimateResult = null;
@@ -4055,6 +4135,12 @@
         if (!p) return;
         projects = projects.filter(function (x) { return x.id !== projectId; });
         setProjects(projects);
+        if (getAuthHeaders().Authorization) {
+            fetch(API_BASE + '/projects?project_id=' + encodeURIComponent(projectId), {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            }).catch(function () {});
+        }
         // Remove chats for this project from localStorage
         try {
             var allChatsRaw = localStorage.getItem('mudrag_chats');
@@ -7920,7 +8006,7 @@
                 project_name: activeProject && activeProject.name ? activeProject.name : undefined,
                 project_id: activeProjectId || undefined,
                 file_reference_context: getFileReferenceContext(),
-                company_logo: (function () { try { return localStorage.getItem('mudrag_company_logo') || undefined; } catch (e) {} })()
+                company_logo: (function () { try { return localStorage.getItem(STORAGE_COMPANY_LOGO) || undefined; } catch (e) {} })()
             };
             if (useTools && lastEstimatePayload && lastEstimateResult) {
                 payload.estimate_context = {
@@ -8376,17 +8462,59 @@
         if (name) createProject(name);
     });
 
+    function closeNewTaskModal() {
+        if (!modalNewTask) return;
+        modalNewTask.hidden = true;
+        if (formNewTask) formNewTask.reset();
+    }
+
+    function openNewTaskModal() {
+        if (!modalNewTask || !activeProjectId) return;
+        if (formNewTask) formNewTask.reset();
+        modalNewTask.hidden = false;
+        if (inputTaskTitle) {
+            setTimeout(function () {
+                inputTaskTitle.focus();
+                inputTaskTitle.select();
+            }, 0);
+        }
+    }
+
     if (btnNewTask) {
         btnNewTask.addEventListener('click', function () {
             if (!activeProjectId) return;
-            var title = prompt('Task title:');
-            if (!title) return;
-            var dueAt = prompt('Due date (optional, YYYY-MM-DD):', '');
+            openNewTaskModal();
+        });
+    }
+
+    if (modalNewTask) {
+        modalNewTask.addEventListener('click', function (e) {
+            if (e.target === modalNewTask) closeNewTaskModal();
+        });
+    }
+
+    if (btnCancelTask) {
+        btnCancelTask.addEventListener('click', function () {
+            closeNewTaskModal();
+        });
+    }
+
+    if (formNewTask) {
+        formNewTask.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!activeProjectId) return;
+            var title = inputTaskTitle ? inputTaskTitle.value.trim() : '';
+            if (!title) {
+                if (inputTaskTitle) inputTaskTitle.focus();
+                return;
+            }
+            var dueAt = inputTaskDueDate ? String(inputTaskDueDate.value || '').trim() : '';
             addTaskToProject(activeProjectId, {
                 title: title,
                 due_at: isValidTaskDate(dueAt) ? dueAt : null,
                 source: 'manual'
             });
+            closeNewTaskModal();
             renderTasksSection();
             showToast('Task added to ' + getTaskProjectLabel(activeProjectId));
         });
