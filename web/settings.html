@@ -33,6 +33,7 @@
 
                 <!-- Account -->
                 <div class="settings-card st-card st-anim-1" id="auth-wrap">
+                    <p class="st-scope-label">Cloud account</p>
                     <h2 class="settings-card-title st-card-title">Account</h2>
 
                     <div id="auth-signed-out" hidden>
@@ -73,6 +74,7 @@
 
                 <!-- Provider API keys -->
                 <div class="settings-card st-card st-anim-2" id="provider-keys-wrap">
+                    <p class="st-scope-label">Account-scoped settings</p>
                     <h2 class="settings-card-title st-card-title">Provider API keys</h2>
                     <p class="st-hint st-hint-tight">mud1 is always free. A small hosted model set is available during beta, and premium models can use your own provider keys.</p>
 
@@ -186,6 +188,7 @@
                 </div>
 
                 <div class="settings-card st-card st-anim-3" id="desktop-sync-wrap">
+                    <p class="st-scope-label">Desktop app only</p>
                     <h2 class="settings-card-title st-card-title">Desktop sync</h2>
                     <p class="st-hint st-hint-tight">Create an `Openmud` folder, mirror all project documents into it, and keep Desktop edits synced back into the app while the desktop app is open.</p>
                     <div class="st-sync-status" id="desktop-sync-status">
@@ -204,6 +207,7 @@
                 </div>
 
                 <div class="settings-card st-card st-anim-3" id="app-updates-wrap">
+                    <p class="st-scope-label">Desktop app only</p>
                     <h2 class="settings-card-title st-card-title">App updates</h2>
                     <p class="st-hint st-hint-tight">Check for new desktop builds, download them in the background, and install them safely on restart. These controls work in the openmud desktop app.</p>
                     <div class="st-sync-status" id="app-update-status">
@@ -235,6 +239,7 @@
 
                 <!-- Company Profile -->
                 <div class="settings-card st-card st-anim-3" id="company-profile-wrap">
+                    <p class="st-scope-label">Account-scoped settings</p>
                     <h2 class="settings-card-title st-card-title">Company profile</h2>
                     <p class="st-hint st-hint-tight">Used when generating proposals, change orders, and other documents from chat.</p>
 
@@ -1407,6 +1412,15 @@
             font-size: 1rem;
             font-weight: 700;
             margin-bottom: 14px;
+        }
+
+        .st-scope-label {
+            margin: 0 0 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
         }
 
         /* ── Hints ─────────────────────────────────────────────────────── */

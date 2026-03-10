@@ -21,6 +21,7 @@ test('settings page shows desktop sync guidance without blank screen', async ({ 
 
   await expect(page.locator('#desktop-sync-wrap')).toBeVisible();
   await expect(page.locator('#desktop-sync-wrap')).toContainText('Desktop sync');
+  await expect(page.locator('#desktop-sync-wrap')).toContainText('Desktop app only');
   await expect(page.locator('#desktop-sync-wrap')).toContainText('without deleting app files just because a mirror file is missing');
 });
 
