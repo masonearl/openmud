@@ -190,3 +190,123 @@ test('desktop handoff redeem returns decrypted tokens once', async () => {
   assert.equal(body.refresh_token, 'refresh-token-xyz');
   assert.equal(updatedId, 'handoff_row_1');
 });
+
+test('desktop handoff redeem rejects consumed codes', async () => {
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  const handlerPath = path.join(repoRoot, 'web', 'api', 'desktop-handoff', 'redeem.js');
+  process.env.SUPABASE_URL = 'https://example.supabase.co';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role';
+  process.env.OPENMUD_SESSION_SECRET = 'test-secret';
+
+  const handler = loadWithMocks(handlerPath, {
+    '@supabase/supabase-js': {
+      createClient() {
+        return {
+          from(table) {
+            assert.equal(table, 'desktop_auth_handoffs');
+            return {
+              select() {
+                return {
+                  eq() {
+                    return {
+                      maybeSingle: async () => ({
+                        data: {
+                          id: 'handoff_row_2',
+                          user_id: 'user_123',
+                          access_token_encrypted: 'unused',
+                          refresh_token_encrypted: 'unused',
+                          expires_at: new Date(Date.now() + 60_000).toISOString(),
+                          consumed_at: new Date().toISOString(),
+                        },
+                        error: null,
+                      }),
+                    };
+                  },
+                };
+              },
+            };
+          },
+        };
+      },
+    },
+  });
+
+  const req = {
+    method: 'POST',
+    headers: {},
+    body: { handoff_code: 'opaque-code-consumed' },
+  };
+  const res = createRes();
+
+  await handler(req, res);
+
+  const { statusCode, body } = res._getState();
+  assert.equal(statusCode, 410);
+  assert.match(body.error, /already used/i);
+});
+
+test('desktop handoff redeem rejects expired codes', async () => {
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  const handlerPath = path.join(repoRoot, 'web', 'api', 'desktop-handoff', 'redeem.js');
+  process.env.SUPABASE_URL = 'https://example.supabase.co';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role';
+  process.env.OPENMUD_SESSION_SECRET = 'test-secret';
+
+  let deletedId = null;
+
+  const handler = loadWithMocks(handlerPath, {
+    '@supabase/supabase-js': {
+      createClient() {
+        return {
+          from(table) {
+            assert.equal(table, 'desktop_auth_handoffs');
+            return {
+              select() {
+                return {
+                  eq() {
+                    return {
+                      maybeSingle: async () => ({
+                        data: {
+                          id: 'handoff_row_3',
+                          user_id: 'user_123',
+                          access_token_encrypted: 'unused',
+                          refresh_token_encrypted: 'unused',
+                          expires_at: new Date(Date.now() - 60_000).toISOString(),
+                          consumed_at: null,
+                        },
+                        error: null,
+                      }),
+                    };
+                  },
+                };
+              },
+              delete() {
+                return {
+                  eq(field, value) {
+                    assert.equal(field, 'id');
+                    deletedId = value;
+                    return Promise.resolve({ error: null });
+                  },
+                };
+              },
+            };
+          },
+        };
+      },
+    },
+  });
+
+  const req = {
+    method: 'POST',
+    headers: {},
+    body: { handoff_code: 'opaque-code-expired' },
+  };
+  const res = createRes();
+
+  await handler(req, res);
+
+  const { statusCode, body } = res._getState();
+  assert.equal(statusCode, 410);
+  assert.match(body.error, /expired/i);
+  assert.equal(deletedId, 'handoff_row_3');
+});

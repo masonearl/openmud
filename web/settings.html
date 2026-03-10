@@ -1337,6 +1337,11 @@
                                     openAppStatus.textContent = 'Opening openmud… If nothing happens, make sure the app is installed.';
                                     openAppStatus.hidden = false;
                                 }
+                            }).catch(function (err) {
+                                if (openAppStatus) {
+                                    openAppStatus.textContent = (err && err.message) || 'Could not prepare desktop sign-in right now.';
+                                    openAppStatus.hidden = false;
+                                }
                             });
                         } else {
                             url = 'openmud://try';
@@ -1347,7 +1352,10 @@
                             }
                         }
                     }).catch(function () {
-                        window.location.href = 'openmud://try';
+                        if (openAppStatus) {
+                            openAppStatus.textContent = 'Could not open the desktop sign-in handoff right now.';
+                            openAppStatus.hidden = false;
+                        }
                     });
                 });
             }

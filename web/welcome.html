@@ -280,6 +280,8 @@
                                 url = 'openmud://auth?handoff=' + encodeURIComponent(data.handoff_code);
                                 window.location.href = url;
                                 setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
+                            }).catch(function (err) {
+                                setOpenStatus((err && err.message) || 'Could not prepare desktop sign-in right now.');
                             });
                         } else {
                             url = 'openmud://try';
@@ -287,8 +289,7 @@
                             setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
                         }
                     }).catch(function () {
-                        window.location.href = 'openmud://try';
-                        setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
+                        setOpenStatus('Could not open the desktop sign-in handoff right now.');
                     });
                 });
             }
