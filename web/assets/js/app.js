@@ -73,6 +73,17 @@
     var _currentAccountScope = 'anon';
     var STORAGE_TASKS_SECTION_EXPANDED = 'mudrag_tasks_section_expanded';
 
+    function logClientPrelaunchEvent(eventName, details) {
+        try {
+            console.log(JSON.stringify(Object.assign({
+                event: eventName,
+                source: 'web-client',
+                user_id: _currentAccountScope || 'anon',
+                at: new Date().toISOString()
+            }, details || {})));
+        } catch (e) {}
+    }
+
     function getAuthHeaders() {
         var h = { 'Content-Type': 'application/json' };
         if (_authToken) h['Authorization'] = 'Bearer ' + _authToken;
@@ -376,7 +387,21 @@
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(getProjectStateSnapshot(projectId))
-        }).catch(function () {});
+        }).then(function (resp) {
+            if (!resp || !resp.ok) {
+                logClientPrelaunchEvent('project_state_sync_failed', {
+                    project_id: projectId,
+                    status: resp ? resp.status : null
+                });
+                return;
+            }
+            logClientPrelaunchEvent('project_state_synced_client', { project_id: projectId });
+        }).catch(function (err) {
+            logClientPrelaunchEvent('project_state_sync_failed', {
+                project_id: projectId,
+                message: err && err.message ? err.message : 'network_error'
+            });
+        });
     }
 
     function scheduleProjectStateSync(projectId) {
@@ -431,6 +456,11 @@
                     loadLegacyMessagesFromApi(projectId, cb);
                     return;
                 }
+                logClientPrelaunchEvent('project_state_loaded_client', {
+                    project_id: projectId,
+                    chat_count: Object.keys(state.chats || {}).length,
+                    task_count: Array.isArray(state.project_data && state.project_data.tasks) ? state.project_data.tasks.length : 0
+                });
                 if (state.project_data) setProjectData(projectId, state.project_data, { silent: true });
                 if (state.chats) setChatsForProject(projectId, state.chats, { silent: true });
                 if (state.active_chat_id) {
@@ -446,7 +476,12 @@
                 var msgs = (cid && chats[cid] && chats[cid].messages) ? chats[cid].messages : [];
                 if (cb) cb(msgs);
             })
-            .catch(function () {
+            .catch(function (err) {
+                logClientPrelaunchEvent('project_state_load_failed', {
+                    project_id: projectId,
+                    message: err && err.message ? err.message : 'network_error'
+                });
+                showToast('Could not load synced project state. Showing local cache.');
                 loadLegacyMessagesFromApi(projectId, cb);
             });
     }
@@ -1279,6 +1314,12 @@
                     enabled: true,
                     syncMode: 'non_destructive',
                     statusLabels: ['synced', 'mirror active']
+                });
+                logClientPrelaunchEvent('desktop_sync_import_completed', {
+                    project_id: projectId,
+                    imported: importedCount,
+                    updated: updatedCount,
+                    preserved: untouchedAppDocs
                 });
                 return {
                     ok: true,
@@ -10765,8 +10806,20 @@
                 syncProjectFromDesktop(projectId).then(function (result) {
                     if (result && result.ok) {
                         showToast('Desktop changes synced into ' + getTaskProjectLabel(projectId));
+                    } else if (result && result.error) {
+                        logClientPrelaunchEvent('desktop_sync_import_failed', {
+                            project_id: projectId,
+                            message: result.error
+                        });
+                        showToast('Desktop sync issue: ' + result.error);
                     }
-                }).catch(function () {});
+                }).catch(function (err) {
+                    logClientPrelaunchEvent('desktop_sync_import_failed', {
+                        project_id: projectId,
+                        message: err && err.message ? err.message : 'unknown_error'
+                    });
+                    showToast('Desktop sync issue: could not import mirror changes.');
+                });
             }, 900);
         });
     }
