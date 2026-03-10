@@ -30,6 +30,7 @@
                 <a href="/settings.html">Settings</a>
             </div>
         </details>
+        <div class="lp-nav-drag-fill" aria-hidden="true"></div>
     </nav>
     <div class="desktop-title-bar" id="desktop-title-bar" hidden>
         <div class="desktop-title-bar-left">
@@ -60,6 +61,8 @@
 
             <!-- Settings section -->
             <div class="dropdown-label">Settings</div>
+            <a href="/settings.html" class="dropdown-item" id="btn-open-web-settings">Web settings</a>
+            <a href="/settings.html#desktop-sync-wrap" class="dropdown-item" id="btn-open-desktop-settings">Desktop app settings</a>
             <button type="button" class="dropdown-item" id="btn-rates" title="Edit labor and equipment rates for bids">Labor &amp; equipment rates</button>
             <button type="button" class="dropdown-item" id="btn-profile" title="Your name, email, phone for resume" hidden>Profile</button>
             <button type="button" class="dropdown-item" id="btn-data-sync" title="Sync contacts and emails into the app" hidden>Data Sync</button>
@@ -157,20 +160,6 @@
                             <button type="button" class="btn-icon-toolbar" id="btn-desktop-sync" title="Sync project to Desktop" aria-label="Sync project to Desktop" hidden>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
                             </button>
-                        </div>
-                    </div>
-                    <div class="documents-sync-status" id="documents-sync-status" hidden>
-                        <div class="documents-sync-copy">
-                            <div class="documents-sync-label" id="documents-sync-label">Desktop sync is off.</div>
-                            <div class="documents-sync-path" id="documents-sync-path"></div>
-                            <div class="documents-sync-help" id="documents-sync-help"></div>
-                        </div>
-                        <div class="documents-sync-actions">
-                            <a href="/download.html" class="btn-secondary btn-sm" id="btn-desktop-sync-download" hidden>Download desktop app</a>
-                            <button type="button" class="btn-secondary btn-sm" id="btn-desktop-sync-setup" hidden>Set up sync</button>
-                            <button type="button" class="btn-secondary btn-sm" id="btn-desktop-sync-sync-all" hidden>Sync all now</button>
-                            <button type="button" class="btn-secondary btn-sm" id="btn-desktop-sync-open" hidden>Open folder</button>
-                            <button type="button" class="btn-secondary btn-sm" id="btn-desktop-sync-change" hidden>Change folder</button>
                         </div>
                     </div>
                     <div class="documents-list" id="documents-list"></div>
@@ -322,7 +311,6 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="model-policy-hint" id="model-policy-hint">mud1 is free and the best default for most openmud work.</div>
                         </div>
                 </form>
                     </div>

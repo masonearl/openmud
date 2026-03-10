@@ -1163,6 +1163,11 @@
             }
             return;
         }
+        var syncComplete = enabled && projectPath && status.lastSyncAt;
+        if (syncComplete) {
+            statusWrap.hidden = true;
+            return;
+        }
         if (enabled) {
             labelEl.textContent = projectPath
                 ? 'This project syncs to your Desktop folder.'
@@ -3560,8 +3565,6 @@
     function refreshChatEntryHints() {
         var inputEl = document.getElementById('chat-input');
         if (inputEl) inputEl.placeholder = getChatPlaceholderText();
-        var modelHintEl = document.getElementById('model-policy-hint');
-        if (modelHintEl) modelHintEl.textContent = getModelPolicyHint(getCurrentModelSelection());
         if (activeProjectId && getMessages(activeProjectId).length === 0) renderMessages();
     }
 
@@ -9097,6 +9100,12 @@
     if (modelSelect && modelTrigger && modelDropdown && modelLabel) {
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved && modelSelect.querySelector('option[value="' + saved + '"]')) modelSelect.value = saved;
+        var modelTooltipEl = null;
+        var modelTooltipTimer = null;
+        function hideModelTooltip() {
+            if (modelTooltipTimer) { clearTimeout(modelTooltipTimer); modelTooltipTimer = null; }
+            if (modelTooltipEl) { modelTooltipEl.remove(); modelTooltipEl = null; }
+        }
         function updateModelLabel() {
             var opt = modelSelect.querySelector('option[value="' + modelSelect.value + '"]');
             var meta = getModelMeta(modelSelect.value);
@@ -9111,6 +9120,7 @@
             e.stopPropagation();
             var open = !modelDropdown.hidden;
             closeAllComposerDropdowns();
+            hideModelTooltip();
             if (!open) {
                 positionDropdownAbove(modelDropdown, modelTrigger);
                 modelDropdown.hidden = false;
@@ -9125,9 +9135,40 @@
                 updateModelLabel();
                 modelDropdown.hidden = true;
                 modelTrigger.setAttribute('aria-expanded', 'false');
+                hideModelTooltip();
             });
+            btn.addEventListener('mouseenter', function () {
+                hideModelTooltip();
+                var modelId = btn.getAttribute('data-value');
+                if (!modelId) return;
+                modelTooltipTimer = setTimeout(function () {
+                    modelTooltipTimer = null;
+                    var meta = getModelMeta(modelId);
+                    var text = meta.short_description || '';
+                    if (!text) return;
+                    modelTooltipEl = document.createElement('div');
+                    modelTooltipEl.className = 'model-dropdown-tooltip';
+                    modelTooltipEl.textContent = text;
+                    document.body.appendChild(modelTooltipEl);
+                    var rect = btn.getBoundingClientRect();
+                    modelTooltipEl.style.left = rect.right + 8 + 'px';
+                    modelTooltipEl.style.top = rect.top + 'px';
+                    var tooltipRect = modelTooltipEl.getBoundingClientRect();
+                    if (tooltipRect.right > window.innerWidth) {
+                        modelTooltipEl.style.left = (rect.left - tooltipRect.width - 8) + 'px';
+                    }
+                    if (tooltipRect.bottom > window.innerHeight) {
+                        modelTooltipEl.style.top = (rect.bottom - tooltipRect.height) + 'px';
+                    }
+                }, 1000);
+            });
+            btn.addEventListener('mouseleave', function () { hideModelTooltip(); });
         });
-        document.addEventListener('click', function () { closeAllComposerDropdowns(); });
+        modelDropdown.addEventListener('mouseleave', function () { hideModelTooltip(); });
+        document.addEventListener('click', function () {
+            closeAllComposerDropdowns();
+            hideModelTooltip();
+        });
     } else if (modelSelect) {
         var saved = localStorage.getItem(STORAGE_MODEL);
         if (saved) modelSelect.value = saved;
