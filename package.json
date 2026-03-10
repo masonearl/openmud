@@ -18,6 +18,7 @@
     "setup:auth": "node scripts/setup-auth.js",
     "generate:apple-jwt": "node scripts/generate-apple-jwt.js",
     "test:e2e": "playwright test",
+    "test:e2e:prelaunch": "playwright test -c playwright.prelaunch.config.ts",
     "test:e2e:ui": "playwright test --ui",
     "bot:site": "node scripts/site-bot.js",
     "bot:site:live": "HEADLESS=false BOT_BROWSER_CHANNEL=chrome BOT_SLOW_MO_MS=250 node scripts/site-bot.js",
