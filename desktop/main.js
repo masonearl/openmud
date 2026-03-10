@@ -5,6 +5,7 @@ if (process.env.DEV === '1' || process.env.NODE_ENV === 'development') {
 const { app, BrowserWindow, shell, dialog, Menu, ipcMain } = require('electron');
 const path = require('path');
 const http = require('http');
+const crypto = require('crypto');
 
 const isDev = process.env.DEV === '1' || process.env.NODE_ENV === 'development';
 
@@ -20,12 +21,15 @@ if (!app.isPackaged && process.argv.length >= 2) {
 function handleDeepLink(url) {
   if (!url) return;
   try {
-    // openmud://auth?access_token=...&refresh_token=...
+    // openmud://auth?handoff=...
     const parsed = new URL(url);
     if (parsed.hostname === 'auth') {
+      const handoffCode = parsed.searchParams.get('handoff');
       const accessToken = parsed.searchParams.get('access_token');
       const refreshToken = parsed.searchParams.get('refresh_token');
-      if (accessToken && refreshToken && mainWindowRef && !mainWindowRef.isDestroyed()) {
+      if (handoffCode && mainWindowRef && !mainWindowRef.isDestroyed()) {
+        mainWindowRef.webContents.send('mudrag:auth-callback', { handoff_code: handoffCode });
+      } else if (accessToken && refreshToken && mainWindowRef && !mainWindowRef.isDestroyed()) {
         mainWindowRef.webContents.send('mudrag:auth-callback', { access_token: accessToken, refresh_token: refreshToken });
       }
     }
@@ -92,7 +96,18 @@ const desktopSyncState = {
   rootPath: '',
   watcher: null,
   eventTimers: {},
+  projectIgnoreUntil: {},
 };
+
+function logPrelaunchEvent(eventName, payload = {}) {
+  console.log(JSON.stringify({
+    event: eventName,
+    source: 'desktop',
+    user_id: storage.getActiveUser ? storage.getActiveUser() : 'anon',
+    at: new Date().toISOString(),
+    ...payload,
+  }));
+}
 
 function slugifyProjectName(name) {
   const cleaned = String(name || 'Project')
@@ -189,33 +204,13 @@ function ensureProjectFolders(projectDir, folders) {
   });
 }
 
-function removeExtraPaths(projectDir, desiredFiles) {
-  const current = [];
-  listRelativeFilesRecursive(projectDir, projectDir, current);
-  current.forEach((file) => {
-    const rel = String(file.relativePath || '').replace(/\\/g, '/');
-    if (!desiredFiles.has(rel)) {
-      try { fs.unlinkSync(file.path); } catch (err) {}
-    }
-  });
+function hashBuffer(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
 }
 
-function pruneEmptyDirs(rootDir) {
-  if (!rootDir || !fs.existsSync(rootDir)) return;
-  let entries = [];
-  try {
-    entries = fs.readdirSync(rootDir, { withFileTypes: true });
-  } catch (err) {
-    return;
-  }
-  entries.forEach((entry) => {
-    if (!entry.isDirectory()) return;
-    const absPath = path.join(rootDir, entry.name);
-    pruneEmptyDirs(absPath);
-    try {
-      if (fs.readdirSync(absPath).length === 0) fs.rmdirSync(absPath);
-    } catch (err) {}
-  });
+function muteProjectWatcher(projectId, ms = 4000) {
+  if (!projectId) return;
+  desktopSyncState.projectIgnoreUntil[projectId] = Date.now() + ms;
 }
 
 function emitDesktopSyncEvent(data) {
@@ -254,6 +249,9 @@ function startDesktopSyncWatcher(rootPath) {
         return projectPath && projectPath.endsWith('/' + projectName);
       });
       const projectId = match ? match[0] : null;
+      if (projectId && desktopSyncState.projectIgnoreUntil[projectId] && desktopSyncState.projectIgnoreUntil[projectId] > Date.now()) {
+        return;
+      }
       const projectPath = match && match[1] ? match[1].path : path.join(targetRoot, projectName);
       scheduleDesktopSyncEvent(projectId, projectPath, 'desktop-change');
     });
@@ -275,23 +273,42 @@ function writeProjectSnapshotToDesktop(opts) {
     try { fs.renameSync(previousDir, desiredDir); } catch (err) {}
   }
   ensureProjectFolders(desiredDir, payload.folders || []);
-  const desiredFiles = new Set();
+  const manifest = {};
+  muteProjectWatcher(payload.projectId, 4500);
   (payload.files || []).forEach((file) => {
     const relPath = String(file && file.relativePath || '').replace(/^\/+/, '').replace(/\\/g, '/');
     if (!relPath || !file.base64) return;
-    desiredFiles.add(relPath);
+    const decoded = Buffer.from(String(file.base64), 'base64');
     const targetPath = path.join(desiredDir, relPath);
     ensureDirSync(path.dirname(targetPath));
+    const fileHash = hashBuffer(decoded);
+    manifest[relPath] = {
+      id: file.id || null,
+      name: file.name || path.basename(relPath),
+      size: file.size || decoded.length,
+      hash: fileHash,
+      mirroredAt: new Date().toISOString(),
+    };
     try {
-      fs.writeFileSync(targetPath, Buffer.from(String(file.base64), 'base64'));
+      let shouldWrite = true;
+      if (fs.existsSync(targetPath)) {
+        try {
+          const existing = fs.readFileSync(targetPath);
+          shouldWrite = hashBuffer(existing) !== fileHash;
+        } catch (_) {
+          shouldWrite = true;
+        }
+      }
+      if (shouldWrite) fs.writeFileSync(targetPath, decoded);
     } catch (err) {}
   });
-  removeExtraPaths(desiredDir, desiredFiles);
-  pruneEmptyDirs(desiredDir);
   const nextProjects = {};
   nextProjects[payload.projectId] = {
     path: desiredDir,
     name: payload.projectName,
+    manifest,
+    mirrorMode: 'non_destructive',
+    lastSyncStatus: 'mirror_active',
     lastSyncAt: new Date().toISOString(),
   };
   setDesktopSyncConfig({
@@ -301,7 +318,13 @@ function writeProjectSnapshotToDesktop(opts) {
     projects: nextProjects,
   });
   startDesktopSyncWatcher(rootPath);
-  return { ok: true, rootPath, projectPath: desiredDir };
+  return {
+    ok: true,
+    rootPath,
+    projectPath: desiredDir,
+    syncMode: 'non_destructive',
+    statusLabels: ['synced', 'mirror active'],
+  };
 }
 
 function getWebPath() {
@@ -4350,6 +4373,14 @@ ipcMain.handle('mudrag:read-local-file', async (_, filePath) => {
   return readFileForImport(filePath);
 });
 
+ipcMain.handle('mudrag:set-active-account', async (_, opts = {}) => {
+  const userId = String(opts.userId || '').trim() || 'anon';
+  const email = String(opts.email || '').trim();
+  const activeUser = storage.setActiveUser(userId);
+  logPrelaunchEvent('desktop_account_scope_set', { scoped_user_id: activeUser, email: email || null });
+  return { ok: true, userId: activeUser, email };
+});
+
 ipcMain.handle('mudrag:desktop-sync-setup', async (_, opts = {}) => {
   const rootPath = opts.rootPath || getDesktopSyncConfig().rootPath || getDefaultDesktopSyncRoot();
   ensureDirSync(rootPath);
@@ -4357,11 +4388,15 @@ ipcMain.handle('mudrag:desktop-sync-setup', async (_, opts = {}) => {
   const projects = Array.isArray(opts.projects) ? opts.projects : [];
   projects.forEach((project) => {
     if (!project || !project.id) return;
+    muteProjectWatcher(project.id, 4500);
     const projectPath = path.join(rootPath, slugifyProjectName(project.name));
     ensureDirSync(projectPath);
     projectMap[project.id] = {
       path: projectPath,
       name: project.name || 'Project',
+      manifest: {},
+      mirrorMode: 'non_destructive',
+      lastSyncStatus: 'mirror_active',
       lastSyncAt: null,
     };
   });
@@ -4372,11 +4407,22 @@ ipcMain.handle('mudrag:desktop-sync-setup', async (_, opts = {}) => {
     projects: projectMap,
   });
   startDesktopSyncWatcher(rootPath);
+  logPrelaunchEvent('desktop_sync_setup_completed', {
+    root_path: rootPath,
+    project_count: Object.keys(projectMap).length,
+  });
   return { ok: true, rootPath, config };
 });
 
 ipcMain.handle('mudrag:desktop-sync-project', async (_, opts = {}) => {
-  return writeProjectSnapshotToDesktop(opts);
+  const result = writeProjectSnapshotToDesktop(opts);
+  logPrelaunchEvent(result && result.ok ? 'desktop_sync_project_completed' : 'desktop_sync_project_failed', {
+    project_id: opts.projectId || null,
+    project_name: opts.projectName || null,
+    root_path: result && result.rootPath ? result.rootPath : null,
+    message: result && result.error ? result.error : null,
+  });
+  return result;
 });
 
 ipcMain.handle('mudrag:desktop-sync-status', async (_, opts = {}) => {
@@ -4390,6 +4436,8 @@ ipcMain.handle('mudrag:desktop-sync-status', async (_, opts = {}) => {
     rootPath,
     projectPath: projectMeta && projectMeta.path ? projectMeta.path : '',
     projectName: projectMeta && projectMeta.name ? projectMeta.name : '',
+    syncMode: projectMeta && projectMeta.mirrorMode ? projectMeta.mirrorMode : 'non_destructive',
+    statusLabels: projectMeta && projectMeta.lastSyncStatus ? ['synced', 'mirror active'] : ['mirror active'],
     lastSyncAt: projectMeta && projectMeta.lastSyncAt ? projectMeta.lastSyncAt : cfg.lastSyncAt || null,
   };
 });
@@ -4422,6 +4470,10 @@ ipcMain.handle('mudrag:desktop-sync-remove-project', async (_, projectId) => {
   const nextProjects = { ...(cfg.projects || {}) };
   delete nextProjects[projectId];
   setDesktopSyncConfig({ replaceProjects: true, projects: nextProjects });
+  logPrelaunchEvent('desktop_sync_project_removed', {
+    project_id: projectId,
+    project_path: projectMeta && projectMeta.path ? projectMeta.path : null,
+  });
   return { ok: true };
 });
 

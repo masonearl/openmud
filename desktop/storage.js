@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { app } = require('electron');
+let activeUserId = 'anon';
 
 function getStorageDir() {
   if (app && app.getPath) {
@@ -19,6 +20,37 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
+}
+
+function sanitizeUserId(value) {
+  const text = String(value || '').trim();
+  if (!text) return 'anon';
+  return text.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || 'anon';
+}
+
+function getUserStorageDir(userId) {
+  return path.join(getStorageDir(), 'users', sanitizeUserId(userId || activeUserId));
+}
+
+function getLegacyPath(fileName) {
+  return path.join(getStorageDir(), fileName);
+}
+
+function getScopedPath(fileName, userId) {
+  const target = path.join(getUserStorageDir(userId), fileName);
+  if (!fs.existsSync(target)) {
+    const legacyPath = getLegacyPath(fileName);
+    if (fs.existsSync(legacyPath)) {
+      ensureDir(path.dirname(target));
+      try {
+        fs.copyFileSync(legacyPath, target);
+        fs.unlinkSync(legacyPath);
+      } catch (_) {
+        // best effort migration from legacy global storage
+      }
+    }
+  }
+  return target;
 }
 
 const DEFAULT_LABOR = {
@@ -36,19 +68,19 @@ const DEFAULT_EQUIPMENT = {
 };
 
 function getRatesPath() {
-  return path.join(getStorageDir(), 'rates.json');
+  return getScopedPath('rates.json');
 }
 
 function getProjectsPath() {
-  return path.join(getStorageDir(), 'projects.json');
+  return getScopedPath('projects.json');
 }
 
 function getProfilePath() {
-  return path.join(getStorageDir(), 'profile.json');
+  return getScopedPath('profile.json');
 }
 
 function getChatsPath() {
-  return path.join(getStorageDir(), 'chats.json');
+  return getScopedPath('chats.json');
 }
 
 function readJSON(filePath, defaultValue) {
@@ -168,7 +200,7 @@ function setChats(projectId, chats) {
 }
 
 function getUserDataPath() {
-  return path.join(getStorageDir(), 'user-data.json');
+  return getScopedPath('user-data.json');
 }
 
 function getUserData() {
@@ -182,8 +214,21 @@ function setUserData(data) {
   return next;
 }
 
+function setActiveUser(userId) {
+  activeUserId = sanitizeUserId(userId);
+  ensureDir(getUserStorageDir(activeUserId));
+  return activeUserId;
+}
+
+function getActiveUser() {
+  return sanitizeUserId(activeUserId);
+}
+
 module.exports = {
   getStorageDir,
+  getUserStorageDir,
+  setActiveUser,
+  getActiveUser,
   getRates,
   setRates,
   getProjects,

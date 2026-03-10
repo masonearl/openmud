@@ -33,6 +33,7 @@
 
                 <!-- Account -->
                 <div class="settings-card st-card st-anim-1" id="auth-wrap">
+                    <p class="st-scope-label">Cloud account</p>
                     <h2 class="settings-card-title st-card-title">Account</h2>
 
                     <div id="auth-signed-out" hidden>
@@ -73,6 +74,7 @@
 
                 <!-- Provider API keys -->
                 <div class="settings-card st-card st-anim-2" id="provider-keys-wrap">
+                    <p class="st-scope-label">Account-scoped settings</p>
                     <h2 class="settings-card-title st-card-title">Provider API keys</h2>
                     <p class="st-hint st-hint-tight">mud1 is always free. A small hosted model set is available during beta, and premium models can use your own provider keys.</p>
 
@@ -186,6 +188,7 @@
                 </div>
 
                 <div class="settings-card st-card st-anim-3" id="desktop-sync-wrap">
+                    <p class="st-scope-label">Desktop app only</p>
                     <h2 class="settings-card-title st-card-title">Desktop sync</h2>
                     <p class="st-hint st-hint-tight">Create an `Openmud` folder, mirror all project documents into it, and keep Desktop edits synced back into the app while the desktop app is open.</p>
                     <div class="st-sync-status" id="desktop-sync-status">
@@ -204,6 +207,7 @@
                 </div>
 
                 <div class="settings-card st-card st-anim-3" id="app-updates-wrap">
+                    <p class="st-scope-label">Desktop app only</p>
                     <h2 class="settings-card-title st-card-title">App updates</h2>
                     <p class="st-hint st-hint-tight">Check for new desktop builds, download them in the background, and install them safely on restart. These controls work in the openmud desktop app.</p>
                     <div class="st-sync-status" id="app-update-status">
@@ -235,6 +239,7 @@
 
                 <!-- Company Profile -->
                 <div class="settings-card st-card st-anim-3" id="company-profile-wrap">
+                    <p class="st-scope-label">Account-scoped settings</p>
                     <h2 class="settings-card-title st-card-title">Company profile</h2>
                     <p class="st-hint st-hint-tight">Used when generating proposals, change orders, and other documents from chat.</p>
 
@@ -322,6 +327,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/account-state.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
         (function () {
@@ -424,6 +430,23 @@
             }
 
             function openDocsDb() {
+                if (window.openmudAccountState && window.openmudAccountState.openScopedDatabase) {
+                    return window.openmudAccountState.openScopedDatabase({
+                        baseName: DB_NAME,
+                        version: DB_VERSION,
+                        upgrade: function (db) {
+                            if (!db.objectStoreNames.contains(DOC_STORE)) {
+                                var docStore = db.createObjectStore(DOC_STORE, { keyPath: 'id' });
+                                docStore.createIndex('projectId', 'projectId', { unique: false });
+                                docStore.createIndex('folderId', 'folderId', { unique: false });
+                            }
+                            if (!db.objectStoreNames.contains(FOLDERS_STORE)) {
+                                var folderStore = db.createObjectStore(FOLDERS_STORE, { keyPath: 'id' });
+                                folderStore.createIndex('projectId', 'projectId', { unique: false });
+                            }
+                        }
+                    });
+                }
                 return new Promise(function (resolve, reject) {
                     var req = indexedDB.open(DB_NAME, DB_VERSION);
                     req.onerror = function () { reject(req.error || new Error('Could not open documents database.')); };
@@ -580,7 +603,7 @@
                 if (!isDesktopSyncAvailable()) {
                     desktopSyncLabel.textContent = 'Folder sync works in the desktop app.';
                     desktopSyncPath.textContent = 'Default root folder: ~/Desktop/Openmud';
-                    desktopSyncHelp.textContent = 'Use the desktop app to choose the sync folder, mirror project files, and keep local folder changes synced reliably.';
+                    desktopSyncHelp.textContent = 'Use the desktop app to choose the sync folder, mirror project files, and import local folder changes without deleting app files just because a mirror file is missing.';
                     if (btnDesktopSyncDownload) btnDesktopSyncDownload.hidden = false;
                     if (btnDesktopSyncSetup) btnDesktopSyncSetup.disabled = true;
                     if (btnDesktopSyncAll) btnDesktopSyncAll.disabled = true;
@@ -596,11 +619,11 @@
                 if (enabled) {
                     desktopSyncLabel.textContent = 'Desktop sync is on.';
                     desktopSyncPath.textContent = 'Root folder: ' + (rootPath || '~/Desktop/Openmud');
-                    desktopSyncHelp.textContent = 'All project documents are mirrored under that root. Edits in the Desktop folder sync back into openmud while the desktop app is open.';
+                    desktopSyncHelp.textContent = 'All project documents are mirrored under that root. Edits in the Desktop folder import back into openmud while the desktop app is open, and missing mirror files do not delete the app copy automatically.';
                 } else {
                     desktopSyncLabel.textContent = 'Desktop sync is off.';
                     desktopSyncPath.textContent = 'Default root folder: ~/Desktop/Openmud';
-                    desktopSyncHelp.textContent = 'Set up sync to create the root folder and mirror every project into it. Use Change folder first if you want a different location.';
+                    desktopSyncHelp.textContent = 'Set up sync to create the root folder and mirror every project into it. Mirror sync is non-destructive: missing mirror files do not automatically delete project documents inside openmud.';
                 }
                 if (btnDesktopSyncSetup) btnDesktopSyncSetup.hidden = enabled;
                 if (btnDesktopSyncAll) btnDesktopSyncAll.hidden = !enabled;
@@ -1312,18 +1335,32 @@
                         var session = r.data && r.data.session;
                         var url;
                         if (session && session.access_token && session.refresh_token) {
-                            url = 'openmud://auth?access_token=' + encodeURIComponent(session.access_token)
-                                + '&refresh_token=' + encodeURIComponent(session.refresh_token);
+                            return mudragAuth.createDesktopHandoff(session).then(function (data) {
+                                url = 'openmud://auth?handoff=' + encodeURIComponent(data.handoff_code);
+                                window.location.href = url;
+                                if (openAppStatus) {
+                                    openAppStatus.textContent = 'Opening openmud… If nothing happens, make sure the app is installed.';
+                                    openAppStatus.hidden = false;
+                                }
+                            }).catch(function (err) {
+                                if (openAppStatus) {
+                                    openAppStatus.textContent = (err && err.message) || 'Could not prepare desktop sign-in right now.';
+                                    openAppStatus.hidden = false;
+                                }
+                            });
                         } else {
                             url = 'openmud://try';
-                        }
-                        window.location.href = url;
-                        if (openAppStatus) {
-                            openAppStatus.textContent = 'Opening openmud\u2026 If nothing happens, make sure the app is installed.';
-                            openAppStatus.hidden = false;
+                            window.location.href = url;
+                            if (openAppStatus) {
+                                openAppStatus.textContent = 'Opening openmud… If nothing happens, make sure the app is installed.';
+                                openAppStatus.hidden = false;
+                            }
                         }
                     }).catch(function () {
-                        window.location.href = 'openmud://try';
+                        if (openAppStatus) {
+                            openAppStatus.textContent = 'Could not open the desktop sign-in handoff right now.';
+                            openAppStatus.hidden = false;
+                        }
                     });
                 });
             }
@@ -1375,6 +1412,15 @@
             font-size: 1rem;
             font-weight: 700;
             margin-bottom: 14px;
+        }
+
+        .st-scope-label {
+            margin: 0 0 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
         }
 
         /* ── Hints ─────────────────────────────────────────────────────── */

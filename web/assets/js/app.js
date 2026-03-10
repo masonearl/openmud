@@ -69,7 +69,20 @@
     var _desktopSyncIgnoreUntil = {};
     var _desktopSyncBootstrapped = false;
     var _desktopSyncStatusCache = null;
+    var _projectStateSyncTimers = {};
+    var _currentAccountScope = 'anon';
     var STORAGE_TASKS_SECTION_EXPANDED = 'mudrag_tasks_section_expanded';
+
+    function logClientPrelaunchEvent(eventName, details) {
+        try {
+            console.log(JSON.stringify(Object.assign({
+                event: eventName,
+                source: 'web-client',
+                user_id: _currentAccountScope || 'anon',
+                at: new Date().toISOString()
+            }, details || {})));
+        } catch (e) {}
+    }
 
     function getAuthHeaders() {
         var h = { 'Content-Type': 'application/json' };
@@ -253,6 +266,8 @@
     }
 
     function syncAuthSession(session) {
+        var nextScope = (session && session.user && session.user.id) ? String(session.user.id) : 'anon';
+        var scopeChanged = nextScope !== _currentAccountScope;
         if (session && session.user && session.access_token) {
             _authToken = session.access_token;
             try {
@@ -262,7 +277,36 @@
         } else {
             _authToken = null;
         }
+        _currentAccountScope = nextScope;
         updateNavAuth();
+        if (scopeChanged) {
+            handleAccountScopeChange();
+        }
+    }
+
+    function handleAccountScopeChange() {
+        _desktopSyncStatusCache = null;
+        _desktopSyncBootstrapped = false;
+        activeProjectId = getActiveId();
+        activeChatId = activeProjectId ? getActiveChatId(activeProjectId) : null;
+        if (!activeProjectId) {
+            var scopedProjects = getProjects();
+            if (scopedProjects.length > 0) {
+                activeProjectId = scopedProjects[0].id;
+                setActiveId(activeProjectId);
+                activeChatId = getActiveChatId(activeProjectId);
+            } else if (!_authToken) {
+                ensureProject();
+                activeProjectId = getActiveId();
+                activeChatId = activeProjectId ? getActiveChatId(activeProjectId) : null;
+            }
+        }
+        renderProjects();
+        renderChats();
+        renderMessages();
+        renderTasksSection();
+        renderDocuments();
+        refreshDesktopSyncStatus(activeProjectId || '').catch(function () {});
     }
 
     function updateNavAuth() {
@@ -321,22 +365,77 @@
                 if (data && Array.isArray(data.projects) && data.projects.length > 0) {
                     localStorage.setItem(STORAGE_PROJECTS, JSON.stringify(data.projects));
                     if (cb) cb(data.projects);
+                    return;
                 }
                 if (cb) cb();
             })
             .catch(function () { if (cb) cb(); });
     }
 
-    function syncMessagesToApi(projectId, msgs) {
-        if (!getAuthHeaders().Authorization || !projectId) return;
-        fetch(API_BASE + '/chat-messages', {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ project_id: projectId, messages: msgs || getMessages(projectId) })
-        }).catch(function () {});
+    function getProjectStateSnapshot(projectId) {
+        return {
+            project_id: projectId,
+            project_data: getProjectData(projectId),
+            chats: getChats(projectId),
+            active_chat_id: getActiveChatId(projectId)
+        };
     }
 
-    function loadMessagesFromApi(projectId, cb) {
+    function syncProjectStateToApi(projectId) {
+        if (!getAuthHeaders().Authorization || !projectId) return;
+        fetch(API_BASE + '/project-state', {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(getProjectStateSnapshot(projectId))
+        }).then(function (resp) {
+            if (!resp || !resp.ok) {
+                logClientPrelaunchEvent('project_state_sync_failed', {
+                    project_id: projectId,
+                    status: resp ? resp.status : null
+                });
+                return;
+            }
+            logClientPrelaunchEvent('project_state_synced_client', { project_id: projectId });
+        }).catch(function (err) {
+            logClientPrelaunchEvent('project_state_sync_failed', {
+                project_id: projectId,
+                message: err && err.message ? err.message : 'network_error'
+            });
+        });
+    }
+
+    function scheduleProjectStateSync(projectId) {
+        if (!getAuthHeaders().Authorization || !projectId) return;
+        clearTimeout(_projectStateSyncTimers[projectId]);
+        _projectStateSyncTimers[projectId] = setTimeout(function () {
+            syncProjectStateToApi(projectId);
+        }, 800);
+    }
+
+    function setChatsForProject(projectId, chats, options) {
+        if (!projectId) return {};
+        options = options || {};
+        try {
+            var raw = localStorage.getItem(STORAGE_MESSAGES);
+            var all = raw ? JSON.parse(raw) : {};
+            all[projectId] = chats || {};
+            localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
+            if (!options.silent) scheduleProjectStateSync(projectId);
+            return all[projectId];
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function syncMessagesToApi(projectId, msgs) {
+        if (!projectId) return;
+        if (msgs && msgs.length > 0) {
+            setMessages(projectId, msgs, { silent: true });
+        }
+        scheduleProjectStateSync(projectId);
+    }
+
+    function loadLegacyMessagesFromApi(projectId, cb) {
         if (!getAuthHeaders().Authorization || !projectId) { if (cb) cb([]); return; }
         fetch(API_BASE + '/chat-messages?project_id=' + encodeURIComponent(projectId), { method: 'GET', headers: getAuthHeaders() })
             .then(function (r) { return r.ok ? r.json() : null; })
@@ -345,6 +444,46 @@
                 if (cb) cb(msgs);
             })
             .catch(function () { if (cb) cb([]); });
+    }
+
+    function loadMessagesFromApi(projectId, cb) {
+        if (!getAuthHeaders().Authorization || !projectId) { if (cb) cb([]); return; }
+        fetch(API_BASE + '/project-state?project_id=' + encodeURIComponent(projectId), { method: 'GET', headers: getAuthHeaders() })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                var state = data && data.project_state ? data.project_state : null;
+                if (!state) {
+                    loadLegacyMessagesFromApi(projectId, cb);
+                    return;
+                }
+                logClientPrelaunchEvent('project_state_loaded_client', {
+                    project_id: projectId,
+                    chat_count: Object.keys(state.chats || {}).length,
+                    task_count: Array.isArray(state.project_data && state.project_data.tasks) ? state.project_data.tasks.length : 0
+                });
+                if (state.project_data) setProjectData(projectId, state.project_data, { silent: true });
+                if (state.chats) setChatsForProject(projectId, state.chats, { silent: true });
+                if (state.active_chat_id) {
+                    setActiveChatId(projectId, state.active_chat_id, { silent: true });
+                }
+                var cid = getActiveChatId(projectId) || state.active_chat_id || null;
+                var chats = getChats(projectId);
+                if (!cid) {
+                    var keys = Object.keys(chats);
+                    cid = keys.length ? keys[0] : null;
+                    if (cid) setActiveChatId(projectId, cid, { silent: true });
+                }
+                var msgs = (cid && chats[cid] && chats[cid].messages) ? chats[cid].messages : [];
+                if (cb) cb(msgs);
+            })
+            .catch(function (err) {
+                logClientPrelaunchEvent('project_state_load_failed', {
+                    project_id: projectId,
+                    message: err && err.message ? err.message : 'network_error'
+                });
+                showToast('Could not load synced project state. Showing local cache.');
+                loadLegacyMessagesFromApi(projectId, cb);
+            });
     }
 
     function getActiveId() {
@@ -369,11 +508,13 @@
         return all[projectId] || {};
     }
 
-    function setProjectData(projectId, data) {
+    function setProjectData(projectId, data, options) {
         if (!projectId) return;
+        options = options || {};
         var all = getAllProjectData();
         all[projectId] = data || {};
         localStorage.setItem(STORAGE_PROJECT_DATA, JSON.stringify(all));
+        if (!options.silent) scheduleProjectStateSync(projectId);
     }
 
     function removeProjectData(projectId) {
@@ -1063,8 +1204,8 @@
                         enabled: true,
                         results: result.results || [],
                         message: rootPath
-                            ? 'Desktop sync is on. All project documents are mirrored to ' + shortenHomePath(rootPath) + '.'
-                            : 'Desktop sync is on. All project documents are mirrored to your Openmud Desktop folder.'
+                            ? 'Desktop sync is on. Project documents are mirrored to ' + shortenHomePath(rootPath) + ' without deleting app files when a mirror file goes missing.'
+                            : 'Desktop sync is on. Project documents are mirrored to your Openmud Desktop folder without deleting app files when a mirror file goes missing.'
                     };
                 });
             });
@@ -1107,6 +1248,9 @@
             });
             var desktopFiles = Array.isArray(listing.files) ? listing.files : [];
             var desktopPaths = {};
+            var importedCount = 0;
+            var updatedCount = 0;
+            var unchangedCount = 0;
             var work = Promise.resolve();
             desktopFiles.forEach(function (fileInfo) {
                 work = work.then(function () {
@@ -1119,20 +1263,38 @@
                         if (existing) {
                             if (existing.name !== imported.name) {
                                 return renameDocument(existing.id, imported.name).then(function () {
-                                    return arrayBuffersEqual(existing.data, data) ? null : updateDocumentContent(existing.id, data);
+                                    if (arrayBuffersEqual(existing.data, data)) {
+                                        unchangedCount += 1;
+                                        return null;
+                                    }
+                                    updatedCount += 1;
+                                    return updateDocumentContent(existing.id, data);
                                 });
                             }
                             if (!arrayBuffersEqual(existing.data, data)) {
+                                updatedCount += 1;
                                 return updateDocumentContent(existing.id, data);
                             }
+                            unchangedCount += 1;
                             return null;
                         }
                         var parts = relPath.split('/').filter(Boolean);
                         var fileName = parts.pop() || imported.name || 'Imported file';
                         var folderName = parts.length ? parts.join(' / ') : '';
+                        var fallbackExisting = docs.find(function (doc) {
+                            if (!doc || (doc.source || '') !== 'desktop-sync') return false;
+                            var currentRelPath = buildDocumentRelativePath(doc, folderLookup);
+                            var currentFolderName = currentRelPath.split('/').slice(0, -1).join(' / ');
+                            return currentFolderName === folderName && arrayBuffersEqual(doc.data, data);
+                        });
+                        if (fallbackExisting) {
+                            unchangedCount += 1;
+                            return renameDocument(fallbackExisting.id, fileName);
+                        }
                         var targetPromise = folderName ? getOrCreateFolder(projectId, folderName) : Promise.resolve(null);
                         return targetPromise.then(function (folderId) {
                             var file = new File([data], fileName, { type: imported.mime || 'application/octet-stream' });
+                            importedCount += 1;
                             return saveDocument(projectId, file, folderId, {
                                 source: 'desktop-sync',
                                 source_meta: { relative_path: relPath }
@@ -1142,17 +1304,33 @@
                 });
             });
             return work.then(function () {
-                var deletions = docs.filter(function (doc) {
+                var untouchedAppDocs = docs.filter(function (doc) {
                     return !desktopPaths[buildDocumentRelativePath(doc, folderLookup)];
-                }).map(function (doc) {
-                    return deleteDocument(doc.id);
+                }).length;
+                renderDocuments();
+                renderTasksSection();
+                if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
+                _desktopSyncStatusCache = Object.assign({}, _desktopSyncStatusCache || {}, {
+                    enabled: true,
+                    syncMode: 'non_destructive',
+                    statusLabels: ['synced', 'mirror active']
                 });
-                return Promise.all(deletions).then(function () {
-                    renderDocuments();
-                    renderTasksSection();
-                    if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
-                    return { ok: true, imported: desktopFiles.length, deleted: deletions.length };
+                logClientPrelaunchEvent('desktop_sync_import_completed', {
+                    project_id: projectId,
+                    imported: importedCount,
+                    updated: updatedCount,
+                    preserved: untouchedAppDocs
                 });
+                return {
+                    ok: true,
+                    imported: importedCount,
+                    updated: updatedCount,
+                    unchanged: unchangedCount,
+                    preserved: untouchedAppDocs,
+                    untouchedAppDocs: untouchedAppDocs,
+                    syncMode: 'non_destructive',
+                    statusLabels: ['synced', 'mirror active']
+                };
             });
         });
     }
@@ -1247,16 +1425,16 @@
         }
         if (enabled) {
             labelEl.textContent = projectPath
-                ? 'This project syncs to your Desktop folder.'
-                : 'Desktop sync is enabled for this app.';
+                ? 'Mirror active for this project.'
+                : 'Mirror active for this app.';
             pathEl.textContent = projectPath
                 ? ('Project folder: ' + projectPath)
                 : ('Root folder: ' + (rootPath || '~/Desktop/Openmud'));
-            helpEl.textContent = 'The first setup syncs every project into the root folder. After that, uploads in openmud sync out automatically and Desktop edits sync back in while the desktop app is open.';
+            helpEl.textContent = 'The first setup mirrors every project into the root folder. After that, uploads in openmud sync out automatically and Desktop edits import back in while the desktop app is open. Missing mirror files do not delete the app copy automatically.';
         } else {
             labelEl.textContent = 'Desktop sync is off.';
             pathEl.textContent = 'Default root folder: ~/Desktop/Openmud';
-            helpEl.textContent = 'Set up sync to create the Openmud folder, mirror every project into it, and keep the Desktop folder and openmud in sync.';
+            helpEl.textContent = 'Set up sync to create the Openmud folder, mirror every project into it, and import Desktop edits back into openmud without destructive delete-on-absence behavior.';
         }
         if (btnDesktopSyncSetup) {
             btnDesktopSyncSetup.hidden = enabled;
@@ -1293,7 +1471,7 @@
             return Promise.resolve({
                 ok: isDesktopSyncEnabled(),
                 message: isDesktopSyncEnabled()
-                    ? 'Desktop sync is enabled. openmud mirrors every project into your Desktop sync root and watches for local changes while the desktop app is open.'
+                    ? 'Desktop sync is enabled. openmud mirrors every project into your Desktop sync root, imports local changes while the desktop app is open, and does not delete app documents just because a mirror file is missing.'
                     : 'Desktop sync is off. Ask openmud to set up Desktop sync or use Settings to choose the folder and mirror all project documents.',
                 rootPath: (_desktopSyncStatusCache && _desktopSyncStatusCache.rootPath) || ''
             });
@@ -1408,13 +1586,16 @@
         } catch (e) { return null; }
     }
 
-    function setActiveChatId(projectId, cid) {
+    function setActiveChatId(projectId, cid, options) {
+        if (!projectId) return;
+        options = options || {};
         try {
             var raw = localStorage.getItem(STORAGE_ACTIVE_CHAT);
             var ac = raw ? JSON.parse(raw) : {};
             ac[projectId] = cid;
             localStorage.setItem(STORAGE_ACTIVE_CHAT, JSON.stringify(ac));
         } catch (e) {}
+        if (!options.silent) scheduleProjectStateSync(projectId);
     }
 
     function getMessages(projectId) {
@@ -1432,12 +1613,12 @@
         } catch (e) { return []; }
     }
 
-    var _messagesSyncTimer = null;
-    function setMessages(projectId, msgs) {
+    function setMessages(projectId, msgs, options) {
+        options = options || {};
         var cid = activeChatId || getActiveChatId(projectId);
         if (!cid) {
             cid = chatIdGen();
-            setActiveChatId(projectId, cid);
+            setActiveChatId(projectId, cid, { silent: true });
             activeChatId = cid;
         }
         var raw = localStorage.getItem(STORAGE_MESSAGES);
@@ -1446,12 +1627,7 @@
         if (!all[projectId][cid]) all[projectId][cid] = { name: 'New chat', messages: [], createdAt: Date.now() };
         all[projectId][cid].messages = msgs;
         localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
-        if (getAuthHeaders().Authorization && projectId) {
-            clearTimeout(_messagesSyncTimer);
-            _messagesSyncTimer = setTimeout(function () {
-                syncMessagesToApi(projectId, msgs);
-            }, 800);
-        }
+        if (!options.silent) scheduleProjectStateSync(projectId);
     }
 
     function createNewChat(projectId) {
@@ -1461,8 +1637,9 @@
         if (!all[projectId]) all[projectId] = {};
         all[projectId][cid] = { name: 'New chat', messages: [], createdAt: Date.now() };
         localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
-        setActiveChatId(projectId, cid);
+        setActiveChatId(projectId, cid, { silent: true });
         activeChatId = cid;
+        scheduleProjectStateSync(projectId);
         return cid;
     }
 
@@ -1479,6 +1656,7 @@
             setActiveChatId(projectId, next);
             activeChatId = next;
         }
+        scheduleProjectStateSync(projectId);
     }
 
     function renameChatThread(projectId, chatIdToRename, newName) {
@@ -1487,6 +1665,7 @@
         if (all[projectId] && all[projectId][chatIdToRename]) {
             all[projectId][chatIdToRename].name = newName;
             localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
+            scheduleProjectStateSync(projectId);
         }
     }
 
@@ -4057,12 +4236,22 @@
         setProjects(projects);
         // Remove chats for this project from localStorage
         try {
-            var allChatsRaw = localStorage.getItem('mudrag_chats');
+            var allChatsRaw = localStorage.getItem(STORAGE_MESSAGES);
             var allChats = allChatsRaw ? JSON.parse(allChatsRaw) : {};
             delete allChats[projectId];
-            localStorage.setItem('mudrag_chats', JSON.stringify(allChats));
+            localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(allChats));
+            var activeChatsRaw = localStorage.getItem(STORAGE_ACTIVE_CHAT);
+            var activeChats = activeChatsRaw ? JSON.parse(activeChatsRaw) : {};
+            delete activeChats[projectId];
+            localStorage.setItem(STORAGE_ACTIVE_CHAT, JSON.stringify(activeChats));
         } catch (_) {}
         removeProjectData(projectId);
+        if (getAuthHeaders().Authorization) {
+            fetch(API_BASE + '/projects?id=' + encodeURIComponent(projectId), {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            }).catch(function () {});
+        }
         // Sync deletion to desktop API
         if (isToolServerOrigin && API_BASE) {
             fetch(API_BASE + '/storage/projects/' + encodeURIComponent(projectId), { method: 'DELETE' }).catch(function () {});
@@ -4366,6 +4555,31 @@
     var docClipboard = null; // { type: 'doc'|'folder', doc?, folder?, folderDocs? }
 
     function openDB() {
+        var accountState = window.openmudAccountState || null;
+        if (accountState && accountState.openScopedDatabase) {
+            return accountState.openScopedDatabase({
+                baseName: DB_NAME,
+                version: DB_VERSION,
+                upgrade: function (db, e) {
+                    if (!db.objectStoreNames.contains(DOC_STORE)) {
+                        var docStore = db.createObjectStore(DOC_STORE, { keyPath: 'id' });
+                        docStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                    if (e.oldVersion < 2 && db.objectStoreNames.contains(DOC_STORE)) {
+                        try {
+                            var docStore = e.target.transaction.objectStore(DOC_STORE);
+                            if (!docStore.indexNames.contains('folderId')) {
+                                docStore.createIndex('folderId', 'folderId', { unique: false });
+                            }
+                        } catch (err) { /* ignore */ }
+                    }
+                    if (!db.objectStoreNames.contains(FOLDERS_STORE)) {
+                        var folderStore = db.createObjectStore(FOLDERS_STORE, { keyPath: 'id' });
+                        folderStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                }
+            });
+        }
         return new Promise(function (resolve, reject) {
             var req = indexedDB.open(DB_NAME, DB_VERSION);
             req.onerror = function () { reject(req.error); };
@@ -6427,6 +6641,13 @@
         if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
             syncProjectToDesktop(projectId).catch(function () {});
         }
+        if (getAuthHeaders().Authorization) {
+            fetch(API_BASE + '/projects', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ id: projectId, name: trimmed })
+            }).catch(function () {});
+        }
     }
 
     var _renamingProject = false;
@@ -7060,7 +7281,7 @@
     function ensureProject() {
         var projects = getProjects();
         if (projects.length === 0) {
-            createProject('Untitled project');
+            if (!getAuthHeaders().Authorization) createProject('Untitled project');
         } else if (!activeProjectId || !projects.find(function (p) { return p.id === activeProjectId; })) {
             switchProject(projects[0].id);
         }
@@ -9978,10 +10199,18 @@
             }
         }
     }
-    if (isToolServerOrigin || (useDesktopApi && toolPort)) {
-        loadStorageProjects(doInit);
+    function startAppAfterAuth() {
+        if (isToolServerOrigin || (useDesktopApi && toolPort)) {
+            loadStorageProjects(doInit);
+        } else {
+            doInit();
+        }
+    }
+
+    if (window.mudragAuthReady && typeof window.mudragAuthReady.then === 'function') {
+        window.mudragAuthReady.finally(startAppAfterAuth);
     } else {
-        doInit();
+        startAppAfterAuth();
     }
 
     (function initMobileSidebar() {
@@ -10577,8 +10806,20 @@
                 syncProjectFromDesktop(projectId).then(function (result) {
                     if (result && result.ok) {
                         showToast('Desktop changes synced into ' + getTaskProjectLabel(projectId));
+                    } else if (result && result.error) {
+                        logClientPrelaunchEvent('desktop_sync_import_failed', {
+                            project_id: projectId,
+                            message: result.error
+                        });
+                        showToast('Desktop sync issue: ' + result.error);
                     }
-                }).catch(function () {});
+                }).catch(function (err) {
+                    logClientPrelaunchEvent('desktop_sync_import_failed', {
+                        project_id: projectId,
+                        message: err && err.message ? err.message : 'unknown_error'
+                    });
+                    showToast('Desktop sync issue: could not import mirror changes.');
+                });
             }, 900);
         });
     }
