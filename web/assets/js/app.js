@@ -69,6 +69,7 @@
     var _desktopSyncIgnoreUntil = {};
     var _desktopSyncBootstrapped = false;
     var _desktopSyncStatusCache = null;
+    var _projectStateSyncTimers = {};
     var _currentAccountScope = 'anon';
     var STORAGE_TASKS_SECTION_EXPANDED = 'mudrag_tasks_section_expanded';
 
@@ -350,25 +351,66 @@
         fetch(API_BASE + '/projects', { method: 'GET', headers: getAuthHeaders() })
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (data) {
-                if (data && Array.isArray(data.projects) && data.projects.length > 0) {
+                if (data && Array.isArray(data.projects)) {
                     localStorage.setItem(STORAGE_PROJECTS, JSON.stringify(data.projects));
                     if (cb) cb(data.projects);
+                    return;
                 }
                 if (cb) cb();
             })
             .catch(function () { if (cb) cb(); });
     }
 
-    function syncMessagesToApi(projectId, msgs) {
+    function getProjectStateSnapshot(projectId) {
+        return {
+            project_id: projectId,
+            project_data: getProjectData(projectId),
+            chats: getChats(projectId),
+            active_chat_id: getActiveChatId(projectId)
+        };
+    }
+
+    function syncProjectStateToApi(projectId) {
         if (!getAuthHeaders().Authorization || !projectId) return;
-        fetch(API_BASE + '/chat-messages', {
+        fetch(API_BASE + '/project-state', {
             method: 'PUT',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ project_id: projectId, messages: msgs || getMessages(projectId) })
+            body: JSON.stringify(getProjectStateSnapshot(projectId))
         }).catch(function () {});
     }
 
-    function loadMessagesFromApi(projectId, cb) {
+    function scheduleProjectStateSync(projectId) {
+        if (!getAuthHeaders().Authorization || !projectId) return;
+        clearTimeout(_projectStateSyncTimers[projectId]);
+        _projectStateSyncTimers[projectId] = setTimeout(function () {
+            syncProjectStateToApi(projectId);
+        }, 800);
+    }
+
+    function setChatsForProject(projectId, chats, options) {
+        if (!projectId) return {};
+        options = options || {};
+        try {
+            var raw = localStorage.getItem(STORAGE_MESSAGES);
+            var all = raw ? JSON.parse(raw) : {};
+            all[projectId] = chats || {};
+            localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
+            if (!options.silent) scheduleProjectStateSync(projectId);
+            return all[projectId];
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function syncMessagesToApi(projectId, msgs) {
+        if (!projectId) return;
+        if (msgs && msgs.length >= 0) {
+            setMessages(projectId, msgs, { silent: true });
+        }
+        scheduleProjectStateSync(projectId);
+    }
+
+    function loadLegacyMessagesFromApi(projectId, cb) {
         if (!getAuthHeaders().Authorization || !projectId) { if (cb) cb([]); return; }
         fetch(API_BASE + '/chat-messages?project_id=' + encodeURIComponent(projectId), { method: 'GET', headers: getAuthHeaders() })
             .then(function (r) { return r.ok ? r.json() : null; })
@@ -377,6 +419,36 @@
                 if (cb) cb(msgs);
             })
             .catch(function () { if (cb) cb([]); });
+    }
+
+    function loadMessagesFromApi(projectId, cb) {
+        if (!getAuthHeaders().Authorization || !projectId) { if (cb) cb([]); return; }
+        fetch(API_BASE + '/project-state?project_id=' + encodeURIComponent(projectId), { method: 'GET', headers: getAuthHeaders() })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                var state = data && data.project_state ? data.project_state : null;
+                if (!state) {
+                    loadLegacyMessagesFromApi(projectId, cb);
+                    return;
+                }
+                if (state.project_data) setProjectData(projectId, state.project_data, { silent: true });
+                if (state.chats) setChatsForProject(projectId, state.chats, { silent: true });
+                if (state.active_chat_id) {
+                    setActiveChatId(projectId, state.active_chat_id, { silent: true });
+                }
+                var cid = getActiveChatId(projectId) || state.active_chat_id || null;
+                var chats = getChats(projectId);
+                if (!cid) {
+                    var keys = Object.keys(chats);
+                    cid = keys.length ? keys[0] : null;
+                    if (cid) setActiveChatId(projectId, cid, { silent: true });
+                }
+                var msgs = (cid && chats[cid] && chats[cid].messages) ? chats[cid].messages : [];
+                if (cb) cb(msgs);
+            })
+            .catch(function () {
+                loadLegacyMessagesFromApi(projectId, cb);
+            });
     }
 
     function getActiveId() {
@@ -401,11 +473,13 @@
         return all[projectId] || {};
     }
 
-    function setProjectData(projectId, data) {
+    function setProjectData(projectId, data, options) {
         if (!projectId) return;
+        options = options || {};
         var all = getAllProjectData();
         all[projectId] = data || {};
         localStorage.setItem(STORAGE_PROJECT_DATA, JSON.stringify(all));
+        if (!options.silent) scheduleProjectStateSync(projectId);
     }
 
     function removeProjectData(projectId) {
@@ -1440,13 +1514,16 @@
         } catch (e) { return null; }
     }
 
-    function setActiveChatId(projectId, cid) {
+    function setActiveChatId(projectId, cid, options) {
+        if (!projectId) return;
+        options = options || {};
         try {
             var raw = localStorage.getItem(STORAGE_ACTIVE_CHAT);
             var ac = raw ? JSON.parse(raw) : {};
             ac[projectId] = cid;
             localStorage.setItem(STORAGE_ACTIVE_CHAT, JSON.stringify(ac));
         } catch (e) {}
+        if (!options.silent) scheduleProjectStateSync(projectId);
     }
 
     function getMessages(projectId) {
@@ -1464,12 +1541,12 @@
         } catch (e) { return []; }
     }
 
-    var _messagesSyncTimer = null;
-    function setMessages(projectId, msgs) {
+    function setMessages(projectId, msgs, options) {
+        options = options || {};
         var cid = activeChatId || getActiveChatId(projectId);
         if (!cid) {
             cid = chatIdGen();
-            setActiveChatId(projectId, cid);
+            setActiveChatId(projectId, cid, { silent: true });
             activeChatId = cid;
         }
         var raw = localStorage.getItem(STORAGE_MESSAGES);
@@ -1478,12 +1555,7 @@
         if (!all[projectId][cid]) all[projectId][cid] = { name: 'New chat', messages: [], createdAt: Date.now() };
         all[projectId][cid].messages = msgs;
         localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
-        if (getAuthHeaders().Authorization && projectId) {
-            clearTimeout(_messagesSyncTimer);
-            _messagesSyncTimer = setTimeout(function () {
-                syncMessagesToApi(projectId, msgs);
-            }, 800);
-        }
+        if (!options.silent) scheduleProjectStateSync(projectId);
     }
 
     function createNewChat(projectId) {
@@ -1493,8 +1565,9 @@
         if (!all[projectId]) all[projectId] = {};
         all[projectId][cid] = { name: 'New chat', messages: [], createdAt: Date.now() };
         localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
-        setActiveChatId(projectId, cid);
+        setActiveChatId(projectId, cid, { silent: true });
         activeChatId = cid;
+        scheduleProjectStateSync(projectId);
         return cid;
     }
 
@@ -1511,6 +1584,7 @@
             setActiveChatId(projectId, next);
             activeChatId = next;
         }
+        scheduleProjectStateSync(projectId);
     }
 
     function renameChatThread(projectId, chatIdToRename, newName) {
@@ -1519,6 +1593,7 @@
         if (all[projectId] && all[projectId][chatIdToRename]) {
             all[projectId][chatIdToRename].name = newName;
             localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
+            scheduleProjectStateSync(projectId);
         }
     }
 
@@ -4089,12 +4164,22 @@
         setProjects(projects);
         // Remove chats for this project from localStorage
         try {
-            var allChatsRaw = localStorage.getItem('mudrag_chats');
+            var allChatsRaw = localStorage.getItem(STORAGE_MESSAGES);
             var allChats = allChatsRaw ? JSON.parse(allChatsRaw) : {};
             delete allChats[projectId];
-            localStorage.setItem('mudrag_chats', JSON.stringify(allChats));
+            localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(allChats));
+            var activeChatsRaw = localStorage.getItem(STORAGE_ACTIVE_CHAT);
+            var activeChats = activeChatsRaw ? JSON.parse(activeChatsRaw) : {};
+            delete activeChats[projectId];
+            localStorage.setItem(STORAGE_ACTIVE_CHAT, JSON.stringify(activeChats));
         } catch (_) {}
         removeProjectData(projectId);
+        if (getAuthHeaders().Authorization) {
+            fetch(API_BASE + '/projects?id=' + encodeURIComponent(projectId), {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            }).catch(function () {});
+        }
         // Sync deletion to desktop API
         if (isToolServerOrigin && API_BASE) {
             fetch(API_BASE + '/storage/projects/' + encodeURIComponent(projectId), { method: 'DELETE' }).catch(function () {});
@@ -6483,6 +6568,13 @@
         updateDesktopTitle();
         if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
             syncProjectToDesktop(projectId).catch(function () {});
+        }
+        if (getAuthHeaders().Authorization) {
+            fetch(API_BASE + '/projects', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ id: projectId, name: trimmed })
+            }).catch(function () {});
         }
     }
 

@@ -3,7 +3,7 @@ const { getUserFromRequest } = require('./lib/auth');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('projects')
-        .select('id, name, created_at')
+        .select('id, name, created_at, updated_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -62,7 +62,30 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ projects: rows });
     }
 
-    res.setHeader('Allow', 'GET, POST, PUT');
+    if (req.method === 'DELETE') {
+      const projectId = String((req.query && req.query.id) || (req.body && req.body.id) || '').trim();
+      if (!projectId) {
+        return res.status(400).json({ error: 'id required', project: null });
+      }
+      const { data: project } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('id', projectId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!project) {
+        return res.status(404).json({ error: 'Project not found', project: null });
+      }
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', projectId)
+        .eq('user_id', user.id);
+      if (error) throw error;
+      return res.status(200).json({ ok: true, id: projectId });
+    }
+
+    res.setHeader('Allow', 'GET, POST, PUT, DELETE');
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (e) {
     console.error('Projects API error:', e);
