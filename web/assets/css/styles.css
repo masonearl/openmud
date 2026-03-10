@@ -411,6 +411,10 @@ body.page-try.has-desktop-title-bar {
     padding-top: 79px;
 }
 
+body.page-settings.has-desktop-title-bar {
+    padding-top: 0;
+}
+
 body.page-try.has-desktop-title-bar .lp-nav {
     position: fixed;
     top: 0;
@@ -422,11 +426,29 @@ body.page-try.has-desktop-title-bar .lp-nav {
     align-items: center;
 }
 
+body.page-settings.has-desktop-title-bar .lp-nav {
+    padding-left: 84px;
+    padding-right: 16px;
+    display: flex;
+    align-items: center;
+}
+
 body.page-try.has-desktop-title-bar .lp-nav .lp-brand-menu {
     flex-shrink: 0;
 }
 
+body.page-settings.has-desktop-title-bar .lp-nav .lp-brand-menu {
+    flex-shrink: 0;
+}
+
 body.page-try.has-desktop-title-bar .lp-nav-drag-fill {
+    flex: 1;
+    min-width: 0;
+    -webkit-app-region: drag;
+    align-self: stretch;
+}
+
+body.page-settings.has-desktop-title-bar .lp-nav-drag-fill {
     flex: 1;
     min-width: 0;
     -webkit-app-region: drag;
@@ -441,6 +463,17 @@ body.page-try.has-desktop-title-bar .lp-nav input,
 body.page-try.has-desktop-title-bar .lp-nav select,
 body.page-try.has-desktop-title-bar .lp-nav textarea,
 body.page-try.has-desktop-title-bar .lp-nav [role="button"] {
+    -webkit-app-region: no-drag;
+}
+
+body.page-settings.has-desktop-title-bar .lp-nav a,
+body.page-settings.has-desktop-title-bar .lp-nav button,
+body.page-settings.has-desktop-title-bar .lp-nav summary,
+body.page-settings.has-desktop-title-bar .lp-nav details,
+body.page-settings.has-desktop-title-bar .lp-nav input,
+body.page-settings.has-desktop-title-bar .lp-nav select,
+body.page-settings.has-desktop-title-bar .lp-nav textarea,
+body.page-settings.has-desktop-title-bar .lp-nav [role="button"] {
     -webkit-app-region: no-drag;
 }
 

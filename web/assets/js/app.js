@@ -8214,9 +8214,14 @@
                         var isAbort = err.name === 'AbortError';
                         var rawMsg = err && err.message ? err.message : '';
                         var isFetchFail = /failed to fetch|networkerror|load failed/i.test(rawMsg || '');
+                        var isDesktopBridgeRequest = !!(isDesktopApp || useDesktopApi);
                         var friendly = isAbort
                             ? 'Request timed out. Try again.'
-                            : (isFetchFail ? 'Could not reach the AI service. Check localhost API is running, then refresh and retry.' : (rawMsg || 'Check your connection and try again.'));
+                            : (isFetchFail
+                                ? (isDesktopBridgeRequest
+                                    ? 'Could not reach the openmud desktop service. Restart the desktop app, then refresh and retry. If Settings shows your Mac agent as Connected, the relay is linked and the local desktop bridge is the part that needs to reconnect.'
+                                    : 'Could not reach the AI service. Refresh and retry.')
+                                : (rawMsg || 'Check your connection and try again.'));
                         handleApiError(friendly, isAbort ? 408 : 0);
                     })
                     .then(function () { doneSending(); });

@@ -74,12 +74,16 @@ function isAllowedToolServerOrigin(origin) {
 
 function applyToolServerCors(req, res) {
   const origin = String(req.headers.origin || '').trim();
+  const requestedHeaders = String(req.headers['access-control-request-headers'] || '').trim();
   if (isAllowedToolServerOrigin(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
+    res.setHeader('Vary', requestedHeaders ? 'Origin, Access-Control-Request-Headers' : 'Origin');
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    requestedHeaders || 'Content-Type, Authorization, X-Client-Date, X-Company-Profile, X-Ui-Theme, X-Openmud-Relay-Token, X-OpenAI-Api-Key, X-Anthropic-Api-Key, X-Grok-Api-Key, X-OpenRouter-Api-Key, X-OpenClaw-Api-Key, X-OpenClaw-Base-Url, X-OpenClaw-Model, X-Openmud-Dev-Key'
+  );
 }
 
 function getToolServerClientIp(req) {

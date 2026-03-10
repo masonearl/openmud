@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="page-settings">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body>
+<body class="page-settings">
     <nav class="lp-nav">
         <details class="lp-brand-menu">
             <summary class="lp-nav-logo"><img src="/assets/logo.png" alt="" class="lp-nav-logo-img"><span>openmud</span> <span class="lp-nav-caret" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M2.25 4.25L6 8l3.75-3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
@@ -21,6 +21,7 @@
                 <a href="/settings.html">Settings</a>
             </div>
         </details>
+        <div class="lp-nav-drag-fill" aria-hidden="true"></div>
     </nav>
 
     <main>
@@ -125,6 +126,7 @@
 
                         <div id="openclaw-connected-view" hidden>
                             <p class="st-agent-connected-text">Connected — your Mac is linked.</p>
+                            <p class="st-agent-help">If desktop chat says it cannot reach the AI service, restart the openmud desktop app. A Connected badge here means the relay sees your Mac, but chat also needs the local desktop service to be running in the app.</p>
                         </div>
 
                         <div id="openclaw-setup-view">
@@ -132,7 +134,7 @@
                             <ol class="st-agent-steps">
                                 <li>Copy your token below.</li>
                                 <li>Run the installer on your Mac. It installs, starts, and keeps the agent running automatically.</li>
-                                <li>Come back. The relay heartbeat updates automatically.</li>
+                                <li>Come back. The relay heartbeat updates automatically. Then reopen the desktop app if chat was already open.</li>
                             </ol>
                             <div class="st-token-row">
                                 <input id="openclaw-relay-token" type="password" class="provider-key-input st-token-input" readonly placeholder="Generating token...">
@@ -390,6 +392,14 @@
             var btnUpdateDownload = document.getElementById('btn-update-download');
             var btnUpdateInstall = document.getElementById('btn-update-install');
             var updateStateCache = null;
+            var isDesktopShell = !!(window.mudragDesktop
+                && window.mudragDesktop.isDesktop === true
+                && /mudrag-desktop/i.test(navigator.userAgent || ''));
+
+            if (isDesktopShell) {
+                document.documentElement.classList.add('has-desktop-title-bar');
+                document.body.classList.add('has-desktop-title-bar');
+            }
 
             function isDesktopSyncAvailable() {
                 return !!(window.mudragDesktop
@@ -779,7 +789,7 @@
                     keys.openclawRelayConnected = true;
                     keys.openclawEnabled = true;
                     writeKeyStore(keys);
-                    if (ocHeartbeat) ocHeartbeat.textContent = 'Heartbeat: Connected to your Mac through the openmud relay.';
+                    if (ocHeartbeat) ocHeartbeat.textContent = 'Heartbeat: Connected to your Mac through the openmud relay. If desktop chat was already open, restart the app once so the local desktop service reconnects cleanly.';
                 } else {
                     ocConnectedView.hidden = true;
                     ocSetupView.hidden = false;
@@ -791,7 +801,7 @@
                     if (ocHeartbeat) {
                         ocHeartbeat.textContent = state === 'error'
                             ? 'Heartbeat: Could not reach the relay. Check your internet connection, then try again.'
-                            : 'Heartbeat: No Mac agent connected yet. Run the installer command above on your Mac.';
+                            : 'Heartbeat: No Mac agent connected yet. Run the installer command above on your Mac, then reopen the desktop app.';
                     }
                 }
             }
@@ -1543,6 +1553,13 @@
             font-size: 0.875rem;
             color: var(--text-secondary);
             margin: 0 0 10px;
+        }
+
+        .st-agent-help {
+            margin: 0;
+            font-size: 0.8125rem;
+            line-height: 1.55;
+            color: var(--text-secondary);
         }
 
         /* ── Agent setup steps ─────────────────────────────────────────── */
