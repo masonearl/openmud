@@ -44,6 +44,7 @@ function getScopedPath(fileName, userId) {
       ensureDir(path.dirname(target));
       try {
         fs.copyFileSync(legacyPath, target);
+        fs.unlinkSync(legacyPath);
       } catch (_) {
         // best effort migration from legacy global storage
       }

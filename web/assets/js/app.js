@@ -429,7 +429,7 @@
 
     function syncMessagesToApi(projectId, msgs) {
         if (!projectId) return;
-        if (msgs && msgs.length >= 0) {
+        if (msgs && msgs.length > 0) {
             setMessages(projectId, msgs, { silent: true });
         }
         scheduleProjectStateSync(projectId);

@@ -45,12 +45,17 @@ module.exports = async function handler(req, res) {
       return res.status(410).json({ error: 'Desktop sign-in code expired. Try opening the app again.' });
     }
 
-    const { error: updateError } = await supabase
+    const { data: updated, error: updateError } = await supabase
       .from('desktop_auth_handoffs')
       .update({ consumed_at: new Date().toISOString() })
       .eq('id', row.id)
-      .is('consumed_at', null);
+      .is('consumed_at', null)
+      .select('id')
+      .maybeSingle();
     if (updateError) throw updateError;
+    if (!updated) {
+      return res.status(410).json({ error: 'Desktop sign-in code was already used.' });
+    }
 
     console.log(JSON.stringify({
       event: 'desktop_handoff_redeemed',
