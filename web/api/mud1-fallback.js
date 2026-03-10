@@ -5,7 +5,8 @@
 const OpenAI = require('openai');
 const { createClient } = require('@supabase/supabase-js');
 const { getUserFromRequest } = require('./lib/auth');
-const { allocateUsage, logUsageEvent, detectSource } = require('./lib/usage');
+const { logUsageEvent, detectSource } = require('./lib/usage');
+const { classifyUsageKind } = require('./lib/model-policy');
 const { getRAGContextForUser, getRAGPackageForUser, buildMud1RAGSystemPrompt } = require('./lib/mud1-rag');
 const { getProjectRAGPackage } = require('./lib/project-rag-store');
 const { maxConfidence, mergeRagSources } = require('./lib/rag-utils');
@@ -96,16 +97,6 @@ module.exports = async function handler(req, res) {
     }
 
     const user = await getUserFromRequest(req);
-    if (user) {
-      const alloc = await allocateUsage(user.id, user.email);
-      if (!alloc.allowed) {
-        return res.status(429).json({
-          error: `Daily limit reached (${alloc.used}/${alloc.limit}). Sign in at openmud.ai/settings for access.`,
-          response: null,
-          usage: { used: alloc.used, limit: alloc.limit, date: alloc.date },
-        });
-      }
-    }
     // No auth: allow desktop/app use without sign-in (usage not tracked)
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -170,12 +161,14 @@ module.exports = async function handler(req, res) {
     const text = completion.choices?.[0]?.message?.content || 'What can I help with?';
     if (user) {
       const usage = completion.usage || {};
+      const usageKind = classifyUsageKind({ model: 'mud1', usingOwnKey: false, source: detectSource(req), requestType: 'chat' });
       await logUsageEvent(user.id, {
         model: 'mud1',
         inputTokens: usage.prompt_tokens || 0,
         outputTokens: usage.completion_tokens || 0,
         source: detectSource(req),
         requestType: 'chat',
+        usageKind,
       });
     }
     return res.status(200).json({

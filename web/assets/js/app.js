@@ -41,6 +41,26 @@
     var TASKS_PROJECT_NAME = 'Tasks';
     var DESKTOP_SYNC_FOLDER_NAME = 'Openmud';
     var TIER_LIMITS = { free: 5, personal: 100, pro: null, executive: null };
+    var platformPolicy = {
+        beta_phase: true,
+        default_model: 'mud1',
+        tier_limits: TIER_LIMITS,
+        notes: {
+            mud1: 'mud1 is always free.',
+            hosted_beta: 'A small hosted model set is available during beta with platform limits.',
+            byok: 'You can add your own provider keys in Settings at any time.'
+        },
+        models: [
+            { id: 'mud1', label: 'mud1', access: 'hosted_free', badge: 'Free', recommended: true, short_description: 'Best default for openmud. Free and available without a provider key.' },
+            { id: 'openclaw', label: 'openmud agent', access: 'desktop_agent', badge: 'Desktop', recommended: false, short_description: 'Uses your linked Mac tools for email, calendar, files, and system actions.' },
+            { id: 'gpt-4o-mini', label: 'GPT-4o mini', access: 'hosted_beta', badge: 'Hosted beta', recommended: false, short_description: 'Fast hosted model from openmud during beta.' },
+            { id: 'claude-3-haiku-20240307', label: 'Claude Haiku 3', access: 'hosted_beta', badge: 'Hosted beta', recommended: false, short_description: 'Lightweight hosted Claude option during beta.' },
+            { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5', access: 'hosted_beta', badge: 'Hosted beta', recommended: false, short_description: 'Stronger hosted Claude option during beta.' },
+            { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6', access: 'byok', badge: 'BYOK', recommended: false, short_description: 'Premium Claude model. Add your own Anthropic key in Settings.' },
+            { id: 'grok-2-latest', label: 'Grok 2', access: 'byok', badge: 'BYOK', recommended: false, short_description: 'Premium Grok model. Add your own xAI key in Settings.' },
+            { id: 'openrouter/openai/gpt-4o-mini', label: 'OpenRouter GPT-4o mini', access: 'byok', badge: 'BYOK', recommended: false, short_description: 'Use your own OpenRouter account for OpenAI-compatible models.' }
+        ]
+    };
     var _authToken = null;
     var DEV_KEY = 'openmud';
     var _relayStatusTimer = null;
@@ -87,6 +107,69 @@
         }
     }
 
+    function getModelMeta(modelId) {
+        var id = String(modelId || '').trim();
+        var list = (platformPolicy && Array.isArray(platformPolicy.models)) ? platformPolicy.models : [];
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] && list[i].id === id) return list[i];
+        }
+        return { id: id || 'mud1', label: id || 'mud1', access: 'byok', badge: 'BYOK', short_description: 'Unknown model.' };
+    }
+
+    function getProviderKeyNameForModel(modelId) {
+        var meta = getModelMeta(modelId);
+        if (meta.id === 'claude-sonnet-4-6' || meta.id === 'claude-3-haiku-20240307' || meta.id === 'claude-haiku-4-5-20251001') return 'anthropic';
+        if (meta.id === 'grok-2-latest') return 'grok';
+        if (String(meta.id || '').indexOf('openrouter/') === 0) return 'openrouter';
+        if (meta.id === 'gpt-4o-mini') return 'openai';
+        return '';
+    }
+
+    function hasOwnKeyForModel(modelId) {
+        var cfg = getProviderConfig();
+        var provider = getProviderKeyNameForModel(modelId);
+        if (provider === 'anthropic') return !!String(cfg.anthropic || '').trim();
+        if (provider === 'grok') return !!String(cfg.grok || '').trim();
+        if (provider === 'openrouter') return !!String(cfg.openrouter || '').trim();
+        if (provider === 'openai') return !!String(cfg.openai || '').trim();
+        return false;
+    }
+
+    function getModelPolicyHint(modelId) {
+        var meta = getModelMeta(modelId);
+        if (meta.access === 'hosted_free') return meta.short_description || 'mud1 is always free.';
+        if (meta.access === 'desktop_agent') return meta.short_description || 'Uses your linked Mac tools.';
+        if (meta.access === 'hosted_beta') {
+            if (hasOwnKeyForModel(modelId)) return (meta.short_description || 'Hosted beta model.') + ' Using your saved provider key right now.';
+            return (meta.short_description || 'Hosted beta model.') + ' Counts against your hosted beta usage.';
+        }
+        if (meta.access === 'byok') {
+            if (hasOwnKeyForModel(modelId)) return (meta.short_description || 'Bring-your-own-key model.') + ' Using your saved provider key.';
+            var baseHint = meta.short_description || 'Bring-your-own-key model.';
+            if (/settings|api key|provider key/i.test(baseHint)) return baseHint;
+            return baseHint + ' Add your provider key in Settings to use it.';
+        }
+        return meta.short_description || '';
+    }
+
+    function updatePlatformPolicy(next) {
+        if (!next || !Array.isArray(next.models) || !next.models.length) return;
+        platformPolicy = next;
+        if (next.tier_limits) TIER_LIMITS = next.tier_limits;
+    }
+
+    function loadPlatformPolicy() {
+        return fetch(API_BASE + '/platform', { method: 'GET' })
+            .then(function (res) { return res.ok ? res.json() : null; })
+            .then(function (data) {
+                if (data) updatePlatformPolicy(data);
+                return data || platformPolicy;
+            })
+            .catch(function () {
+                return platformPolicy;
+            });
+    }
+
     function saveProviderConfig(next) {
         try {
             localStorage.setItem(STORAGE_PROVIDER_KEYS, JSON.stringify(next || {}));
@@ -127,16 +210,18 @@
         if (!modelSelectEl) return;
         var option = modelSelectEl.querySelector('option[value="' + value + '"]');
         if (!option) return;
+        var meta = getModelMeta(value);
         modelSelectEl.value = value;
         localStorage.setItem(STORAGE_MODEL, value);
         var labelEl = document.getElementById('model-select-label');
-        if (labelEl) labelEl.textContent = option.textContent || value;
+        if (labelEl) labelEl.textContent = meta.label || option.textContent || value;
         var dropdownEl = document.getElementById('model-dropdown');
         if (dropdownEl) {
             dropdownEl.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
                 btn.setAttribute('aria-selected', btn.getAttribute('data-value') === value ? 'true' : 'false');
             });
         }
+        refreshChatEntryHints();
     }
 
     function getChatHeaders() {
@@ -1398,12 +1483,16 @@
         return TIER_LIMITS[tier] != null ? TIER_LIMITS[tier] : TIER_LIMITS.free;
     }
 
-    function isOverLimit() {
+    function isOverLimit(modelId) {
         if (/[?&]dev=1/.test(window.location.search || '')) {
             try { localStorage.setItem(STORAGE_USAGE, JSON.stringify({ date: new Date().toISOString().slice(0, 10), count: 0 })); } catch (e) {}
             return false;  // dev mode: reset usage and bypass
         }
         if (localStorage.getItem('mudrag_dev_unlimited') === 'true') return false;
+        var selectedModel = modelId || getCurrentModelSelection();
+        var meta = getModelMeta(selectedModel);
+        if (meta.access === 'hosted_free' || meta.access === 'desktop_agent') return false;
+        if (hasOwnKeyForModel(selectedModel)) return false;
         var limit = getTierLimit();
         if (limit === null) return false;
         return getUsage() >= limit;
@@ -1499,7 +1588,7 @@
                     if (el) {
                         var limit = data.limit;
                         el.textContent = limit == null ? (data.used + ' today') : (data.used + ' / ' + limit);
-                        el.title = 'Messages used today. View details in Settings.';
+                        el.title = 'Hosted beta usage today. mud1 is free. BYOK and local desktop usage do not count against this limit.';
                     }
                 }
             }).catch(function () {});
@@ -3429,6 +3518,28 @@
         }
     }
 
+    function syncModelPickerFromPolicy() {
+        var modelSelect = document.getElementById('model-select');
+        if (modelSelect) {
+            Array.prototype.slice.call(modelSelect.options || []).forEach(function (option) {
+                var meta = getModelMeta(option.value);
+                if (!meta || !meta.label) return;
+                option.textContent = meta.badge ? (meta.label + ' - ' + meta.badge) : meta.label;
+            });
+        }
+        var modelDropdown = document.getElementById('model-dropdown');
+        if (modelDropdown) {
+            modelDropdown.querySelectorAll('.model-dropdown-item[data-value]').forEach(function (btn) {
+                var meta = getModelMeta(btn.getAttribute('data-value'));
+                if (!meta || !meta.label) return;
+                btn.textContent = meta.badge ? (meta.label + ' - ' + meta.badge) : meta.label;
+                btn.title = getModelPolicyHint(meta.id);
+            });
+        }
+        var saved = getCurrentModelSelection();
+        setModelSelection(saved);
+    }
+
     function getChatPlaceholderText() {
         var model = getCurrentModelSelection();
         var mode = getCurrentAgentMode();
@@ -3449,6 +3560,8 @@
     function refreshChatEntryHints() {
         var inputEl = document.getElementById('chat-input');
         if (inputEl) inputEl.placeholder = getChatPlaceholderText();
+        var modelHintEl = document.getElementById('model-policy-hint');
+        if (modelHintEl) modelHintEl.textContent = getModelPolicyHint(getCurrentModelSelection());
         if (activeProjectId && getMessages(activeProjectId).length === 0) renderMessages();
     }
 
@@ -7474,17 +7587,20 @@
         if (tryHandleBidItemsLoadToProposalCommand(text)) return;
         if (tryHandleCsvEditCommand(text)) return;
 
-        if (isOverLimit()) {
+        var selectedModelForLimit = getCurrentModelSelection();
+        if (isOverLimit(selectedModelForLimit)) {
             var modal = document.getElementById('modal-upgrade');
             if (modal) {
                 var tier = localStorage.getItem(STORAGE_SUB_TIER) || 'free';
                 var titleEl = document.getElementById('modal-upgrade-title');
                 var descEl = document.getElementById('modal-upgrade-desc');
-                if (tier === 'free' && titleEl) titleEl.textContent = 'Free limit reached';
-                else if (tier === 'personal' && titleEl) titleEl.textContent = 'Personal limit reached';
+                var meta = getModelMeta(selectedModelForLimit);
+                if (tier === 'free' && titleEl) titleEl.textContent = 'Hosted beta limit reached';
+                else if (tier === 'personal' && titleEl) titleEl.textContent = 'Hosted beta limit reached';
                 else if (titleEl) titleEl.textContent = 'Limit reached';
-                if (tier === 'personal' && descEl) descEl.textContent = "You've used your 100 messages for today. Upgrade to Pro for unlimited.";
-                else if (descEl) descEl.textContent = "You've used your free messages for today. Upgrade for more.";
+                if (descEl) {
+                    descEl.textContent = 'Your hosted beta limit is used up for today. Switch to mud1 for free, use openmud agent on desktop, or add your own key in Settings for ' + (meta.label || 'this model') + '.';
+                }
                 modal.hidden = false;
                 modal.addEventListener('click', function closeModal(e) {
                     if (e.target === modal) {
@@ -7747,6 +7863,7 @@
                 var msg = String(errMsg || '').toLowerCase();
                 var isRateLimit = statusCode === 429 || /rate.?limit|too many request|usage limit|limit reached|limit exceeded/i.test(errMsg);
                 var isAuthError = statusCode === 401 || statusCode === 403 || /sign in|log in|unauthorized|not authenticated|authentication/i.test(errMsg);
+                var isByokRequired = /requires your own .*api key|add it in settings/i.test(msg);
                 var hasDevUnlimited = localStorage.getItem('mudrag_dev_unlimited') === 'true';
                 if (isAuthError && hasDevUnlimited) {
                     addMessage('assistant', 'Dev mode is enabled. Retrying with dev access unlocked.');
@@ -7764,16 +7881,15 @@
                     var modal = document.getElementById('modal-upgrade');
                     var titleEl = document.getElementById('modal-upgrade-title');
                     var descEl = document.getElementById('modal-upgrade-desc');
-                    if (isAuthError) {
-                        var signInPath = '/settings.html';
+                    if (isByokRequired) {
+                        if (titleEl) titleEl.textContent = 'Add your API key';
+                        if (descEl) descEl.textContent = 'This model is bring-your-own-key. Open Settings and add the matching provider key, or switch back to mud1.';
+                    } else if (isAuthError) {
                         if (titleEl) titleEl.textContent = 'Sign in to continue';
-                        if (descEl) descEl.textContent = 'You need to sign in to use the AI. Use the sign in button below, or enter a dev key.';
+                        if (descEl) descEl.textContent = 'Sign in to use hosted models. mud1 stays free once you are signed in, and BYOK models work with your own saved keys.';
                     } else {
-                        var tier = localStorage.getItem(STORAGE_SUB_TIER) || 'free';
-                        if (titleEl) titleEl.textContent = tier === 'free' ? 'Free limit reached' : 'Daily limit reached';
-                        if (descEl) descEl.textContent = tier === 'free'
-                            ? "You've used your free messages for today. Upgrade for more, or use the desktop app with mud1 (free, local)."
-                            : "You've hit today's limit. Upgrade to Pro for unlimited messages, or enter a dev key below.";
+                        if (titleEl) titleEl.textContent = 'Hosted beta limit reached';
+                        if (descEl) descEl.textContent = 'Your hosted beta messages are used up for now. Switch to mud1 for free, use openmud agent on desktop, or use your own provider key in Settings.';
                     }
                     if (modal) modal.hidden = false;
                 } else {
@@ -8983,7 +9099,8 @@
         if (saved && modelSelect.querySelector('option[value="' + saved + '"]')) modelSelect.value = saved;
         function updateModelLabel() {
             var opt = modelSelect.querySelector('option[value="' + modelSelect.value + '"]');
-            modelLabel.textContent = opt ? opt.textContent : modelSelect.value;
+            var meta = getModelMeta(modelSelect.value);
+            modelLabel.textContent = meta.label || (opt ? opt.textContent : modelSelect.value);
             modelDropdown.querySelectorAll('.model-dropdown-item').forEach(function (btn) {
                 btn.setAttribute('aria-selected', btn.getAttribute('data-value') === modelSelect.value ? 'true' : 'false');
             });
@@ -9020,6 +9137,10 @@
         });
         refreshChatEntryHints();
     }
+    loadPlatformPolicy().then(function () {
+        syncModelPickerFromPolicy();
+        refreshChatEntryHints();
+    });
 
     var agentModeSelect = document.getElementById('agent-mode-select');
     var agentModeTrigger = document.getElementById('agent-mode-trigger');
@@ -10158,19 +10279,26 @@
     }
 
     // ── In-app update notification (Cursor-style bottom-left pill) ────────────
-    if (window.mudragDesktop && window.mudragDesktop.onUpdateAvailable) {
-        window.mudragDesktop.onUpdateAvailable(function (data) {
-            if (!data || !data.version) return;
+    if (window.mudragDesktop && window.mudragDesktop.getUpdateState) {
+        function removeUpdatePill() {
             var existing = document.getElementById('mudrag-update-pill');
-            if (existing) existing.remove();
+            if (!existing) return;
+            existing.classList.remove('update-pill-visible');
+            setTimeout(function () {
+                if (existing.parentNode) existing.remove();
+            }, 300);
+        }
 
-            var pill = document.createElement('div');
+        function ensureUpdatePill() {
+            var pill = document.getElementById('mudrag-update-pill');
+            if (pill) return pill;
+            pill = document.createElement('div');
             pill.id = 'mudrag-update-pill';
             pill.innerHTML =
                 '<div class="update-pill-inner">' +
                     '<div class="update-pill-dot"></div>' +
-                    '<span class="update-pill-text">openmud ' + data.version + ' available</span>' +
-                    '<button class="update-pill-btn" id="update-pill-install">Restart to update</button>' +
+                    '<span class="update-pill-text" id="update-pill-text"></span>' +
+                    '<button class="update-pill-btn" id="update-pill-action"></button>' +
                     '<button class="update-pill-dismiss" id="update-pill-dismiss" title="Dismiss">✕</button>' +
                 '</div>' +
                 '<div class="update-pill-bar" id="update-pill-bar" hidden>' +
@@ -10178,44 +10306,132 @@
                     '<span class="update-pill-bar-label" id="update-pill-bar-label">Downloading…</span>' +
                 '</div>';
             document.body.appendChild(pill);
-
-            // Animate in
+            document.getElementById('update-pill-dismiss').addEventListener('click', function () {
+                removeUpdatePill();
+            });
             requestAnimationFrame(function () { pill.classList.add('update-pill-visible'); });
+            return pill;
+        }
 
-            document.getElementById('update-pill-install').addEventListener('click', function () {
-                var installBtn = document.getElementById('update-pill-install');
-                var dismissBtn = document.getElementById('update-pill-dismiss');
-                var barWrap = document.getElementById('update-pill-bar');
-                if (installBtn) { installBtn.disabled = true; installBtn.textContent = 'Downloading…'; }
-                if (dismissBtn) { dismissBtn.hidden = true; }
-                if (barWrap) { barWrap.hidden = false; }
+        function renderUpdatePill(state) {
+            state = state || {};
+            var status = String(state.status || '');
+            var version = state.downloadedVersion || state.availableVersion || state.currentVersion || '';
+            var prefs = state.preferences || {};
+            var shouldShow = status === 'available'
+                || status === 'downloading'
+                || status === 'downloaded'
+                || status === 'installing'
+                || status === 'error';
+            if (!shouldShow) {
+                removeUpdatePill();
+                return;
+            }
 
-                if (window.mudragDesktop && window.mudragDesktop.onUpdateProgress) {
-                    window.mudragDesktop.onUpdateProgress(function (prog) {
-                        var fill = document.getElementById('update-pill-bar-fill');
-                        var lbl = document.getElementById('update-pill-bar-label');
-                        if (fill) fill.style.width = (prog.pct || 0) + '%';
-                        if (lbl) lbl.textContent = prog.label || 'Installing…';
-                        if (installBtn) installBtn.textContent = prog.label || 'Installing…';
+            var pill = ensureUpdatePill();
+            var textEl = document.getElementById('update-pill-text');
+            var actionBtn = document.getElementById('update-pill-action');
+            var barWrap = document.getElementById('update-pill-bar');
+            var fill = document.getElementById('update-pill-bar-fill');
+            var barLabel = document.getElementById('update-pill-bar-label');
+            if (!pill || !textEl || !actionBtn || !barWrap || !fill || !barLabel) return;
+
+            var text = 'Update available';
+            var actionLabel = '';
+            var action = '';
+            var disabled = false;
+            var showBar = false;
+
+            if (status === 'available') {
+                text = version ? ('openmud ' + version + ' available') : 'Update available';
+                if (prefs.autoDownloadUpdates) {
+                    actionLabel = 'Downloading…';
+                    disabled = true;
+                    showBar = true;
+                    barLabel.textContent = state.message || 'Downloading update…';
+                } else {
+                    actionLabel = 'Download update';
+                    action = 'download';
+                }
+            } else if (status === 'downloading') {
+                text = version ? ('Downloading openmud ' + version) : 'Downloading update';
+                actionLabel = 'Downloading…';
+                disabled = true;
+                showBar = true;
+                barLabel.textContent = state.message || 'Downloading update…';
+            } else if (status === 'downloaded') {
+                text = version ? ('openmud ' + version + ' ready') : 'Update ready to install';
+                actionLabel = 'Restart to update';
+                action = 'install';
+                showBar = true;
+                barLabel.textContent = state.message || 'Update ready to install.';
+            } else if (status === 'installing') {
+                text = version ? ('Installing openmud ' + version) : 'Installing update';
+                actionLabel = 'Restarting…';
+                disabled = true;
+                showBar = true;
+                barLabel.textContent = state.message || 'Restarting to install update…';
+            } else if (status === 'error') {
+                text = state.error || state.message || 'Update failed';
+                actionLabel = 'Check again';
+                action = 'check';
+            }
+
+            textEl.textContent = text;
+            actionBtn.textContent = actionLabel;
+            actionBtn.disabled = disabled;
+            actionBtn.dataset.action = action;
+            barWrap.hidden = !showBar;
+            fill.style.width = Math.max(0, Math.min(100, Number(state.progress) || 0)) + '%';
+            if (showBar && status === 'downloaded') fill.style.width = '100%';
+            if (showBar && status === 'installing') fill.style.width = '100%';
+
+            actionBtn.onclick = function () {
+                var kind = actionBtn.dataset.action || '';
+                if (kind === 'download' && window.mudragDesktop.downloadUpdate) {
+                    actionBtn.disabled = true;
+                    window.mudragDesktop.downloadUpdate().then(function (result) {
+                        if (!result || !result.ok) {
+                            actionBtn.disabled = false;
+                            showToast('Update failed: ' + ((result && result.error) || 'Unknown error'));
+                        }
+                    }).catch(function () {
+                        actionBtn.disabled = false;
+                        showToast('Could not download the update.');
+                    });
+                } else if (kind === 'install' && window.mudragDesktop.installUpdate) {
+                    actionBtn.disabled = true;
+                    window.mudragDesktop.installUpdate().then(function (result) {
+                        if (!result || !result.ok) {
+                            actionBtn.disabled = false;
+                            showToast('Update failed: ' + ((result && result.error) || 'Unknown error'));
+                        }
+                    }).catch(function () {
+                        actionBtn.disabled = false;
+                        showToast('Could not install the update.');
+                    });
+                } else if (kind === 'check' && window.mudragDesktop.checkUpdateManual) {
+                    actionBtn.disabled = true;
+                    window.mudragDesktop.checkUpdateManual().finally(function () {
+                        actionBtn.disabled = false;
                     });
                 }
+            };
+        }
 
-                window.mudragDesktop.installUpdate().then(function (r) {
-                    if (!r || !r.ok) {
-                        if (installBtn) { installBtn.disabled = false; installBtn.textContent = 'Restart to update'; }
-                        if (barWrap) barWrap.hidden = true;
-                        showToast('Update failed: ' + ((r && r.error) || 'Unknown error'));
-                    }
-                }).catch(function () {
-                    if (installBtn) { installBtn.disabled = false; installBtn.textContent = 'Restart to update'; }
-                });
+        if (window.mudragDesktop.onUpdateState) {
+            window.mudragDesktop.onUpdateState(function (state) {
+                renderUpdatePill(state);
             });
+        } else if (window.mudragDesktop.onUpdateAvailable) {
+            window.mudragDesktop.onUpdateAvailable(function (data) {
+                renderUpdatePill(data || {});
+            });
+        }
 
-            document.getElementById('update-pill-dismiss').addEventListener('click', function () {
-                pill.classList.remove('update-pill-visible');
-                setTimeout(function () { if (pill.parentNode) pill.remove(); }, 300);
-            });
-        });
+        window.mudragDesktop.getUpdateState().then(function (state) {
+            renderUpdatePill(state || {});
+        }).catch(function () {});
     }
 
     if (window.mudragDesktop && window.mudragDesktop.onDesktopSync) {

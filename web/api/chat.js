@@ -7,6 +7,7 @@ const buildSchedule = require('./schedule').buildSchedule;
 const buildProposal = require('./proposal').buildProposal;
 const { getUserFromRequest } = require('./lib/auth');
 const { allocateUsage, logUsageEvent, detectSource } = require('./lib/usage');
+const { isHostedModel, isHostedBetaModel, isDesktopAgentModel, getRequiredProviderKey, classifyUsageKind } = require('./lib/model-policy');
 const { getRAGContextForUser, getRAGPackageForUser, buildMud1RAGSystemPrompt } = require('./lib/mud1-rag');
 const { getProjectRAGPackage } = require('./lib/project-rag-store');
 const { maxConfidence, mergeRagSources } = require('./lib/rag-utils');
@@ -20,7 +21,6 @@ try {
 const OUTPUT_RULES = `
 Output format: Plain text only. No markdown (no **, ##, ###). No LaTeX or math blocks (no \\[, \\], $$). Be concise. Short sentences. Get to the point. Use simple bullets with - if needed.`;
 const DEV_KEY = 'openmud';
-const HOSTED_FREE_MODELS = new Set(['mud1', 'gpt-4o-mini']);
 const OPENMUD_BRAND_CONTEXT = [
   'openmud is an open-source agentic AI platform for heavy civil and underground utility construction.',
   'The mission is to build the best agentic AI tool in construction and help construction teams finish real workflows, not just chat.',
@@ -1269,6 +1269,8 @@ module.exports = async function handler(req, res) {
       (isOpenClaw && !!openclawKeyOverride) ||
       (isGrok && !!grokKeyOverride) ||
       (isOpenRouter && !!openrouterKeyOverride);
+    const usageRequestType = use_tools ? 'estimate' : 'chat';
+    const usageKind = classifyUsageKind({ model, usingOwnKey, source: reqSource, requestType: usageRequestType });
 
     // Auth policy:
     // - Dev bypass always skips auth.
@@ -1288,20 +1290,23 @@ module.exports = async function handler(req, res) {
       // - mud1 is always free (no daily cap)
       // - one hosted low-cost model is available with daily caps
       // - premium models require user-provided API keys
-      if (!usingOwnKey && !HOSTED_FREE_MODELS.has(model)) {
+      if (!usingOwnKey && !isHostedModel(model) && !isDesktopAgentModel(model)) {
+        const keyName = getRequiredProviderKey(model);
         return res.status(403).json({
-          error: 'This model requires your own API key. Add it in Settings to continue.',
+          error: keyName
+            ? `This model requires your own ${keyName} API key. Add it in Settings to continue.`
+            : 'This model requires your own API key. Add it in Settings to continue.',
           response: null,
         });
       }
 
-      // Only apply daily allocation to hosted non-mud1 requests.
-      if (!usingOwnKey && !isMud1) {
+      // Only apply daily allocation to hosted beta requests.
+      if (!usingOwnKey && isHostedBetaModel(model)) {
         const alloc = await allocateUsage(user.id, user.email);
         if (!alloc.allowed) {
           const limitLabel = alloc.limit == null ? 'unlimited' : alloc.limit;
           return res.status(429).json({
-            error: `Daily limit reached (${alloc.used}/${limitLabel}). Sign in at openmud.ai/settings for access.`,
+            error: `Hosted beta limit reached (${alloc.used}/${limitLabel}). Try mud1 for free, use your own API key in Settings, or wait for the limit to reset.`,
             response: null,
             usage: { used: alloc.used, limit: alloc.limit, date: alloc.date },
           });
@@ -1593,7 +1598,7 @@ module.exports = async function handler(req, res) {
 
     // mud1: True RAG — retrieve from knowledge base → GPT-4o generates grounded response
     if (isMud1) {
-      const apiKey = openaiKeyOverride || process.env.OPENAI_API_KEY;
+      const apiKey = process.env.OPENAI_API_KEY;
       if (!apiKey) {
         return res.status(500).json({
           error: 'OPENAI_API_KEY not configured',
@@ -1640,8 +1645,16 @@ module.exports = async function handler(req, res) {
       });
       const text = completion.choices?.[0]?.message?.content || 'What can I help with?';
       const usage = completion.usage || {};
-      if (user && user.id && !usingOwnKey) {
-        logUsageEvent(user.id, { model, inputTokens: usage.prompt_tokens || 0, outputTokens: usage.completion_tokens || 0, source: reqSource, requestType: use_tools ? 'estimate' : 'chat' });
+      if (user && user.id) {
+        logUsageEvent(user.id, {
+          model,
+          inputTokens: usage.prompt_tokens || 0,
+          outputTokens: usage.completion_tokens || 0,
+          source: reqSource,
+          requestType: usageRequestType,
+          usageKind,
+          usingOwnKey,
+        });
       }
       const mergedSources = mergeRagSources(
         (projectRag && projectRag.sources) || [],
@@ -1707,8 +1720,16 @@ module.exports = async function handler(req, res) {
           let text = ensureScheduleBlock(rawText || 'No response.', lastUser?.content, use_tools, messages);
           text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
           const ausage = response.usage || {};
-          if (user && user.id && !usingOwnKey) {
-            logUsageEvent(user.id, { model, inputTokens: ausage.input_tokens || 0, outputTokens: ausage.output_tokens || 0, source: reqSource, requestType: use_tools ? 'estimate' : 'chat' });
+          if (user && user.id) {
+            logUsageEvent(user.id, {
+              model,
+              inputTokens: ausage.input_tokens || 0,
+              outputTokens: ausage.output_tokens || 0,
+              source: reqSource,
+              requestType: usageRequestType,
+              usageKind,
+              usingOwnKey,
+            });
           }
           return res.status(200).json({ response: text, tools_used: [] });
         } catch (e) {
@@ -2163,13 +2184,15 @@ module.exports = async function handler(req, res) {
       let text = ensureScheduleBlock(rawText, lastUser?.content, use_tools, messages);
       text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
       const usage = completion.usage || {};
-      if (user && user.id && !usingOwnKey) {
+      if (user && user.id) {
         logUsageEvent(user.id, {
           model,
           inputTokens: usage.prompt_tokens || 0,
           outputTokens: usage.completion_tokens || 0,
           source: reqSource,
-          requestType: use_tools ? 'estimate' : 'chat',
+          requestType: usageRequestType,
+          usageKind,
+          usingOwnKey,
         });
       }
       return res.status(200).json({ response: text, tools_used: [] });
@@ -2279,8 +2302,16 @@ module.exports = async function handler(req, res) {
     let text = ensureScheduleBlock(rawText, lastUser?.content, use_tools, messages);
     text = ensureProposalBlock(text, lastUser?.content, use_tools, estimate_context);
     const ousage = completion.usage || {};
-    if (user && user.id && !usingOwnKey) {
-      logUsageEvent(user.id, { model, inputTokens: ousage.prompt_tokens || 0, outputTokens: ousage.completion_tokens || 0, source: reqSource, requestType: use_tools ? 'estimate' : 'chat' });
+    if (user && user.id) {
+      logUsageEvent(user.id, {
+        model,
+        inputTokens: ousage.prompt_tokens || 0,
+        outputTokens: ousage.completion_tokens || 0,
+        source: reqSource,
+        requestType: usageRequestType,
+        usageKind,
+        usingOwnKey,
+      });
     }
     return res.status(200).json({ response: text, tools_used: [] });
   } catch (err) {

@@ -55,6 +55,7 @@ jobs:
           APP_VERSION=$(node -p "require('./desktop/package.json').version")
           ZIP_PATH=$(ls -t desktop/dist/*.zip 2>/dev/null | head -1 || true)
           DMG_PATH=$(ls -t desktop/dist/*.dmg 2>/dev/null | head -1 || true)
+          LATEST_MAC_PATH=$(ls -t desktop/dist/latest-mac.yml 2>/dev/null | head -1 || true)
           if [ -z "$ZIP_PATH" ]; then
             APP_DIR=$(ls -td desktop/dist/mac* 2>/dev/null | head -1 || true)
             if [ -z "$APP_DIR" ] || [ ! -d "$APP_DIR/openmud.app" ]; then
@@ -72,6 +73,7 @@ jobs:
           echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
           echo "zip_path=$ZIP_PATH" >> "$GITHUB_OUTPUT"
           echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
+          echo "latest_mac_path=$LATEST_MAC_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Upload desktop artifact
         uses: actions/upload-artifact@v4
@@ -80,6 +82,7 @@ jobs:
           path: |
             ${{ steps.meta.outputs.zip_path }}
             ${{ steps.meta.outputs.dmg_path }}
+            ${{ steps.meta.outputs.latest_mac_path }}
 
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/')
@@ -91,3 +94,4 @@ jobs:
           files: |
             ${{ steps.meta.outputs.zip_path }}
             ${{ steps.meta.outputs.dmg_path }}
+            ${{ steps.meta.outputs.latest_mac_path }}

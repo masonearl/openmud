@@ -67,6 +67,7 @@ if (isDev) {
 }
 const https = require('https');
 const { spawn } = require('child_process');
+const { autoUpdater } = require('electron-updater');
 
 const TOOL_SERVER_PORT = 3847;
 const storage = require('./storage');
@@ -325,11 +326,15 @@ const MIME = {
   '.woff2': 'font/woff2',
 };
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'tinyllama';
-const VERSION_CHECK_URL = 'https://openmud.ai/api/desktop-version';
 const DEFAULT_EMAIL_ACCOUNTS = (process.env.OPENMUD_EMAIL_ACCOUNTS || 'you@company.com')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
+const UPDATE_PREFS_DEFAULTS = Object.freeze({
+  autoCheckForUpdates: true,
+  autoDownloadUpdates: true,
+  installUpdatesOnQuit: true,
+});
 
 function getToolsPath() {
   if (app.isPackaged) {
@@ -3182,6 +3187,29 @@ function startToolServer(cb) {
         });
       return;
     }
+    if (req.method === 'GET' && pathname === '/api/platform') {
+      fetch('https://openmud.ai/api/platform')
+        .then((r) => r.json())
+        .then((cfg) => {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(cfg));
+        })
+        .catch(() => {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            beta_phase: true,
+            default_model: 'mud1',
+            tier_limits: { free: 5, personal: 100, pro: null, executive: null },
+            notes: {
+              mud1: 'mud1 is always free.',
+              hosted_beta: 'A small hosted model set is available during beta with platform limits.',
+              byok: 'You can always add your own provider keys in Settings.',
+            },
+            models: [],
+          }));
+        });
+      return;
+    }
     if (req.method === 'GET' && pathname === '/api/storage/rates') {
       try {
         const rates = storage.getRates();
@@ -3738,7 +3766,10 @@ function createWindow(toolPort) {
   if (isDev) loadOpts.reloadIgnoringCache = true;
   win.loadURL(appUrl, loadOpts).catch(() => {});
   win.webContents.on('page-title-updated', () => { win.setTitle(''); });
-  win.webContents.once('did-finish-load', () => { win.setTitle(''); });
+  win.webContents.once('did-finish-load', () => {
+    win.setTitle('');
+    emitUpdateState();
+  });
   if (isDev) win.webContents.openDevTools();
 
   // The app window is the AI assistant (/try). Everything else — settings, billing,
@@ -3759,218 +3790,326 @@ function createWindow(toolPort) {
   });
 }
 
-function parseVersion(v) {
-  return v.split('.').map((n) => parseInt(n, 10) || 0);
-}
+let updateListenersConfigured = false;
+let updateCheckPromise = null;
+let updateDownloadPromise = null;
+let lastUpdateCheckContext = { manual: false, source: 'auto' };
+let updateState = {
+  status: 'idle',
+  message: '',
+  error: '',
+  progress: 0,
+  availableVersion: '',
+  downloadedVersion: '',
+  checkedAt: null,
+};
 
-function isNewer(latest, current) {
-  const a = parseVersion(latest);
-  const b = parseVersion(current);
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    const x = a[i] || 0;
-    const y = b[i] || 0;
-    if (x > y) return true;
-    if (x < y) return false;
+function isTranslocatedApp() {
+  try {
+    return String(app.getPath('exe') || '').includes('/AppTranslocation/');
+  } catch (err) {
+    return false;
   }
-  return false;
 }
 
-// Holds the pending update info so the install handler can access it
-let _pendingUpdate = null;
+function canUseAutoUpdater() {
+  return !isDev && app.isPackaged && !isTranslocatedApp();
+}
 
-function notifyRendererUpdate(version, downloadUrl) {
-  _pendingUpdate = { version, downloadUrl };
+function getUpdatePreferences() {
+  const userData = storage.getUserData() || {};
+  const prefs = userData.updatePreferences || {};
+  return {
+    autoCheckForUpdates: prefs.autoCheckForUpdates !== false,
+    autoDownloadUpdates: prefs.autoDownloadUpdates !== false,
+    installUpdatesOnQuit: prefs.installUpdatesOnQuit !== false,
+  };
+}
+
+function applyUpdatePreferences() {
+  const prefs = getUpdatePreferences();
+  autoUpdater.autoDownload = !!prefs.autoDownloadUpdates;
+  autoUpdater.autoInstallOnAppQuit = !!prefs.installUpdatesOnQuit;
+  if ('autoRunAppAfterInstall' in autoUpdater) {
+    autoUpdater.autoRunAppAfterInstall = true;
+  }
+  return prefs;
+}
+
+function getUpdateState() {
+  return {
+    currentVersion: app.getVersion(),
+    canCheck: canUseAutoUpdater(),
+    isPackaged: !!app.isPackaged,
+    isTranslocated: isTranslocatedApp(),
+    preferences: getUpdatePreferences(),
+    ...updateState,
+  };
+}
+
+function emitUpdateState() {
+  const menu = Menu.getApplicationMenu && Menu.getApplicationMenu();
+  const installItem = menu && menu.getMenuItemById ? menu.getMenuItemById('install-update-now') : null;
+  const autoCheckItem = menu && menu.getMenuItemById ? menu.getMenuItemById('pref-auto-check-updates') : null;
+  const autoDownloadItem = menu && menu.getMenuItemById ? menu.getMenuItemById('pref-auto-download-updates') : null;
+  const installOnQuitItem = menu && menu.getMenuItemById ? menu.getMenuItemById('pref-install-updates-on-quit') : null;
+  const prefs = getUpdatePreferences();
+  if (installItem) installItem.enabled = updateState.status === 'downloaded';
+  if (autoCheckItem) autoCheckItem.checked = !!prefs.autoCheckForUpdates;
+  if (autoDownloadItem) autoDownloadItem.checked = !!prefs.autoDownloadUpdates;
+  if (installOnQuitItem) installOnQuitItem.checked = !!prefs.installUpdatesOnQuit;
   if (mainWindowRef && !mainWindowRef.isDestroyed()) {
-    mainWindowRef.webContents.send('mudrag:update-available', { version, downloadUrl });
+    mainWindowRef.webContents.send('mudrag:update-state', getUpdateState());
   }
 }
 
-function checkForUpdates(manual) {
-  if (process.env.DEV === '1' || !app.isPackaged) {
-    if (manual) dialog.showMessageBox({ type: 'info', message: 'Update check skipped in development.' });
+function setUpdateState(patch) {
+  updateState = {
+    ...updateState,
+    ...(patch || {}),
+  };
+  emitUpdateState();
+  return getUpdateState();
+}
+
+function maybeShowManualUpdateDialog(type, message) {
+  if (!lastUpdateCheckContext.manual || lastUpdateCheckContext.source !== 'menu') return;
+  dialog.showMessageBox({
+    type: type || 'info',
+    message,
+  }).catch(() => {});
+}
+
+function ensureAutoUpdaterConfigured() {
+  if (updateListenersConfigured) {
+    applyUpdatePreferences();
     return;
   }
-  const current = app.getVersion();
-  https.get(VERSION_CHECK_URL, (res) => {
-    let data = '';
-    res.on('data', (c) => { data += c; });
-    res.on('end', () => {
-      try {
-        const { version, url } = JSON.parse(data);
-        if (version && isNewer(version, current)) {
-          // Notify renderer to show in-app update pill (Cursor-style)
-          notifyRendererUpdate(version, url);
-        } else if (manual) {
-          dialog.showMessageBox({ type: 'info', message: `You're up to date. openmud ${current}` });
-        }
-      } catch (e) {
-        if (manual) dialog.showMessageBox({ type: 'error', message: 'Could not check for updates.' });
-      }
+  updateListenersConfigured = true;
+  applyUpdatePreferences();
+
+  autoUpdater.on('checking-for-update', () => {
+    setUpdateState({
+      status: 'checking',
+      message: 'Checking for updates…',
+      error: '',
+      progress: 0,
+      checkedAt: new Date().toISOString(),
     });
-  }).on('error', () => {
-    if (manual) dialog.showMessageBox({ type: 'error', message: 'Could not check for updates.' });
   });
-}
 
-// Download a URL to a file path, sending progress events to the renderer window.
-// Follows HTTP redirects automatically.
-function downloadFileWithProgress(url, destPath, onProgress) {
-  return new Promise((resolve, reject) => {
-    const doGet = (targetUrl, redirectCount) => {
-      if (redirectCount > 10) return reject(new Error('Too many redirects'));
-      const mod = targetUrl.startsWith('https') ? https : require('http');
-      mod.get(targetUrl, (res) => {
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          return doGet(res.headers.location, redirectCount + 1);
-        }
-        if (res.statusCode !== 200) {
-          return reject(new Error(`HTTP ${res.statusCode}`));
-        }
-        const total = parseInt(res.headers['content-length'] || '0', 10);
-        let received = 0;
-        const fs = require('fs');
-        const out = fs.createWriteStream(destPath);
-        res.on('data', (chunk) => {
-          received += chunk.length;
-          out.write(chunk);
-          if (total > 0 && onProgress) onProgress(Math.round((received / total) * 100));
-        });
-        res.on('end', () => { out.end(); resolve(); });
-        res.on('error', reject);
-        out.on('error', reject);
-      }).on('error', reject);
-    };
-    doGet(url, 0);
+  autoUpdater.on('update-available', (info) => {
+    const version = String(info && info.version || '');
+    const prefs = getUpdatePreferences();
+    setUpdateState({
+      status: prefs.autoDownloadUpdates ? 'downloading' : 'available',
+      message: prefs.autoDownloadUpdates ? `Downloading openmud ${version}…` : `openmud ${version} is available.`,
+      error: '',
+      progress: 0,
+      availableVersion: version,
+      downloadedVersion: '',
+      checkedAt: new Date().toISOString(),
+    });
+    if (mainWindowRef && !mainWindowRef.isDestroyed()) {
+      mainWindowRef.webContents.send('mudrag:update-available', getUpdateState());
+    }
   });
-}
 
-ipcMain.handle('mudrag:install-update', async () => {
-  if (!_pendingUpdate) return { ok: false, error: 'No update pending' };
-  const { version, downloadUrl } = _pendingUpdate;
-  const os = require('os');
-  const fs = require('fs');
-  const dmgPath = path.join(os.tmpdir(), `openmud-${version}-update.dmg`);
-  const mountPoint = path.join(os.tmpdir(), `mudrag-update-mount-${Date.now()}`);
+  autoUpdater.on('update-not-available', () => {
+    updateCheckPromise = null;
+    updateDownloadPromise = null;
+    setUpdateState({
+      status: 'up-to-date',
+      message: `You're up to date. openmud ${app.getVersion()}`,
+      error: '',
+      progress: 0,
+      availableVersion: '',
+      downloadedVersion: '',
+      checkedAt: new Date().toISOString(),
+    });
+    maybeShowManualUpdateDialog('info', `You're up to date. openmud ${app.getVersion()}`);
+  });
 
-  const sendProgress = (pct, label) => {
+  autoUpdater.on('download-progress', (progress) => {
+    const pct = Math.max(0, Math.min(100, Math.round(progress && progress.percent || 0)));
+    const version = updateState.availableVersion || updateState.downloadedVersion || '';
+    const label = version ? `Downloading openmud ${version}… ${pct}%` : `Downloading update… ${pct}%`;
+    setUpdateState({
+      status: 'downloading',
+      message: label,
+      error: '',
+      progress: pct,
+    });
     if (mainWindowRef && !mainWindowRef.isDestroyed()) {
       mainWindowRef.webContents.send('mudrag:update-progress', { pct, label });
     }
-  };
+  });
 
-  try {
-    sendProgress(0, 'Downloading…');
-    await downloadFileWithProgress(downloadUrl, dmgPath, (pct) => sendProgress(pct, `Downloading… ${pct}%`));
-    sendProgress(100, 'Installing…');
-
-    // Determine where this app bundle lives (e.g. /Applications/openmud.app)
-    const exePath = app.getPath('exe'); // …/openmud.app/Contents/MacOS/openmud
-    let bundlePath = exePath.split('.app')[0] + '.app';
-
-    // macOS App Translocation moves quarantined apps to a read-only temp path.
-    // Resolve to the real install location so the updater can write there.
-    if (bundlePath.includes('/AppTranslocation/')) {
-      const appName = path.basename(bundlePath);
-      if (fs.existsSync(path.join('/Applications', appName))) {
-        bundlePath = path.join('/Applications', appName);
-      } else if (fs.existsSync(path.join(os.homedir(), 'Applications', appName))) {
-        bundlePath = path.join(os.homedir(), 'Applications', appName);
-      }
+  autoUpdater.on('update-downloaded', (info) => {
+    updateCheckPromise = null;
+    updateDownloadPromise = null;
+    const version = String(info && info.version || updateState.availableVersion || '');
+    setUpdateState({
+      status: 'downloaded',
+      message: version ? `openmud ${version} is ready to install.` : 'Update is ready to install.',
+      error: '',
+      progress: 100,
+      downloadedVersion: version,
+      availableVersion: version || updateState.availableVersion,
+      checkedAt: new Date().toISOString(),
+    });
+    if (mainWindowRef && !mainWindowRef.isDestroyed()) {
+      mainWindowRef.webContents.send('mudrag:update-available', getUpdateState());
+      mainWindowRef.webContents.send('mudrag:update-progress', {
+        pct: 100,
+        label: version ? `openmud ${version} is ready to install.` : 'Update is ready to install.',
+      });
     }
-    const installDir = path.dirname(bundlePath); // e.g. /Applications
+  });
 
-    // Write a detached shell script that mounts the DMG, replaces the app, relaunches
-    const scriptContent = [
-      '#!/bin/bash',
-      'set +e',
-      'sleep 2',
-      'LOG="/tmp/mudrag-updater.log"',
-      'exec >> "$LOG" 2>&1',
-      'echo "==== $(date -u +%Y-%m-%dT%H:%M:%SZ) mudrag updater start ===="',
-      'APP_SRC=""',
-      'APP_NAME="openmud.app"',
-      'DEST_APP=""',
-      `CURRENT_BUNDLE="${bundlePath}"`,
-      `CURRENT_INSTALL_DIR="${installDir}"`,
-      'echo "current_bundle=$CURRENT_BUNDLE"',
-      'echo "current_install_dir=$CURRENT_INSTALL_DIR"',
-      `mkdir -p "${mountPoint}"`,
-      `if hdiutil attach "${dmgPath}" -mountpoint "${mountPoint}" -nobrowse -quiet 2>/dev/null; then`,
-      `  APP_SRC=$(ls -d "${mountPoint}"/*.app 2>/dev/null | head -1)`,
-      '  echo "ls_app_result=$APP_SRC"',
-      'fi',
-      'if [ -n "$APP_SRC" ]; then',
-      '  APP_NAME="$(basename "$APP_SRC")"',
-      '  echo "mounted_app=$APP_SRC  app_name=$APP_NAME"',
-      '  try_install () {',
-      '    TARGET="$1"',
-      '    [ -z "$TARGET" ] && return 1',
-      '    mkdir -p "$(dirname "$TARGET")"',
-      '    rm -rf "$TARGET"',
-      '    if ditto "$APP_SRC" "$TARGET"; then',
-      '      DEST_APP="$TARGET"',
-      '      echo "install_ok=$TARGET"',
-      '      return 0',
-      '    fi',
-      '    echo "install_failed=$TARGET (exit $?)"',
-      '    return 1',
-      '  }',
-      '',
-      '  # Prefer a stable install location over translocated/DMG launch paths.',
-      '  PREFERRED_DEST=""',
-      '  if [[ "$CURRENT_BUNDLE" == /Applications/*.app ]] || [[ "$CURRENT_BUNDLE" == "$HOME/Applications/"*.app ]]; then',
-      '    PREFERRED_DEST="$CURRENT_BUNDLE"',
-      '  elif [ -d "/Applications/$APP_NAME" ]; then',
-      '    PREFERRED_DEST="/Applications/$APP_NAME"',
-      '  elif [ -d "$HOME/Applications/$APP_NAME" ]; then',
-      '    PREFERRED_DEST="$HOME/Applications/$APP_NAME"',
-      '  else',
-      '    PREFERRED_DEST="/Applications/$APP_NAME"',
-      '  fi',
-      '  echo "preferred_dest=$PREFERRED_DEST"',
-      '',
-      '  try_install "$PREFERRED_DEST" ||',
-      '  try_install "/Applications/$APP_NAME" ||',
-      '  try_install "$HOME/Applications/$APP_NAME" ||',
-      '  try_install "$CURRENT_INSTALL_DIR/$APP_NAME"',
-      'else',
-      '  echo "mount_or_app_discovery_failed"',
-      `  echo "mountpoint_contents=$(ls -la "${mountPoint}" 2>&1)"`,
-      'fi',
-      `hdiutil detach "${mountPoint}" -quiet 2>/dev/null`,
-      `rmdir "${mountPoint}" 2>/dev/null`,
-      `rm -f "${dmgPath}"`,
-      'if [ -n "$DEST_APP" ]; then',
-      '  echo "relaunch=$DEST_APP"',
-      '  sleep 1',
-      '  open "$DEST_APP" || open -a "$APP_NAME"',
-      'else',
-      '  echo "relaunch_fallback=attempting open -a $APP_NAME"',
-      '  sleep 1',
-      '  open -a "$APP_NAME" || open /Applications/"$APP_NAME"',
-      'fi',
-      'echo "==== updater end ===="',
-      'rm -f "$0"',
-    ].join('\n');
-    const scriptPath = path.join(os.tmpdir(), `mudrag-update-${Date.now()}.sh`);
-    fs.writeFileSync(scriptPath, scriptContent, { mode: 0o755 });
+  autoUpdater.on('error', (err) => {
+    updateCheckPromise = null;
+    updateDownloadPromise = null;
+    const message = String(err && err.message || 'Could not check for updates.');
+    setUpdateState({
+      status: 'error',
+      message,
+      error: message,
+    });
+    maybeShowManualUpdateDialog('error', message);
+  });
+}
 
-    // Detach the script so it keeps running after we quit
-    const { spawn: spawnProc } = require('child_process');
-    spawnProc('bash', [scriptPath], { detached: true, stdio: 'ignore' }).unref();
+function setUpdatePreferences(nextPrefs) {
+  const merged = {
+    ...UPDATE_PREFS_DEFAULTS,
+    ...getUpdatePreferences(),
+    ...(nextPrefs || {}),
+  };
+  storage.setUserData({ updatePreferences: merged });
+  applyUpdatePreferences();
+  emitUpdateState();
+  return getUpdateState();
+}
 
-    sendProgress(100, 'Restarting…');
-    setTimeout(() => app.quit(), 800);
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: err.message };
+async function checkForUpdates(manual, source) {
+  lastUpdateCheckContext = { manual: !!manual, source: source || (manual ? 'renderer' : 'auto') };
+  ensureAutoUpdaterConfigured();
+
+  if (!canUseAutoUpdater()) {
+    const message = isDev || !app.isPackaged
+      ? 'Update checks are only available in packaged builds.'
+      : 'Install openmud in Applications before using automatic updates.';
+    setUpdateState({
+      status: 'unsupported',
+      message,
+      error: '',
+      progress: 0,
+    });
+    maybeShowManualUpdateDialog('info', message);
+    return { ok: false, skipped: true, reason: 'unsupported', state: getUpdateState() };
   }
+
+  if (updateCheckPromise) {
+    return { ok: true, queued: true, state: getUpdateState() };
+  }
+
+  updateCheckPromise = autoUpdater.checkForUpdates()
+    .then(() => ({ ok: true, state: getUpdateState() }))
+    .catch((err) => {
+      const message = String(err && err.message || 'Could not check for updates.');
+      setUpdateState({
+        status: 'error',
+        message,
+        error: message,
+      });
+      maybeShowManualUpdateDialog('error', message);
+      return { ok: false, error: message, state: getUpdateState() };
+    })
+    .finally(() => {
+      updateCheckPromise = null;
+    });
+
+  return updateCheckPromise;
+}
+
+async function downloadUpdate(manual) {
+  ensureAutoUpdaterConfigured();
+  if (!canUseAutoUpdater()) {
+    return { ok: false, error: 'Automatic updates are only available in the installed desktop app.' };
+  }
+  if (updateState.status === 'downloaded') {
+    return { ok: true, alreadyDownloaded: true, state: getUpdateState() };
+  }
+  if (!updateState.availableVersion) {
+    return { ok: false, error: 'No update is available to download.', state: getUpdateState() };
+  }
+  if (updateDownloadPromise) {
+    return { ok: true, queued: true, state: getUpdateState() };
+  }
+  lastUpdateCheckContext = { manual: !!manual, source: manual ? 'renderer' : 'auto' };
+  setUpdateState({
+    status: 'downloading',
+    message: updateState.availableVersion
+      ? `Downloading openmud ${updateState.availableVersion}…`
+      : 'Downloading update…',
+    error: '',
+    progress: 0,
+  });
+  updateDownloadPromise = autoUpdater.downloadUpdate()
+    .then(() => ({ ok: true, state: getUpdateState() }))
+    .catch((err) => {
+      const message = String(err && err.message || 'Could not download the update.');
+      setUpdateState({
+        status: 'error',
+        message,
+        error: message,
+      });
+      return { ok: false, error: message, state: getUpdateState() };
+    })
+    .finally(() => {
+      updateDownloadPromise = null;
+    });
+  return updateDownloadPromise;
+}
+
+ipcMain.handle('mudrag:get-update-state', async () => {
+  ensureAutoUpdaterConfigured();
+  return getUpdateState();
 });
 
-ipcMain.handle('mudrag:check-update-manual', async () => {
-  checkForUpdates(true);
-  return { ok: true };
+ipcMain.handle('mudrag:get-update-preferences', async () => getUpdatePreferences());
+
+ipcMain.handle('mudrag:set-update-preferences', async (_, prefs) => setUpdatePreferences(prefs));
+
+ipcMain.handle('mudrag:download-update', async () => downloadUpdate(true));
+
+ipcMain.handle('mudrag:install-update', async () => {
+  ensureAutoUpdaterConfigured();
+  if (updateState.status !== 'downloaded') {
+    return { ok: false, error: 'No downloaded update is ready to install.', state: getUpdateState() };
+  }
+  setUpdateState({
+    status: 'installing',
+    message: 'Restarting to install update…',
+    error: '',
+  });
+  setTimeout(() => {
+    try {
+      autoUpdater.quitAndInstall(false, true);
+    } catch (err) {
+      const message = String(err && err.message || 'Could not install the update.');
+      setUpdateState({
+        status: 'error',
+        message,
+        error: message,
+      });
+    }
+  }, 120);
+  return { ok: true, restarting: true, state: getUpdateState() };
 });
+
+ipcMain.handle('mudrag:check-update-manual', async () => checkForUpdates(true, 'renderer'));
 
 // ── Document Template IPC ────────────────────────────────────────────────────
 
@@ -4410,17 +4549,48 @@ function forceReload() {
 
 app.whenReady().then(() => {
   hydrateSessionState();
+  ensureAutoUpdaterConfigured();
   try {
     const cfg = getDesktopSyncConfig();
     if (cfg.rootPath) startDesktopSyncWatcher(cfg.rootPath);
   } catch (err) {}
   const isDev = process.env.DEV === '1' || process.env.NODE_ENV === 'development';
+  const updatePrefs = getUpdatePreferences();
   const template = [
     {
       label: app.name,
       submenu: [
         { role: 'about' },
-        { label: 'Check for Updates', click: () => checkForUpdates(true) },
+        { label: 'Check for Updates', click: () => { checkForUpdates(true, 'menu'); } },
+        { label: 'Download Update', click: () => { downloadUpdate(true); } },
+        { label: 'Restart to Install Update', click: () => { autoUpdater.quitAndInstall(false, true); }, enabled: false, id: 'install-update-now' },
+        { type: 'separator' },
+        {
+          label: 'App Updates',
+          submenu: [
+            {
+              label: 'Automatically Check for Updates',
+              id: 'pref-auto-check-updates',
+              type: 'checkbox',
+              checked: !!updatePrefs.autoCheckForUpdates,
+              click: (item) => { setUpdatePreferences({ autoCheckForUpdates: !!item.checked }); },
+            },
+            {
+              label: 'Download Updates Automatically',
+              id: 'pref-auto-download-updates',
+              type: 'checkbox',
+              checked: !!updatePrefs.autoDownloadUpdates,
+              click: (item) => { setUpdatePreferences({ autoDownloadUpdates: !!item.checked }); },
+            },
+            {
+              label: 'Install Downloaded Updates on Quit',
+              id: 'pref-install-updates-on-quit',
+              type: 'checkbox',
+              checked: !!updatePrefs.installUpdatesOnQuit,
+              click: (item) => { setUpdatePreferences({ installUpdatesOnQuit: !!item.checked }); },
+            },
+          ],
+        },
         { type: 'separator' },
         { role: 'hide' },
         { role: 'hideOthers' },
@@ -4470,7 +4640,9 @@ app.whenReady().then(() => {
 
   startToolServer((toolPort) => {
     createWindow(toolPort);
-    setTimeout(() => checkForUpdates(false), 5000);
+    if (getUpdatePreferences().autoCheckForUpdates) {
+      setTimeout(() => { checkForUpdates(false, 'auto'); }, 5000);
+    }
     // Check Ollama availability after window is loaded, notify user if missing
     setTimeout(async () => {
       const status = await checkAndStartOllama().catch(() => 'unknown');

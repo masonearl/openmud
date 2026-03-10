@@ -17,6 +17,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { getUserFromRequest } = require('./lib/auth');
 const { allocateUsage, logUsageEvent, detectSource } = require('./lib/usage');
+const { classifyUsageKind } = require('./lib/model-policy');
 const { getCoreAnthropicTools } = require('../../api/_lib/toolSchemas');
 
 const MODEL = 'claude-haiku-4-5';
@@ -263,7 +264,7 @@ module.exports = async function handler(req, res) {
   const usage = await allocateUsage(user.id, user.email);
   if (!usage.allowed) {
     res.status(429).json({
-      error: `Daily limit reached (${usage.used}/${usage.limit} messages). Sign in at openmud.ai/settings for access.`,
+      error: `Hosted beta limit reached (${usage.used}/${usage.limit} messages). Try mud1 for free or wait for the limit to reset.`,
       code: 'rate_limited',
       used: usage.used,
       limit: usage.limit,
@@ -303,12 +304,14 @@ module.exports = async function handler(req, res) {
     });
 
     // Log usage
+    const usageKind = classifyUsageKind({ model: MODEL, usingOwnKey: false, source: detectSource(req), requestType: 'agentic_step' });
     logUsageEvent(user.id, {
       model: MODEL,
       inputTokens: response.usage?.input_tokens || 0,
       outputTokens: response.usage?.output_tokens || 0,
       source: detectSource(req),
       requestType: 'agentic_step',
+      usageKind,
     });
 
     // Parse response into text + tool_calls

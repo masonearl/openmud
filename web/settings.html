@@ -74,7 +74,7 @@
                 <!-- Provider API keys -->
                 <div class="settings-card st-card st-anim-2" id="provider-keys-wrap">
                     <h2 class="settings-card-title st-card-title">Provider API keys</h2>
-                    <p class="st-hint st-hint-tight">Optional. Add your own keys to run AI directly with your provider accounts.</p>
+                    <p class="st-hint st-hint-tight">mud1 is always free. A small hosted model set is available during beta, and premium models can use your own provider keys.</p>
 
                     <div class="st-keys-list">
                         <div class="st-key-row">
@@ -182,6 +182,7 @@
                         <button type="button" class="btn-secondary btn-sm" id="btn-clear-provider-keys">Clear keys</button>
                         <span id="provider-keys-status" class="settings-auth-status" hidden></span>
                     </div>
+                    <p class="st-hint st-hint-tight" style="margin-top:12px;">Use `mud1` for the default openmud experience. Use hosted beta models when you want alternate behavior. Add keys here for BYOK models like Claude Sonnet, Grok, or OpenRouter.</p>
                 </div>
 
                 <div class="settings-card st-card st-anim-3" id="desktop-sync-wrap">
@@ -199,6 +200,36 @@
                         <button type="button" class="btn-secondary btn-sm" id="btn-settings-sync-open">Open folder</button>
                         <button type="button" class="btn-secondary btn-sm" id="btn-settings-sync-change">Change folder</button>
                         <span id="desktop-sync-save-status" class="settings-auth-status" hidden></span>
+                    </div>
+                </div>
+
+                <div class="settings-card st-card st-anim-3" id="app-updates-wrap">
+                    <h2 class="settings-card-title st-card-title">App updates</h2>
+                    <p class="st-hint st-hint-tight">Check for new desktop builds, download them in the background, and install them safely on restart. These controls work in the openmud desktop app.</p>
+                    <div class="st-sync-status" id="app-update-status">
+                        <div class="st-sync-label" id="app-update-label">Desktop app updates are available in the app.</div>
+                        <div class="st-sync-path" id="app-update-version">Current version: --</div>
+                        <div class="st-sync-help" id="app-update-help">Open the desktop app to manage automatic checks, download behavior, and restart-to-install updates.</div>
+                    </div>
+                    <div class="st-update-prefs" id="app-update-prefs">
+                        <label class="st-check-row">
+                            <input type="checkbox" id="pref-auto-check-updates">
+                            <span>Automatically check for updates</span>
+                        </label>
+                        <label class="st-check-row">
+                            <input type="checkbox" id="pref-auto-download-updates">
+                            <span>Download updates automatically</span>
+                        </label>
+                        <label class="st-check-row">
+                            <input type="checkbox" id="pref-install-updates-on-quit">
+                            <span>Install downloaded updates on quit</span>
+                        </label>
+                    </div>
+                    <div class="provider-keys-actions">
+                        <button type="button" class="btn-primary btn-sm" id="btn-update-check">Check for updates</button>
+                        <button type="button" class="btn-secondary btn-sm" id="btn-update-download" hidden>Download update</button>
+                        <button type="button" class="btn-secondary btn-sm" id="btn-update-install" hidden>Restart to install</button>
+                        <span id="app-update-save-status" class="settings-auth-status" hidden></span>
                     </div>
                 </div>
 
@@ -347,6 +378,18 @@
             var btnDesktopSyncOpen = document.getElementById('btn-settings-sync-open');
             var btnDesktopSyncChange = document.getElementById('btn-settings-sync-change');
             var desktopSyncCache = null;
+            var appUpdateLabel = document.getElementById('app-update-label');
+            var appUpdateVersion = document.getElementById('app-update-version');
+            var appUpdateHelp = document.getElementById('app-update-help');
+            var appUpdatePrefs = document.getElementById('app-update-prefs');
+            var appUpdateSaveStatus = document.getElementById('app-update-save-status');
+            var prefAutoCheckUpdates = document.getElementById('pref-auto-check-updates');
+            var prefAutoDownloadUpdates = document.getElementById('pref-auto-download-updates');
+            var prefInstallUpdatesOnQuit = document.getElementById('pref-install-updates-on-quit');
+            var btnUpdateCheck = document.getElementById('btn-update-check');
+            var btnUpdateDownload = document.getElementById('btn-update-download');
+            var btnUpdateInstall = document.getElementById('btn-update-install');
+            var updateStateCache = null;
 
             function isDesktopSyncAvailable() {
                 return !!(window.mudragDesktop
@@ -577,6 +620,119 @@
                 }).catch(function () {
                     renderDesktopSyncState({ enabled: false, rootPath: '' });
                     return { ok: false, enabled: false };
+                });
+            }
+
+            function isDesktopUpdateAvailable() {
+                return !!(window.mudragDesktop
+                    && window.mudragDesktop.isDesktop === true
+                    && /mudrag-desktop/i.test(navigator.userAgent || '')
+                    && window.mudragDesktop.getUpdateState
+                    && window.mudragDesktop.setUpdatePreferences);
+            }
+
+            function showAppUpdateMessage(msg, isError) {
+                if (!appUpdateSaveStatus) return;
+                appUpdateSaveStatus.textContent = msg;
+                appUpdateSaveStatus.hidden = false;
+                appUpdateSaveStatus.className = 'settings-auth-status' + (isError ? ' settings-auth-status-error' : '');
+                setTimeout(function () {
+                    appUpdateSaveStatus.hidden = true;
+                }, 3500);
+            }
+
+            function setUpdatePrefsDisabled(disabled) {
+                [prefAutoCheckUpdates, prefAutoDownloadUpdates, prefInstallUpdatesOnQuit, btnUpdateCheck, btnUpdateDownload, btnUpdateInstall].forEach(function (el) {
+                    if (el) el.disabled = !!disabled;
+                });
+            }
+
+            function renderAppUpdateState(stateInfo) {
+                var state = stateInfo || {};
+                updateStateCache = state;
+                var prefs = state.preferences || {};
+                var status = String(state.status || '');
+                if (!appUpdateLabel || !appUpdateVersion || !appUpdateHelp) return;
+                if (!isDesktopUpdateAvailable()) {
+                    appUpdateLabel.textContent = 'Desktop app updates are available in the app.';
+                    appUpdateVersion.textContent = 'Current version: --';
+                    appUpdateHelp.textContent = 'Open openmud on your Mac to configure automatic checks, background downloads, and restart-to-install behavior.';
+                    setUpdatePrefsDisabled(true);
+                    if (appUpdatePrefs) appUpdatePrefs.setAttribute('aria-disabled', 'true');
+                    if (btnUpdateDownload) btnUpdateDownload.hidden = true;
+                    if (btnUpdateInstall) btnUpdateInstall.hidden = true;
+                    return;
+                }
+
+                if (prefAutoCheckUpdates) prefAutoCheckUpdates.checked = !!prefs.autoCheckForUpdates;
+                if (prefAutoDownloadUpdates) prefAutoDownloadUpdates.checked = !!prefs.autoDownloadUpdates;
+                if (prefInstallUpdatesOnQuit) prefInstallUpdatesOnQuit.checked = !!prefs.installUpdatesOnQuit;
+
+                if (state.currentVersion) {
+                    appUpdateVersion.textContent = 'Current version: ' + state.currentVersion;
+                } else {
+                    appUpdateVersion.textContent = 'Current version: --';
+                }
+
+                if (!state.canCheck) {
+                    appUpdateLabel.textContent = state.isTranslocated
+                        ? 'Install openmud in Applications to use automatic updates.'
+                        : 'Automatic updates are only available in packaged desktop builds.';
+                    appUpdateHelp.textContent = 'Once the app is installed normally, open this page in the desktop app or use the app menu to check for updates.';
+                    setUpdatePrefsDisabled(true);
+                    if (btnUpdateDownload) btnUpdateDownload.hidden = true;
+                    if (btnUpdateInstall) btnUpdateInstall.hidden = true;
+                    return;
+                }
+
+                setUpdatePrefsDisabled(false);
+                if (appUpdatePrefs) appUpdatePrefs.removeAttribute('aria-disabled');
+
+                if (status === 'checking') {
+                    appUpdateLabel.textContent = 'Checking for updates…';
+                    appUpdateHelp.textContent = 'openmud is checking for a newer signed desktop release.';
+                } else if (status === 'available') {
+                    appUpdateLabel.textContent = state.availableVersion ? ('openmud ' + state.availableVersion + ' is available.') : 'An update is available.';
+                    appUpdateHelp.textContent = prefs.autoDownloadUpdates
+                        ? 'Automatic download is enabled. The download should start right away.'
+                        : 'Automatic download is off. Click Download update when you are ready.';
+                } else if (status === 'downloading') {
+                    appUpdateLabel.textContent = state.availableVersion ? ('Downloading openmud ' + state.availableVersion + '…') : 'Downloading update…';
+                    appUpdateHelp.textContent = state.message || 'The update is downloading in the background.';
+                } else if (status === 'downloaded') {
+                    appUpdateLabel.textContent = state.downloadedVersion ? ('openmud ' + state.downloadedVersion + ' is ready to install.') : 'Update is ready to install.';
+                    appUpdateHelp.textContent = prefs.installUpdatesOnQuit
+                        ? 'Restart now to install, or quit the app later and it will install on exit.'
+                        : 'Restart now to install the downloaded update.';
+                } else if (status === 'installing') {
+                    appUpdateLabel.textContent = 'Restarting to install update…';
+                    appUpdateHelp.textContent = state.message || 'openmud is handing off to the updater.';
+                } else if (status === 'up-to-date') {
+                    appUpdateLabel.textContent = 'openmud is up to date.';
+                    appUpdateHelp.textContent = state.message || 'No newer desktop release is available right now.';
+                } else if (status === 'error') {
+                    appUpdateLabel.textContent = 'Update check failed.';
+                    appUpdateHelp.textContent = state.error || state.message || 'Could not reach the update feed.';
+                } else {
+                    appUpdateLabel.textContent = 'Desktop app updates are ready.';
+                    appUpdateHelp.textContent = 'Use the controls below to check for updates and decide how they download and install.';
+                }
+
+                if (btnUpdateDownload) btnUpdateDownload.hidden = !(status === 'available' && !prefs.autoDownloadUpdates);
+                if (btnUpdateInstall) btnUpdateInstall.hidden = status !== 'downloaded';
+            }
+
+            function refreshAppUpdateState() {
+                if (!isDesktopUpdateAvailable()) {
+                    renderAppUpdateState({ status: 'idle', currentVersion: '', canCheck: false });
+                    return Promise.resolve({ ok: false, canCheck: false });
+                }
+                return window.mudragDesktop.getUpdateState().then(function (state) {
+                    renderAppUpdateState(state || {});
+                    return state || {};
+                }).catch(function () {
+                    renderAppUpdateState({ status: 'error', error: 'Could not read updater state.' });
+                    return { status: 'error' };
                 });
             }
 
@@ -1066,7 +1222,77 @@
                 });
             }
 
+            [prefAutoCheckUpdates, prefAutoDownloadUpdates, prefInstallUpdatesOnQuit].forEach(function (input) {
+                if (!input || !window.mudragDesktop || !window.mudragDesktop.setUpdatePreferences) return;
+                input.addEventListener('change', function () {
+                    window.mudragDesktop.setUpdatePreferences({
+                        autoCheckForUpdates: !!(prefAutoCheckUpdates && prefAutoCheckUpdates.checked),
+                        autoDownloadUpdates: !!(prefAutoDownloadUpdates && prefAutoDownloadUpdates.checked),
+                        installUpdatesOnQuit: !!(prefInstallUpdatesOnQuit && prefInstallUpdatesOnQuit.checked)
+                    }).then(function (state) {
+                        renderAppUpdateState(state || {});
+                        showAppUpdateMessage('Update preferences saved.', false);
+                    }).catch(function (err) {
+                        showAppUpdateMessage((err && err.message) || 'Could not save update preferences.', true);
+                    });
+                });
+            });
+
+            if (btnUpdateCheck && window.mudragDesktop && window.mudragDesktop.checkUpdateManual) {
+                btnUpdateCheck.addEventListener('click', function () {
+                    btnUpdateCheck.disabled = true;
+                    window.mudragDesktop.checkUpdateManual().then(function () {
+                        setTimeout(function () {
+                            btnUpdateCheck.disabled = false;
+                            refreshAppUpdateState();
+                        }, 300);
+                    }).catch(function (err) {
+                        btnUpdateCheck.disabled = false;
+                        showAppUpdateMessage((err && err.message) || 'Could not check for updates.', true);
+                    });
+                });
+            }
+
+            if (btnUpdateDownload && window.mudragDesktop && window.mudragDesktop.downloadUpdate) {
+                btnUpdateDownload.addEventListener('click', function () {
+                    btnUpdateDownload.disabled = true;
+                    window.mudragDesktop.downloadUpdate().then(function (result) {
+                        if (!result || !result.ok) {
+                            btnUpdateDownload.disabled = false;
+                            showAppUpdateMessage((result && result.error) || 'Could not download the update.', true);
+                            return;
+                        }
+                        refreshAppUpdateState();
+                    }).catch(function (err) {
+                        btnUpdateDownload.disabled = false;
+                        showAppUpdateMessage((err && err.message) || 'Could not download the update.', true);
+                    });
+                });
+            }
+
+            if (btnUpdateInstall && window.mudragDesktop && window.mudragDesktop.installUpdate) {
+                btnUpdateInstall.addEventListener('click', function () {
+                    btnUpdateInstall.disabled = true;
+                    window.mudragDesktop.installUpdate().then(function (result) {
+                        if (!result || !result.ok) {
+                            btnUpdateInstall.disabled = false;
+                            showAppUpdateMessage((result && result.error) || 'Could not install the update.', true);
+                        }
+                    }).catch(function (err) {
+                        btnUpdateInstall.disabled = false;
+                        showAppUpdateMessage((err && err.message) || 'Could not install the update.', true);
+                    });
+                });
+            }
+
+            if (window.mudragDesktop && window.mudragDesktop.onUpdateState) {
+                window.mudragDesktop.onUpdateState(function (state) {
+                    renderAppUpdateState(state || {});
+                });
+            }
+
             refreshDesktopSyncState();
+            refreshAppUpdateState();
         })();
     </script>
     <script src="assets/js/nav.js"></script>
@@ -1445,6 +1671,38 @@
             color: var(--text-secondary);
             font-size: 0.88rem;
             line-height: 1.5;
+        }
+
+        .st-update-prefs {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .st-check-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            color: var(--text);
+            font-size: 0.875rem;
+            line-height: 1.45;
+        }
+
+        .st-check-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            flex-shrink: 0;
+            accent-color: var(--accent);
+        }
+
+        .st-update-prefs[aria-disabled="true"] {
+            opacity: 0.65;
+            pointer-events: none;
         }
 
         /* ── Link items spacing ────────────────────────────────────────── */

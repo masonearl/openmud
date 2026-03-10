@@ -175,7 +175,7 @@
         .db-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
         /* Breakdown grid */
-        .db-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .db-breakdown { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
         .db-breakdown-card {
             background: var(--bg-alt);
             border: 1px solid var(--border);
@@ -501,6 +501,10 @@
                     <div id="breakdown-model"></div>
                 </div>
                 <div class="db-breakdown-card">
+                    <div class="db-breakdown-title">By Access</div>
+                    <div id="breakdown-usage-kind"></div>
+                </div>
+                <div class="db-breakdown-card">
                     <div class="db-breakdown-title">By Source</div>
                     <div id="breakdown-source"></div>
                 </div>
@@ -516,6 +520,7 @@
                         <tr>
                             <th>Date</th>
                             <th>Source</th>
+                            <th>Access</th>
                             <th>Model</th>
                             <th>Tokens</th>
                             <th style="text-align:right">Est. cost</th>
@@ -804,6 +809,7 @@
 
         // Breakdowns
         renderBreakdown('breakdown-model', data.by_model, 'model', 'label');
+        renderBreakdown('breakdown-usage-kind', data.by_usage_kind, 'usage_kind', 'label');
         renderBreakdown('breakdown-source', data.by_source, 'source', 'label');
 
         // Table
@@ -921,6 +927,7 @@
             return '<tr>'
                 + '<td>' + fmtDate(r.date) + '</td>'
                 + '<td><span class="db-source-badge ' + srcClass + '">' + (r.source || 'Web') + '</span></td>'
+                + '<td>' + (r.usage_kind || 'Hosted beta') + '</td>'
                 + '<td>' + (r.model || '—') + '</td>'
                 + '<td>' + (totalTok ? fmtTokens(totalTok) : '—') + '</td>'
                 + '<td style="text-align:right">' + (r.cost_microdollars ? fmtCost(r.cost_microdollars) : '—') + '</td>'

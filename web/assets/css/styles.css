@@ -418,6 +418,18 @@ body.page-try.has-desktop-title-bar .lp-nav {
     right: 0;
     padding-left: 84px;
     padding-right: 16px;
+    -webkit-app-region: drag;
+}
+
+body.page-try.has-desktop-title-bar .lp-nav a,
+body.page-try.has-desktop-title-bar .lp-nav button,
+body.page-try.has-desktop-title-bar .lp-nav summary,
+body.page-try.has-desktop-title-bar .lp-nav details,
+body.page-try.has-desktop-title-bar .lp-nav input,
+body.page-try.has-desktop-title-bar .lp-nav select,
+body.page-try.has-desktop-title-bar .lp-nav textarea,
+body.page-try.has-desktop-title-bar .lp-nav [role="button"] {
+    -webkit-app-region: no-drag;
 }
 
 body.page-try.has-desktop-title-bar .desktop-title-bar {
@@ -2326,12 +2338,15 @@ label.btn-upload {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
-    margin-bottom: 10px;
-    padding: 12px;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    background: rgba(255,255,255,0.04);
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 14px 14px 13px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.035) 100%),
+        rgba(255,255,255,0.03);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
 }
 
 .documents-sync-copy {
@@ -2340,24 +2355,34 @@ label.btn-upload {
 }
 
 .documents-sync-label {
-    font-size: 0.98rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--text);
-    line-height: 1.35;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
 }
 
 .documents-sync-path,
 .documents-sync-help {
-    margin-top: 6px;
-    font-size: 0.84rem;
+    margin-top: 7px;
+    font-size: 0.92rem;
     color: var(--text-secondary);
-    line-height: 1.55;
+    line-height: 1.5;
     word-break: break-word;
+}
+
+.documents-sync-path {
+    color: rgba(239, 232, 221, 0.9);
+    font-weight: 600;
+}
+
+.documents-sync-help {
+    color: rgba(228, 215, 197, 0.88);
 }
 
 .documents-sync-actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 8px;
     width: 100%;
 }
@@ -2367,6 +2392,24 @@ label.btn-upload {
     justify-content: center;
     text-align: center;
     min-width: 0;
+}
+
+.documents-sync-actions .btn-secondary,
+.documents-sync-actions a.btn-secondary {
+    min-height: 42px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(18, 15, 12, 0.82);
+    border-color: rgba(255,255,255,0.1);
+    color: var(--text);
+    white-space: normal;
+    line-height: 1.25;
+}
+
+.documents-sync-actions .btn-secondary:hover,
+.documents-sync-actions a.btn-secondary:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.16);
 }
 
 .msg-task-card {
@@ -4171,6 +4214,14 @@ label.btn-upload {
     color: var(--text-secondary);
     margin-right: 6px;
     white-space: nowrap;
+}
+
+.model-policy-hint {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    min-height: 1.2em;
 }
 
 .chat-composer-chevron {

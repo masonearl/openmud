@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { getSubscriptionStatus } = require('./subscription');
+const { classifyUsageKind, encodeRequestType, decodeUsageKind, getBaseRequestType } = require('./model-policy');
 
 const TIER_LIMITS = { free: 5, personal: 100, pro: null, executive: null };
 
@@ -37,15 +38,18 @@ function detectSource(req) {
 /**
  * Log a single AI request to usage_events. Fire-and-forget — never throws.
  * @param {string} userId
- * @param {{ model: string, inputTokens: number, outputTokens: number, source: string, requestType: string }} opts
+ * @param {{ model: string, inputTokens: number, outputTokens: number, source: string, requestType: string, usageKind?: string, usingOwnKey?: boolean }} opts
  */
-async function logUsageEvent(userId, { model = 'mud1', inputTokens = 0, outputTokens = 0, source = 'web', requestType = 'chat' } = {}) {
+async function logUsageEvent(userId, { model = 'mud1', inputTokens = 0, outputTokens = 0, source = 'web', requestType = 'chat', usageKind = '', usingOwnKey = false } = {}) {
   try {
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !key || !userId) return;
     const supabase = createClient(url, key);
-    const costMicrodollars = computeCostMicrodollars(model, inputTokens, outputTokens);
+    const normalizedUsageKind = usageKind || classifyUsageKind({ model, usingOwnKey, source, requestType });
+    const costMicrodollars = (normalizedUsageKind === 'byok' || normalizedUsageKind === 'local_desktop' || normalizedUsageKind === 'desktop_agent')
+      ? 0
+      : computeCostMicrodollars(model, inputTokens, outputTokens);
     await supabase.from('usage_events').insert({
       user_id: userId,
       source,
@@ -53,7 +57,7 @@ async function logUsageEvent(userId, { model = 'mud1', inputTokens = 0, outputTo
       input_tokens: inputTokens,
       output_tokens: outputTokens,
       cost_microdollars: costMicrodollars,
-      request_type: requestType,
+      request_type: encodeRequestType(requestType, normalizedUsageKind),
     });
   } catch (e) {
     console.error('[usage] logUsageEvent failed:', e.message);
@@ -141,4 +145,5 @@ async function allocateUsage(userId, email) {
 module.exports = {
   getUsage, incrementUsage, checkUsage, allocateUsage, getLimitForTier, TIER_LIMITS,
   logUsageEvent, detectSource, MODEL_PRICING, computeCostMicrodollars,
+  classifyUsageKind, encodeRequestType, decodeUsageKind, getBaseRequestType,
 };

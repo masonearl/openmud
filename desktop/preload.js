@@ -15,6 +15,10 @@ const desktopBridge = {
   ollamaPullModel: () => ipcRenderer.invoke('mudrag:ollama-pull-model'),
   installUpdate:   () => ipcRenderer.invoke('mudrag:install-update'),
   checkUpdateManual: () => ipcRenderer.invoke('mudrag:check-update-manual'),
+  downloadUpdate:  () => ipcRenderer.invoke('mudrag:download-update'),
+  getUpdateState:  () => ipcRenderer.invoke('mudrag:get-update-state'),
+  getUpdatePreferences: () => ipcRenderer.invoke('mudrag:get-update-preferences'),
+  setUpdatePreferences: (prefs) => ipcRenderer.invoke('mudrag:set-update-preferences', prefs),
   openDocSource:   (htmlPath) => ipcRenderer.invoke('mudrag:open-doc-source', htmlPath),
   openDocFolder:   (folderPath) => ipcRenderer.invoke('mudrag:open-doc-folder', folderPath),
   readTemplateSource: (docType) => ipcRenderer.invoke('mudrag:read-template-source', docType),
@@ -45,6 +49,10 @@ const desktopBridge = {
   onUpdateProgress: (cb) => {
     ipcRenderer.on('mudrag:update-progress', (_, data) => cb(data));
     return () => ipcRenderer.removeAllListeners('mudrag:update-progress');
+  },
+  onUpdateState: (cb) => {
+    ipcRenderer.on('mudrag:update-state', (_, data) => cb(data));
+    return () => ipcRenderer.removeAllListeners('mudrag:update-state');
   },
   onDesktopSync: (cb) => {
     ipcRenderer.on('mudrag:desktop-sync', (_, data) => cb(data));

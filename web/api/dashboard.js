@@ -7,6 +7,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { getUserFromRequest } = require('./lib/auth');
 const { getSubscriptionStatus } = require('./lib/subscription');
 const { TIER_LIMITS } = require('./lib/usage');
+const { decodeUsageKind, getBaseRequestType } = require('./lib/model-policy');
 
 const MODEL_LABELS = {
   'mud1':                      'mud1',
@@ -18,6 +19,13 @@ const MODEL_LABELS = {
 };
 
 const SOURCE_LABELS = { web: 'Web', desktop: 'Desktop', ios: 'iOS' };
+const USAGE_KIND_LABELS = {
+  hosted_free: 'mud1 free',
+  hosted_beta: 'Hosted beta',
+  byok: 'BYOK',
+  local_desktop: 'Local desktop',
+  desktop_agent: 'Desktop agent',
+};
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -69,6 +77,7 @@ module.exports = async function handler(req, res) {
       daily: [],
       by_model: [],
       by_source: [],
+      by_usage_kind: [],
       recent: [],
       days,
       needs_setup: needsSetup,
@@ -122,15 +131,24 @@ module.exports = async function handler(req, res) {
   }
   const by_source = Object.values(sourceMap).sort((a, b) => b.messages - a.messages);
 
+  const usageKindMap = {};
+  for (const r of rows) {
+    const kind = decodeUsageKind(r.request_type);
+    if (!usageKindMap[kind]) usageKindMap[kind] = { usage_kind: kind, label: USAGE_KIND_LABELS[kind] || kind, messages: 0 };
+    usageKindMap[kind].messages++;
+  }
+  const by_usage_kind = Object.values(usageKindMap).sort((a, b) => b.messages - a.messages);
+
   // Recent events (last 50, formatted for the table)
   const recent = rows.slice(0, 50).map((r) => ({
     date: r.created_at,
     source: SOURCE_LABELS[r.source] || r.source,
     model: MODEL_LABELS[r.model] || r.model,
+    usage_kind: USAGE_KIND_LABELS[decodeUsageKind(r.request_type)] || decodeUsageKind(r.request_type),
     input_tokens: r.input_tokens || 0,
     output_tokens: r.output_tokens || 0,
     cost_microdollars: r.cost_microdollars || 0,
-    request_type: r.request_type || 'chat',
+    request_type: getBaseRequestType(r.request_type) || 'chat',
   }));
 
   return res.status(200).json({
@@ -139,6 +157,7 @@ module.exports = async function handler(req, res) {
     daily,
     by_model,
     by_source,
+    by_usage_kind,
     recent,
     days,
   });
