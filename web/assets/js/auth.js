@@ -63,6 +63,18 @@
     return (typeof window !== 'undefined' && window.openmudAccountState) ? window.openmudAccountState : null;
   }
 
+  function logAuthEvent(eventName, details) {
+    try {
+      var accountState = getAccountState();
+      console.log(JSON.stringify(Object.assign({
+        event: eventName,
+        source: 'web-auth',
+        user_id: accountState && accountState.getCurrentUserId ? accountState.getCurrentUserId() : 'anon',
+        at: new Date().toISOString()
+      }, details || {})));
+    } catch (e) {}
+  }
+
   function syncDesktopAccountContext(session) {
     if (typeof window === 'undefined' || !window.mudragDesktop || !window.mudragDesktop.setActiveAccount) return Promise.resolve();
     var user = session && session.user ? session.user : null;
@@ -100,6 +112,7 @@
     if (!session || !session.access_token || !session.refresh_token) {
       return Promise.reject(new Error('You need to sign in before opening the desktop app.'));
     }
+    logAuthEvent('desktop_handoff_start_requested');
     return fetch(getApiBase() + '/desktop-handoff/start', {
       method: 'POST',
       headers: {
@@ -117,14 +130,23 @@
         if (!data || !data.handoff_code) {
           throw new Error('Desktop handoff was not created.');
         }
+        logAuthEvent('desktop_handoff_start_completed', {
+          expires_at: data.expires_at || null
+        });
         return data;
       });
+    }).catch(function (err) {
+      logAuthEvent('desktop_handoff_start_failed', {
+        message: err && err.message ? err.message : 'unknown_error'
+      });
+      throw err;
     });
   }
 
   function redeemDesktopHandoff(handoffCode) {
     var code = String(handoffCode || '').trim();
     if (!code) return Promise.reject(new Error('Missing desktop handoff code.'));
+    logAuthEvent('desktop_handoff_redeem_requested');
     return fetch(getApiBase() + '/desktop-handoff/redeem', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -137,8 +159,14 @@
         if (!data || !data.access_token || !data.refresh_token) {
           throw new Error('Desktop sign-in response was incomplete.');
         }
+        logAuthEvent('desktop_handoff_redeem_completed');
         return data;
       });
+    }).catch(function (err) {
+      logAuthEvent('desktop_handoff_redeem_failed', {
+        message: err && err.message ? err.message : 'unknown_error'
+      });
+      throw err;
     });
   }
 
@@ -215,12 +243,20 @@
 
   window.mudragAuth = {
     signInWithEmail: function (email) {
+      logAuthEvent('auth_signin_email_started');
       return getClient().then(function (client) {
         if (!client) return Promise.reject(new Error('Auth not configured. Missing SUPABASE_URL / SUPABASE_ANON_KEY.'));
-        return client.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: getRedirectUrl() } });
+        return client.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: getRedirectUrl() } })
+          .then(function (result) {
+            logAuthEvent(result && result.error ? 'auth_signin_email_failed' : 'auth_signin_email_completed', {
+              message: result && result.error ? result.error.message || 'unknown_error' : null
+            });
+            return result;
+          });
       });
     },
     signInWithGoogle: function () {
+      logAuthEvent('auth_signin_google_started');
       return getClient().then(function (client) {
         if (!client) return Promise.reject(new Error('Auth not configured. Missing SUPABASE_URL / SUPABASE_ANON_KEY.'));
         var redirectTo = getRedirectUrl();
@@ -230,13 +266,18 @@
         }).then(function (result) {
           var oauthUrl = result && result.data && result.data.url;
           if (oauthUrl && typeof window !== 'undefined' && window.location) {
+            logAuthEvent('auth_signin_google_redirect_ready');
             window.location.assign(oauthUrl);
+          }
+          if (result && result.error) {
+            logAuthEvent('auth_signin_google_failed', { message: result.error.message || 'unknown_error' });
           }
           return result;
         });
       });
     },
     signInWithApple: function () {
+      logAuthEvent('auth_signin_apple_started');
       return getClient().then(function (client) {
         if (!client) return Promise.reject(new Error('Auth not configured. Missing SUPABASE_URL / SUPABASE_ANON_KEY.'));
         var redirectTo = getRedirectUrl();
@@ -246,7 +287,11 @@
         }).then(function (result) {
           var oauthUrl = result && result.data && result.data.url;
           if (oauthUrl && typeof window !== 'undefined' && window.location) {
+            logAuthEvent('auth_signin_apple_redirect_ready');
             window.location.assign(oauthUrl);
+          }
+          if (result && result.error) {
+            logAuthEvent('auth_signin_apple_failed', { message: result.error.message || 'unknown_error' });
           }
           return result;
         });
@@ -255,14 +300,21 @@
     signOut: function () {
       return getClient().then(function (client) {
         if (!client) {
-          return syncAccountScope(null).then(function () { return null; });
+          return syncAccountScope(null).then(function () {
+            logAuthEvent('auth_signout_completed');
+            return null;
+          });
         }
         return client.auth.signOut().then(function (result) {
           return syncAccountScope(null).then(function () {
+            logAuthEvent('auth_signout_completed');
             return result;
           });
         }).catch(function (err) {
           return syncAccountScope(null).then(function () {
+            logAuthEvent('auth_signout_failed', {
+              message: err && err.message ? err.message : 'unknown_error'
+            });
             throw err;
           });
         });
@@ -278,6 +330,9 @@
         return client.auth.getSession().then(function (result) {
           var session = result && result.data ? result.data.session : null;
           return syncAccountScope(session).then(function () {
+            logAuthEvent('auth_session_loaded', {
+              signed_in: !!(session && session.user)
+            });
             return result;
           });
         });
@@ -288,6 +343,10 @@
         if (!client) return;
         client.auth.onAuthStateChange(function (event, session) {
           syncAccountScope(session).then(function () {
+            logAuthEvent('auth_state_changed', {
+              auth_event: event || '',
+              signed_in: !!(session && session.user)
+            });
             cb(event, session);
           });
         });
