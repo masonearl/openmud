@@ -152,10 +152,16 @@ test('desktop handoff redeem returns decrypted tokens once', async () => {
                     assert.equal(field, 'id');
                     updatedId = value;
                     return {
-                      is: async (isField, isValue) => {
+                      is(isField, isValue) {
                         assert.equal(isField, 'consumed_at');
                         assert.equal(isValue, null);
-                        return { error: null };
+                        return {
+                          select() {
+                            return {
+                              maybeSingle: async () => ({ data: { id: updatedId }, error: null }),
+                            };
+                          },
+                        };
                       },
                     };
                   },

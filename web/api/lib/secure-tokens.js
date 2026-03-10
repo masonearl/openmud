@@ -6,8 +6,7 @@ function env(name) {
 
 function getTokenSecret() {
   const raw = env('OPENMUD_SESSION_SECRET')
-    || env('EMAIL_TOKEN_SECRET')
-    || env('OPENMUD_API_KEY');
+    || env('EMAIL_TOKEN_SECRET');
   if (!raw) {
     throw new Error('OPENMUD_SESSION_SECRET or EMAIL_TOKEN_SECRET is required.');
   }
