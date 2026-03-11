@@ -24,6 +24,10 @@ function buildProposal(params) {
     company_email   = '',
     company_url     = '',
     company_logo    = '',   // base64 data URL or https URL
+    payment_terms   = '',
+    change_order_terms = '',
+    warranty        = '',
+    validity_days   = 30,
     theme        = 'light',
   } = params;
 
@@ -253,6 +257,24 @@ ${duration ? `<div style="font-size:10px;color:${textSub};">Estimated Duration: 
 <div style="font-size:10px;line-height:1.65;color:${text};">${escHtml(assumptions.trim()).replace(/\n/g, '<br>')}</div>`;
   }
 
+  const paymentTermsText = (payment_terms && payment_terms.trim())
+    ? payment_terms.trim()
+    : 'Progress payments are due based on completed work in place and approved billing quantities. Retainage, tax treatment, and billing documentation will follow the contract or owner requirements.';
+  const paymentTermsHtml = `${sectionBar('Payment Terms')}
+<div style="font-size:10px;line-height:1.65;color:${text};">${escHtml(paymentTermsText).replace(/\n/g, '<br>')}</div>`;
+
+  const changeOrderText = (change_order_terms && change_order_terms.trim())
+    ? change_order_terms.trim()
+    : 'Changes to scope, quantities, access conditions, utility conflicts, differing site conditions, or owner-directed revisions will be addressed by written change order before extra work proceeds whenever possible.';
+  const changeOrderHtml = `${sectionBar('Change Order Procedure')}
+<div style="font-size:10px;line-height:1.65;color:${text};">${escHtml(changeOrderText).replace(/\n/g, '<br>')}</div>`;
+
+  const warrantyText = (warranty && warranty.trim())
+    ? warranty.trim()
+    : 'Installed work will be completed in a professional manner and aligned with applicable codes, specifications, and standard manufacturer warranty requirements for supplied materials.';
+  const warrantyHtml = `${sectionBar('Warranty')}
+<div style="font-size:10px;line-height:1.65;color:${text};">${escHtml(warrantyText).replace(/\n/g, '<br>')}</div>`;
+
   // ── CLOSING ──────────────────────────────────────────────────────────────────
   // Mirrors SimpleProposal.swift footer note
   const contactLine = (company_contact && (company_phone || company_email))
@@ -261,10 +283,24 @@ ${duration ? `<div style="font-size:10px;color:${textSub};">Estimated Duration: 
 
   const closingText = (closing_note && closing_note.trim())
     ? closing_note.trim()
-    : `This proposal is valid for 30 days from the date of issue. All work will be performed in a professional manner in accordance with applicable codes and standards.${contactLine} We appreciate the opportunity to bid on this project and look forward to working with you.`;
+    : `This proposal is valid for ${Math.max(1, parseInt(validity_days, 10) || 30)} days from the date of issue. All work will be performed in a professional manner in accordance with applicable codes and standards.${contactLine} We appreciate the opportunity to bid on this project and look forward to working with you.`;
 
   const closingHtml = `${sectionBar('Closing Note')}
 <div style="font-size:10px;line-height:1.7;color:${text};">${escHtml(closingText)}</div>`;
+
+  const acceptanceHtml = `${sectionBar('Acceptance')}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:4px;">
+  <div>
+    <div style="font-size:8px;color:${textSub};margin-bottom:18px;">Accepted by</div>
+    <div style="border-top:1px solid ${hdrBdr};height:22px;"></div>
+    <div style="font-size:8px;color:${textMeta};">Authorized signature</div>
+  </div>
+  <div>
+    <div style="font-size:8px;color:${textSub};margin-bottom:18px;">Date</div>
+    <div style="border-top:1px solid ${hdrBdr};height:22px;"></div>
+    <div style="font-size:8px;color:${textMeta};">Execution date</div>
+  </div>
+</div>`;
 
   // ── FOOTER ────────────────────────────────────────────────────────────────────
   // Matches masonearl.com preview-footer-box style exactly
@@ -292,7 +328,11 @@ ${inclusionsHtml}
 ${exclusionsHtml}
 ${clarificationsHtml}
 ${assumptionsHtml}
+${paymentTermsHtml}
+${changeOrderHtml}
+${warrantyHtml}
 ${closingHtml}
+${acceptanceHtml}
 ${footerHtml}
 </div>`;
 
@@ -328,6 +368,10 @@ async function proposalHandler(req, res) {
       company_email:   body.company_email || '',
       company_url:     body.company_url || '',
       company_logo:    body.company_logo || '',
+      payment_terms:   body.payment_terms || '',
+      change_order_terms: body.change_order_terms || '',
+      warranty:        body.warranty || '',
+      validity_days:   body.validity_days != null ? parseInt(body.validity_days, 10) : 30,
       theme:           body.theme === 'dark' ? 'dark' : 'light',
     });
     return res.status(200).json(result);
