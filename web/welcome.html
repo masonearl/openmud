@@ -55,6 +55,15 @@
                             Sign in with Apple
                         </button>
                     </div>
+                    <div id="welcome-dev-signin" class="settings-card settings-card-dev-auth" hidden>
+                        <h3 class="settings-card-subtitle">Dev sign in</h3>
+                        <p class="settings-auth-hint">Testing only. Available when dev auth is enabled on the server.</p>
+                        <div class="settings-auth-form settings-auth-form-dev">
+                            <input type="password" id="dev-auth-token" placeholder="Dev token">
+                            <input type="email" id="dev-auth-email" placeholder="dev@openmud.ai">
+                            <button type="button" class="btn-primary" id="btn-dev-sign-in">Dev sign in</button>
+                        </div>
+                    </div>
                     <span id="auth-status" class="settings-auth-status" hidden></span>
                 </div>
 
@@ -103,14 +112,30 @@
             var status = document.getElementById('auth-status');
             var btnGoogle = document.getElementById('btn-google');
             var btnApple = document.getElementById('btn-apple');
+            var devSignInWrap = document.getElementById('welcome-dev-signin');
+            var devTokenInput = document.getElementById('dev-auth-token');
+            var devEmailInput = document.getElementById('dev-auth-email');
+            var btnDevSignIn = document.getElementById('btn-dev-sign-in');
             var modelGrid = document.getElementById('model-grid');
             var modelNote = document.getElementById('model-note');
             var redirectedAfterAuth = false;
             var nextRaw = '';
+            var desktopAuthRequested = false;
+            var desktopAuthRequestId = '';
+            var desktopAuthPort = '';
             try {
-                nextRaw = new URLSearchParams(window.location.search || '').get('next') || '';
+                var params = new URLSearchParams(window.location.search || '');
+                nextRaw = params.get('next') || '';
+                desktopAuthRequested = params.get('desktop') === '1';
+                desktopAuthRequestId = params.get('desktopRequestId') || '';
+                desktopAuthPort = params.get('desktopPort') || '';
+                if (devSignInWrap) devSignInWrap.hidden = params.get('dev') !== '1';
             } catch (e) {
                 nextRaw = '';
+                desktopAuthRequested = false;
+                desktopAuthRequestId = '';
+                desktopAuthPort = '';
+                if (devSignInWrap) devSignInWrap.hidden = true;
             }
             if (!nextRaw) {
                 try {
@@ -127,11 +152,59 @@
             }
             var nextPath = getSafeNextPath(nextRaw);
 
+            function getModelStorageKey() {
+                return (window.mudragAuth && mudragAuth.getScopedStorageKey)
+                    ? mudragAuth.getScopedStorageKey(STORAGE_MODEL)
+                    : STORAGE_MODEL;
+            }
+
+            function openDesktopApp(session, options) {
+                var opts = options || {};
+                var nextForDesktop = getSafeNextPath(opts.nextPath || nextPath || '/try') || '/try';
+                var handoffPromise = (opts.requestId || opts.port)
+                    ? Promise.resolve({ requestId: opts.requestId || '', port: opts.port || '' })
+                    : ((window.mudragAuth && mudragAuth.requestDesktopAuthHandoff)
+                        ? mudragAuth.requestDesktopAuthHandoff({ nextPath: nextForDesktop })
+                        : Promise.resolve(null));
+                return handoffPromise.then(function (handoff) {
+                    var port = (handoff && handoff.port) || opts.port || '';
+                    var launchUrl = (window.mudragAuth && mudragAuth.buildDesktopAppUrl)
+                        ? mudragAuth.buildDesktopAppUrl(nextForDesktop, port)
+                        : 'openmud://try';
+                    if (!(session && session.access_token && session.refresh_token && handoff && handoff.requestId && window.mudragAuth && mudragAuth.deliverSessionToDesktop)) {
+                        return { delivered: false, launchUrl: launchUrl };
+                    }
+                    return mudragAuth.deliverSessionToDesktop(session, {
+                        requestId: handoff.requestId,
+                        port: port,
+                        nextPath: nextForDesktop
+                    }).then(function (result) {
+                        return {
+                            delivered: !!(result && result.delivered),
+                            launchUrl: (result && result.launchUrl) || launchUrl
+                        };
+                    }).catch(function () {
+                        return { delivered: false, launchUrl: launchUrl };
+                    });
+                });
+            }
+
             function maybeRedirectAfterAuth(session) {
-                if (!nextPath || redirectedAfterAuth || !(session && session.user)) return;
+                if (redirectedAfterAuth || !(session && session.user)) return;
                 redirectedAfterAuth = true;
                 try { localStorage.removeItem('mudrag_auth_next'); } catch (e) {}
                 window.setTimeout(function () {
+                    if (desktopAuthRequested && !/mudrag-desktop/i.test(navigator.userAgent || '')) {
+                        openDesktopApp(session, {
+                            requestId: desktopAuthRequestId,
+                            port: desktopAuthPort,
+                            nextPath: nextPath || '/try'
+                        }).then(function (result) {
+                            window.location.replace((result && result.launchUrl) || 'openmud://try');
+                        });
+                        return;
+                    }
+                    if (!nextPath) return;
                     window.location.replace(nextPath);
                 }, 150);
             }
@@ -162,7 +235,7 @@
                     var suffix = model.badge ? ' - ' + model.badge : '';
                     return '<button type="button" class="welcome-model-btn" data-value="' + model.id + '" title="' + (model.short_description || '') + '">' + model.label + suffix + '</button>';
                 }).join('');
-                var saved = localStorage.getItem(STORAGE_MODEL) || 'mud1';
+                var saved = localStorage.getItem(getModelStorageKey()) || 'mud1';
                 modelGrid.querySelectorAll('.welcome-model-btn').forEach(function (btn) {
                     btn.classList.toggle('selected', btn.getAttribute('data-value') === saved);
                 });
@@ -235,12 +308,29 @@
                 });
             }
 
+            if (btnDevSignIn && devTokenInput) {
+                btnDevSignIn.addEventListener('click', function () {
+                    var token = devTokenInput.value.trim();
+                    var email = devEmailInput ? devEmailInput.value.trim() : '';
+                    if (!token) {
+                        showStatus('Enter the dev token first.', true);
+                        return;
+                    }
+                    status.hidden = true;
+                    mudragAuth.devSignIn(token, email, nextPath || '/try').then(function () {
+                        showStatus('Opening dev sign in…', false);
+                    }).catch(function (err) {
+                        showStatus(err.message || 'Dev sign in failed', true);
+                    });
+                });
+            }
+
             if (modelGrid) {
                 modelGrid.addEventListener('click', function (e) {
                     var btn = e.target.closest('.welcome-model-btn');
                     if (!btn) return;
                     var val = btn.getAttribute('data-value');
-                    localStorage.setItem(STORAGE_MODEL, val);
+                    localStorage.setItem(getModelStorageKey(), val);
                     modelGrid.querySelectorAll('.welcome-model-btn').forEach(function (b) {
                         b.classList.toggle('selected', b.getAttribute('data-value') === val);
                     });
@@ -269,19 +359,12 @@
                         window.location.href = '/try?toolPort=3847&useDesktopApi=1';
                         return;
                     }
-                    // Get the current session and pass tokens via deep link so the
-                    // desktop app can sign the user in automatically.
                     mudragAuth.getSession().then(function (r) {
                         var session = r.data && r.data.session;
-                        var url;
-                        if (session && session.access_token && session.refresh_token) {
-                            url = 'openmud://auth?access_token=' + encodeURIComponent(session.access_token)
-                                + '&refresh_token=' + encodeURIComponent(session.refresh_token);
-                        } else {
-                            url = 'openmud://try';
-                        }
-                        window.location.href = url;
-                        setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
+                        openDesktopApp(session, { nextPath: '/try' }).then(function (result) {
+                            window.location.href = (result && result.launchUrl) || 'openmud://try';
+                            setOpenStatus('Opening openmud… If it was already running, your session will sync automatically.');
+                        });
                     }).catch(function () {
                         window.location.href = 'openmud://try';
                         setOpenStatus('Opening openmud… If nothing happens, make sure the app is installed.');
@@ -309,6 +392,8 @@
         .welcome-model-btn.selected { border-color: var(--accent, #888); background: rgba(255,255,255,0.05); }
         .settings-card-subtitle { font-size: 1rem; margin: 1.5rem 0 0.25rem; }
         .welcome-cta-wrap { margin: 1.5rem 0 0.625rem; }
+        .settings-card-dev-auth { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border, #333); }
+        .settings-auth-form-dev { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.75rem; align-items: center; }
         .btn-open-app {
             display: inline-block;
             padding: 0.75rem 2rem;
