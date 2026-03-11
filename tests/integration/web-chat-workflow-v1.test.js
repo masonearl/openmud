@@ -343,6 +343,8 @@ test('web chat extracts and returns reusable project facts', async () => {
   assert.equal(facts.client, 'North County Water');
   assert.equal(facts.quantities.length, 3);
   assert.equal(facts.project_risks.length, 2);
+  assert.equal(facts.project_facts_meta.confidence, 'low');
+  assert.ok(Array.isArray(facts.project_facts_meta.missing_fields));
 });
 
 test('web chat builds change order from project context and documents', async () => {
@@ -419,6 +421,59 @@ test('web chat builds change order from project context and documents', async ()
   assert.match(payload.schedule_impact, /2 working days/i);
 });
 
+test('web chat extracts partial project facts with evidence and missing fields', async () => {
+  process.env.OPENAI_API_KEY = 'test-openai-key';
+  process.env.SUPABASE_URL = 'https://supabase.example.test';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role';
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  const handlerPath = path.join(repoRoot, 'web', 'api', 'chat.js');
+  const handler = loadWithMocks(handlerPath, getCommonMocks([
+    {
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            project_name: 'Mesa Drive Drainage Repair',
+            client: 'Mesa City Utilities',
+            scope_summary: 'Repair drainage crossing and restore disturbed pavement.',
+            utility_type: 'storm drain',
+            quantities: ['Drainage crossing repair', 'Pavement restoration'],
+            confidence: 'low',
+            missing_fields: ['bid_items', 'start_date', 'pricing'],
+            evidence: [
+              'Work includes repair of the drainage crossing at Mesa Drive.',
+              'Restore disturbed pavement and shoulder after repair is complete.',
+            ],
+            notes: 'The source note is incomplete and does not include pricing or schedule.',
+          }),
+        },
+      }],
+    },
+  ], '[Project Source 1] Field note\nRepair drainage crossing at Mesa Drive. Restore disturbed pavement. Pricing not included.'));
+
+  const req = createReq({
+    messages: [{ role: 'user', content: 'Extract the project facts from this incomplete drainage repair note and save what we can.' }],
+    model: 'gpt-4o-mini',
+    use_tools: true,
+    project_id: 'proj_partial',
+    project_name: 'Mesa Drive Drainage Repair',
+    project_data: {},
+  });
+  const res = createRes();
+
+  await handler(req, res);
+
+  const { statusCode, body } = res._getState();
+  assert.equal(statusCode, 200);
+  assert.deepEqual(body.tools_used, ['extract_project_facts']);
+  const facts = extractTaggedJson(body.response, 'MUDRAG_PROJECT_FACTS');
+  assert.equal(facts.utility_type, 'storm drain');
+  assert.equal(facts.quantities.length, 2);
+  assert.equal(facts.project_facts_meta.confidence, 'low');
+  assert.deepEqual(facts.project_facts_meta.missing_fields, ['bid_items', 'start_date', 'pricing']);
+  assert.equal(facts.project_facts_evidence.length, 2);
+  assert.match(facts.notes, /does not include pricing or schedule/i);
+});
+
 test('web chat builds a repo-guided builder plan', async () => {
   process.env.OPENAI_API_KEY = 'test-openai-key';
   process.env.SUPABASE_URL = 'https://supabase.example.test';
@@ -479,4 +534,60 @@ test('web chat builds a repo-guided builder plan', async () => {
   assert.equal(payload.tests.length, 2);
   assert.equal(payload.risks.length, 2);
   assert.match(payload.next_action, /document extraction quality improvements/i);
+});
+
+test('web chat builds a repo-guided builder validation plan', async () => {
+  process.env.OPENAI_API_KEY = 'test-openai-key';
+  process.env.SUPABASE_URL = 'https://supabase.example.test';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role';
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  const handlerPath = path.join(repoRoot, 'web', 'api', 'chat.js');
+  const handler = loadWithMocks(handlerPath, getCommonMocks([
+    {
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            goal: 'Validate the builder workflow slice before shipping.',
+            summary: 'Run targeted automated checks first, then confirm the chat flow returns a usable shipping-readiness report with conservative blockers.',
+            commands: [
+              'node --test tests/integration/web-chat-workflow-v1.test.js',
+              'Run lints on web/api/chat.js and web/api/lib/workflow-v1.js',
+            ],
+            checks: [
+              'Confirm builder_plan and builder_validate requests do not hijack proposal or schedule prompts.',
+              'Verify the chat response hides structured tags and shows a readable validation summary.',
+            ],
+            blockers: [
+              'The workflow layer in web/api/chat.js is becoming crowded and should eventually split into dedicated workflow modules.',
+            ],
+            ship_decision: 'needs_work',
+            next_action: 'Add execution-oriented builder steps or split workflow routing before calling the system release-ready.',
+          }),
+        },
+      }],
+    },
+  ]));
+
+  const req = createReq({
+    messages: [{ role: 'user', content: 'Validate this builder workflow feature and give me the ship check for the current openmud slice.' }],
+    model: 'gpt-4o-mini',
+    use_tools: true,
+    project_name: 'openmud',
+    project_data: {},
+  });
+  const res = createRes();
+
+  await handler(req, res);
+
+  const { statusCode, body } = res._getState();
+  assert.equal(statusCode, 200);
+  assert.deepEqual(body.tools_used, ['generate_builder_validate']);
+  assert.match(body.response, /Builder validate ready:/);
+  const payload = extractTaggedJson(body.response, 'MUDRAG_BUILDER_VALIDATE');
+  assert.equal(payload.goal, 'Validate the builder workflow slice before shipping.');
+  assert.equal(payload.commands.length, 2);
+  assert.equal(payload.checks.length, 2);
+  assert.equal(payload.blockers.length, 1);
+  assert.equal(payload.ship_decision, 'needs_work');
+  assert.match(payload.next_action, /execution-oriented builder steps/i);
 });

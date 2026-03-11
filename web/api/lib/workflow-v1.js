@@ -1,12 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 const OpenAI = require('openai');
+const {
+  pickProjectFacts,
+  normalizeProjectFacts,
+  extractProjectFacts,
+} = require('./document-extraction');
 
 const PROPOSAL_WORKFLOW_INTENT = /\b(generate|create|make|build|write|draft)\b.*\b(proposal|quote|scope of work|bid document|pricing)\b|\b(proposal|quote|scope of work|bid document)\b.*\b(generate|create|make|build|write|draft)\b/i;
 const SCHEDULE_WORKFLOW_INTENT = /\b(generate|create|make|build|draft)\b.*\b(schedule|timeline|sequencing|phasing)\b|\b(schedule|timeline|sequencing|phasing)\b.*\b(generate|create|make|build|draft)\b/i;
 const CHANGE_ORDER_WORKFLOW_INTENT = /\b(generate|create|make|build|write|draft)\b.*\b(change order|co\b|extra work|change directive)\b|\b(change order|co\b|extra work|change directive)\b.*\b(generate|create|make|build|write|draft)\b/i;
 const PROJECT_FACTS_WORKFLOW_INTENT = /\b(extract|pull|summarize|capture|save|analyze|index)\b.*\b(project facts|job facts|project data|scope summary|project summary|document facts|bid facts)\b|\b(project facts|job facts|project data|scope summary|document facts|bid facts)\b.*\b(extract|pull|summarize|capture|save|analyze|index)\b/i;
 const BUILDER_PLAN_WORKFLOW_INTENT = /\b(agentic builder|builder approach|builder plan|implementation plan|execution plan|ship plan|delivery plan|build plan|roadmap)\b|\b(plan|map|scope|break down|sequence)\b.*\b(builder|implementation|workflow|feature|project)\b/i;
+const BUILDER_VALIDATE_WORKFLOW_INTENT = /\b(builder[_\s-]?validate|validation plan|validate|verify|test|smoke test|ship check|release check|qa plan|go[-\s]?live check)\b.*\b(builder|workflow|feature|release|ship|change|project)\b|\b(builder|workflow|feature|release|ship|change|project)\b.*\b(validate|verify|test|smoke test|qa|check)\b/i;
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 function readRepoGuidance(relativePath) {
@@ -42,6 +48,10 @@ function isBuilderPlanWorkflowIntent(text) {
   return BUILDER_PLAN_WORKFLOW_INTENT.test(String(text || ''));
 }
 
+function isBuilderValidateWorkflowIntent(text) {
+  return BUILDER_VALIDATE_WORKFLOW_INTENT.test(String(text || ''));
+}
+
 function clampText(value, maxLen = 4000) {
   const text = String(value || '').trim();
   if (!text) return '';
@@ -55,91 +65,6 @@ function normalizeIsoDate(value, fallback = '') {
   const date = new Date(text);
   if (Number.isNaN(date.getTime())) return fallback;
   return date.toISOString().slice(0, 10);
-}
-
-function pickProjectFacts(projectData) {
-  const data = projectData && typeof projectData === 'object' ? projectData : {};
-  const picked = {};
-  [
-    'client',
-    'client_name',
-    'owner',
-    'project_name',
-    'address',
-    'location',
-    'scope',
-    'scope_summary',
-    'description',
-    'project_type',
-    'utility_type',
-    'start_date',
-    'duration_days',
-    'crew_size',
-    'notes',
-    'quantity_summary',
-    'executive_summary',
-    'technical_approach',
-    'means_methods',
-    'project_approach',
-    'site_logistics',
-    'logistics_plan',
-    'site_constraints',
-    'major_milestones',
-    'milestones',
-    'phases',
-    'known_risks',
-    'project_risks',
-    'risks',
-    'change_reason',
-    'co_number',
-    'schedule_impact',
-    'assumptions',
-    'exclusions',
-    'budget',
-    'estimated_total',
-    'estimate_total',
-    'project_facts_meta',
-  ].forEach((key) => {
-    const value = data[key];
-    if (value == null) return;
-    if (typeof value === 'string' && !value.trim()) return;
-    picked[key] = value;
-  });
-
-  if (Array.isArray(data.quantities)) {
-    picked.quantities = data.quantities.slice(0, 12);
-  }
-
-  if (Array.isArray(data.bid_items)) {
-    picked.bid_items = data.bid_items.slice(0, 24).map((item) => ({
-      description: String(item?.description || item?.name || '').trim(),
-      quantity: item?.quantity ?? item?.qty ?? null,
-      unit: item?.unit ?? null,
-      unit_price: item?.unit_price ?? item?.unitPrice ?? null,
-      amount: item?.amount ?? item?.total ?? null,
-    }));
-  }
-
-  if (Array.isArray(data.line_items)) {
-    picked.line_items = data.line_items.slice(0, 24).map((item) => ({
-      description: String(item?.description || item?.name || '').trim(),
-      quantity: item?.quantity ?? item?.qty ?? null,
-      unit: item?.unit ?? null,
-      unit_price: item?.unit_price ?? item?.unitPrice ?? null,
-      amount: item?.amount ?? item?.total ?? null,
-    }));
-  }
-
-  if (Array.isArray(data.tasks)) {
-    picked.tasks = data.tasks.slice(0, 12).map((task) => ({
-      title: String(task?.title || '').trim(),
-      notes: clampText(task?.notes || '', 240),
-      status: task?.status || '',
-      due_at: task?.due_at || null,
-    }));
-  }
-
-  return picked;
 }
 
 function buildConversationSummary(messages) {
@@ -227,54 +152,6 @@ function normalizeLooseStringList(items, maxItems = 8) {
     .slice(0, maxItems);
 }
 
-function normalizeProjectFacts(parsed, defaults = {}) {
-  const bidItems = normalizeBidItems(parsed?.bid_items || defaults.bid_items);
-  const totalFromItems = bidItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-  const milestones = normalizeStringList(
-    parsed?.major_milestones || parsed?.milestones || defaults.major_milestones || defaults.milestones || defaults.phases || defaults.tasks,
-    10
-  );
-  const risks = normalizeStringList(
-    parsed?.project_risks || parsed?.risks || defaults.project_risks || defaults.risks || defaults.known_risks,
-    10
-  );
-  const quantities = normalizeStringList(
-    parsed?.quantities || defaults.quantities,
-    12
-  );
-  const totalCandidate = Number(parsed?.estimated_total ?? parsed?.estimate_total ?? parsed?.total);
-  const estimatedTotal = Number.isFinite(totalCandidate) && totalCandidate > 0
-    ? totalCandidate
-    : (totalFromItems > 0 ? totalFromItems : (Number(defaults.estimated_total ?? defaults.estimate_total) || 0));
-  const durationCandidate = Number(parsed?.duration_days ?? parsed?.duration);
-
-  return {
-    project_name: String(parsed?.project_name || defaults.project_name || '').trim(),
-    client: String(parsed?.client || defaults.client || defaults.client_name || '').trim(),
-    owner: String(parsed?.owner || defaults.owner || '').trim(),
-    address: String(parsed?.address || defaults.address || '').trim(),
-    location: String(parsed?.location || defaults.location || '').trim(),
-    scope_summary: String(parsed?.scope_summary || parsed?.scope || defaults.scope_summary || defaults.scope || defaults.description || '').trim(),
-    description: String(parsed?.description || defaults.description || '').trim(),
-    project_type: String(parsed?.project_type || defaults.project_type || '').trim(),
-    utility_type: String(parsed?.utility_type || defaults.utility_type || '').trim(),
-    start_date: normalizeIsoDate(parsed?.start_date || defaults.start_date || '', ''),
-    duration_days: Number.isFinite(durationCandidate) && durationCandidate > 0 ? Math.round(durationCandidate) : (Number(defaults.duration_days) || null),
-    quantity_summary: String(parsed?.quantity_summary || defaults.quantity_summary || '').trim(),
-    quantities,
-    executive_summary: String(parsed?.executive_summary || defaults.executive_summary || '').trim(),
-    technical_approach: String(parsed?.technical_approach || parsed?.means_methods || defaults.technical_approach || defaults.means_methods || defaults.project_approach || '').trim(),
-    logistics_plan: String(parsed?.logistics_plan || parsed?.site_logistics || defaults.logistics_plan || defaults.site_logistics || defaults.site_constraints || '').trim(),
-    major_milestones: milestones,
-    project_risks: risks,
-    bid_items: bidItems,
-    estimated_total: estimatedTotal > 0 ? estimatedTotal : 0,
-    assumptions: String(parsed?.assumptions || defaults.assumptions || '').trim(),
-    exclusions: String(parsed?.exclusions || defaults.exclusions || '').trim(),
-    notes: String(parsed?.notes || defaults.notes || '').trim(),
-  };
-}
-
 function normalizeProposalParams(parsed, defaults = {}) {
   const facts = normalizeProjectFacts(parsed, defaults);
   const totalCandidate = Number(parsed?.total);
@@ -360,14 +237,28 @@ function normalizeBuilderPlan(parsed, defaults = {}) {
   };
 }
 
+function normalizeBuilderValidate(parsed, defaults = {}) {
+  const goal = String(parsed?.goal || defaults.goal || '').trim() || 'Validate the current openmud shipping slice.';
+  const summary = String(parsed?.summary || parsed?.why || defaults.summary || '').trim();
+  const commands = normalizeLooseStringList(parsed?.commands || parsed?.validation_commands || defaults.commands, 10);
+  const checks = normalizeLooseStringList(parsed?.checks || parsed?.manual_checks || defaults.checks, 10);
+  const blockers = normalizeLooseStringList(parsed?.blockers || parsed?.risks || defaults.blockers, 8);
+  const decisionRaw = String(parsed?.ship_decision || parsed?.decision || defaults.ship_decision || '').trim().toLowerCase();
+  const shipDecision = ['ready', 'needs_work', 'blocked'].includes(decisionRaw) ? decisionRaw : 'needs_work';
+  const nextAction = String(parsed?.next_action || parsed?.first_action || defaults.next_action || '').trim();
+
+  return {
+    goal,
+    summary,
+    commands,
+    checks,
+    blockers,
+    ship_decision: shipDecision,
+    next_action: nextAction,
+  };
+}
+
 function getWorkflowPromptConfig(workflow) {
-  if (workflow === 'project_facts') {
-    return {
-      workflowLine: 'Extract reusable project facts from project context and uploaded project documents.',
-      schema: '{"project_name":"string","client":"string","owner":"string","address":"string","location":"string","scope_summary":"string","project_type":"string","utility_type":"string","start_date":"YYYY-MM-DD","duration_days":30,"quantity_summary":"string","quantities":["string"],"executive_summary":"string","technical_approach":"string","logistics_plan":"string","major_milestones":["string"],"project_risks":["string"],"bid_items":[{"description":"string","quantity":1,"unit":"LF","unit_price":0,"amount":0}],"estimated_total":0,"assumptions":"string","exclusions":"string","notes":"string"}',
-      guidance: 'Capture only facts that are directly supported by project documents or saved project data. Use empty strings, empty arrays, or 0 when a fact is not supported.',
-    };
-  }
   if (workflow === 'proposal') {
     return {
       workflowLine: 'Generate a professional construction proposal draft from project context.',
@@ -389,6 +280,13 @@ function getWorkflowPromptConfig(workflow) {
       guidance: 'Keep the plan incremental and repo-specific. Favor workflow completion, shared structured data, deterministic builders, and tests over generic refactors.',
     };
   }
+  if (workflow === 'builder_validate') {
+    return {
+      workflowLine: 'Generate a focused internal validation plan for deciding whether an openmud change is ready to ship.',
+      schema: '{"goal":"string","summary":"string","commands":["string"],"checks":["string"],"blockers":["string"],"ship_decision":"ready|needs_work|blocked","next_action":"string"}',
+      guidance: 'Recommend concrete automated commands first, then targeted manual checks. Call out blockers clearly and keep the ship decision conservative.',
+    };
+  }
   return {
     workflowLine: 'Generate a professional construction schedule draft from project context.',
     schema: '{"project_name":"string","start_date":"YYYY-MM-DD","duration_days":14,"phases":["Phase 1","Phase 2","Phase 3"]}',
@@ -398,7 +296,7 @@ function getWorkflowPromptConfig(workflow) {
 
 function buildWorkflowPrompt({ workflow, userRequest, projectName, projectFacts, projectRagContext }) {
   const config = getWorkflowPromptConfig(workflow);
-  if (workflow === 'builder_plan') {
+  if (workflow === 'builder_plan' || workflow === 'builder_validate') {
     return [
       config.workflowLine,
       'You are planning product implementation work for the openmud codebase.',
@@ -435,11 +333,14 @@ function buildWorkflowPrompt({ workflow, userRequest, projectName, projectFacts,
 }
 
 async function extractWorkflowDraft({ apiKey, workflow, userRequest, projectName, projectData, projectRagContext }) {
+  if (workflow === 'project_facts') {
+    return extractProjectFacts({ apiKey, userRequest, projectName, projectData, projectRagContext });
+  }
   const projectFacts = pickProjectFacts(projectData);
   const client = new OpenAI({ apiKey });
   const completion = await client.chat.completions.create({
     model: 'gpt-4o-mini',
-    max_tokens: workflow === 'project_facts' ? 1200 : (workflow === 'builder_plan' ? 1100 : 900),
+    max_tokens: workflow === 'project_facts' ? 1200 : ((workflow === 'builder_plan' || workflow === 'builder_validate') ? 1100 : 900),
     temperature: 0.1,
     messages: [
       {
@@ -470,6 +371,7 @@ async function extractWorkflowDraft({ apiKey, workflow, userRequest, projectName
   if (workflow === 'proposal') return normalizeProposalParams(parsed, defaults);
   if (workflow === 'change_order') return normalizeChangeOrderParams(parsed, defaults);
   if (workflow === 'builder_plan') return normalizeBuilderPlan(parsed, defaults);
+  if (workflow === 'builder_validate') return normalizeBuilderValidate(parsed, defaults);
   return normalizeScheduleParams(parsed, defaults);
 }
 
@@ -480,10 +382,12 @@ module.exports = {
   isChangeOrderWorkflowIntent,
   isProjectFactsWorkflowIntent,
   isBuilderPlanWorkflowIntent,
+  isBuilderValidateWorkflowIntent,
   normalizeProjectFacts,
   normalizeProposalParams,
   normalizeScheduleParams,
   normalizeChangeOrderParams,
   normalizeBuilderPlan,
+  normalizeBuilderValidate,
   pickProjectFacts,
 };

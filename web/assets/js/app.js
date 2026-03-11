@@ -1497,6 +1497,17 @@
         }).filter(Boolean).slice(0, maxItems || 12);
     }
 
+    function normalizeEvidenceList(items, maxItems) {
+        if (!Array.isArray(items)) return [];
+        return items.map(function (item) {
+            if (typeof item === 'string') return item.trim();
+            if (item && typeof item === 'object') {
+                return String(item.snippet || item.quote || item.text || item.description || item.title || '').trim();
+            }
+            return '';
+        }).filter(Boolean).slice(0, maxItems || 10);
+    }
+
     function persistProjectFacts(projectId, facts, meta) {
         if (!projectId || !facts || typeof facts !== 'object') return getProjectData(projectId);
         var prev = getProjectData(projectId);
@@ -1538,6 +1549,8 @@
         if (milestones.length > 0) next.major_milestones = milestones;
         var risks = normalizeFactList(facts.project_risks || facts.risks, 12);
         if (risks.length > 0) next.project_risks = risks;
+        var evidence = normalizeEvidenceList(facts.project_facts_evidence || facts.evidence, 10);
+        if (evidence.length > 0) next.project_facts_evidence = evidence;
         if (Array.isArray(facts.bid_items) && facts.bid_items.length > 0) {
             next.bid_items = toCanonicalBidItems(facts.bid_items);
             next.bid_items_meta = Object.assign({}, prev.bid_items_meta || {}, {
@@ -1547,7 +1560,7 @@
                 updated_at: new Date().toISOString()
             });
         }
-        next.project_facts_meta = Object.assign({}, prev.project_facts_meta || {}, meta || {}, {
+        next.project_facts_meta = Object.assign({}, prev.project_facts_meta || {}, facts.project_facts_meta || {}, meta || {}, {
             updated_at: new Date().toISOString()
         });
         setProjectData(projectId, next);
@@ -2357,6 +2370,7 @@
         var changeOrderMatch = text.match(/\[MUDRAG_CHANGE_ORDER\]([\s\S]*?)\[\/MUDRAG_CHANGE_ORDER\]/);
         var projectFactsMatch = text.match(/\[MUDRAG_PROJECT_FACTS\]([\s\S]*?)\[\/MUDRAG_PROJECT_FACTS\]/);
         var builderPlanMatch = text.match(/\[MUDRAG_BUILDER_PLAN\]([\s\S]*?)\[\/MUDRAG_BUILDER_PLAN\]/);
+        var builderValidateMatch = text.match(/\[MUDRAG_BUILDER_VALIDATE\]([\s\S]*?)\[\/MUDRAG_BUILDER_VALIDATE\]/);
         var tasksMatch = text.match(/\[MUDRAG_TASKS\]([\s\S]*?)\[\/MUDRAG_TASKS\]/);
         var desktopSyncMatch = text.match(/\[MUDRAG_DESKTOP_SYNC\]([\s\S]*?)\[\/MUDRAG_DESKTOP_SYNC\]/);
         var resumeMatch = text.match(/\[MUDRAG_RESUME\]([\s\S]*?)\[\/MUDRAG_RESUME\]/);
@@ -2792,6 +2806,9 @@
         }
         if (builderPlanMatch) {
             displayText = displayText.replace(/\[MUDRAG_BUILDER_PLAN\][\s\S]*?\[\/MUDRAG_BUILDER_PLAN\]/, '').trim();
+        }
+        if (builderValidateMatch) {
+            displayText = displayText.replace(/\[MUDRAG_BUILDER_VALIDATE\][\s\S]*?\[\/MUDRAG_BUILDER_VALIDATE\]/, '').trim();
         }
         if (resumeMatch) {
             displayText = displayText.replace(/\[MUDRAG_RESUME\][\s\S]*?\[\/MUDRAG_RESUME\]/, '').trim();

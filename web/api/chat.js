@@ -19,6 +19,7 @@ const {
   isChangeOrderWorkflowIntent,
   isProjectFactsWorkflowIntent,
   isBuilderPlanWorkflowIntent,
+  isBuilderValidateWorkflowIntent,
 } = require('./lib/workflow-v1');
 
 // Shared openmud capabilities – update mud1/docs/CAPABILITIES.md and mud1/prompts/capabilities.js when adding features
@@ -546,7 +547,10 @@ async function loadProjectRagForQuery({ projectId, user, query }) {
 
 function hasReusableProjectFacts(projectData) {
   const data = projectData && typeof projectData === 'object' ? projectData : {};
-  if (data.project_facts_meta && data.project_facts_meta.updated_at) return true;
+  if (data.project_facts_meta && data.project_facts_meta.updated_at) {
+    const confidence = String(data.project_facts_meta.confidence || '').trim().toLowerCase();
+    if (confidence && confidence !== 'low') return true;
+  }
   const keys = [
     'scope_summary',
     'executive_summary',
@@ -580,6 +584,28 @@ function formatBuilderPlanResponse(plan) {
   if (implementationSteps.length) sections.push(`Implementation steps:\n${implementationSteps.map((step) => `- ${step}`).join('\n')}`);
   if (tests.length) sections.push(`Validation:\n${tests.map((test) => `- ${test}`).join('\n')}`);
   if (risks.length) sections.push(`Risks:\n${risks.map((risk) => `- ${risk}`).join('\n')}`);
+  if (nextAction) sections.push(`Next action:\n- ${nextAction}`);
+
+  return sections.join('\n\n');
+}
+
+function formatBuilderValidateResponse(plan) {
+  const data = plan && typeof plan === 'object' ? plan : {};
+  const sections = [];
+  const goal = String(data.goal || 'Validate the current openmud shipping slice.').trim();
+  const summary = String(data.summary || '').trim();
+  const commands = Array.isArray(data.commands) ? data.commands.filter(Boolean) : [];
+  const checks = Array.isArray(data.checks) ? data.checks.filter(Boolean) : [];
+  const blockers = Array.isArray(data.blockers) ? data.blockers.filter(Boolean) : [];
+  const shipDecision = String(data.ship_decision || 'needs_work').trim();
+  const nextAction = String(data.next_action || '').trim();
+
+  sections.push(`Builder validate ready: ${goal}`);
+  if (summary) sections.push(summary);
+  if (commands.length) sections.push(`Commands:\n${commands.map((command) => `- ${command}`).join('\n')}`);
+  if (checks.length) sections.push(`Checks:\n${checks.map((check) => `- ${check}`).join('\n')}`);
+  if (blockers.length) sections.push(`Blockers:\n${blockers.map((blocker) => `- ${blocker}`).join('\n')}`);
+  sections.push(`Ship decision:\n- ${shipDecision}`);
   if (nextAction) sections.push(`Next action:\n- ${nextAction}`);
 
   return sections.join('\n\n');
@@ -1625,10 +1651,11 @@ module.exports = async function handler(req, res) {
       const wantsChangeOrder = use_tools && isChangeOrderWorkflowIntent(userRequest);
       const wantsProjectFacts = use_tools && isProjectFactsWorkflowIntent(userRequest);
       const wantsBuilderPlan = use_tools && isBuilderPlanWorkflowIntent(userRequest);
+      const wantsBuilderValidate = use_tools && isBuilderValidateWorkflowIntent(userRequest);
       const wantsWorkflowDoc = wantsProposal || wantsSchedule || wantsChangeOrder;
-      if ((wantsWorkflowDoc || wantsProjectFacts || wantsBuilderPlan) && process.env.OPENAI_API_KEY) {
+      if ((wantsWorkflowDoc || wantsProjectFacts || wantsBuilderPlan || wantsBuilderValidate) && process.env.OPENAI_API_KEY) {
         try {
-          if (wantsBuilderPlan && !wantsWorkflowDoc && !wantsProjectFacts) {
+          if (wantsBuilderPlan && !wantsWorkflowDoc && !wantsProjectFacts && !wantsBuilderValidate) {
             const builderPlan = await extractWorkflowDraft({
               apiKey: process.env.OPENAI_API_KEY,
               workflow: 'builder_plan',
@@ -1645,6 +1672,26 @@ module.exports = async function handler(req, res) {
                 builderPlanTag,
               ].join('\n'),
               tools_used: ['generate_builder_plan'],
+            });
+          }
+
+          if (wantsBuilderValidate && !wantsWorkflowDoc && !wantsProjectFacts) {
+            const builderValidate = await extractWorkflowDraft({
+              apiKey: process.env.OPENAI_API_KEY,
+              workflow: 'builder_validate',
+              userRequest,
+              projectName: String(project_name || project_data?.project_name || project_data?.name || 'openmud').trim() || 'openmud',
+              projectData: project_data || {},
+              projectRagContext: '',
+            });
+            const builderValidateTag = `[MUDRAG_BUILDER_VALIDATE]${JSON.stringify(builderValidate)}[/MUDRAG_BUILDER_VALIDATE]`;
+            return res.status(200).json({
+              response: [
+                formatBuilderValidateResponse(builderValidate),
+                '',
+                builderValidateTag,
+              ].join('\n'),
+              tools_used: ['generate_builder_validate'],
             });
           }
 
@@ -1678,7 +1725,7 @@ module.exports = async function handler(req, res) {
           }
           const mergedProjectData = extractedFacts
             ? Object.assign({}, workflowContext.projectData || {}, extractedFacts, {
-              project_facts_meta: Object.assign({}, (workflowContext.projectData && workflowContext.projectData.project_facts_meta) || {}, {
+              project_facts_meta: Object.assign({}, (workflowContext.projectData && workflowContext.projectData.project_facts_meta) || {}, extractedFacts.project_facts_meta || {}, {
                 source: 'workflow_v1',
                 source_type: 'project_docs',
                 updated_at: new Date().toISOString(),
