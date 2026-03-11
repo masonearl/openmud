@@ -139,7 +139,15 @@ test('web chat builds proposal from project context and documents', async () => 
         message: {
           content: JSON.stringify({
             client: 'City of Provo',
+            executive_summary: 'Install a new sewer main package with traffic control, manholes, and surface restoration while maintaining safe access and a clean closeout path.',
             scope: 'Install 1,200 LF of 12-inch sewer main with manholes, service reconnects, traffic control, and surface restoration.',
+            technical_approach: 'Use open-cut trenching, maintain traffic control by work zone, install sewer main and structures in sequenced runs, test each segment before final restoration, and coordinate tie-ins to minimize service disruption.',
+            major_milestones: [
+              'Mobilization, traffic control setup, and utility locate confirmation.',
+              'Mainline trenching and sewer pipe installation complete.',
+              'Manholes, tie-ins, and service reconnects complete.',
+              'Testing, punch list, and final surface restoration complete.',
+            ],
             total: 486500,
             duration: 28,
             bid_items: [
@@ -147,6 +155,12 @@ test('web chat builds proposal from project context and documents', async () => 
               { description: 'Sewer main install', amount: 334000 },
               { description: 'Manholes and tie-ins', amount: 92000 },
               { description: 'Restoration and closeout', amount: 38000 },
+            ],
+            logistics_plan: 'Maintain one lane of traffic, stage pipe along the east shoulder, coordinate utility locates before trench production, and restore asphalt patches at the end of each work block.',
+            project_risks: [
+              'Unknown utility conflicts at service crossings.',
+              'Traffic-control restrictions along the collector road.',
+              'Production impacts if groundwater control is required.',
             ],
             assumptions: 'Open-cut install. Normal working hours.',
             exclusions: 'Rock excavation and utility conflicts not shown in bid documents.',
@@ -176,11 +190,23 @@ test('web chat builds proposal from project context and documents', async () => 
   assert.equal(statusCode, 200);
   assert.deepEqual(body.tools_used, ['generate_proposal']);
   assert.ok(body._proposal_html.includes('Proposal'));
+  assert.ok(body._proposal_html.includes('Executive Summary'));
+  assert.ok(body._proposal_html.includes('Technical Approach / Means and Methods'));
+  assert.ok(body._proposal_html.includes('Major Milestones'));
+  assert.ok(body._proposal_html.includes('Project Logistics'));
+  assert.ok(body._proposal_html.includes('Project Risks and Constraints'));
+  assert.ok(body._proposal_html.includes('Mainline trenching and sewer pipe installation complete.'));
+  assert.ok(body._proposal_html.includes('Unknown utility conflicts at service crossings.'));
   const payload = extractTaggedJson(body.response, 'MUDRAG_PROPOSAL');
   assert.equal(payload.client, 'City of Provo');
+  assert.match(payload.executive_summary, /sewer main package/i);
+  assert.match(payload.technical_approach, /open-cut trenching/i);
   assert.equal(payload.total, 486500);
   assert.equal(payload.duration, 28);
   assert.equal(payload.bid_items.length, 4);
+  assert.equal(payload.major_milestones.length, 4);
+  assert.match(payload.logistics_plan, /one lane of traffic/i);
+  assert.equal(payload.project_risks.length, 3);
 });
 
 test('web chat builds schedule from project context and documents', async () => {

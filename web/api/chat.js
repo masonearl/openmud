@@ -1603,10 +1603,15 @@ module.exports = async function handler(req, res) {
             const result = buildProposal({ ...params, ...companyProfile, theme });
             const proposalTag = `[MUDRAG_PROPOSAL]${JSON.stringify({
               client: result.client,
+              executive_summary: result.executive_summary || '',
               scope: result.scope,
+              technical_approach: result.technical_approach || '',
+              major_milestones: result.major_milestones || [],
               total: result.total,
               duration: result.duration,
               bid_items: result.bid_items || [],
+              logistics_plan: result.logistics_plan || '',
+              project_risks: result.project_risks || [],
             })}[/MUDRAG_PROPOSAL]`;
             return res.status(200).json({
               response: [

@@ -36,6 +36,19 @@ function pickProjectFacts(projectData) {
     'duration_days',
     'crew_size',
     'notes',
+    'executive_summary',
+    'technical_approach',
+    'means_methods',
+    'project_approach',
+    'site_logistics',
+    'logistics_plan',
+    'site_constraints',
+    'major_milestones',
+    'milestones',
+    'phases',
+    'known_risks',
+    'project_risks',
+    'risks',
     'assumptions',
     'exclusions',
     'budget',
@@ -117,6 +130,20 @@ function normalizeBidItems(items) {
     .filter((item) => item.description);
 }
 
+function normalizeStringList(items, maxItems = 8) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item) => {
+      if (typeof item === 'string') return item.trim();
+      if (item && typeof item === 'object') {
+        return String(item.description || item.title || item.name || item.risk || '').trim();
+      }
+      return '';
+    })
+    .filter(Boolean)
+    .slice(0, maxItems);
+}
+
 function normalizeProposalParams(parsed, defaults = {}) {
   const bidItems = normalizeBidItems(parsed?.bid_items || defaults.bid_items);
   const totalFromItems = bidItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -125,12 +152,25 @@ function normalizeProposalParams(parsed, defaults = {}) {
     ? totalCandidate
     : (totalFromItems > 0 ? totalFromItems : Number(defaults.total) || 0);
   const durationCandidate = Number(parsed?.duration);
+  const riskItems = normalizeStringList(
+    parsed?.project_risks || parsed?.risks || defaults.project_risks || defaults.risks || defaults.known_risks,
+    10
+  );
+  const majorMilestones = normalizeStringList(
+    parsed?.major_milestones || parsed?.milestones || defaults.major_milestones || defaults.milestones || defaults.phases || defaults.tasks,
+    10
+  );
   return {
     client: String(parsed?.client || defaults.client || defaults.project_name || 'Project').trim() || 'Project',
     scope: String(parsed?.scope || defaults.scope || defaults.scope_summary || defaults.description || 'Scope of work to be finalized from project documents.').trim(),
     total,
     duration: Number.isFinite(durationCandidate) && durationCandidate > 0 ? Math.round(durationCandidate) : (Number(defaults.duration_days) || null),
     bid_items: bidItems,
+    executive_summary: String(parsed?.executive_summary || defaults.executive_summary || '').trim(),
+    technical_approach: String(parsed?.technical_approach || parsed?.means_methods || defaults.technical_approach || defaults.means_methods || defaults.project_approach || '').trim(),
+    major_milestones: majorMilestones,
+    logistics_plan: String(parsed?.logistics_plan || parsed?.site_logistics || defaults.logistics_plan || defaults.site_logistics || defaults.site_constraints || '').trim(),
+    project_risks: riskItems,
     assumptions: String(parsed?.assumptions || defaults.assumptions || '').trim(),
     exclusions: String(parsed?.exclusions || defaults.exclusions || '').trim(),
   };
@@ -156,7 +196,7 @@ function buildWorkflowPrompt({ workflow, userRequest, projectName, projectFacts,
     : 'Generate a professional construction schedule draft from project context.';
 
   const schema = workflow === 'proposal'
-    ? '{"client":"string","scope":"string","total":0,"duration":14,"bid_items":[{"description":"string","quantity":1,"unit":"LS","unit_price":0,"amount":0}],"assumptions":"string","exclusions":"string"}'
+    ? '{"client":"string","executive_summary":"string","scope":"string","technical_approach":"string","major_milestones":["string"],"total":0,"duration":14,"bid_items":[{"description":"string","quantity":1,"unit":"LS","unit_price":0,"amount":0}],"logistics_plan":"string","project_risks":["string"],"assumptions":"string","exclusions":"string"}'
     : '{"project_name":"string","start_date":"YYYY-MM-DD","duration_days":14,"phases":["Phase 1","Phase 2","Phase 3"]}';
 
   return [
@@ -165,6 +205,9 @@ function buildWorkflowPrompt({ workflow, userRequest, projectName, projectFacts,
     'Prefer exact facts from project documents and project data.',
     'Do not invent pricing that is not supported by context.',
     'If pricing is missing for a proposal, keep total at 0 and still produce a clean scope-based draft.',
+    workflow === 'proposal'
+      ? 'Only include executive_summary, technical_approach, major_milestones, logistics_plan, and project_risks when they are clearly supported by the project documents or saved project data. Otherwise use an empty string or empty array.'
+      : 'Keep the schedule baseline realistic and concise.',
     'Return ONLY valid JSON matching this schema:',
     schema,
     '',

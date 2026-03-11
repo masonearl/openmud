@@ -12,11 +12,16 @@ function buildProposal(params) {
     scope        = '',
     total        = 0,
     duration     = null,
+    executive_summary = '',
+    technical_approach = '',
     assumptions  = '',
     exclusions   = '',
     inclusions   = '',
     closing_note = '',
     bid_items    = [],
+    logistics_plan = '',
+    major_milestones = [],
+    project_risks = [],
     // Optional company fields — forwarded from app settings if available
     company_name    = '',
     company_contact = '',
@@ -89,6 +94,13 @@ function buildProposal(params) {
     </table>`;
   }
 
+  function textSection(title, body) {
+    const content = String(body || '').trim();
+    if (!content) return '';
+    return `${sectionBar(title)}
+<div style="font-size:10px;line-height:1.65;color:${text};">${escHtml(content).replace(/\n/g, '<br>')}</div>`;
+  }
+
   function escHtml(str) {
     return String(str)
       .replace(/&/g, '&amp;')
@@ -135,9 +147,12 @@ function buildProposal(params) {
     ? `<p style="margin:0 0 6px;font-size:10px;color:${text};">${escHtml(company_name)} proposes the following scope of work and pricing for ${escHtml(client)}.</p>`
     : `<p style="margin:0 0 6px;font-size:10px;color:${text};">We propose the following scope of work and pricing for ${escHtml(client)}.</p>`;
 
+  const executiveSummaryHtml = textSection('Executive Summary', executive_summary);
+
   const scopeHtml = `${sectionBar('Scope of Work')}
 ${introLine}
 <div style="font-size:10px;line-height:1.65;color:${text};">${escHtml(scope || '—').replace(/\n/g, '<br>')}</div>`;
+  const technicalApproachHtml = textSection('Technical Approach / Means and Methods', technical_approach);
 
   // ── BID ITEMS ────────────────────────────────────────────────────────────────
   let bidItemsHtml = '';
@@ -145,7 +160,7 @@ ${introLine}
     const valid = bid_items.filter(i => i && (i.description || i.amount != null));
 
     // Detect extended columns (qty / unit / unit_price)
-    const hasExtended = valid.some(i => i.qty != null || i.unit || i.unit_price != null);
+    const hasExtended = valid.some(i => i.qty != null || i.quantity != null || i.unit || i.unit_price != null);
 
     const rows = valid.map((item, idx) => {
       const desc   = escHtml((item.description || '').trim() || '—');
@@ -153,7 +168,8 @@ ${introLine}
       const rowBg  = idx % 2 === 1 ? tblRowAlt : bg;
 
       if (hasExtended) {
-        const qty    = item.qty    != null ? item.qty    : '—';
+        const qtyRaw = item.qty != null ? item.qty : item.quantity;
+        const qty    = qtyRaw != null ? qtyRaw : '—';
         const unit   = item.unit              ? item.unit   : '—';
         const uPrice = item.unit_price != null ? `$${Number(item.unit_price).toLocaleString()}` : '—';
         return `<tr style="background:${rowBg};">
@@ -257,6 +273,20 @@ ${duration ? `<div style="font-size:10px;color:${textSub};">Estimated Duration: 
 <div style="font-size:10px;line-height:1.65;color:${text};">${escHtml(assumptions.trim()).replace(/\n/g, '<br>')}</div>`;
   }
 
+  const logisticsHtml = textSection('Project Logistics', logistics_plan);
+  const milestoneItemsList = Array.isArray(major_milestones)
+    ? major_milestones.map((item) => String(item || '').trim()).filter(Boolean)
+    : [];
+  const milestonesHtml = milestoneItemsList.length > 0
+    ? `${sectionBar('Major Milestones')}${itemsTable(milestoneItemsList)}`
+    : '';
+  const riskItemsList = Array.isArray(project_risks)
+    ? project_risks.map((item) => String(item || '').trim()).filter(Boolean)
+    : [];
+  const risksHtml = riskItemsList.length > 0
+    ? `${sectionBar('Project Risks and Constraints')}${itemsTable(riskItemsList)}`
+    : '';
+
   const paymentTermsText = (payment_terms && payment_terms.trim())
     ? payment_terms.trim()
     : 'Progress payments are due based on completed work in place and approved billing quantities. Retainage, tax treatment, and billing documentation will follow the contract or owner requirements.';
@@ -322,12 +352,17 @@ ${duration ? `<div style="font-size:10px;color:${textSub};">Estimated Duration: 
   // ── ASSEMBLE ──────────────────────────────────────────────────────────────────
   const html = `<div class="pdf-doc pdf-doc-proposal" style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px 36px;max-width:700px;margin:0 auto;background:${bg};color:${text};font-size:11px;line-height:1.5;box-sizing:border-box;">
 ${headerHtml}
+${executiveSummaryHtml}
 ${scopeHtml}
+${technicalApproachHtml}
+${milestonesHtml}
 ${bidItemsHtml}
 ${inclusionsHtml}
 ${exclusionsHtml}
 ${clarificationsHtml}
 ${assumptionsHtml}
+${logisticsHtml}
+${risksHtml}
 ${paymentTermsHtml}
 ${changeOrderHtml}
 ${warrantyHtml}
@@ -336,7 +371,7 @@ ${acceptanceHtml}
 ${footerHtml}
 </div>`;
 
-  return { client, scope, total, duration, bid_items, html, theme };
+  return { client, scope, total, duration, bid_items, executive_summary, technical_approach, major_milestones: milestoneItemsList, logistics_plan, project_risks: riskItemsList, html, theme };
 }
 
 async function proposalHandler(req, res) {
@@ -357,11 +392,16 @@ async function proposalHandler(req, res) {
       scope:           body.scope || '',
       total:           parseFloat(body.total) || 0,
       duration:        body.duration != null ? parseInt(body.duration, 10) : null,
+      executive_summary: body.executive_summary || '',
+      technical_approach: body.technical_approach || '',
       assumptions:     body.assumptions || '',
       exclusions:      body.exclusions || '',
       inclusions:      body.inclusions || '',
       closing_note:    body.closing_note || '',
       bid_items:       body.bid_items || [],
+      logistics_plan:  body.logistics_plan || '',
+      major_milestones: body.major_milestones || [],
+      project_risks:   body.project_risks || [],
       company_name:    body.company_name || '',
       company_contact: body.company_contact || '',
       company_phone:   body.company_phone || '',
