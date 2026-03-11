@@ -11,6 +11,7 @@ const { isHostedModel, isHostedBetaModel, isDesktopAgentModel, getRequiredProvid
 const { getRAGContextForUser, getRAGPackageForUser, buildMud1RAGSystemPrompt } = require('./lib/mud1-rag');
 const { getProjectRAGPackage } = require('./lib/project-rag-store');
 const { maxConfidence, mergeRagSources } = require('./lib/rag-utils');
+const { extractWorkflowDraft, isProposalWorkflowIntent, isScheduleWorkflowIntent } = require('./lib/workflow-v1');
 
 // Shared openmud capabilities – update mud1/docs/CAPABILITIES.md and mud1/prompts/capabilities.js when adding features
 let MUDRAG_CAPABILITIES = '';
@@ -514,6 +515,25 @@ Be thorough, accurate, and practical.${OUTPUT_RULES}`,
 
 function getSystemPrompt(model) {
   return SYSTEM_PROMPTS[model] || SYSTEM_PROMPTS['gpt-4o-mini'];
+}
+
+async function loadProjectRagForQuery({ projectId, user, query }) {
+  if (!projectId || !user || !user.id || !query) return null;
+  try {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return null;
+    const supabase = createClient(url, key);
+    return await getProjectRAGPackage({
+      projectId,
+      query,
+      userId: user.id,
+      topK: 6,
+      supabaseClient: supabase,
+    });
+  } catch (e) {
+    return null;
+  }
 }
 
 /** Anthropic: map to model IDs. Old deprecated IDs redirect to current. */
@@ -1235,14 +1255,15 @@ module.exports = async function handler(req, res) {
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Openmud-Dev-Key, X-OpenAI-Api-Key, X-Anthropic-Api-Key, X-Grok-Api-Key, X-OpenRouter-Api-Key, X-OpenClaw-Api-Key, X-OpenClaw-Base-Url, X-OpenClaw-Model, X-Openmud-Relay-Token, X-Client-Date');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Openmud-Dev-Key, X-OpenAI-Api-Key, X-Anthropic-Api-Key, X-Grok-Api-Key, X-OpenRouter-Api-Key, X-OpenClaw-Api-Key, X-OpenClaw-Base-Url, X-OpenClaw-Model, X-Openmud-Relay-Token, X-Client-Date, X-Company-Profile, X-Ui-Theme');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   try {
-    const { messages, model = 'mud1', temperature = 0.7, max_tokens = 1024, use_tools = false, estimate_context = null, stream = false, email, project_id, project_name, project_data } = req.body || {};
+    const body = req.body || {};
+    const { messages, model = 'mud1', temperature = 0.7, max_tokens = 1024, use_tools = false, estimate_context = null, stream = false, email, project_id, project_name, project_data, file_reference_context } = body;
     const reqSource = detectSource(req);
     const devBypass = isDevBypass(req);
     const openaiKeyOverride = getHeader(req, 'x-openai-api-key');
@@ -1545,53 +1566,87 @@ module.exports = async function handler(req, res) {
       // No automation command detected — fall through to normal AI response
     }
 
-    // ── Document / Proposal generation (mud1 + openclaw) ─────────────────────
-    // Intercept before the RAG path so the AI doesn't refuse or hallucinate.
-    // Detects explicit requests to generate a proposal, document, or PDF,
-    // extracts params via GPT, builds the HTML using buildProposal(), and
-    // returns it as _proposal_html for the client to preview + download.
+    // ── Workflow V1: proposal + schedule generation from project context ─────
+    // This is the first agentic slice: use project data and indexed project docs
+    // to extract structured workflow params, then run deterministic builders.
     {
-      const lastUserContent = (lastUserMsg?.content || '').toLowerCase();
-      const isDocGenIntent = /\b(generate|create|make|build|write|draft)\b.*\b(proposal|document|doc|pdf)\b|\b(proposal|document|pdf)\b.*\b(generate|create|make|build|write|draft)\b|\bcombine.*\b(documents?|docs?|pdf)\b|\bmerge.*\b(documents?|docs?|pdf)\b/i.test(lastUserContent);
+      const userRequest = String(lastUserMsg?.content || '').trim();
+      const wantsProposal = use_tools && isProposalWorkflowIntent(userRequest);
+      const wantsSchedule = use_tools && isScheduleWorkflowIntent(userRequest);
+      if ((wantsProposal || wantsSchedule) && process.env.OPENAI_API_KEY) {
+        try {
+          const projectRag = await loadProjectRagForQuery({
+            projectId: project_id,
+            user,
+            query: userRequest,
+          });
+          const workflowProjectName = String(project_name || project_data?.project_name || project_data?.name || 'Project').trim() || 'Project';
+          let companyProfile = {};
+          try { companyProfile = JSON.parse(getHeader(req, 'x-company-profile') || '{}'); } catch (_) {}
+          if (body.company_logo) companyProfile.company_logo = body.company_logo;
+          const theme = getHeader(req, 'x-ui-theme') === 'dark' ? 'dark' : 'light';
+          const workflowContext = {
+            apiKey: process.env.OPENAI_API_KEY,
+            userRequest,
+            projectName: workflowProjectName,
+            projectData: Object.assign({}, project_data || {}, {
+              file_reference_context: file_reference_context || null,
+            }),
+            projectRagContext: (projectRag && projectRag.context) || '',
+          };
 
-      if (isDocGenIntent) {
-        const genApiKey = process.env.OPENAI_API_KEY;
-        if (genApiKey) {
-          try {
-            // Extract proposal params from the conversation
-            const fullContext = messages.filter(m => m.role === 'user').map(m => String(m.content || '')).join('\n');
-            const genClient = new OpenAI({ apiKey: genApiKey });
-            const paramCompletion = await genClient.chat.completions.create({
-              model: 'gpt-4o-mini',
-              max_tokens: 600,
-              temperature: 0.2,
-              messages: [
-                {
-                  role: 'system',
-                  content: 'Extract proposal details from the user\'s request. Return ONLY valid JSON:\n{"client":"client or project name","scope":"detailed scope of work","total":0,"duration":null,"bid_items":[{"description":"item","quantity":1,"unit":"LS","unit_price":0,"amount":0}],"assumptions":"","exclusions":""}\nIf a field is not mentioned, use sensible defaults. total=0 means unknown. duration in calendar days or null.'
-                },
-                { role: 'user', content: fullContext }
-              ],
+          if (wantsProposal) {
+            const params = await extractWorkflowDraft({
+              ...workflowContext,
+              workflow: 'proposal',
             });
-            const raw = String(paramCompletion.choices?.[0]?.message?.content || '');
-            const match = raw.match(/\{[\s\S]*\}/);
-            if (match) {
-              const params = JSON.parse(match[0]);
-              // Pull company profile and logo forwarded from the client
-              let companyProfile = {};
-              try { companyProfile = JSON.parse(getHeader(req, 'x-company-profile') || '{}'); } catch (_) {}
-              if (body.company_logo) companyProfile.company_logo = body.company_logo;
-              // Match theme to user's UI preference
-              const theme = getHeader(req, 'x-ui-theme') === 'dark' ? 'dark' : 'light';
-              const result = buildProposal({ ...params, ...companyProfile, theme });
-              return res.status(200).json({
-                response: `Here's your proposal${params.client ? ' for ' + params.client : ''}. Preview below — click Download PDF to save it.`,
-                _proposal_html: result.html,
-              });
-            }
-          } catch (_) {
-            // Fall through to normal AI path on any extraction failure
+            const result = buildProposal({ ...params, ...companyProfile, theme });
+            const proposalTag = `[MUDRAG_PROPOSAL]${JSON.stringify({
+              client: result.client,
+              scope: result.scope,
+              total: result.total,
+              duration: result.duration,
+              bid_items: result.bid_items || [],
+            })}[/MUDRAG_PROPOSAL]`;
+            return res.status(200).json({
+              response: [
+                `Proposal ready for ${result.client || workflowProjectName}.`,
+                '',
+                proposalTag,
+              ].join('\n'),
+              _proposal_html: result.html,
+              tools_used: ['generate_proposal'],
+            });
           }
+
+          if (wantsSchedule) {
+            const params = await extractWorkflowDraft({
+              ...workflowContext,
+              workflow: 'schedule',
+            });
+            const result = buildSchedule(
+              params.project_name,
+              params.duration_days,
+              params.start_date,
+              params.phases
+            );
+            const scheduleTag = `[MUDRAG_SCHEDULE]${JSON.stringify({
+              project: result.project_name,
+              duration: result.duration,
+              start_date: params.start_date,
+              phases: params.phases,
+            })}[/MUDRAG_SCHEDULE]`;
+            return res.status(200).json({
+              response: [
+                `Schedule ready for ${result.project_name}.`,
+                '',
+                scheduleTag,
+              ].join('\n'),
+              tools_used: ['generate_schedule'],
+            });
+          }
+        } catch (workflowErr) {
+          console.warn('Workflow V1 generation failed; falling back to normal chat:', workflowErr?.message || workflowErr);
         }
       }
     }

@@ -10,6 +10,8 @@ openmud is a free, open-source AI assistant built specifically for the construct
 
 It understands trenching, pipe sizing, labor and equipment rates, phased scheduling, and the bid workflows contractors actually use. Not a generic AI with a construction coat of paint.
 
+openmud is being built as an agentic workflow platform. Chat is the control surface, but the product value comes from finishing real construction tasks: extracting project facts from documents, generating proposals and schedules, drafting RFIs and emails, preparing change orders, supporting takeoffs, and building estimating intelligence from historical job data.
+
 **Try it live → [openmud.ai](https://openmud.ai)**
 
 ---
@@ -43,6 +45,21 @@ The AI returns a structured cost breakdown, which you can export to PDF or turn 
 | Proposal generator | Formatted proposal from your estimate, ready to send |
 | **Calculators** | 18 construction calculators — trench volume, pipe flow, OSHA safety, markup, production rates, unit converter, pipe reference, Manning's n, and more |
 | Python tool library | Estimating, hydraulics, trench takeoff, safety, bid math, and unit conversion tools |
+
+---
+
+## Build discipline
+
+When building openmud, keep these rules in line:
+
+- Treat chat as the orchestration layer, not the final product
+- Prefer structured project context over one-off prompting
+- Build tools that finish real workflows: proposal, schedule, change order, extraction, estimating
+- Every major feature should help users win work, price work, document work, get paid, or protect margin
+- Prefer deterministic builders and saved project artifacts over freeform model output alone
+- Use the free plan to teach workflows and create trust; use paid plans to save hours, reduce admin load, and unlock professional-grade outputs at scale
+
+Current product build plan: [buildplan.md](buildplan.md)
 
 ---
 
