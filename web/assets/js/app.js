@@ -2356,6 +2356,7 @@
         var proposalMatch = text.match(/\[MUDRAG_PROPOSAL\]([\s\S]*?)\[\/MUDRAG_PROPOSAL\]/);
         var changeOrderMatch = text.match(/\[MUDRAG_CHANGE_ORDER\]([\s\S]*?)\[\/MUDRAG_CHANGE_ORDER\]/);
         var projectFactsMatch = text.match(/\[MUDRAG_PROJECT_FACTS\]([\s\S]*?)\[\/MUDRAG_PROJECT_FACTS\]/);
+        var builderPlanMatch = text.match(/\[MUDRAG_BUILDER_PLAN\]([\s\S]*?)\[\/MUDRAG_BUILDER_PLAN\]/);
         var tasksMatch = text.match(/\[MUDRAG_TASKS\]([\s\S]*?)\[\/MUDRAG_TASKS\]/);
         var desktopSyncMatch = text.match(/\[MUDRAG_DESKTOP_SYNC\]([\s\S]*?)\[\/MUDRAG_DESKTOP_SYNC\]/);
         var resumeMatch = text.match(/\[MUDRAG_RESUME\]([\s\S]*?)\[\/MUDRAG_RESUME\]/);
@@ -2788,6 +2789,9 @@
                     });
                 }
             } catch (e) { /* ignore */ }
+        }
+        if (builderPlanMatch) {
+            displayText = displayText.replace(/\[MUDRAG_BUILDER_PLAN\][\s\S]*?\[\/MUDRAG_BUILDER_PLAN\]/, '').trim();
         }
         if (resumeMatch) {
             displayText = displayText.replace(/\[MUDRAG_RESUME\][\s\S]*?\[\/MUDRAG_RESUME\]/, '').trim();

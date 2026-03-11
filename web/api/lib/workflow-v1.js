@@ -1,9 +1,26 @@
+const fs = require('fs');
+const path = require('path');
 const OpenAI = require('openai');
 
 const PROPOSAL_WORKFLOW_INTENT = /\b(generate|create|make|build|write|draft)\b.*\b(proposal|quote|scope of work|bid document|pricing)\b|\b(proposal|quote|scope of work|bid document)\b.*\b(generate|create|make|build|write|draft)\b/i;
 const SCHEDULE_WORKFLOW_INTENT = /\b(generate|create|make|build|draft)\b.*\b(schedule|timeline|sequencing|phasing)\b|\b(schedule|timeline|sequencing|phasing)\b.*\b(generate|create|make|build|draft)\b/i;
 const CHANGE_ORDER_WORKFLOW_INTENT = /\b(generate|create|make|build|write|draft)\b.*\b(change order|co\b|extra work|change directive)\b|\b(change order|co\b|extra work|change directive)\b.*\b(generate|create|make|build|write|draft)\b/i;
 const PROJECT_FACTS_WORKFLOW_INTENT = /\b(extract|pull|summarize|capture|save|analyze|index)\b.*\b(project facts|job facts|project data|scope summary|project summary|document facts|bid facts)\b|\b(project facts|job facts|project data|scope summary|document facts|bid facts)\b.*\b(extract|pull|summarize|capture|save|analyze|index)\b/i;
+const BUILDER_PLAN_WORKFLOW_INTENT = /\b(agentic builder|builder approach|builder plan|implementation plan|execution plan|ship plan|delivery plan|build plan|roadmap)\b|\b(plan|map|scope|break down|sequence)\b.*\b(builder|implementation|workflow|feature|project)\b/i;
+const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
+
+function readRepoGuidance(relativePath) {
+  try {
+    return fs.readFileSync(path.join(REPO_ROOT, relativePath), 'utf8').trim();
+  } catch (e) {
+    return '';
+  }
+}
+
+const BUILDER_GUIDANCE_CONTEXT = [
+  readRepoGuidance('buildplan.md'),
+  readRepoGuidance('docs/ROADMAP.md'),
+].filter(Boolean).join('\n\n---\n\n');
 
 function isProposalWorkflowIntent(text) {
   return PROPOSAL_WORKFLOW_INTENT.test(String(text || ''));
@@ -19,6 +36,10 @@ function isChangeOrderWorkflowIntent(text) {
 
 function isProjectFactsWorkflowIntent(text) {
   return PROJECT_FACTS_WORKFLOW_INTENT.test(String(text || ''));
+}
+
+function isBuilderPlanWorkflowIntent(text) {
+  return BUILDER_PLAN_WORKFLOW_INTENT.test(String(text || ''));
 }
 
 function clampText(value, maxLen = 4000) {
@@ -182,6 +203,30 @@ function normalizeStringList(items, maxItems = 8) {
     .slice(0, maxItems);
 }
 
+function normalizeLooseStringList(items, maxItems = 8) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item) => {
+      if (typeof item === 'string') return item.trim();
+      if (item && typeof item === 'object') {
+        return String(
+          item.path
+          || item.file
+          || item.title
+          || item.step
+          || item.test
+          || item.risk
+          || item.description
+          || item.name
+          || ''
+        ).trim();
+      }
+      return '';
+    })
+    .filter(Boolean)
+    .slice(0, maxItems);
+}
+
 function normalizeProjectFacts(parsed, defaults = {}) {
   const bidItems = normalizeBidItems(parsed?.bid_items || defaults.bid_items);
   const totalFromItems = bidItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -295,6 +340,26 @@ function normalizeChangeOrderParams(parsed, defaults = {}) {
   };
 }
 
+function normalizeBuilderPlan(parsed, defaults = {}) {
+  const goal = String(parsed?.goal || defaults.goal || '').trim() || 'Ship the next high-value openmud workflow.';
+  const summary = String(parsed?.summary || parsed?.why || defaults.summary || '').trim();
+  const touchedFiles = normalizeLooseStringList(parsed?.touched_files || parsed?.files || defaults.touched_files, 12);
+  const implementationSteps = normalizeLooseStringList(parsed?.implementation_steps || parsed?.steps || defaults.implementation_steps, 10);
+  const tests = normalizeLooseStringList(parsed?.tests || parsed?.validation_steps || defaults.tests, 8);
+  const risks = normalizeLooseStringList(parsed?.risks || defaults.risks, 8);
+  const nextAction = String(parsed?.next_action || parsed?.first_action || defaults.next_action || '').trim();
+
+  return {
+    goal,
+    summary,
+    touched_files: touchedFiles,
+    implementation_steps: implementationSteps,
+    tests,
+    risks,
+    next_action: nextAction,
+  };
+}
+
 function getWorkflowPromptConfig(workflow) {
   if (workflow === 'project_facts') {
     return {
@@ -317,6 +382,13 @@ function getWorkflowPromptConfig(workflow) {
       guidance: 'Focus on changed scope, why it changed, pricing, and schedule impact. Do not invent amounts unsupported by context. Use 0 when pricing is not available.',
     };
   }
+  if (workflow === 'builder_plan') {
+    return {
+      workflowLine: 'Generate a focused internal builder plan for shipping the next openmud capability.',
+      schema: '{"goal":"string","summary":"string","touched_files":["path/to/file"],"implementation_steps":["string"],"tests":["string"],"risks":["string"],"next_action":"string"}',
+      guidance: 'Keep the plan incremental and repo-specific. Favor workflow completion, shared structured data, deterministic builders, and tests over generic refactors.',
+    };
+  }
   return {
     workflowLine: 'Generate a professional construction schedule draft from project context.',
     schema: '{"project_name":"string","start_date":"YYYY-MM-DD","duration_days":14,"phases":["Phase 1","Phase 2","Phase 3"]}',
@@ -326,6 +398,22 @@ function getWorkflowPromptConfig(workflow) {
 
 function buildWorkflowPrompt({ workflow, userRequest, projectName, projectFacts, projectRagContext }) {
   const config = getWorkflowPromptConfig(workflow);
+  if (workflow === 'builder_plan') {
+    return [
+      config.workflowLine,
+      'You are planning product implementation work for the openmud codebase.',
+      'Use the repository guidance below to keep the plan aligned with product direction.',
+      'Prefer small vertical slices that ship real workflow value.',
+      config.guidance,
+      'Return ONLY valid JSON matching this schema:',
+      config.schema,
+      '',
+      'Repository guidance:',
+      clampText(BUILDER_GUIDANCE_CONTEXT, 9000) || 'No repository guidance available.',
+      '',
+      `User request: ${clampText(userRequest, 1600)}`,
+    ].join('\n');
+  }
   return [
     config.workflowLine,
     'You are extracting structured inputs for an openmud workflow.',
@@ -351,7 +439,7 @@ async function extractWorkflowDraft({ apiKey, workflow, userRequest, projectName
   const client = new OpenAI({ apiKey });
   const completion = await client.chat.completions.create({
     model: 'gpt-4o-mini',
-    max_tokens: workflow === 'project_facts' ? 1200 : 900,
+    max_tokens: workflow === 'project_facts' ? 1200 : (workflow === 'builder_plan' ? 1100 : 900),
     temperature: 0.1,
     messages: [
       {
@@ -381,6 +469,7 @@ async function extractWorkflowDraft({ apiKey, workflow, userRequest, projectName
   if (workflow === 'project_facts') return normalizeProjectFacts(parsed, defaults);
   if (workflow === 'proposal') return normalizeProposalParams(parsed, defaults);
   if (workflow === 'change_order') return normalizeChangeOrderParams(parsed, defaults);
+  if (workflow === 'builder_plan') return normalizeBuilderPlan(parsed, defaults);
   return normalizeScheduleParams(parsed, defaults);
 }
 
@@ -390,9 +479,11 @@ module.exports = {
   isScheduleWorkflowIntent,
   isChangeOrderWorkflowIntent,
   isProjectFactsWorkflowIntent,
+  isBuilderPlanWorkflowIntent,
   normalizeProjectFacts,
   normalizeProposalParams,
   normalizeScheduleParams,
   normalizeChangeOrderParams,
+  normalizeBuilderPlan,
   pickProjectFacts,
 };

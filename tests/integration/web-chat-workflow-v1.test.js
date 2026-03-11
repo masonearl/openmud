@@ -418,3 +418,65 @@ test('web chat builds change order from project context and documents', async ()
   assert.equal(payload.line_items.length, 2);
   assert.match(payload.schedule_impact, /2 working days/i);
 });
+
+test('web chat builds a repo-guided builder plan', async () => {
+  process.env.OPENAI_API_KEY = 'test-openai-key';
+  process.env.SUPABASE_URL = 'https://supabase.example.test';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role';
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  const handlerPath = path.join(repoRoot, 'web', 'api', 'chat.js');
+  const handler = loadWithMocks(handlerPath, getCommonMocks([
+    {
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            goal: 'Ship the first agentic builder loop for openmud.',
+            summary: 'Start with a repo-guided builder planning workflow in chat so feature requests turn into scoped implementation plans before we add heavier automation.',
+            touched_files: [
+              'web/api/lib/workflow-v1.js',
+              'web/api/chat.js',
+              'tests/integration/web-chat-workflow-v1.test.js',
+            ],
+            implementation_steps: [
+              'Detect builder-plan intent in chat requests.',
+              'Extract strict JSON for files, implementation steps, tests, and risks.',
+              'Return a readable plan plus a hidden builder-plan payload for the client.',
+            ],
+            tests: [
+              'Add an integration test for builder-plan generation.',
+              'Verify proposal, schedule, and change-order workflows still pass.',
+            ],
+            risks: [
+              'Builder intent could overlap with generic planning requests if the matcher is too broad.',
+              'The workflow layer could grow too large if every builder feature lives directly in chat.js.',
+            ],
+            next_action: 'Use the builder plan to implement the next shipping workflow: document extraction quality improvements.',
+          }),
+        },
+      }],
+    },
+  ]));
+
+  const req = createReq({
+    messages: [{ role: 'user', content: 'Build an agentic builder plan for openmud so we can ship faster and keep the workflow architecture clean.' }],
+    model: 'gpt-4o-mini',
+    use_tools: true,
+    project_name: 'openmud',
+    project_data: {},
+  });
+  const res = createRes();
+
+  await handler(req, res);
+
+  const { statusCode, body } = res._getState();
+  assert.equal(statusCode, 200);
+  assert.deepEqual(body.tools_used, ['generate_builder_plan']);
+  assert.match(body.response, /Builder plan ready:/);
+  const payload = extractTaggedJson(body.response, 'MUDRAG_BUILDER_PLAN');
+  assert.equal(payload.goal, 'Ship the first agentic builder loop for openmud.');
+  assert.equal(payload.touched_files.length, 3);
+  assert.equal(payload.implementation_steps.length, 3);
+  assert.equal(payload.tests.length, 2);
+  assert.equal(payload.risks.length, 2);
+  assert.match(payload.next_action, /document extraction quality improvements/i);
+});

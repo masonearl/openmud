@@ -18,6 +18,7 @@ const {
   isScheduleWorkflowIntent,
   isChangeOrderWorkflowIntent,
   isProjectFactsWorkflowIntent,
+  isBuilderPlanWorkflowIntent,
 } = require('./lib/workflow-v1');
 
 // Shared openmud capabilities – update mud1/docs/CAPABILITIES.md and mud1/prompts/capabilities.js when adding features
@@ -560,6 +561,28 @@ function hasReusableProjectFacts(projectData) {
     if (Array.isArray(value)) return value.length > 0;
     return !!String(value || '').trim();
   }) || (Array.isArray(data.bid_items) && data.bid_items.length > 0);
+}
+
+function formatBuilderPlanResponse(plan) {
+  const data = plan && typeof plan === 'object' ? plan : {};
+  const sections = [];
+  const goal = String(data.goal || 'Ship the next openmud workflow.').trim();
+  const summary = String(data.summary || '').trim();
+  const touchedFiles = Array.isArray(data.touched_files) ? data.touched_files.filter(Boolean) : [];
+  const implementationSteps = Array.isArray(data.implementation_steps) ? data.implementation_steps.filter(Boolean) : [];
+  const tests = Array.isArray(data.tests) ? data.tests.filter(Boolean) : [];
+  const risks = Array.isArray(data.risks) ? data.risks.filter(Boolean) : [];
+  const nextAction = String(data.next_action || '').trim();
+
+  sections.push(`Builder plan ready: ${goal}`);
+  if (summary) sections.push(summary);
+  if (touchedFiles.length) sections.push(`Files to touch:\n${touchedFiles.map((file) => `- ${file}`).join('\n')}`);
+  if (implementationSteps.length) sections.push(`Implementation steps:\n${implementationSteps.map((step) => `- ${step}`).join('\n')}`);
+  if (tests.length) sections.push(`Validation:\n${tests.map((test) => `- ${test}`).join('\n')}`);
+  if (risks.length) sections.push(`Risks:\n${risks.map((risk) => `- ${risk}`).join('\n')}`);
+  if (nextAction) sections.push(`Next action:\n- ${nextAction}`);
+
+  return sections.join('\n\n');
 }
 
 /** Anthropic: map to model IDs. Old deprecated IDs redirect to current. */
@@ -1601,9 +1624,30 @@ module.exports = async function handler(req, res) {
       const wantsSchedule = use_tools && isScheduleWorkflowIntent(userRequest);
       const wantsChangeOrder = use_tools && isChangeOrderWorkflowIntent(userRequest);
       const wantsProjectFacts = use_tools && isProjectFactsWorkflowIntent(userRequest);
+      const wantsBuilderPlan = use_tools && isBuilderPlanWorkflowIntent(userRequest);
       const wantsWorkflowDoc = wantsProposal || wantsSchedule || wantsChangeOrder;
-      if ((wantsWorkflowDoc || wantsProjectFacts) && process.env.OPENAI_API_KEY) {
+      if ((wantsWorkflowDoc || wantsProjectFacts || wantsBuilderPlan) && process.env.OPENAI_API_KEY) {
         try {
+          if (wantsBuilderPlan && !wantsWorkflowDoc && !wantsProjectFacts) {
+            const builderPlan = await extractWorkflowDraft({
+              apiKey: process.env.OPENAI_API_KEY,
+              workflow: 'builder_plan',
+              userRequest,
+              projectName: String(project_name || project_data?.project_name || project_data?.name || 'openmud').trim() || 'openmud',
+              projectData: project_data || {},
+              projectRagContext: '',
+            });
+            const builderPlanTag = `[MUDRAG_BUILDER_PLAN]${JSON.stringify(builderPlan)}[/MUDRAG_BUILDER_PLAN]`;
+            return res.status(200).json({
+              response: [
+                formatBuilderPlanResponse(builderPlan),
+                '',
+                builderPlanTag,
+              ].join('\n'),
+              tools_used: ['generate_builder_plan'],
+            });
+          }
+
           const projectRag = await loadProjectRagForQuery({
             projectId: project_id,
             user,
