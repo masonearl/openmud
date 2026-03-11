@@ -138,6 +138,30 @@ test('web chat builds proposal from project context and documents', async () => 
       choices: [{
         message: {
           content: JSON.stringify({
+            project_name: 'Provo Sewer Improvements',
+            client: 'City of Provo',
+            utility_type: 'sewer',
+            scope_summary: 'Install 1,200 LF of 12-inch sewer main with 4 manholes, service reconnects, traffic control, and surface restoration.',
+            quantity_summary: '1,200 LF sewer main and 4 manholes.',
+            quantities: ['1,200 LF of 12-inch sewer main', '4 manholes', 'Asphalt patch restoration'],
+            major_milestones: [
+              'Mobilization, traffic control setup, and utility locate confirmation.',
+              'Mainline trenching and sewer pipe installation complete.',
+              'Testing, punch list, and final surface restoration complete.',
+            ],
+            project_risks: [
+              'Unknown utility conflicts at service crossings.',
+              'Traffic-control restrictions along the collector road.',
+            ],
+            logistics_plan: 'Maintain one lane of traffic and stage pipe along the east shoulder.',
+          }),
+        },
+      }],
+    },
+    {
+      choices: [{
+        message: {
+          content: JSON.stringify({
             client: 'City of Provo',
             executive_summary: 'Install a new sewer main package with traffic control, manholes, and surface restoration while maintaining safe access and a clean closeout path.',
             scope: 'Install 1,200 LF of 12-inch sewer main with manholes, service reconnects, traffic control, and surface restoration.',
@@ -188,7 +212,7 @@ test('web chat builds proposal from project context and documents', async () => 
 
   const { statusCode, body } = res._getState();
   assert.equal(statusCode, 200);
-  assert.deepEqual(body.tools_used, ['generate_proposal']);
+  assert.deepEqual(body.tools_used, ['extract_project_facts', 'generate_proposal']);
   assert.ok(body._proposal_html.includes('Proposal'));
   assert.ok(body._proposal_html.includes('Executive Summary'));
   assert.ok(body._proposal_html.includes('Technical Approach / Means and Methods'));
@@ -197,6 +221,9 @@ test('web chat builds proposal from project context and documents', async () => 
   assert.ok(body._proposal_html.includes('Project Risks and Constraints'));
   assert.ok(body._proposal_html.includes('Mainline trenching and sewer pipe installation complete.'));
   assert.ok(body._proposal_html.includes('Unknown utility conflicts at service crossings.'));
+  const projectFacts = extractTaggedJson(body.response, 'MUDRAG_PROJECT_FACTS');
+  assert.equal(projectFacts.utility_type, 'sewer');
+  assert.equal(projectFacts.quantities.length, 3);
   const payload = extractTaggedJson(body.response, 'MUDRAG_PROPOSAL');
   assert.equal(payload.client, 'City of Provo');
   assert.match(payload.executive_summary, /sewer main package/i);
@@ -216,6 +243,21 @@ test('web chat builds schedule from project context and documents', async () => 
   const repoRoot = path.resolve(__dirname, '..', '..');
   const handlerPath = path.join(repoRoot, 'web', 'api', 'chat.js');
   const handler = loadWithMocks(handlerPath, getCommonMocks([
+    {
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            project_name: 'Airport Waterline Replacement',
+            client: 'Airport Authority',
+            utility_type: 'waterline',
+            scope_summary: 'Replace existing airport waterline with trenching, testing, tie-ins, and restoration.',
+            major_milestones: ['Mobilization', 'Traffic control and sawcut', 'Waterline install', 'Testing and restoration'],
+            start_date: '2026-04-01',
+            duration_days: 35,
+          }),
+        },
+      }],
+    },
     {
       choices: [{
         message: {
@@ -247,10 +289,132 @@ test('web chat builds schedule from project context and documents', async () => 
 
   const { statusCode, body } = res._getState();
   assert.equal(statusCode, 200);
-  assert.deepEqual(body.tools_used, ['generate_schedule']);
+  assert.deepEqual(body.tools_used, ['extract_project_facts', 'generate_schedule']);
+  const projectFacts = extractTaggedJson(body.response, 'MUDRAG_PROJECT_FACTS');
+  assert.equal(projectFacts.utility_type, 'waterline');
   const payload = extractTaggedJson(body.response, 'MUDRAG_SCHEDULE');
   assert.equal(payload.project, 'Airport Waterline Replacement');
   assert.equal(payload.duration, 35);
   assert.equal(payload.start_date, '2026-04-01');
   assert.equal(payload.phases.length, 6);
+});
+
+test('web chat extracts and returns reusable project facts', async () => {
+  process.env.OPENAI_API_KEY = 'test-openai-key';
+  process.env.SUPABASE_URL = 'https://supabase.example.test';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role';
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  const handlerPath = path.join(repoRoot, 'web', 'api', 'chat.js');
+  const handler = loadWithMocks(handlerPath, getCommonMocks([
+    {
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            project_name: 'North County Force Main',
+            client: 'North County Water',
+            utility_type: 'force main',
+            scope_summary: 'Install new force main, tie-ins, and restoration.',
+            quantities: ['2,400 LF of 16-inch force main', '2 tie-ins', '2 valve assemblies'],
+            major_milestones: ['Mobilization', 'Force main installation', 'Testing and restoration'],
+            project_risks: ['Railroad permit timing', 'Unknown utility crossings'],
+          }),
+        },
+      }],
+    },
+  ], '[Project Source 1] Bid package\n2,400 LF of 16-inch force main, 2 tie-ins, valve assemblies, and restoration.'));
+
+  const req = createReq({
+    messages: [{ role: 'user', content: 'Extract the project facts from these bid documents and save the project summary.' }],
+    model: 'gpt-4o-mini',
+    use_tools: true,
+    project_id: 'proj_789',
+    project_name: 'North County Force Main',
+    project_data: {},
+  });
+  const res = createRes();
+
+  await handler(req, res);
+
+  const { statusCode, body } = res._getState();
+  assert.equal(statusCode, 200);
+  assert.deepEqual(body.tools_used, ['extract_project_facts']);
+  const facts = extractTaggedJson(body.response, 'MUDRAG_PROJECT_FACTS');
+  assert.equal(facts.project_name, 'North County Force Main');
+  assert.equal(facts.client, 'North County Water');
+  assert.equal(facts.quantities.length, 3);
+  assert.equal(facts.project_risks.length, 2);
+});
+
+test('web chat builds change order from project context and documents', async () => {
+  process.env.OPENAI_API_KEY = 'test-openai-key';
+  process.env.SUPABASE_URL = 'https://supabase.example.test';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role';
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  const handlerPath = path.join(repoRoot, 'web', 'api', 'chat.js');
+  const handler = loadWithMocks(handlerPath, getCommonMocks([
+    {
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            project_name: 'Provo Sewer Improvements',
+            client: 'City of Provo',
+            utility_type: 'sewer',
+            scope_summary: 'Install sewer main, manholes, tie-ins, and restoration.',
+            project_risks: ['Utility conflicts', 'Traffic-control restrictions'],
+          }),
+        },
+      }],
+    },
+    {
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            project_name: 'Provo Sewer Improvements',
+            client: 'City of Provo',
+            co_number: 'CO-003',
+            title: 'Additional rock excavation at manhole tie-in',
+            change_reason: 'Field conditions revealed unclassified rock at the north tie-in that was not shown in the bid documents.',
+            scope: 'Excavate and remove rock, extend trench support, and install additional bedding to complete the tie-in safely.',
+            line_items: [
+              { description: 'Rock excavation', quantity: 42, unit: 'CY', unit_price: 185, amount: 7770 },
+              { description: 'Additional shoring and trench support', quantity: 1, unit: 'LS', unit_price: 3200, amount: 3200 },
+            ],
+            amount: 10970,
+            duration_days: 2,
+            schedule_impact: 'Adds 2 working days to complete the tie-in and final restoration.',
+            assumptions: 'Pricing assumes work can proceed during normal working hours.',
+          }),
+        },
+      }],
+    },
+  ], '[Project Source 1] Daily note\nRock encountered at north tie-in. Additional excavation and trench support required.'));
+
+  const req = createReq({
+    messages: [{ role: 'user', content: 'Create a change order from the project documents for the extra rock excavation and schedule impact.' }],
+    model: 'gpt-4o-mini',
+    use_tools: true,
+    project_id: 'proj_123',
+    project_name: 'Provo Sewer Improvements',
+    project_data: {
+      client_name: 'City of Provo',
+      utility_type: 'sewer',
+    },
+  });
+  const res = createRes();
+
+  await handler(req, res);
+
+  const { statusCode, body } = res._getState();
+  assert.equal(statusCode, 200);
+  assert.deepEqual(body.tools_used, ['extract_project_facts', 'generate_change_order']);
+  assert.ok(body._document_html.includes('Change Order'));
+  assert.ok(body._document_html.includes('Reason for Change'));
+  assert.ok(body._document_html.includes('Pricing Breakdown'));
+  const facts = extractTaggedJson(body.response, 'MUDRAG_PROJECT_FACTS');
+  assert.equal(facts.project_name, 'Provo Sewer Improvements');
+  const payload = extractTaggedJson(body.response, 'MUDRAG_CHANGE_ORDER');
+  assert.equal(payload.co_number, 'CO-003');
+  assert.equal(payload.amount, 10970);
+  assert.equal(payload.line_items.length, 2);
+  assert.match(payload.schedule_impact, /2 working days/i);
 });

@@ -5,13 +5,20 @@ const path = require('path');
 const { execFile } = require('child_process');
 const buildSchedule = require('./schedule').buildSchedule;
 const buildProposal = require('./proposal').buildProposal;
+const buildChangeOrder = require('./change-order').buildChangeOrder;
 const { getUserFromRequest } = require('./lib/auth');
 const { allocateUsage, logUsageEvent, detectSource } = require('./lib/usage');
 const { isHostedModel, isHostedBetaModel, isDesktopAgentModel, getRequiredProviderKey, classifyUsageKind } = require('./lib/model-policy');
 const { getRAGContextForUser, getRAGPackageForUser, buildMud1RAGSystemPrompt } = require('./lib/mud1-rag');
 const { getProjectRAGPackage } = require('./lib/project-rag-store');
 const { maxConfidence, mergeRagSources } = require('./lib/rag-utils');
-const { extractWorkflowDraft, isProposalWorkflowIntent, isScheduleWorkflowIntent } = require('./lib/workflow-v1');
+const {
+  extractWorkflowDraft,
+  isProposalWorkflowIntent,
+  isScheduleWorkflowIntent,
+  isChangeOrderWorkflowIntent,
+  isProjectFactsWorkflowIntent,
+} = require('./lib/workflow-v1');
 
 // Shared openmud capabilities – update mud1/docs/CAPABILITIES.md and mud1/prompts/capabilities.js when adding features
 let MUDRAG_CAPABILITIES = '';
@@ -534,6 +541,25 @@ async function loadProjectRagForQuery({ projectId, user, query }) {
   } catch (e) {
     return null;
   }
+}
+
+function hasReusableProjectFacts(projectData) {
+  const data = projectData && typeof projectData === 'object' ? projectData : {};
+  if (data.project_facts_meta && data.project_facts_meta.updated_at) return true;
+  const keys = [
+    'scope_summary',
+    'executive_summary',
+    'technical_approach',
+    'logistics_plan',
+    'major_milestones',
+    'project_risks',
+    'quantity_summary',
+  ];
+  return keys.some((key) => {
+    const value = data[key];
+    if (Array.isArray(value)) return value.length > 0;
+    return !!String(value || '').trim();
+  }) || (Array.isArray(data.bid_items) && data.bid_items.length > 0);
 }
 
 /** Anthropic: map to model IDs. Old deprecated IDs redirect to current. */
@@ -1566,14 +1592,17 @@ module.exports = async function handler(req, res) {
       // No automation command detected — fall through to normal AI response
     }
 
-    // ── Workflow V1: proposal + schedule generation from project context ─────
-    // This is the first agentic slice: use project data and indexed project docs
-    // to extract structured workflow params, then run deterministic builders.
+    // ── Workflow V1: facts + proposal + schedule + change order ───────────────
+    // Use project data plus indexed project docs to extract structured facts,
+    // save them back into project state, and run deterministic document builders.
     {
       const userRequest = String(lastUserMsg?.content || '').trim();
       const wantsProposal = use_tools && isProposalWorkflowIntent(userRequest);
       const wantsSchedule = use_tools && isScheduleWorkflowIntent(userRequest);
-      if ((wantsProposal || wantsSchedule) && process.env.OPENAI_API_KEY) {
+      const wantsChangeOrder = use_tools && isChangeOrderWorkflowIntent(userRequest);
+      const wantsProjectFacts = use_tools && isProjectFactsWorkflowIntent(userRequest);
+      const wantsWorkflowDoc = wantsProposal || wantsSchedule || wantsChangeOrder;
+      if ((wantsWorkflowDoc || wantsProjectFacts) && process.env.OPENAI_API_KEY) {
         try {
           const projectRag = await loadProjectRagForQuery({
             projectId: project_id,
@@ -1594,10 +1623,44 @@ module.exports = async function handler(req, res) {
             }),
             projectRagContext: (projectRag && projectRag.context) || '',
           };
+          const shouldExtractFacts = wantsProjectFacts
+            || (wantsWorkflowDoc && !hasReusableProjectFacts(project_data) && !!workflowContext.projectRagContext);
+          let extractedFacts = null;
+          if (shouldExtractFacts) {
+            extractedFacts = await extractWorkflowDraft({
+              ...workflowContext,
+              workflow: 'project_facts',
+            });
+          }
+          const mergedProjectData = extractedFacts
+            ? Object.assign({}, workflowContext.projectData || {}, extractedFacts, {
+              project_facts_meta: Object.assign({}, (workflowContext.projectData && workflowContext.projectData.project_facts_meta) || {}, {
+                source: 'workflow_v1',
+                source_type: 'project_docs',
+                updated_at: new Date().toISOString(),
+              }),
+            })
+            : workflowContext.projectData;
+          const projectFactsTag = extractedFacts
+            ? `[MUDRAG_PROJECT_FACTS]${JSON.stringify(mergedProjectData)}[/MUDRAG_PROJECT_FACTS]`
+            : '';
+          const toolsUsed = extractedFacts ? ['extract_project_facts'] : [];
+
+          if (wantsProjectFacts && !wantsWorkflowDoc) {
+            return res.status(200).json({
+              response: [
+                `Project facts saved for ${workflowProjectName}.`,
+                '',
+                projectFactsTag,
+              ].filter(Boolean).join('\n'),
+              tools_used: toolsUsed,
+            });
+          }
 
           if (wantsProposal) {
             const params = await extractWorkflowDraft({
               ...workflowContext,
+              projectData: mergedProjectData,
               workflow: 'proposal',
             });
             const result = buildProposal({ ...params, ...companyProfile, theme });
@@ -1617,16 +1680,53 @@ module.exports = async function handler(req, res) {
               response: [
                 `Proposal ready for ${result.client || workflowProjectName}.`,
                 '',
+                projectFactsTag,
+                projectFactsTag ? '' : null,
                 proposalTag,
-              ].join('\n'),
+              ].filter(Boolean).join('\n'),
               _proposal_html: result.html,
-              tools_used: ['generate_proposal'],
+              tools_used: toolsUsed.concat(['generate_proposal']),
+            });
+          }
+
+          if (wantsChangeOrder) {
+            const params = await extractWorkflowDraft({
+              ...workflowContext,
+              projectData: mergedProjectData,
+              workflow: 'change_order',
+            });
+            const result = buildChangeOrder({ ...params, ...companyProfile, theme });
+            const changeOrderTag = `[MUDRAG_CHANGE_ORDER]${JSON.stringify({
+              project_name: result.project_name,
+              client: result.client,
+              co_number: result.co_number || '',
+              title: result.title,
+              change_reason: result.change_reason || '',
+              scope: result.scope,
+              amount: result.amount,
+              duration_days: result.duration_days || 0,
+              schedule_impact: result.schedule_impact || '',
+              line_items: result.line_items || [],
+            })}[/MUDRAG_CHANGE_ORDER]`;
+            return res.status(200).json({
+              response: [
+                `Change order ready for ${result.project_name}.`,
+                '',
+                projectFactsTag,
+                projectFactsTag ? '' : null,
+                changeOrderTag,
+              ].filter(Boolean).join('\n'),
+              _document_html: result.html,
+              _document_label: 'Change Order',
+              _document_filename_base: 'change-order',
+              tools_used: toolsUsed.concat(['generate_change_order']),
             });
           }
 
           if (wantsSchedule) {
             const params = await extractWorkflowDraft({
               ...workflowContext,
+              projectData: mergedProjectData,
               workflow: 'schedule',
             });
             const result = buildSchedule(
@@ -1645,9 +1745,11 @@ module.exports = async function handler(req, res) {
               response: [
                 `Schedule ready for ${result.project_name}.`,
                 '',
+                projectFactsTag,
+                projectFactsTag ? '' : null,
                 scheduleTag,
-              ].join('\n'),
-              tools_used: ['generate_schedule'],
+              ].filter(Boolean).join('\n'),
+              tools_used: toolsUsed.concat(['generate_schedule']),
             });
           }
         } catch (workflowErr) {

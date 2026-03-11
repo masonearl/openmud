@@ -451,6 +451,26 @@
             .catch(function () { if (cb) cb([]); });
     }
 
+    function syncProjectDataToApi(projectId, data) {
+        if (!getAuthHeaders().Authorization || !projectId) return;
+        fetch(API_BASE + '/project-data', {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ project_id: projectId, project_data: data || getProjectData(projectId) || {} })
+        }).catch(function () {});
+    }
+
+    function loadProjectDataFromApi(projectId, cb) {
+        if (!getAuthHeaders().Authorization || !projectId) { if (cb) cb(null); return; }
+        fetch(API_BASE + '/project-data?project_id=' + encodeURIComponent(projectId), { method: 'GET', headers: getAuthHeaders() })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                var projectData = (data && data.project_data && typeof data.project_data === 'object') ? data.project_data : null;
+                if (cb) cb(projectData);
+            })
+            .catch(function () { if (cb) cb(null); });
+    }
+
     function getActiveId() {
         return localStorage.getItem(STORAGE_ACTIVE) || null;
     }
@@ -473,11 +493,13 @@
         return all[projectId] || {};
     }
 
-    function setProjectData(projectId, data) {
+    function setProjectData(projectId, data, options) {
         if (!projectId) return;
+        var opts = options || {};
         var all = getAllProjectData();
         all[projectId] = data || {};
         localStorage.setItem(STORAGE_PROJECT_DATA, JSON.stringify(all));
+        if (!opts.skipSync) syncProjectDataToApi(projectId, all[projectId]);
     }
 
     function removeProjectData(projectId) {
@@ -486,6 +508,12 @@
         if (!all[projectId]) return;
         delete all[projectId];
         localStorage.setItem(STORAGE_PROJECT_DATA, JSON.stringify(all));
+        if (getAuthHeaders().Authorization) {
+            fetch(API_BASE + '/project-data?project_id=' + encodeURIComponent(projectId), {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            }).catch(function () {});
+        }
     }
 
     function normalizeTaskText(value, fallback) {
@@ -1458,6 +1486,74 @@
         return canonicalItems;
     }
 
+    function normalizeFactList(items, maxItems) {
+        if (!Array.isArray(items)) return [];
+        return items.map(function (item) {
+            if (typeof item === 'string') return item.trim();
+            if (item && typeof item === 'object') {
+                return String(item.description || item.title || item.name || item.risk || item.task || '').trim();
+            }
+            return '';
+        }).filter(Boolean).slice(0, maxItems || 12);
+    }
+
+    function persistProjectFacts(projectId, facts, meta) {
+        if (!projectId || !facts || typeof facts !== 'object') return getProjectData(projectId);
+        var prev = getProjectData(projectId);
+        var next = Object.assign({}, prev);
+        [
+            'client',
+            'client_name',
+            'owner',
+            'project_name',
+            'address',
+            'location',
+            'scope',
+            'scope_summary',
+            'description',
+            'project_type',
+            'utility_type',
+            'start_date',
+            'quantity_summary',
+            'executive_summary',
+            'technical_approach',
+            'logistics_plan',
+            'change_reason',
+            'co_number',
+            'schedule_impact',
+            'assumptions',
+            'exclusions',
+            'notes'
+        ].forEach(function (key) {
+            var value = facts[key];
+            if (typeof value === 'string' && value.trim()) next[key] = value.trim();
+        });
+        ['duration_days', 'estimated_total', 'estimate_total', 'budget'].forEach(function (key) {
+            var num = Number(facts[key]);
+            if (isFinite(num) && num > 0) next[key] = num;
+        });
+        var quantities = normalizeFactList(facts.quantities, 12);
+        if (quantities.length > 0) next.quantities = quantities;
+        var milestones = normalizeFactList(facts.major_milestones || facts.milestones, 12);
+        if (milestones.length > 0) next.major_milestones = milestones;
+        var risks = normalizeFactList(facts.project_risks || facts.risks, 12);
+        if (risks.length > 0) next.project_risks = risks;
+        if (Array.isArray(facts.bid_items) && facts.bid_items.length > 0) {
+            next.bid_items = toCanonicalBidItems(facts.bid_items);
+            next.bid_items_meta = Object.assign({}, prev.bid_items_meta || {}, {
+                source: (meta && meta.source) || 'workflow_v1',
+                source_type: (meta && meta.source_type) || 'project_facts',
+                count: next.bid_items.length,
+                updated_at: new Date().toISOString()
+            });
+        }
+        next.project_facts_meta = Object.assign({}, prev.project_facts_meta || {}, meta || {}, {
+            updated_at: new Date().toISOString()
+        });
+        setProjectData(projectId, next);
+        return next;
+    }
+
     function chatIdGen() { return 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
 
     var activeChatId = null;
@@ -2258,6 +2354,8 @@
         var text = (content || '').trim();
         var scheduleMatch = text.match(/\[MUDRAG_SCHEDULE\]([\s\S]*?)\[\/MUDRAG_SCHEDULE\]/);
         var proposalMatch = text.match(/\[MUDRAG_PROPOSAL\]([\s\S]*?)\[\/MUDRAG_PROPOSAL\]/);
+        var changeOrderMatch = text.match(/\[MUDRAG_CHANGE_ORDER\]([\s\S]*?)\[\/MUDRAG_CHANGE_ORDER\]/);
+        var projectFactsMatch = text.match(/\[MUDRAG_PROJECT_FACTS\]([\s\S]*?)\[\/MUDRAG_PROJECT_FACTS\]/);
         var tasksMatch = text.match(/\[MUDRAG_TASKS\]([\s\S]*?)\[\/MUDRAG_TASKS\]/);
         var desktopSyncMatch = text.match(/\[MUDRAG_DESKTOP_SYNC\]([\s\S]*?)\[\/MUDRAG_DESKTOP_SYNC\]/);
         var resumeMatch = text.match(/\[MUDRAG_RESUME\]([\s\S]*?)\[\/MUDRAG_RESUME\]/);
@@ -2587,6 +2685,8 @@
 
         var scheduleData = null;
         var proposalData = null;
+        var changeOrderData = null;
+        var projectFactsData = null;
         var resumeData = null;
         var createProjectData = null;
         var chooseEmailData = null;
@@ -2669,6 +2769,24 @@
             displayText = displayText.replace(/\[MUDRAG_PROPOSAL\][\s\S]*?\[\/MUDRAG_PROPOSAL\]/, '').trim();
             try {
                 proposalData = JSON.parse(proposalMatch[1].trim());
+            } catch (e) { /* ignore */ }
+        }
+        if (changeOrderMatch) {
+            displayText = displayText.replace(/\[MUDRAG_CHANGE_ORDER\][\s\S]*?\[\/MUDRAG_CHANGE_ORDER\]/, '').trim();
+            try {
+                changeOrderData = JSON.parse(changeOrderMatch[1].trim());
+            } catch (e) { /* ignore */ }
+        }
+        if (projectFactsMatch) {
+            displayText = displayText.replace(/\[MUDRAG_PROJECT_FACTS\][\s\S]*?\[\/MUDRAG_PROJECT_FACTS\]/, '').trim();
+            try {
+                projectFactsData = JSON.parse(projectFactsMatch[1].trim());
+                if (activeProjectId) {
+                    persistProjectFacts(activeProjectId, projectFactsData, {
+                        source: 'workflow_v1',
+                        source_type: 'project_docs'
+                    });
+                }
             } catch (e) { /* ignore */ }
         }
         if (resumeMatch) {
@@ -3832,7 +3950,9 @@
      * Render a generated proposal/document as an in-chat preview card with
      * Download PDF and Open in new tab actions.
      */
-    function renderProposalPreview(html) {
+    function renderProposalPreview(html, options) {
+        var docLabel = (options && options.label) ? String(options.label) : 'Document';
+        var fileBase = (options && options.fileBase) ? String(options.fileBase) : docLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         var wrap = document.createElement('div');
         wrap.className = 'msg-proposal-preview';
 
@@ -3850,7 +3970,7 @@
                 tempDiv.innerHTML = html;
                 html2pdf(tempDiv, {
                     margin: 0,
-                    filename: 'proposal-' + new Date().toISOString().slice(0, 10) + '.pdf',
+                    filename: (fileBase || 'document') + '-' + new Date().toISOString().slice(0, 10) + '.pdf',
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -3859,7 +3979,7 @@
                 // Fallback: open in new tab for browser print-to-PDF
                 var win = window.open('', '_blank');
                 if (win) {
-                    win.document.write('<!DOCTYPE html><html><head><title>Proposal</title><style>body{margin:0;padding:0;background:#fff;} @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style></head><body>' + html + '</body></html>');
+                    win.document.write('<!DOCTYPE html><html><head><title>' + docLabel + '</title><style>body{margin:0;padding:0;background:#fff;} @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style></head><body>' + html + '</body></html>');
                     win.document.close();
                     setTimeout(function () { win.print(); }, 400);
                 }
@@ -3873,7 +3993,7 @@
         openBtn.addEventListener('click', function () {
             var win = window.open('', '_blank');
             if (win) {
-                win.document.write('<!DOCTYPE html><html><head><title>Proposal</title><style>body{margin:0;padding:24px;background:#fff;} @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style></head><body>' + html + '</body></html>');
+                win.document.write('<!DOCTYPE html><html><head><title>' + docLabel + '</title><style>body{margin:0;padding:24px;background:#fff;} @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style></head><body>' + html + '</body></html>');
                 win.document.close();
             }
         });
@@ -6440,29 +6560,34 @@
         renderProjects();
         renderChats();
         if (getAuthHeaders().Authorization) {
-            loadMessagesFromApi(id, function (msgs) {
-                if (msgs && msgs.length > 0) {
-                    var cid = activeChatId || getActiveChatId(id);
-                    if (!cid) cid = createNewChat(id);
-                    var raw = localStorage.getItem(STORAGE_MESSAGES);
-                    var all = raw ? JSON.parse(raw) : {};
-                    if (!all[id]) all[id] = {};
-                    if (!all[id][cid]) all[id][cid] = { name: 'Chat 1', messages: [], createdAt: Date.now() };
-                    all[id][cid].messages = msgs;
-                    localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
+            loadProjectDataFromApi(id, function (projectData) {
+                if (projectData && typeof projectData === 'object') {
+                    setProjectData(id, Object.assign({}, getProjectData(id), projectData), { skipSync: true });
                 }
-                renderMessages();
-                renderChats();
-                renderTasksSection();
-                renderDocuments();
-                refreshDesktopSyncStatus(id).catch(function () {});
-                if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
-                    syncProjectFromDesktop(id).catch(function () {});
-                }
-                var pmPane = document.getElementById('pm-ops-pane');
-                if (pmPane && typeof pmPane._mudragPmRefresh === 'function') pmPane._mudragPmRefresh();
-                updateDesktopTitle();
-                if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
+                loadMessagesFromApi(id, function (msgs) {
+                    if (msgs && msgs.length > 0) {
+                        var cid = activeChatId || getActiveChatId(id);
+                        if (!cid) cid = createNewChat(id);
+                        var raw = localStorage.getItem(STORAGE_MESSAGES);
+                        var all = raw ? JSON.parse(raw) : {};
+                        if (!all[id]) all[id] = {};
+                        if (!all[id][cid]) all[id][cid] = { name: 'Chat 1', messages: [], createdAt: Date.now() };
+                        all[id][cid].messages = msgs;
+                        localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(all));
+                    }
+                    renderMessages();
+                    renderChats();
+                    renderTasksSection();
+                    renderDocuments();
+                    refreshDesktopSyncStatus(id).catch(function () {});
+                    if (isDesktopSyncAvailable() && isDesktopSyncEnabled()) {
+                        syncProjectFromDesktop(id).catch(function () {});
+                    }
+                    var pmPane = document.getElementById('pm-ops-pane');
+                    if (pmPane && typeof pmPane._mudragPmRefresh === 'function') pmPane._mudragPmRefresh();
+                    updateDesktopTitle();
+                    if (window.mudrag && window.mudrag.renderCanvas) window.mudrag.renderCanvas();
+                });
             });
         } else {
             renderMessages();
@@ -8001,7 +8126,7 @@
                     && effectiveModel !== 'mud1'
                     && !/^grok/i.test(effectiveModel)
                     && !/^openrouter\//i.test(effectiveModel),
-                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined,
+                available_tools: useTools ? ['build_schedule', 'generate_proposal', 'generate_change_order', 'extract_project_facts', 'estimate_project_cost', 'calculate_material_cost', 'calculate_labor_cost', 'calculate_equipment_cost'] : undefined,
                 project_data: projectDataForPayload && Object.keys(projectDataForPayload).length ? projectDataForPayload : undefined,
                 project_name: activeProject && activeProject.name ? activeProject.name : undefined,
                 project_id: activeProjectId || undefined,
@@ -8198,7 +8323,13 @@
                             }
                             // Proposal/document preview card
                             if (data && data._proposal_html) {
-                                renderProposalPreview(data._proposal_html);
+                                renderProposalPreview(data._proposal_html, { label: 'Proposal', fileBase: 'proposal' });
+                            }
+                            if (data && data._document_html) {
+                                renderProposalPreview(data._document_html, {
+                                    label: data._document_label || 'Document',
+                                    fileBase: data._document_filename_base || 'document'
+                                });
                             }
                             if (data && data.tools_used && data.tools_used.length > 0) {
                                 updateActiveToolPills(data.tools_used);
