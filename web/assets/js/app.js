@@ -1933,6 +1933,35 @@
         desktopAvailable: false
     };
 
+    function ensureMobileChatTweaks() {
+        var viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            var content = String(viewport.getAttribute('content') || '');
+            if (content.indexOf('viewport-fit=cover') === -1) {
+                viewport.setAttribute('content', content ? (content + ', viewport-fit=cover') : 'width=device-width, initial-scale=1.0, viewport-fit=cover');
+            }
+        }
+        if (document.getElementById('mobile-chat-tweaks')) return;
+        var style = document.createElement('style');
+        style.id = 'mobile-chat-tweaks';
+        style.textContent = ''
+            + '@media (max-width: 768px) {'
+            + '  .main-wrapper.layout-chat-main .chat-panel-wrapper { order: 1; height: min(68dvh, 760px); max-height: none; min-height: min(460px, 68dvh); }'
+            + '  .main-wrapper.layout-chat-main .main-content-area { order: 2; min-height: 180px; }'
+            + '  .chat-messages { padding-top: 8px; padding-bottom: 14px; scroll-padding-bottom: 120px; -webkit-overflow-scrolling: touch; }'
+            + '  .chat-input-form { position: sticky; bottom: 0; z-index: 5; padding: 8px 0 calc(14px + env(safe-area-inset-bottom, 0)); background: linear-gradient(180deg, rgba(15, 15, 15, 0.88) 0%, var(--bg) 24%); backdrop-filter: blur(10px); }'
+            + '  .chat-composer { border-radius: 14px; }'
+            + '  .chat-composer-input { font-size: 16px; line-height: 1.4; }'
+            + '  .msg-row { max-width: 100%; }'
+            + '}'
+            + '@media (max-width: 600px) {'
+            + '  .chat-panel-wrapper { min-height: min(420px, 66dvh); }'
+            + '  .chat-composer-input { font-size: 16px; }'
+            + '}';
+        document.head.appendChild(style);
+    }
+    ensureMobileChatTweaks();
+
     function addMessage(role, content, projectId) {
         projectId = projectId || activeProjectId;
         if (!projectId) return;
@@ -4226,6 +4255,25 @@
     function scrollToLatest() {
         var container = document.getElementById('chat-messages');
         if (container) container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
+
+    function isMobileChatLayout() {
+        try {
+            return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function keepMobileComposerVisible() {
+        if (!isMobileChatLayout()) return;
+        var container = document.getElementById('chat-messages');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+        if (form && form.scrollIntoView) {
+            form.scrollIntoView({ block: 'end', inline: 'nearest', behavior: 'smooth' });
+        }
     }
 
     function renderProjects() {
@@ -8421,7 +8469,22 @@
     }
     input.addEventListener('input', autoGrowTextarea);
     input.addEventListener('paste', function () { setTimeout(autoGrowTextarea, 0); });
+    input.addEventListener('focus', function () {
+        setTimeout(keepMobileComposerVisible, 40);
+        setTimeout(keepMobileComposerVisible, 260);
+    });
+    input.addEventListener('click', function () {
+        setTimeout(keepMobileComposerVisible, 40);
+    });
     autoGrowTextarea();
+
+    if (window.visualViewport && input) {
+        window.visualViewport.addEventListener('resize', function () {
+            if (document.activeElement === input) {
+                setTimeout(keepMobileComposerVisible, 30);
+            }
+        });
+    }
 
     // ── Slash command menu ────────────────────────────────────────────────
     var SLASH_COMMANDS = [
