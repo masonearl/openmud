@@ -22,6 +22,11 @@ from tools.estimating.estimating_tools import (  # noqa: E402
     calculate_labor_cost,
     calculate_material_cost,
     estimate_project_cost,
+    estimate_from_bid_history,
+    get_historical_unit_prices,
+    get_production_benchmark,
+    load_rate_library,
+    lookup_heavybid_crew,
 )
 
 API_VERSION = "1.0"
@@ -76,6 +81,39 @@ def _run_tool(tool_name, args):
             equipment=args.get('equipment', []),
             markup=float(args.get('markup', 0.15)),
             region=args.get('region', 'national'),
+        )
+
+    if tool_name == 'get_historical_unit_prices':
+        return get_historical_unit_prices(
+            description=args.get('description', ''),
+            unit=args.get('unit', ''),
+            limit=int(args.get('limit', 5)),
+        )
+
+    if tool_name == 'lookup_heavybid_crew':
+        return lookup_heavybid_crew(
+            crew_code=args.get('crew_code', ''),
+            description=args.get('description', ''),
+            limit=int(args.get('limit', 10)),
+        )
+
+    if tool_name == 'estimate_from_bid_history':
+        return estimate_from_bid_history(
+            description=args.get('description', ''),
+            quantity=float(args.get('quantity', 0)),
+            unit=args.get('unit', ''),
+            markup=float(args.get('markup', 0)),
+            limit=int(args.get('limit', 5)),
+        )
+
+    if tool_name == 'load_rate_library':
+        return load_rate_library(region_key=args.get('region_key', 'heavybid_derived'))
+
+    if tool_name == 'get_production_benchmark':
+        return get_production_benchmark(
+            description=args.get('description', ''),
+            unit=args.get('unit', ''),
+            limit=int(args.get('limit', 5)),
         )
 
     raise ValueError(f"Unsupported tool '{tool_name}'")

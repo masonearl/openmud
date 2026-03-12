@@ -633,6 +633,11 @@ async function executeTool(req, toolName, args) {
     case 'calculate_material_cost':
     case 'calculate_labor_cost':
     case 'calculate_equipment_cost':
+    case 'get_historical_unit_prices':
+    case 'lookup_heavybid_crew':
+    case 'estimate_from_bid_history':
+    case 'load_rate_library':
+    case 'get_production_benchmark':
       return callPythonTool(req, normalized, args);
     default:
       throw new Error(`Tool '${toolName}' is not supported`);

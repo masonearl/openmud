@@ -14,7 +14,7 @@ from urllib.parse import urlparse, parse_qs
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 sys.path.insert(0, ROOT)
 
-from tools.estimating.estimating_tools import get_regions, get_rates  # noqa: E402
+from tools.estimating.estimating_tools import get_rate_libraries, get_regions, get_rates  # noqa: E402
 
 
 API_VERSION = "1.0"
@@ -44,9 +44,9 @@ class handler(BaseHTTPRequestHandler):
 
         if region:
             data = get_rates(region)
-            self._json(200, {"region": region, "rates": data})
+            self._json(200, {"region": region, "rates": data, "rate_libraries": get_rate_libraries()})
         else:
-            self._json(200, {"regions": get_regions()})
+            self._json(200, {"regions": get_regions(), "rate_libraries": get_rate_libraries()})
 
     def do_POST(self):
         try:
@@ -56,9 +56,9 @@ class handler(BaseHTTPRequestHandler):
 
             if region:
                 data = get_rates(region)
-                self._json(200, {"region": region, "rates": data})
+                self._json(200, {"region": region, "rates": data, "rate_libraries": get_rate_libraries()})
             else:
-                self._json(200, {"regions": get_regions()})
+                self._json(200, {"regions": get_regions(), "rate_libraries": get_rate_libraries()})
 
         except Exception as exc:
             self._json(500, {'error': str(exc)})

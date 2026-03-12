@@ -20,7 +20,7 @@
         "region": {
           "type": "string",
           "description": "Geographic region for rate lookup. Available: national (default), utah, mountain_west, texas, california, northeast. Rates reflect local market conditions including prevailing wage where applicable.",
-          "enum": ["national", "utah", "mountain_west", "texas", "california", "northeast"]
+          "enum": ["national", "utah", "mountain_west", "texas", "california", "northeast", "heavybid_derived"]
         }
       },
       "required": ["material_type", "quantity"]
@@ -43,7 +43,7 @@
         "region": {
           "type": "string",
           "description": "Geographic region for rate lookup. Available: national (default), utah, mountain_west, texas, california, northeast. Rates reflect local market conditions including prevailing wage where applicable.",
-          "enum": ["national", "utah", "mountain_west", "texas", "california", "northeast"]
+          "enum": ["national", "utah", "mountain_west", "texas", "california", "northeast", "heavybid_derived"]
         }
       },
       "required": ["labor_type", "hours"]
@@ -66,7 +66,7 @@
         "region": {
           "type": "string",
           "description": "Geographic region for rate lookup. Available: national (default), utah, mountain_west, texas, california, northeast. Rates reflect local market conditions including prevailing wage where applicable.",
-          "enum": ["national", "utah", "mountain_west", "texas", "california", "northeast"]
+          "enum": ["national", "utah", "mountain_west", "texas", "california", "northeast", "heavybid_derived"]
         }
       },
       "required": ["equipment_type", "days"]
@@ -119,10 +119,118 @@
         "region": {
           "type": "string",
           "description": "Geographic region for rate lookup. Available: national (default), utah, mountain_west, texas, california, northeast. Rates reflect local market conditions including prevailing wage where applicable.",
-          "enum": ["national", "utah", "mountain_west", "texas", "california", "northeast"]
+          "enum": ["national", "utah", "mountain_west", "texas", "california", "northeast", "heavybid_derived"]
         }
       },
       "required": ["materials", "labor"]
+    }
+  },
+  {
+    "name": "get_historical_unit_prices",
+    "description": "Look up HeavyBid-derived historical unit prices for similar bid items. Use when the user asks what similar work carried on prior bids.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description or keywords for the work item to match"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Optional unit filter such as LF, EA, LS, CY, or TN"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of historical matches to return"
+        }
+      },
+      "required": ["description"]
+    }
+  },
+  {
+    "name": "lookup_heavybid_crew",
+    "description": "Search the normalized HeavyBid crew library by crew code or description.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "crew_code": {
+          "type": "string",
+          "description": "Exact or partial HeavyBid crew code"
+        },
+        "description": {
+          "type": "string",
+          "description": "Crew description keywords"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of crew matches to return"
+        }
+      }
+    }
+  },
+  {
+    "name": "estimate_from_bid_history",
+    "description": "Estimate a line item using HeavyBid-derived historical unit prices and an optional markup.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description or keywords for the work item to estimate"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Required quantity for the estimate"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Optional unit filter such as LF, EA, LS, CY, or TN"
+        },
+        "markup": {
+          "type": "number",
+          "description": "Optional markup as decimal, e.g. 0.15 for 15%"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of historical matches to use"
+        }
+      },
+      "required": ["description", "quantity"]
+    }
+  },
+  {
+    "name": "load_rate_library",
+    "description": "Load a named rate library into the estimating engine and return its contents. Use for private HeavyBid-derived rate tables or other external libraries.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "region_key": {
+          "type": "string",
+          "description": "Rate library key such as heavybid_derived or national"
+        }
+      }
+    }
+  },
+  {
+    "name": "get_production_benchmark",
+    "description": "Return HeavyBid-derived production benchmarks such as units per manhour for similar work items.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description or keywords for the work item to benchmark"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Optional unit filter such as LF, EA, LS, CY, or TN"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of historical benchmark rows to return"
+        }
+      },
+      "required": ["description"]
     }
   },
   {

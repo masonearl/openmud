@@ -1,0 +1,7 @@
+schema/*.json
+schema/tables/*.json
+manifests/*.json
+normalized/*.json
+binary/*.json
+!README.md
+!.gitignore

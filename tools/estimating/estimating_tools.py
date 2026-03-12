@@ -12,6 +12,11 @@ Rates are all-in (wages + benefits burden where noted).
 Updated: 2025 Q1 — contribute better regional data at github.com/masonearl/openmud
 """
 
+from copy import deepcopy
+import json
+import re
+from pathlib import Path
+
 # ─── Region Definitions ────────────────────────────────────────────────────────
 # Each region is a self-contained rate table. Keys are lowercase slugs.
 # Add new regions by adding a new dict here or via load_rates_from_json().
@@ -444,6 +449,7 @@ EQUIPMENT_RATES = {
 
 def get_regions() -> list:
     """Return list of available region keys with labels."""
+    _load_external_rate_tables()
     return [
         {
             "key": key,
@@ -457,6 +463,7 @@ def get_regions() -> list:
 
 def get_rates(region: str = "national") -> dict:
     """Return the full rate table for a region. Falls back to national."""
+    _load_external_rate_tables()
     return RATE_TABLES.get(region.lower(), RATE_TABLES["national"])
 
 
@@ -471,6 +478,551 @@ def load_rates_from_json(region_key: str, data: dict) -> None:
         data: Dict matching the RATE_TABLES structure
     """
     RATE_TABLES[region_key] = data
+
+
+HEAVYBID_NORMALIZED_DIR = Path(__file__).resolve().parents[2] / "data" / "heavybid" / "normalized"
+_EXTERNAL_LIBRARIES_LOADED = False
+
+
+def _safe_load_json(path: Path):
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _slugify(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(text or "").strip().lower()).strip("_")
+
+
+def _tokenize(text: str) -> list:
+    return [part for part in re.split(r"[^a-z0-9]+", str(text or "").lower()) if part]
+
+
+HISTORY_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "existing",
+    "for",
+    "in",
+    "install",
+    "installation",
+    "item",
+    "line",
+    "main",
+    "new",
+    "of",
+    "pipe",
+    "the",
+    "to",
+    "work",
+}
+
+
+def _bucket_average(items: list) -> float:
+    values = [float(value) for value in items if value is not None]
+    return round(sum(values) / len(values), 4) if values else 0.0
+
+
+def _match_labor_type(record: dict) -> str | None:
+    desc = f"{record.get('description', '')} {record.get('labor_code', '')}".lower()
+    if "foreman" in desc:
+        return "foreman"
+    if "labor" in desc:
+        return "laborer"
+    if "operator" in desc or str(record.get("labor_code", "")).upper().startswith("O"):
+        return "operator"
+    if "pipe" in desc:
+        return "pipe_layer"
+    if "grade" in desc or "survey" in desc:
+        return "grade_checker"
+    if "traffic" in desc or "flag" in desc:
+        return "traffic_control"
+    if "electric" in desc:
+        return "electrician"
+    if "iron" in desc:
+        return "ironworker"
+    if "plumb" in desc:
+        return "plumber"
+    return None
+
+
+def _match_equipment_type(record: dict) -> str | None:
+    desc = f"{record.get('description', '')} {record.get('equipment_code', '')}".lower()
+    mappings = [
+        ("excavator_mini", ["mini excavator"]),
+        ("excavator_30t", ["excavator 330", "excavator 320", "excavator 30"]),
+        ("excavator_20t", ["excavator", "trackhoe"]),
+        ("backhoe", ["backhoe"]),
+        ("dozer_d6", ["dozer", "d6"]),
+        ("dump_truck", ["dump truck"]),
+        ("water_truck", ["water truck"]),
+        ("roller_sheepsfoot", ["sheepsfoot"]),
+        ("plate_compactor", ["plate compactor"]),
+        ("jumping_jack", ["jumping jack", "rammer"]),
+        ("dewatering_pump", ["pump"]),
+        ("generator", ["generator"]),
+        ("trench_box", ["trench box", "trench plate", "shield"]),
+        ("auger", ["auger", "drill"]),
+        ("compactor", ["compactor"]),
+    ]
+    for key, phrases in mappings:
+        if any(phrase in desc for phrase in phrases):
+            return key
+    return None
+
+
+def _match_material_key(record: dict) -> tuple[str, str] | None:
+    desc = f"{record.get('description', '')} {record.get('resource_code', '')}".lower()
+    if "road base" in desc or "base course" in desc:
+        return ("aggregate", "base_course")
+    if "sand" in desc:
+        return ("aggregate", "screened_sand")
+    if "flow sand" in desc:
+        return ("aggregate", "screened_sand")
+    if "rebar" in desc and "#5" in desc:
+        return ("reinforcement", "rebar_5")
+    if "rebar" in desc and "#4" in desc:
+        return ("reinforcement", "rebar_4")
+    if "concrete" in desc and "4000" in desc:
+        return ("concrete", "4000_psi")
+    if "concrete" in desc and "3000" in desc:
+        return ("concrete", "3000_psi")
+
+    size_match = re.search(r"(\d+)\s*(?:in|inch|\")", desc)
+    if size_match:
+        size = size_match.group(1)
+        if "pe" in desc or "poly" in desc or "hdpe" in desc:
+            return ("pipe", f"hdpe_{size}")
+        if "ductile" in desc or "dip" in desc:
+            return ("pipe", f"dip_{size}")
+        if "pvc" in desc and ("c900" in desc or "water" in desc):
+            return ("pipe", f"pvc_c900_{size}")
+        if "pvc" in desc and ("sdr" in desc or "sewer" in desc):
+            return ("pipe", f"pvc_sdr35_{size}")
+        if "rcp" in desc or "concrete pipe" in desc:
+            return ("pipe", f"rcp_{size}")
+    return None
+
+
+def _apply_bucketed_materials(rate_table: dict, material_rows: list) -> None:
+    buckets = {}
+    for row in material_rows:
+        match = _match_material_key(row)
+        if not match:
+            continue
+        group, key = match
+        buckets.setdefault((group, key), []).append(float(row.get("cost", 0) or 0))
+    for (group, key), values in buckets.items():
+        avg_cost = _bucket_average(values)
+        if avg_cost <= 0:
+            continue
+        rate_table.setdefault("materials", {}).setdefault(group, {})[key] = {
+            "unit": "LF" if group == "pipe" else ("CY" if group == "concrete" else ("LF" if "rebar" in key else "ton")),
+            "cost": avg_cost,
+            "description": key.replace("_", " "),
+        }
+
+
+def _build_heavybid_rate_library() -> dict | None:
+    labor_rows = _safe_load_json(HEAVYBID_NORMALIZED_DIR / "labor_rates.json") or []
+    equipment_rows = _safe_load_json(HEAVYBID_NORMALIZED_DIR / "equipment_rates.json") or []
+    material_rows = _safe_load_json(HEAVYBID_NORMALIZED_DIR / "material_library.json") or []
+
+    if not labor_rows and not equipment_rows and not material_rows:
+        return None
+
+    rate_table = deepcopy(RATE_TABLES["national"])
+    rate_table.update({
+        "label": "HeavyBid Derived (Private)",
+        "description": "Private rate library derived from normalized HeavyBid exports on this machine.",
+        "wage_type": "private_heavybid",
+        "source": "openmud HeavyBid extraction",
+        "last_updated": "generated-local",
+    })
+
+    labor_buckets = {}
+    for row in labor_rows:
+        labor_type = _match_labor_type(row)
+        if not labor_type:
+            continue
+        labor_buckets.setdefault(labor_type, []).append(float(row.get("rate", 0) or 0))
+
+    for labor_type, values in labor_buckets.items():
+        avg_rate = _bucket_average(values)
+        if avg_rate <= 0:
+            continue
+        title = rate_table["labor"].get(labor_type, {}).get("title", labor_type.replace("_", " ").title())
+        rate_table["labor"][labor_type] = {
+            "hourly": avg_rate,
+            "overtime": round(avg_rate * 1.5, 2),
+            "title": title,
+        }
+
+    equipment_buckets = {}
+    for row in equipment_rows:
+        equipment_type = _match_equipment_type(row)
+        if not equipment_type:
+            continue
+        rate = float(row.get("rent_rate", 0) or 0)
+        units = str(row.get("units", "")).lower()
+        if rate <= 0:
+            continue
+        equipment_buckets.setdefault(equipment_type, {"hourly": [], "daily": []})
+        if units.startswith("hr"):
+            equipment_buckets[equipment_type]["hourly"].append(rate)
+            equipment_buckets[equipment_type]["daily"].append(rate * 8)
+        else:
+            equipment_buckets[equipment_type]["daily"].append(rate)
+
+    for equipment_type, values in equipment_buckets.items():
+        daily = _bucket_average(values["daily"])
+        hourly = _bucket_average(values["hourly"]) or round(daily / 8, 2)
+        if daily <= 0 and hourly <= 0:
+            continue
+        description = rate_table["equipment"].get(equipment_type, {}).get("description", equipment_type.replace("_", " ").title())
+        rate_table["equipment"][equipment_type] = {
+            "daily": round(daily or hourly * 8, 2),
+            "hourly": round(hourly or daily / 8, 2),
+            "description": description,
+        }
+
+    _apply_bucketed_materials(rate_table, material_rows)
+    return rate_table
+
+
+def _load_external_rate_tables(force: bool = False) -> None:
+    global _EXTERNAL_LIBRARIES_LOADED
+    if _EXTERNAL_LIBRARIES_LOADED and not force:
+        return
+
+    explicit_path = HEAVYBID_NORMALIZED_DIR / "rate_libraries.json"
+    explicit = _safe_load_json(explicit_path)
+    if isinstance(explicit, dict):
+        for key, value in explicit.items():
+            if isinstance(value, dict):
+                RATE_TABLES[str(key)] = value
+
+    heavybid_derived = _build_heavybid_rate_library()
+    if heavybid_derived:
+        RATE_TABLES["heavybid_derived"] = heavybid_derived
+
+    _EXTERNAL_LIBRARIES_LOADED = True
+
+
+def get_rate_libraries() -> list:
+    """Return all rate library keys available to estimate tools."""
+    _load_external_rate_tables()
+    return [
+        {
+            "key": key,
+            "label": value.get("label", key),
+            "source": value.get("source", ""),
+            "wage_type": value.get("wage_type", ""),
+            "description": value.get("description", ""),
+        }
+        for key, value in RATE_TABLES.items()
+    ]
+
+
+def load_rate_library(region_key: str = "heavybid_derived") -> dict:
+    """Load and return a named rate library."""
+    _load_external_rate_tables(force=True)
+    data = RATE_TABLES.get(region_key)
+    if not data:
+        return {"error": f"Rate library '{region_key}' not found."}
+    return {"region": region_key, "rates": data, "available_libraries": get_rate_libraries()}
+
+
+def _load_heavybid_snapshot() -> dict:
+    return _safe_load_json(HEAVYBID_NORMALIZED_DIR / "snapshot.json") or {}
+
+
+def _extract_size_tokens(text: str) -> set:
+    tokens = set()
+    for match in re.finditer(r"(\d+)\s*(?:in|inch|\")", str(text or "").lower()):
+        tokens.add(match.group(1))
+    return tokens
+
+
+def _score_bid_item_match(item: dict, description: str = "", unit: str = "") -> int:
+    haystack_parts = [
+        str(item.get("description", "")),
+        str(item.get("item_code", "")),
+        str(item.get("cost_code_1", "")),
+        str(item.get("cost_code_2", "")),
+        str(item.get("crew_code", "")),
+        str(item.get("project_name", "")),
+    ]
+    haystack = " ".join(haystack_parts).lower()
+    raw_tokens = _tokenize(description)
+    query_tokens = [token for token in raw_tokens if token not in HISTORY_STOPWORDS]
+    significant_tokens = set(query_tokens or raw_tokens)
+    phrase = " ".join(query_tokens).strip()
+    score = 0
+
+    if phrase and phrase in haystack:
+        score += 8
+
+    for token in significant_tokens:
+        if token in haystack:
+            score += 3
+
+    unit_text = str(unit or "").strip().lower()
+    item_unit = str(item.get("unit", "")).strip().lower()
+    if unit_text:
+        if unit_text == item_unit:
+            score += 4
+        else:
+            score -= 3
+
+    query_sizes = _extract_size_tokens(description)
+    item_sizes = _extract_size_tokens(haystack)
+    if query_sizes:
+        if query_sizes & item_sizes:
+            score += 5
+        else:
+            score -= 6
+
+    quantity = float(item.get("quantity", 0) or 0)
+    unit_price = float(item.get("unit_price", 0) or 0)
+    manhours = float(item.get("manhours", 0) or 0)
+    if unit_price > 0:
+        score += 1
+    if quantity > 0:
+        score += 1
+    if manhours > 0:
+        score += 1
+
+    return score
+
+
+def _token_overlap_count(item: dict, description: str = "") -> int:
+    haystack = " ".join(
+        [
+            str(item.get("description", "")),
+            str(item.get("item_code", "")),
+            str(item.get("cost_code_1", "")),
+            str(item.get("cost_code_2", "")),
+            str(item.get("crew_code", "")),
+            str(item.get("project_name", "")),
+        ]
+    ).lower()
+    raw_tokens = _tokenize(description)
+    significant_tokens = [token for token in raw_tokens if token not in HISTORY_STOPWORDS]
+    tokens = significant_tokens or raw_tokens
+    return sum(1 for token in tokens if token in haystack)
+
+
+def _search_bid_items(
+    description: str = "",
+    unit: str = "",
+    min_score: int = 4,
+    exact_unit_only: bool = False,
+) -> list:
+    snapshot = _load_heavybid_snapshot()
+    items = snapshot.get("bid_items", [])
+    if not items:
+        return []
+    raw_tokens = _tokenize(description)
+    significant_tokens = [token for token in raw_tokens if token not in HISTORY_STOPWORDS]
+    required_overlap = 1 if len(significant_tokens or raw_tokens) <= 1 else 2
+    unit_text = str(unit or "").strip().lower()
+
+    matches = []
+    for item in items:
+        item_unit = str(item.get("unit", "")).strip().lower()
+        if exact_unit_only and unit_text and item_unit != unit_text:
+            continue
+        overlap = _token_overlap_count(item, description)
+        if overlap < required_overlap:
+            continue
+        score = _score_bid_item_match(item, description, unit)
+        if score >= min_score:
+            enriched = dict(item)
+            enriched["_score"] = score
+            enriched["_overlap"] = overlap
+            matches.append(enriched)
+    matches.sort(
+        key=lambda row: (
+            row.get("_score", 0),
+            row.get("_overlap", 0),
+            float(row.get("unit_price", 0) or 0) > 0,
+            float(row.get("amount", 0) or 0),
+        ),
+        reverse=True,
+    )
+    return matches
+
+
+def get_historical_unit_prices(description: str, unit: str = "", limit: int = 5) -> dict:
+    """Find historical unit prices from HeavyBid-derived bid items."""
+    matches = [
+        item for item in _search_bid_items(description, unit, min_score=5, exact_unit_only=bool(unit))
+        if float(item.get("unit_price", 0) or 0) > 0
+    ][: max(1, int(limit or 5))]
+    if not matches:
+        return {"description": description, "unit": unit, "matches": [], "average_unit_price": 0}
+    prices = [float(item.get("unit_price", 0) or 0) for item in matches if float(item.get("unit_price", 0) or 0) > 0]
+    return {
+        "description": description,
+        "unit": unit,
+        "matches": matches,
+        "average_unit_price": round(sum(prices) / len(prices), 4) if prices else 0,
+        "estimate_count": len({item.get("estimate_code") for item in matches}),
+    }
+
+
+def lookup_heavybid_crew(crew_code: str = "", description: str = "", limit: int = 10) -> dict:
+    """Search normalized HeavyBid crew exports."""
+    crews = _safe_load_json(HEAVYBID_NORMALIZED_DIR / "crew_library.json") or []
+    query = " ".join([crew_code, description]).strip().lower()
+    query_tokens = set(_tokenize(query))
+    matches = []
+    for crew in crews:
+        haystack = f"{crew.get('crew_code', '')} {crew.get('description', '')}".lower()
+        score = 0
+        if crew_code and crew_code.lower() == str(crew.get("crew_code", "")).lower():
+            score += 5
+        score += sum(1 for token in query_tokens if token in haystack)
+        if score > 0:
+            row = dict(crew)
+            row["_score"] = score
+            matches.append(row)
+    matches.sort(key=lambda row: row.get("_score", 0), reverse=True)
+    return {"crew_code": crew_code, "description": description, "matches": matches[: max(1, int(limit or 10))]}
+
+
+def get_production_benchmark(description: str, unit: str = "", limit: int = 5) -> dict:
+    """Return productivity benchmarks using quantity and manhours from historical bid items."""
+    measurable_units = {"lf", "cy", "tn", "ton", "sy", "sf", "ea", "m3", "mton"}
+    unit_text = str(unit or "").strip().lower()
+    matches = _search_bid_items(description, unit, min_score=6, exact_unit_only=bool(unit_text))
+    benchmarks = []
+    for item in matches:
+        item_unit = str(item.get("unit", "")).strip().lower()
+        if item_unit not in measurable_units:
+            continue
+        quantity = float(item.get("quantity", 0) or 0)
+        manhours = float(item.get("manhours", 0) or 0)
+        if quantity <= 0 or manhours <= 0:
+            continue
+        benchmark = dict(item)
+        benchmark["units_per_manhour"] = round(quantity / manhours, 4)
+        benchmark["manhours_per_unit"] = round(manhours / quantity, 6)
+        benchmarks.append(benchmark)
+    benchmarks.sort(key=lambda row: row.get("quantity", 0), reverse=True)
+    summary = {
+        "description": description,
+        "unit": unit,
+        "benchmarks": benchmarks[: max(1, int(limit or 5))],
+    }
+    if summary["benchmarks"]:
+        summary["average_units_per_manhour"] = round(
+            sum(row["units_per_manhour"] for row in summary["benchmarks"]) / len(summary["benchmarks"]),
+            4,
+        )
+    else:
+        summary["average_units_per_manhour"] = 0
+    return summary
+
+
+def estimate_from_bid_history(description: str, quantity: float, unit: str = "", markup: float = 0.0, limit: int = 5) -> dict:
+    """Estimate a line item from HeavyBid historical unit-price matches."""
+    historical = get_historical_unit_prices(description=description, unit=unit, limit=limit)
+    avg = float(historical.get("average_unit_price", 0) or 0)
+    direct_cost = quantity * avg
+    total = direct_cost * (1 + float(markup or 0))
+    return {
+        "description": description,
+        "quantity": quantity,
+        "unit": unit,
+        "average_unit_price": round(avg, 4),
+        "direct_cost": round(direct_cost, 2),
+        "markup": float(markup or 0),
+        "total": round(total, 2),
+        "matches": historical.get("matches", []),
+        "estimate_count": historical.get("estimate_count", 0),
+    }
+
+
+def get_heavybid_snapshot_summary() -> dict:
+    """Return counts and metadata for the local HeavyBid snapshot."""
+    snapshot = _load_heavybid_snapshot()
+    if not snapshot:
+        return {"available": False, "counts": {}}
+    return {
+        "available": True,
+        "generated_at": snapshot.get("generated_at", ""),
+        "source_dir": snapshot.get("source_dir", ""),
+        "counts": snapshot.get("counts", {}),
+    }
+
+
+def get_heavybid_calculator_defaults() -> dict:
+    """Return shared calculator constants derived from local HeavyBid artifacts when available."""
+    _load_external_rate_tables()
+    rates = RATE_TABLES.get("heavybid_derived", RATE_TABLES["national"])
+    materials = rates.get("materials", {})
+    pipe = materials.get("pipe", {})
+    concrete = materials.get("concrete", {})
+    reinforcement = materials.get("reinforcement", {})
+
+    labor_options = []
+    for key, value in rates.get("labor", {}).items():
+        labor_options.append({
+            "value": key,
+            "label": f"{value.get('title', key.replace('_', ' ').title())} (${value.get('hourly', 0):.2f}/hr)",
+        })
+
+    equipment_options = []
+    for key, value in rates.get("equipment", {}).items():
+        equipment_options.append({
+            "value": key,
+            "label": f"{value.get('description', key.replace('_', ' ').title())} (${value.get('daily', 0):.2f}/day)",
+        })
+
+    material_size_options = {
+        "pipe": [
+            {"value": "12", "label": f'12" pipe (${pipe.get("pvc_c900_12", {}).get("cost", 38):.2f}/LF)'},
+            {"value": "10", "label": f'10" pipe (${pipe.get("pvc_c900_10", {}).get("cost", 27):.2f}/LF)'},
+            {"value": "8", "label": f'8" pipe (${pipe.get("pvc_c900_8", {}).get("cost", 19):.2f}/LF)'},
+            {"value": "6", "label": f'6" pipe (${pipe.get("pvc_c900_6", {}).get("cost", 13):.2f}/LF)'},
+            {"value": "4", "label": f'4" pipe (${pipe.get("pvc_c900_4", {}).get("cost", 8.5):.2f}/LF)'},
+        ],
+        "concrete": [
+            {"value": "5000_psi", "label": f'5,000 PSI (${concrete.get("5000_psi", {}).get("cost", 195):.2f}/CY)'},
+            {"value": "4000_psi", "label": f'4,000 PSI (${concrete.get("4000_psi", {}).get("cost", 180):.2f}/CY)'},
+            {"value": "3000_psi", "label": f'3,000 PSI (${concrete.get("3000_psi", {}).get("cost", 165):.2f}/CY)'},
+        ],
+        "rebar": [
+            {"value": "5_rebar", "label": f'#5 rebar (${reinforcement.get("rebar_5", {}).get("cost", 1.75):.2f}/LF)'},
+            {"value": "4_rebar", "label": f'#4 rebar (${reinforcement.get("rebar_4", {}).get("cost", 1.25):.2f}/LF)'},
+        ],
+    }
+
+    snapshot = _load_heavybid_snapshot()
+    formula_templates = []
+    for formula in (snapshot.get("formulas", []) or [])[:20]:
+        if formula.get("formula_cells"):
+            formula_templates.append({
+                "template_name": formula.get("template_name", ""),
+                "formula_cells": formula.get("formula_cells", [])[:6],
+            })
+
+    return {
+        "material_size_options": material_size_options,
+        "labor_options": sorted(labor_options, key=lambda item: item["label"]),
+        "equipment_options": sorted(equipment_options, key=lambda item: item["label"]),
+        "concrete_price_map": {
+            "3000": round(concrete.get("3000_psi", {}).get("cost", 165), 2),
+            "4000": round(concrete.get("4000_psi", {}).get("cost", 180), 2),
+            "5000": round(concrete.get("5000_psi", {}).get("cost", 195), 2),
+        },
+        "region_options": get_regions(),
+        "rate_libraries": get_rate_libraries(),
+        "formula_templates": formula_templates,
+    }
 
 
 def calculate_material_cost(

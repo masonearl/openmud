@@ -50,6 +50,14 @@ function results(containerId, rows) {
     }).join('');
 }
 
+function esc(text) {
+    return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 // ─── TAKEOFF CALCULATORS ──────────────────────────────────────────────────────
 
 function calcTrenchVolume() {
@@ -103,9 +111,8 @@ function showConcreteTab(tab, btn) {
 
 function calcConcreteVolume() {
     var waste = 1 + n('cv-waste') / 100;
-    var psiPrices = { '3000': 166, '4000': 180, '5000': 195 };
     var psi = s('cv-psi');
-    var price = psiPrices[psi] || 180;
+    var price = CONCRETE_PRICE_MAP[psi] || 180;
     var vol, label;
 
     if (currentConcreteTab === 'slab') {
@@ -807,15 +814,74 @@ var MAT_SIZE_OPTIONS = {
         { value: '4_rebar', label: '#4 rebar ($1.25/LF)' },
     ],
 };
+var LABOR_OPTIONS = [
+    { value: 'operator', label: 'Operator ($85/hr)' },
+    { value: 'laborer', label: 'Laborer ($35/hr)' },
+    { value: 'foreman', label: 'Foreman ($55/hr)' },
+    { value: 'electrician', label: 'Electrician ($65/hr)' },
+    { value: 'ironworker', label: 'Ironworker ($55/hr)' }
+];
+var EQUIPMENT_OPTIONS = [
+    { value: 'excavator', label: 'Excavator ($400/day)' },
+    { value: 'compactor', label: 'Compactor ($100/day)' },
+    { value: 'auger', label: 'Auger ($450/day)' }
+];
+var CONCRETE_PRICE_MAP = { '3000': 166, '4000': 180, '5000': 195 };
+
+function optionHtml(options, selectedValue) {
+    return (options || []).map(function(o) {
+        var selected = selectedValue && String(selectedValue) === String(o.value) ? ' selected' : '';
+        return '<option value="' + esc(o.value) + '"' + selected + '>' + esc(o.label) + '</option>';
+    }).join('');
+}
+
+function refreshEstimatorRegionOptions(regionOptions) {
+    var select = document.getElementById('est-region');
+    if (!select || !Array.isArray(regionOptions) || !regionOptions.length) return;
+    var current = select.value || 'national';
+    select.innerHTML = regionOptions.map(function(region) {
+        var value = region.key || region.value || 'national';
+        var label = region.label || value;
+        var selected = value === current ? ' selected' : '';
+        return '<option value="' + esc(value) + '"' + selected + '>' + esc(label) + '</option>';
+    }).join('');
+}
+
+function refreshEstimatorRows() {
+    document.querySelectorAll('.est-mat-type').forEach(function(select) { updateMatSizes(select); });
+    document.querySelectorAll('.est-lab-type').forEach(function(select) {
+        var current = select.value;
+        select.innerHTML = optionHtml(LABOR_OPTIONS, current);
+    });
+    document.querySelectorAll('.est-eq-type').forEach(function(select) {
+        var current = select.value;
+        select.innerHTML = optionHtml(EQUIPMENT_OPTIONS, current);
+    });
+}
+
+async function initHeavybidCalculatorDefaults() {
+    try {
+        var res = await fetch('/api/python/heavybid?action=calculator_defaults');
+        var payload = await res.json();
+        var data = payload && payload.result ? payload.result : null;
+        if (!data) return;
+        if (data.material_size_options) MAT_SIZE_OPTIONS = data.material_size_options;
+        if (Array.isArray(data.labor_options) && data.labor_options.length) LABOR_OPTIONS = data.labor_options;
+        if (Array.isArray(data.equipment_options) && data.equipment_options.length) EQUIPMENT_OPTIONS = data.equipment_options;
+        if (data.concrete_price_map) CONCRETE_PRICE_MAP = data.concrete_price_map;
+        refreshEstimatorRegionOptions(data.region_options || []);
+        refreshEstimatorRows();
+    } catch (err) {
+        // Fallback to bundled defaults when the Python endpoint is unavailable.
+    }
+}
 
 function updateMatSizes(typeSelect) {
     var row = typeSelect.closest('.est-row');
     var sizeSelect = row.querySelector('.est-mat-size');
     var type = typeSelect.value;
     var options = MAT_SIZE_OPTIONS[type] || [];
-    sizeSelect.innerHTML = options.map(function(o) {
-        return '<option value="' + o.value + '">' + o.label + '</option>';
-    }).join('');
+    sizeSelect.innerHTML = optionHtml(options, sizeSelect.value);
 }
 
 function addEstMaterialRow() {
@@ -827,9 +893,7 @@ function addEstMaterialRow() {
         '<option value="concrete">Concrete</option>' +
         '<option value="rebar">Rebar</option></select>' +
         '<select class="est-mat-size">' +
-        '<option value="8">8" pipe ($18/LF)</option>' +
-        '<option value="6">6" pipe ($12/LF)</option>' +
-        '<option value="4">4" pipe ($8.50/LF)</option></select>' +
+        optionHtml(MAT_SIZE_OPTIONS.pipe) + '</select>' +
         '<input type="number" class="est-mat-qty" placeholder="Qty" value="100" min="0">' +
         '<span class="crew-remove" onclick="removeEstRow(this, \'material\')">×</span>';
     document.getElementById('est-material-rows').appendChild(row);
@@ -840,11 +904,7 @@ function addEstLaborRow() {
     row.className = 'est-row';
     row.innerHTML =
         '<select class="est-lab-type">' +
-        '<option value="operator">Operator ($85/hr)</option>' +
-        '<option value="laborer">Laborer ($35/hr)</option>' +
-        '<option value="foreman">Foreman ($55/hr)</option>' +
-        '<option value="electrician">Electrician ($65/hr)</option>' +
-        '<option value="ironworker">Ironworker ($55/hr)</option></select>' +
+        optionHtml(LABOR_OPTIONS) + '</select>' +
         '<input type="number" class="est-lab-hrs" placeholder="Hours" value="40" min="0">' +
         '<span class="crew-remove" onclick="removeEstRow(this, \'labor\')">×</span>';
     document.getElementById('est-labor-rows').appendChild(row);
@@ -855,9 +915,7 @@ function addEstEquipRow() {
     row.className = 'est-row';
     row.innerHTML =
         '<select class="est-eq-type">' +
-        '<option value="excavator">Excavator ($400/day)</option>' +
-        '<option value="compactor">Compactor ($100/day)</option>' +
-        '<option value="auger">Auger ($450/day)</option></select>' +
+        optionHtml(EQUIPMENT_OPTIONS) + '</select>' +
         '<input type="number" class="est-eq-days" placeholder="Days" value="3" min="0">' +
         '<span class="crew-remove" onclick="removeEstRow(this, \'equipment\')">×</span>';
     document.getElementById('est-equip-rows').appendChild(row);
@@ -1049,6 +1107,7 @@ window.addEventListener('DOMContentLoaded', function() {
     // Defer so layout is ready before panel swap.
     setTimeout(showPanelFromHash, 0);
     setTimeout(showPanelFromHash, 100);
+    setTimeout(initHeavybidCalculatorDefaults, 0);
 });
 window.addEventListener('load', showPanelFromHash);
 window.addEventListener('pageshow', showPanelFromHash);

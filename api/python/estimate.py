@@ -12,7 +12,7 @@ from http.server import BaseHTTPRequestHandler
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 sys.path.insert(0, ROOT)
 
-from tools.estimating.estimating_tools import estimate_project_cost, get_regions  # noqa: E402
+from tools.estimating.estimating_tools import estimate_project_cost, get_rate_libraries, get_regions  # noqa: E402
 
 API_VERSION = "1.0"
 
@@ -64,6 +64,7 @@ class handler(BaseHTTPRequestHandler):
             )
             # Surface available regions so the UI can build a selector
             result['available_regions'] = get_regions()
+            result['available_rate_libraries'] = get_rate_libraries()
             self._json(200, result)
 
         except Exception as exc:
