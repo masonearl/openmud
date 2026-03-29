@@ -2297,3 +2297,57 @@ body.sidebar-collapsed .sidebar-resize-handle {
         margin: 0 0 8px;
     }
 }
+
+/* Mobile improvements for issue #5 */
+@media (max-width: 480px) {
+    /* Estimate card table: stack vertically */
+    .estimate-card table,
+    .result-card table {
+        display: block;
+    }
+    .estimate-card table tr,
+    .result-card table tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eee;
+    }
+    .estimate-card table td,
+    .result-card table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+    }
+    .estimate-card table td:first-child,
+    .result-card table td:first-child {
+        font-weight: 600;
+        color: #666;
+    }
+    
+    /* Chat input: stay above keyboard */
+    .chat-input-form {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        padding: 12px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+    }
+    .chat-composer {
+        flex-wrap: wrap;
+    }
+    .chat-composer-input {
+        width: 100% !important;
+        margin-bottom: 8px;
+    }
+    
+    /* Tap targets: minimum 44x44px */
+    .btn-sm,
+    .quick-tool-btn,
+    .quick-btn,
+    .btn-copy-chat,
+    .est-actions .btn-sm {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
